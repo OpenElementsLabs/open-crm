@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyDetail } from "@/components/company-detail";
 import { de } from "@/lib/i18n/de";
@@ -16,8 +16,12 @@ vi.mock("next/navigation", () => ({
 
 const mockDeleteCompany = vi.fn();
 
+const mockGetCompanyComments = vi.fn();
+
 vi.mock("@/lib/api", () => ({
   deleteCompany: (...args: unknown[]) => mockDeleteCompany(...args),
+  getCompanyComments: (...args: unknown[]) => mockGetCompanyComments(...args),
+  createCompanyComment: vi.fn(),
 }));
 
 const testCompany: CompanyDto = {
@@ -34,6 +38,18 @@ const testCompany: CompanyDto = {
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 };
+
+beforeEach(() => {
+  mockGetCompanyComments.mockResolvedValue({
+    content: [],
+    totalElements: 0,
+    totalPages: 0,
+    number: 0,
+    size: 20,
+    first: true,
+    last: true,
+  });
+});
 
 afterEach(() => {
   cleanup();
@@ -73,15 +89,14 @@ describe("CompanyDetail", () => {
     expect(deleteButton).toBeInTheDocument();
   });
 
-  it("should show comment placeholder section", () => {
+  it("should show comment section with title and input", async () => {
     renderWithProviders(<CompanyDetail company={testCompany} />);
 
-    expect(screen.getByText(S.comments.title)).toBeInTheDocument();
-    expect(screen.getByText(S.comments.empty)).toBeInTheDocument();
-
-    const addButton = screen.getByText(S.comments.add);
-    expect(addButton).toBeInTheDocument();
-    expect(addButton.closest("button")).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getByText(S.comments.title)).toBeInTheDocument();
+      expect(screen.getByText(S.comments.empty)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(S.comments.placeholder)).toBeInTheDocument();
+    });
   });
 
   it("should open delete dialog and redirect on confirm", async () => {

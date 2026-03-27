@@ -24,6 +24,20 @@ export interface CompanyCreateDto {
   readonly country?: string | null;
 }
 
+export interface CommentDto {
+  readonly id: string;
+  readonly text: string;
+  readonly author: string;
+  readonly companyId: string | null;
+  readonly contactId: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface CommentCreateDto {
+  readonly text: string;
+}
+
 export interface Page<T> {
   readonly content: readonly T[];
   readonly totalElements: number;

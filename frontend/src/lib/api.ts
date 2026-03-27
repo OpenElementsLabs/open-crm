@@ -1,4 +1,4 @@
-import type { CompanyDto, CompanyCreateDto, Page } from "./types";
+import type { CompanyDto, CompanyCreateDto, CommentDto, CommentCreateDto, Page } from "./types";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
 
@@ -105,6 +105,39 @@ export async function restoreCompany(id: string): Promise<CompanyDto> {
 
   if (!response.ok) {
     throw new Error(`Failed to restore company: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getCompanyComments(
+  companyId: string,
+  page: number = 0,
+): Promise<Page<CommentDto>> {
+  const url = `${baseUrl()}/api/companies/${companyId}/comments?page=${page}&size=20&sort=createdAt,desc`;
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch comments: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createCompanyComment(
+  companyId: string,
+  data: CommentCreateDto,
+): Promise<CommentDto> {
+  const url = `${baseUrl()}/api/companies/${companyId}/comments`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create comment: ${response.status}`);
   }
 
   return response.json();

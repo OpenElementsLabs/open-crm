@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2, MessageSquarePlus } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { CompanyComments } from "@/components/company-comments";
 import { deleteCompany } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -92,19 +93,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
 
       <Separator className="my-8" />
 
-      {/* Comments placeholder */}
-      <Card className="border-oe-gray-light">
-        <CardHeader>
-          <CardTitle className="font-heading text-lg text-oe-dark">{S.comments.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4 text-sm text-oe-gray-mid">{S.comments.empty}</p>
-          <Button variant="outline" disabled>
-            <MessageSquarePlus className="mr-2 h-4 w-4" />
-            {S.comments.add}
-          </Button>
-        </CardContent>
-      </Card>
+      <CompanyComments companyId={company.id} />
 
       <DeleteConfirmDialog
         open={deleteOpen}

@@ -55,7 +55,7 @@ public class CommentService {
                         "Company not found: " + companyId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(request.author());
+        entity.setAuthor("UNKNOWN");
         entity.setCompany(company);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);
@@ -77,7 +77,7 @@ public class CommentService {
                         "Contact not found: " + contactId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(request.author());
+        entity.setAuthor("UNKNOWN");
         entity.setContact(contact);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);
@@ -96,7 +96,6 @@ public class CommentService {
         Objects.requireNonNull(request, "request must not be null");
         final CommentEntity entity = findOrThrow(id);
         entity.setText(request.text());
-        entity.setAuthor(request.author());
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);
     }

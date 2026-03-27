@@ -4,19 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Request DTO for updating an existing comment.
+ * DTO for updating an existing comment. The author is not modifiable.
  *
- * @param text   the updated comment text (required)
- * @param author the updated author name (required)
+ * @param text the updated comment text (required)
  */
 @Schema(description = "Request body for updating an existing comment")
 public record CommentUpdateDto(
         @NotBlank(message = "Text must not be blank")
         @Schema(description = "Comment text", example = "Updated meeting notes.", requiredMode = Schema.RequiredMode.REQUIRED)
-        String text,
-
-        @NotBlank(message = "Author must not be blank")
-        @Schema(description = "Author name", example = "Hendrik Ebbers", requiredMode = Schema.RequiredMode.REQUIRED)
-        String author
+        String text
 ) {
 }

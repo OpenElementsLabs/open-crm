@@ -74,7 +74,7 @@ class CommentControllerTest {
 
     private String addCommentToCompany(final String companyId, final String text) throws Exception {
         final String json = """
-                {"text": "%s", "author": "Test User"}
+                {"text": "%s"}
                 """.formatted(text);
         final String response = mockMvc.perform(post("/api/companies/" + companyId + "/comments")
                         .contentType(MediaType.APPLICATION_JSON).content(json))
@@ -85,7 +85,7 @@ class CommentControllerTest {
 
     private String addCommentToContact(final String contactId, final String text) throws Exception {
         final String json = """
-                {"text": "%s", "author": "Test User"}
+                {"text": "%s"}
                 """.formatted(text);
         final String response = mockMvc.perform(post("/api/contacts/" + contactId + "/comments")
                         .contentType(MediaType.APPLICATION_JSON).content(json))
@@ -104,7 +104,7 @@ class CommentControllerTest {
             //GIVEN
             final String companyId = createCompany("Test Co");
             final String json = """
-                    {"text": "Great meeting", "author": "Hendrik"}
+                    {"text": "Great meeting"}
                     """;
 
             //WHEN
@@ -114,7 +114,7 @@ class CommentControllerTest {
             //THEN
             result.andExpect(status().isCreated())
                     .andExpect(jsonPath("$.text").value("Great meeting"))
-                    .andExpect(jsonPath("$.author").value("Hendrik"))
+                    .andExpect(jsonPath("$.author").value("UNKNOWN"))
                     .andExpect(jsonPath("$.companyId").value(companyId))
                     .andExpect(jsonPath("$.contactId").isEmpty())
                     .andExpect(jsonPath("$.createdAt").exists());
@@ -126,7 +126,7 @@ class CommentControllerTest {
             //GIVEN
             final String contactId = createContact("John", "Doe");
             final String json = """
-                    {"text": "Follow up needed", "author": "Admin"}
+                    {"text": "Follow up needed"}
                     """;
 
             //WHEN
@@ -144,7 +144,7 @@ class CommentControllerTest {
         void shouldFailForNonExistentCompany() throws Exception {
             //GIVEN
             final String json = """
-                    {"text": "Comment", "author": "User"}
+                    {"text": "Comment"}
                     """;
 
             //WHEN
@@ -160,7 +160,7 @@ class CommentControllerTest {
         void shouldFailForNonExistentContact() throws Exception {
             //GIVEN
             final String json = """
-                    {"text": "Comment", "author": "User"}
+                    {"text": "Comment"}
                     """;
 
             //WHEN
@@ -177,24 +177,7 @@ class CommentControllerTest {
             //GIVEN
             final String companyId = createCompany("Test Co");
             final String json = """
-                    {"text": "  ", "author": "User"}
-                    """;
-
-            //WHEN
-            final var result = mockMvc.perform(post("/api/companies/" + companyId + "/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
-
-            //THEN
-            result.andExpect(status().isBadRequest());
-        }
-
-        @Test
-        @DisplayName("should fail without author")
-        void shouldFailWithoutAuthor() throws Exception {
-            //GIVEN
-            final String companyId = createCompany("Test Co");
-            final String json = """
-                    {"text": "A comment", "author": " "}
+                    {"text": "  "}
                     """;
 
             //WHEN
@@ -212,7 +195,7 @@ class CommentControllerTest {
             final String companyId = createCompany("Deleted Co");
             mockMvc.perform(delete("/api/companies/" + companyId));
             final String json = """
-                    {"text": "Still commenting", "author": "User"}
+                    {"text": "Still commenting"}
                     """;
 
             //WHEN
@@ -277,7 +260,7 @@ class CommentControllerTest {
             final String companyId = createCompany("Test Co");
             final String commentId = addCommentToCompany(companyId, "Original text");
             final String json = """
-                    {"text": "Updated text", "author": "Test User"}
+                    {"text": "Updated text"}
                     """;
 
             //WHEN
@@ -296,7 +279,7 @@ class CommentControllerTest {
             final String companyId = createCompany("Test Co");
             final String commentId = addCommentToCompany(companyId, "Original");
             final String json = """
-                    {"text": "  ", "author": "User"}
+                    {"text": "  "}
                     """;
 
             //WHEN

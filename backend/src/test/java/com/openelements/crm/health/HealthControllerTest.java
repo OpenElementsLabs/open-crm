@@ -131,8 +131,7 @@ class HealthControllerTest {
 
             //THEN
             result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.components.schemas.CommentCreateDto.required", hasItem("text")))
-                    .andExpect(jsonPath("$.components.schemas.CommentCreateDto.required", hasItem("author")));
+                    .andExpect(jsonPath("$.components.schemas.CommentCreateDto.required", hasItem("text")));
         }
 
         @Test
