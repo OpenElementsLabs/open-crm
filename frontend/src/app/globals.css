@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  /* Open Elements Brand Colors */
+  --color-oe-dark: #020144;
+  --color-oe-black: #000000;
+  --color-oe-white: #ffffff;
+  --color-oe-gray-mid: #b0aea5;
+  --color-oe-gray-light: #e8e6dc;
+  --color-oe-green: #5CBA9E;
+  --color-oe-green-light: #BEE3D8;
+  --color-oe-green-lighter: #DEF1EC;
+  --color-oe-green-dark: #3E9279;
+  --color-oe-red: #E63277;
+  --color-oe-red-light: #F5ADC9;
+  --color-oe-red-lighter: #FAD6E4;
+  --color-oe-red-dark: #BB1756;
+  --color-oe-blue: #5DB9F5;
+  --color-oe-blue-light: #BEE3FB;
+  --color-oe-blue-lighter: #DFF1FD;
+  --color-oe-blue-dark: #2496EF;
+  --color-oe-yellow: #F1E34B;
+  --color-oe-yellow-light: #F9F4B7;
+  --color-oe-yellow-lighter: #FCF9DB;
+  --color-oe-yellow-dark: #DCCB12;
+
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Lato", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-oe-black);
+  background-color: var(--color-oe-white);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}

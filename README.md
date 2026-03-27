@@ -2,6 +2,8 @@
 
 An open-source CRM system designed for startups to manage customers, contacts, and companies with ease.
 
+**Status:** Early development
+
 ## Overview
 
 Open CRM provides a straightforward way to organize and maintain business relationships.
@@ -17,11 +19,11 @@ It focuses on the core needs of small teams: keeping track of companies, contact
 
 ## Tech Stack
 
-- **Backend:** Spring Boot (Java)
-- **Frontend:** TBD
-- **Database:** PostgreSQL
-- **Authentication:** Authentik (SSO via OpenID Connect)
-- **External Integrations:** Brevo API
+- **Backend:** Spring Boot 3.4 (Java 21)
+- **Frontend:** Next.js 15 (React 19, TypeScript, Tailwind CSS, shadcn/ui)
+- **Database:** PostgreSQL 17
+- **Authentication:** Authentik (SSO via OpenID Connect) — planned
+- **External Integrations:** Brevo API — planned
 
 ## Architecture
 
@@ -37,6 +39,84 @@ It focuses on the core needs of small teams: keeping track of companies, contact
          │  Authentik  │     │   Brevo    │
          │   (SSO)     │     │   (Sync)   │
          └────────────┘     └────────────┘
+```
+
+## Prerequisites
+
+- **Java 21** — recommended via [SDKMAN!](https://sdkman.io/) (see `backend/.sdkmanrc`)
+- **Node.js 22** — recommended via [nvm](https://github.com/nvm-sh/nvm) (see `frontend/.nvmrc`)
+- **pnpm** — package manager for the frontend
+- **Docker & Docker Compose** — for running the full stack
+- **PostgreSQL 17** — for standalone backend development (or use Docker)
+
+## Getting Started
+
+### Setup
+
+1. Clone the repository
+2. Copy the environment file:
+   ```bash
+   cp .env.example .env
+   ```
+3. Adjust values in `.env` if needed (defaults work for local development)
+
+### Run with Docker Compose
+
+Start all services (PostgreSQL, backend, frontend):
+
+```bash
+docker compose up --build
+```
+
+- Frontend: [http://localhost:4001](http://localhost:4001)
+- Backend API: [http://localhost:9081/api/health](http://localhost:9081/api/health)
+- Swagger UI: [http://localhost:9081/swagger-ui.html](http://localhost:9081/swagger-ui.html)
+
+Stop services:
+
+```bash
+docker compose down
+```
+
+Stop services and remove database data:
+
+```bash
+docker compose down -v
+```
+
+### Run Standalone (without Docker)
+
+**Backend:**
+
+```bash
+cd backend
+sdk env install          # install Java 21 via SDKMAN!
+./mvnw spring-boot:run   # starts on port 8080
+```
+
+Requires a running PostgreSQL instance. Configure connection via environment variables or `application.yml`.
+
+**Frontend:**
+
+```bash
+cd frontend
+nvm install              # install Node.js 22 via nvm
+pnpm install
+BACKEND_URL=http://localhost:8080 pnpm dev   # starts on port 3000
+```
+
+### Build
+
+**Backend:**
+
+```bash
+cd backend && ./mvnw clean verify
+```
+
+**Frontend:**
+
+```bash
+cd frontend && pnpm install && pnpm test && pnpm build
 ```
 
 ## License
