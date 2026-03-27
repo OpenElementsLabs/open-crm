@@ -1,12 +1,17 @@
 # Project Features
 
-<!-- This file is generated and updated by the /project-analyze skill. You can also edit it manually. -->
+Open CRM is an open-source CRM system designed for startups and small teams to manage business relationships. It focuses on core CRM needs — companies, contacts, and communication history — without the complexity of enterprise solutions. The project is in early development.
 
-<!-- Describe the core features and user-facing capabilities of this project. Example: -->
+## Core Features
 
-<!-- ## Overview -->
-<!-- Brief description of what this project does and who it is for. -->
+- **Company Management** — Create, view, edit, and soft-delete companies with address and contact details. Supports filtering by name/city/country, sorting, pagination, and restoring archived companies.
+- **Contact Management** — Track individual contacts with name, email, phone, position, gender, language, and LinkedIn URL. Contacts are linked to companies. Includes fields for Brevo sync status and double opt-in tracking.
+- **Comments** — Add free-text comments with author attribution to companies or contacts. Comments are paginated and sorted by creation date.
+- **Health Monitoring** — A health endpoint to verify backend availability, displayed in the frontend.
+- **Internationalization (i18n)** — Frontend supports German and English with language detection and switching.
+- **API Documentation** — Swagger UI and OpenAPI spec auto-generated from backend annotations.
 
-<!-- ## Core Features -->
-<!-- - **Feature A** — What it does and why it matters -->
-<!-- - **Feature B** — What it does and why it matters -->
+## Planned Features
+
+- **Single Sign-On (SSO)** — Authentication via Authentik using OpenID Connect.
+- **Brevo Sync** — Automatic synchronization of contacts and companies with Brevo for marketing workflows.

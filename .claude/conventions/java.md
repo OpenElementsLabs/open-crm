@@ -24,6 +24,16 @@ Formatting rules (indentation, charset, line endings) are defined in `.editorcon
 - Do not use `var`
 - Follow standard Java naming: `PascalCase` for classes, `camelCase` for methods/fields, `UPPER_SNAKE_CASE` for
   constants.
+- **IMPORTANT**: Use consistent class name suffixes to express architectural roles:
+  - `Service` — Business-logic classes (e.g., `UserService`, `PaymentService`).
+  - `Repository` — Data access layer classes (e.g., `UserRepository`, `OrderRepository`).
+  - `Entity` — JPA entities / persisted domain objects (e.g., `UserEntity`, `OrderEntity`).
+  - `DTO` — Data Transfer Objects for the API layer and between internal layers (e.g., `UserDTO`, `OrderDTO`). This is the default suffix for all objects that carry data across layer boundaries, including REST request and response bodies.
+  - `Request` / `Response` — Use only when a generic DTO does not fit, for example when request and response structures differ significantly or when separate naming improves clarity. Prefer `DTO` as the default.
+  - `Controller` — REST controllers / route handlers (e.g., `UserController`).
+  - `Registry` — Central lookup or management of objects (e.g., `ServiceRegistry`, `EventRegistry`).
+  - `Config` or `Configuration` — Configuration classes (e.g., `SecurityConfig`, `DatabaseConfiguration`).
+- Do not invent custom suffixes for these roles — use the ones listed above for consistency across projects.
 - **IMPORTANT**: Do not use Lombok. Use modern Java features (records, pattern matching) instead.
 - Always override `equals`, `hashCode`, and `toString` together for non-record classes. Use `Objects.equals()` and
   `Objects.hash()` as helpers.

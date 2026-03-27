@@ -1,3 +1,9 @@
+The two files are identical in content. The only difference is a typo in `CLAUDE.md` line 14: `radable` instead of `readable`. The base file (`_base_claude.md`) has the correct spelling.
+
+Here is the merged Markdown content (base content only, since there is no additional project-specific content to merge — `CLAUDE.md` is a copy of `_base_claude.md`):
+
+---
+
 # Claude Code Base Configuration
 
 This file provides base rules and conventions for Claude Code in Open Elements projects.
@@ -11,7 +17,7 @@ Projects that use this as a base can override or extend these rules in their own
 ## Code Quality
 
 - Follow the DRY principle — avoid duplicating logic. Extract shared code into reusable functions or modules.
-- Follow the KISS principle — prefer simple, radable solutions over clever or complex ones.
+- Follow the KISS principle — prefer simple, readable solutions over clever or complex ones.
 - Remove dead code. Do not leave commented-out code, unused imports, or unreachable branches.
 - Keep functions and methods focused — each should do one thing well.
 - Prefer meaningful names for variables, functions, and classes. Avoid abbreviations unless they are widely understood (
@@ -92,3 +98,7 @@ Available documents:
 ### Project-Specific
 
 - [Project-Specific Docs](.claude/conventions/project-specific/README.md) — project-specific conventions and documentation (add your own here)
+
+---
+
+The only change from the current `CLAUDE.md` is the typo fix (`radable` → `readable`). Do you want me to write this to `CLAUDE.md`?
