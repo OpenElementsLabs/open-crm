@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Lato } from "next/font/google";
+import { Sidebar } from "@/components/sidebar";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -23,7 +24,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${montserrat.variable} ${lato.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Sidebar />
+        <main className="md:ml-64 min-h-screen bg-oe-white">
+          <div className="p-6 md:p-8">{children}</div>
+        </main>
+      </body>
     </html>
   );
 }
