@@ -16,8 +16,9 @@ import java.util.UUID;
  * @param linkedInUrl   the LinkedIn profile URL
  * @param phoneNumber   the phone number
  * @param companyId     the company ID
- * @param companyName   the company name (resolved)
- * @param syncedToBrevo whether synced to Brevo
+ * @param companyName    the company name (resolved)
+ * @param companyDeleted whether the associated company is soft-deleted
+ * @param syncedToBrevo  whether synced to Brevo
  * @param doubleOptIn   whether double opt-in is confirmed
  * @param language      the preferred language
  * @param createdAt     the creation timestamp
@@ -35,6 +36,7 @@ public record ContactDto(
         @Schema(description = "Phone number") String phoneNumber,
         @Schema(description = "Company ID") UUID companyId,
         @Schema(description = "Company name") String companyName,
+        @Schema(description = "Whether the associated company is archived", requiredMode = Schema.RequiredMode.REQUIRED) boolean companyDeleted,
         @Schema(description = "Whether synced to Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean syncedToBrevo,
         @Schema(description = "Whether double opt-in is confirmed", requiredMode = Schema.RequiredMode.REQUIRED) boolean doubleOptIn,
         @Schema(description = "Preferred language", requiredMode = Schema.RequiredMode.REQUIRED) Language language,
@@ -51,6 +53,7 @@ public record ContactDto(
     public static ContactDto fromEntity(final ContactEntity entity) {
         final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
         final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
+        final boolean companyDeleted = entity.getCompany() != null && entity.getCompany().isDeleted();
         return new ContactDto(
                 entity.getId(),
                 entity.getFirstName(),
@@ -62,6 +65,7 @@ public record ContactDto(
                 entity.getPhoneNumber(),
                 companyId,
                 companyName,
+                companyDeleted,
                 entity.isSyncedToBrevo(),
                 entity.isDoubleOptIn(),
                 entity.getLanguage(),

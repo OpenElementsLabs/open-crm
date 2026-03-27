@@ -35,6 +35,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     phoneNumber: "+49 123 456",
     companyId: "company-1",
     companyName: "Open Elements",
+    companyDeleted: false,
     syncedToBrevo: true,
     doubleOptIn: false,
     language: "DE",
@@ -99,7 +100,7 @@ describe("ContactDetail", () => {
 
   it("should show archived badge when company is soft-deleted", () => {
     renderWithProviders(
-      <ContactDetail contact={makeContact()} companyDeleted={true} />,
+      <ContactDetail contact={makeContact({ companyDeleted: true })} />,
     );
 
     expect(screen.getByText(S.detail.archivedBadge)).toBeInTheDocument();

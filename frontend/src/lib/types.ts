@@ -49,6 +49,7 @@ export interface ContactDto {
   readonly phoneNumber: string | null;
   readonly companyId: string | null;
   readonly companyName: string | null;
+  readonly companyDeleted: boolean;
   readonly syncedToBrevo: boolean;
   readonly doubleOptIn: boolean;
   readonly language: "DE" | "EN";

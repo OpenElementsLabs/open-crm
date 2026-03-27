@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -53,6 +53,19 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-heading text-2xl font-bold text-oe-dark">{company.name}</h1>
         <div className="flex gap-2">
+          {company.deleted ? (
+            <Button variant="outline" disabled className="opacity-50">
+              <Users className="mr-2 h-4 w-4" />
+              {S.detail.showEmployees}
+            </Button>
+          ) : (
+            <Button asChild variant="outline">
+              <Link href={`/contacts?companyId=${company.id}`}>
+                <Users className="mr-2 h-4 w-4" />
+                {S.detail.showEmployees}
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline">
             <Link href={`/companies/${company.id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />

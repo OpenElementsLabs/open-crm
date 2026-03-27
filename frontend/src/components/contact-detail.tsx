@@ -60,10 +60,9 @@ function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations
 
 interface ContactDetailProps {
   readonly contact: ContactDto;
-  readonly companyDeleted?: boolean;
 }
 
-export function ContactDetail({ contact, companyDeleted = false }: ContactDetailProps) {
+export function ContactDetail({ contact }: ContactDetailProps) {
   const t = useTranslations();
   const S = t.contacts;
   const router = useRouter();
@@ -123,15 +122,23 @@ export function ContactDetail({ contact, companyDeleted = false }: ContactDetail
             <div>
               <dt className="text-sm font-medium text-oe-gray-mid">{S.detail.company}</dt>
               <dd className="mt-1 text-sm text-oe-black">
-                {contact.companyName ? (
-                  <span>
-                    {contact.companyName}
-                    {companyDeleted && (
+                {contact.companyId && contact.companyName ? (
+                  contact.companyDeleted ? (
+                    <span>
+                      {contact.companyName}
                       <span className="ml-2 inline-block rounded bg-oe-gray-light px-2 py-0.5 text-xs text-oe-gray-mid">
                         {S.detail.archivedBadge}
                       </span>
-                    )}
-                  </span>
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/companies/${contact.companyId}`}
+                      className="text-oe-green hover:text-oe-green-dark underline"
+                    >
+                      {contact.companyName}
+                      <span className="ml-1 text-xs no-underline">({S.detail.showCompany})</span>
+                    </Link>
+                  )
                 ) : (
                   "—"
                 )}

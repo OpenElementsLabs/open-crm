@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ export function ContactList() {
   const t = useTranslations();
   const S = t.contacts;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -38,7 +39,7 @@ export function ContactList() {
   const [firstNameFilter, setFirstNameFilter] = useState("");
   const [lastNameFilter, setLastNameFilter] = useState("");
   const [emailFilter, setEmailFilter] = useState("");
-  const [companyIdFilter, setCompanyIdFilter] = useState("");
+  const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
   const [languageFilter, setLanguageFilter] = useState("");
 
   const [companies, setCompanies] = useState<CompanyDto[]>([]);

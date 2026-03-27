@@ -13,6 +13,7 @@ const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
   usePathname: () => "/contacts",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const mockGetContacts = vi.fn();
@@ -37,6 +38,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     phoneNumber: "+49 123 456",
     companyId: "company-1",
     companyName: "Open Elements",
+    companyDeleted: false,
     syncedToBrevo: false,
     doubleOptIn: false,
     language: "DE",

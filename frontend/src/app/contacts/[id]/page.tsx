@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ContactDetail } from "@/components/contact-detail";
-import { getContact, getCompany } from "@/lib/api";
+import { getContact } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -13,16 +13,7 @@ export default async function ContactDetailPage({ params }: ContactDetailPagePro
 
   try {
     const contact = await getContact(id);
-    let companyDeleted = false;
-    if (contact.companyId) {
-      try {
-        const company = await getCompany(contact.companyId);
-        companyDeleted = company.deleted;
-      } catch {
-        // Company may have been hard-deleted or inaccessible
-      }
-    }
-    return <ContactDetail contact={contact} companyDeleted={companyDeleted} />;
+    return <ContactDetail contact={contact} />;
   } catch {
     notFound();
   }

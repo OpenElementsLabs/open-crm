@@ -52,6 +52,7 @@ const existingContact: ContactDto = {
   phoneNumber: "+49 123 456",
   companyId: "company-1",
   companyName: "Open Elements",
+  companyDeleted: false,
   syncedToBrevo: false,
   doubleOptIn: false,
   language: "DE",
