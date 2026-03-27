@@ -38,6 +38,36 @@ export interface CommentCreateDto {
   readonly text: string;
 }
 
+export interface ContactDto {
+  readonly id: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string | null;
+  readonly position: string | null;
+  readonly gender: "MALE" | "FEMALE" | "DIVERSE" | null;
+  readonly linkedInUrl: string | null;
+  readonly phoneNumber: string | null;
+  readonly companyId: string | null;
+  readonly companyName: string | null;
+  readonly syncedToBrevo: boolean;
+  readonly doubleOptIn: boolean;
+  readonly language: "DE" | "EN";
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface ContactCreateDto {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email?: string | null;
+  readonly position?: string | null;
+  readonly gender?: "MALE" | "FEMALE" | "DIVERSE" | null;
+  readonly linkedInUrl?: string | null;
+  readonly phoneNumber?: string | null;
+  readonly companyId?: string | null;
+  readonly language: "DE" | "EN";
+}
+
 export interface Page<T> {
   readonly content: readonly T[];
   readonly totalElements: number;

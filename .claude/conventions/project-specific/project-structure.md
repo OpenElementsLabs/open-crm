@@ -23,13 +23,17 @@ open-crm/
 │   │   ├── page.tsx                — Home page
 │   │   ├── layout.tsx              — Root layout
 │   │   ├── health/                 — Health status page
-│   │   └── companies/              — Company pages (list, detail, new, edit)
+│   │   ├── companies/              — Company pages (list, detail, new, edit)
+│   │   └── contacts/               — Contact pages (list, detail, new, edit)
 │   ├── src/components/             — React components
 │   │   ├── ui/                     — shadcn/ui primitives (button, card, table, etc.)
 │   │   ├── sidebar.tsx             — Navigation sidebar
 │   │   ├── company-list.tsx        — Company list with filters
 │   │   ├── company-detail.tsx      — Company detail view
 │   │   ├── company-form.tsx        — Company create/edit form
+│   │   ├── contact-list.tsx       — Contact list with filters
+│   │   ├── contact-detail.tsx     — Contact detail view
+│   │   ├── contact-form.tsx       — Contact create/edit form
 │   │   └── __tests__/              — Component tests
 │   ├── src/lib/                    — Shared utilities
 │   │   ├── api.ts                  — Backend API client functions
@@ -43,6 +47,7 @@ open-crm/
 │   ├── base-project-setup/         — Initial project setup spec
 │   ├── company-frontend/           — Company frontend feature spec
 │   ├── company-comments/           — Company comments feature spec
+│   ├── 007-contact-frontend/       — Contact frontend feature spec
 │   ├── core-data-model/            — Core data model spec
 │   ├── dto-refactoring/            — DTO refactoring spec
 │   └── frontend-i18n/              — Internationalization spec

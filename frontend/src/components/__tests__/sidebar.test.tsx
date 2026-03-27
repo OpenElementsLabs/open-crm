@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { Sidebar } from "@/components/sidebar";
 import { de } from "@/lib/i18n/de";
+import { en } from "@/lib/i18n/en";
 import { renderWithProviders } from "@/test/test-utils";
 
 // Mock next/navigation
@@ -58,5 +59,42 @@ describe("Sidebar", () => {
     );
 
     expect(healthLink).toHaveAttribute("href", "/health");
+  });
+
+  it("should render Kontakte navigation entry", () => {
+    const { container } = renderWithProviders(<Sidebar />);
+
+    const links = container.querySelectorAll("a");
+    const linkTexts = Array.from(links).map((link) => link.textContent);
+
+    expect(linkTexts).toContain(de.nav.contacts);
+  });
+
+  it("should link Kontakte to /contacts", () => {
+    const { container } = renderWithProviders(<Sidebar />);
+
+    const contactsLink = Array.from(container.querySelectorAll("a")).find(
+      (link) => link.textContent?.includes(de.nav.contacts),
+    );
+
+    expect(contactsLink).toHaveAttribute("href", "/contacts");
+  });
+
+  it("should show Contacts in English when language is en", () => {
+    const { container } = renderWithProviders(<Sidebar />, { language: "en" });
+
+    const links = container.querySelectorAll("a");
+    const linkTexts = Array.from(links).map((link) => link.textContent);
+
+    expect(linkTexts).toContain(en.nav.contacts);
+  });
+
+  it("should show Kontakte in German when language is de", () => {
+    const { container } = renderWithProviders(<Sidebar />, { language: "de" });
+
+    const links = container.querySelectorAll("a");
+    const linkTexts = Array.from(links).map((link) => link.textContent);
+
+    expect(linkTexts).toContain(de.nav.contacts);
   });
 });
