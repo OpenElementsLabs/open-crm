@@ -1,0 +1,180 @@
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { ContactDetail } from "@/components/contact-detail";
+import { de } from "@/lib/i18n/de";
+import { renderWithProviders } from "@/test/test-utils";
+import type { ContactDto } from "@/lib/types";
+
+const S = de.contacts;
+
+const mockPush = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/contacts/test-id",
+}));
+
+const mockDeleteContact = vi.fn();
+
+vi.mock("@/lib/api", () => ({
+  deleteContact: (...args: unknown[]) => mockDeleteContact(...args),
+}));
+
+function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
+  return {
+    id: "test-id",
+    firstName: "Max",
+    lastName: "Mustermann",
+    email: "max@example.com",
+    position: "CEO",
+    gender: "MALE",
+    linkedInUrl: "https://linkedin.com/in/max",
+    phoneNumber: "+49 123 456",
+    companyId: "company-1",
+    companyName: "Open Elements",
+    syncedToBrevo: true,
+    doubleOptIn: false,
+    language: "DE",
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+describe("ContactDetail", () => {
+  it("should render all contact fields", () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    expect(screen.getByText("Max Mustermann")).toBeInTheDocument(); // heading
+    expect(screen.getByText("max@example.com")).toBeInTheDocument();
+    expect(screen.getByText("CEO")).toBeInTheDocument();
+    expect(screen.getByText(S.form.male)).toBeInTheDocument();
+    expect(screen.getByText("+49 123 456")).toBeInTheDocument();
+    expect(screen.getByText("https://linkedin.com/in/max")).toBeInTheDocument();
+    expect(screen.getByText("DE")).toBeInTheDocument();
+    expect(screen.getByText("Open Elements")).toBeInTheDocument();
+  });
+
+  it("should display Brevo fields as disabled checkboxes", () => {
+    renderWithProviders(
+      <ContactDetail contact={makeContact({ syncedToBrevo: true, doubleOptIn: false })} />,
+    );
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes).toHaveLength(2);
+
+    // syncedToBrevo: checked and disabled
+    const brevoCheckbox = checkboxes[0];
+    expect(brevoCheckbox).toBeChecked();
+    expect(brevoCheckbox).toBeDisabled();
+
+    // doubleOptIn: unchecked and disabled
+    const optInCheckbox = checkboxes[1];
+    expect(optInCheckbox).not.toBeChecked();
+    expect(optInCheckbox).toBeDisabled();
+
+    expect(screen.getByText(S.detail.syncedToBrevo)).toBeInTheDocument();
+    expect(screen.getByText(S.detail.doubleOptIn)).toBeInTheDocument();
+  });
+
+  it("should show archived badge when company is soft-deleted", () => {
+    renderWithProviders(
+      <ContactDetail contact={makeContact()} companyDeleted={true} />,
+    );
+
+    expect(screen.getByText(S.detail.archivedBadge)).toBeInTheDocument();
+  });
+
+  it("should handle missing optional fields with dash", () => {
+    renderWithProviders(
+      <ContactDetail
+        contact={makeContact({
+          email: null,
+          position: null,
+          gender: null,
+          phoneNumber: null,
+          linkedInUrl: null,
+          companyId: null,
+          companyName: null,
+        })}
+      />,
+    );
+
+    // Optional fields should show "—"
+    const dashes = screen.getAllByText("—");
+    expect(dashes.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("should show comments placeholder with disabled button", () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    expect(screen.getByText(S.detail.commentsTitle)).toBeInTheDocument();
+    const addButton = screen.getByText(S.detail.commentsPlaceholder);
+    expect(addButton).toBeInTheDocument();
+    expect(addButton.closest("button")).toBeDisabled();
+  });
+
+  it("should show edit button linking to edit page", () => {
+    const { container } = renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    const editLink = Array.from(container.querySelectorAll("a")).find(
+      (a) => a.getAttribute("href") === "/contacts/test-id/edit",
+    );
+
+    expect(editLink).toBeInTheDocument();
+    expect(editLink?.textContent).toContain(S.detail.edit);
+  });
+
+  it("should open delete dialog with permanent warning and comment loss", async () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    const deleteButtons = screen.getAllByText(S.detail.delete);
+    fireEvent.click(deleteButtons[0]);
+
+    await waitFor(() => {
+      const expectedText = S.deleteDialog.description.replace("{name}", "Max Mustermann");
+      expect(screen.getByText(expectedText)).toBeInTheDocument();
+    });
+  });
+
+  it("should delete contact and navigate to list on confirm", async () => {
+    mockDeleteContact.mockResolvedValue(undefined);
+
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    const deleteButtons = screen.getAllByText(S.detail.delete);
+    fireEvent.click(deleteButtons[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText(S.deleteDialog.confirm)).toBeInTheDocument();
+    });
+
+    const allConfirmButtons = screen.getAllByText(S.deleteDialog.confirm);
+    fireEvent.click(allConfirmButtons[allConfirmButtons.length - 1]);
+
+    await waitFor(() => {
+      expect(mockDeleteContact).toHaveBeenCalledWith("test-id");
+      expect(mockPush).toHaveBeenCalledWith("/contacts");
+    });
+  });
+
+  it("should close dialog on cancel without deleting", async () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    const deleteButtons = screen.getAllByText(S.detail.delete);
+    fireEvent.click(deleteButtons[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText(S.deleteDialog.cancel)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText(S.deleteDialog.cancel));
+
+    expect(mockDeleteContact).not.toHaveBeenCalled();
+  });
+});
