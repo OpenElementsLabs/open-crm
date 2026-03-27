@@ -75,6 +75,7 @@ export const de = {
       title: "Kommentare",
       empty: "Keine Kommentare vorhanden",
       add: "Kommentar hinzufügen",
+      addTitle: "Kommentar hinzufügen",
       placeholder: "Kommentar eingeben...",
       send: "Senden",
       loadMore: "Mehr laden",

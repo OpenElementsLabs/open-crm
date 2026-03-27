@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { ContactComments } from "@/components/contact-comments";
 import { deleteContact } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -147,13 +148,7 @@ export function ContactDetail({ contact, companyDeleted = false }: ContactDetail
 
       <Separator className="my-8" />
 
-      {/* Comments placeholder */}
-      <div>
-        <h2 className="font-heading text-lg font-bold text-oe-dark mb-4">{S.detail.commentsTitle}</h2>
-        <Button disabled variant="outline">
-          {S.detail.commentsPlaceholder}
-        </Button>
-      </div>
+      <ContactComments contactId={contact.id} />
 
       <DeleteConfirmDialog
         open={deleteOpen}

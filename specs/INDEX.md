@@ -10,6 +10,6 @@
 | 006 | Frontend i18n              | Bilingual support (DE/EN) with language toggle in sidebar and automatic detection                   | — | done   |
 | 007 | Contact frontend           | Contact management UI with list, detail, create, edit, delete, and company association              | — | done   |
 | 008 | Global UI styling fixes    | Add missing shadcn/ui semantic CSS variables for dialog/select backgrounds and table borders        | — | done   |
-| 009 | Comment Modal Dialog       | Refactor how comments are added                                                                     | — | open   |
+| 009 | Comment Modal Dialog       | Refactor how comments are added                                                                     | — | done   |
 | 010 | Contact-company navigation | Bidirectional navigation links between contact detail and company detail views                      | — | open   |
 

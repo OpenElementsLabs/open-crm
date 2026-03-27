@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanyComments, createCompanyComment } from "@/lib/api";
+import { getContactComments, createContactComment } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -21,11 +21,11 @@ function formatDate(dateString: string, language: string): string {
   });
 }
 
-interface CompanyCommentsProps {
-  readonly companyId: string;
+interface ContactCommentsProps {
+  readonly contactId: string;
 }
 
-export function CompanyComments({ companyId }: CompanyCommentsProps) {
+export function ContactComments({ contactId }: ContactCommentsProps) {
   const t = useTranslations();
   const S = t.companies.comments;
 
@@ -45,7 +45,7 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
       setLoading(true);
     }
     try {
-      const result = await getCompanyComments(companyId, pageNum);
+      const result = await getContactComments(contactId, pageNum);
       if (append) {
         setComments((prev) => [...prev, ...result.content]);
       } else {
@@ -61,7 +61,7 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [companyId]);
+  }, [contactId]);
 
   useEffect(() => {
     fetchComments(0, false);
@@ -70,7 +70,7 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
   const handleSend = async (text: string) => {
     setSending(true);
     try {
-      const newComment = await createCompanyComment(companyId, { text });
+      const newComment = await createContactComment(contactId, { text });
       setComments((prev) => [newComment, ...prev]);
     } finally {
       setSending(false);
@@ -95,7 +95,6 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
         </Button>
       </CardHeader>
       <CardContent>
-        {/* Loading skeleton */}
         {loading && (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -107,12 +106,10 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
           </div>
         )}
 
-        {/* Empty state */}
         {!loading && comments.length === 0 && (
           <p className="text-sm text-oe-gray-mid">{S.empty}</p>
         )}
 
-        {/* Comment list */}
         {!loading && comments.length > 0 && (
           <div className="space-y-4">
             {comments.map((comment) => (
@@ -128,7 +125,6 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
           </div>
         )}
 
-        {/* Load more */}
         {!loading && hasMore && (
           <div className="mt-4 flex justify-center">
             <Button

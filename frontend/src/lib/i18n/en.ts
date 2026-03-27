@@ -77,6 +77,7 @@ export const en: Translations = {
       title: "Comments",
       empty: "No comments yet",
       add: "Add Comment",
+      addTitle: "Add Comment",
       placeholder: "Write a comment...",
       send: "Send",
       loadMore: "Load more",

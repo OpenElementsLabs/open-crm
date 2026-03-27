@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { ContactDetail } from "@/components/contact-detail";
 import { de } from "@/lib/i18n/de";
@@ -15,9 +15,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockDeleteContact = vi.fn();
+const mockGetContactComments = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   deleteContact: (...args: unknown[]) => mockDeleteContact(...args),
+  getContactComments: (...args: unknown[]) => mockGetContactComments(...args),
+  createContactComment: vi.fn(),
 }));
 
 function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
@@ -40,6 +43,18 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     ...overrides,
   };
 }
+
+beforeEach(() => {
+  mockGetContactComments.mockResolvedValue({
+    content: [],
+    totalElements: 0,
+    totalPages: 0,
+    number: 0,
+    size: 20,
+    first: true,
+    last: true,
+  });
+});
 
 afterEach(() => {
   cleanup();
@@ -110,13 +125,13 @@ describe("ContactDetail", () => {
     expect(dashes.length).toBeGreaterThanOrEqual(5);
   });
 
-  it("should show comments placeholder with disabled button", () => {
+  it("should show comments section with Add Comment button", async () => {
     renderWithProviders(<ContactDetail contact={makeContact()} />);
 
-    expect(screen.getByText(S.detail.commentsTitle)).toBeInTheDocument();
-    const addButton = screen.getByText(S.detail.commentsPlaceholder);
-    expect(addButton).toBeInTheDocument();
-    expect(addButton.closest("button")).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getByText(de.companies.comments.title)).toBeInTheDocument();
+      expect(screen.getByText(de.companies.comments.add)).toBeInTheDocument();
+    });
   });
 
   it("should show edit button linking to edit page", () => {

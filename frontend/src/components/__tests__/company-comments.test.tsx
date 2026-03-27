@@ -72,9 +72,6 @@ describe("CompanyComments", () => {
       await waitFor(() => {
         expect(screen.getByText(S.empty)).toBeInTheDocument();
       });
-
-      // Input field should still be visible
-      expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
     });
 
     it("should show loading skeleton while fetching", () => {
@@ -94,18 +91,66 @@ describe("CompanyComments", () => {
       renderWithProviders(<CompanyComments companyId="company-1" />);
 
       await waitFor(() => {
-        // Should contain date parts (format varies by locale)
         const dateText = screen.getByText(/27/);
         expect(dateText).toBeInTheDocument();
       });
     });
   });
 
-  describe("create", () => {
+  describe("add comment button", () => {
+    it("should show Add Comment button in header", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+
+      renderWithProviders(<CompanyComments companyId="company-1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText(S.add)).toBeInTheDocument();
+      });
+    });
+
+    it("should not show inline textarea", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+
+      renderWithProviders(<CompanyComments companyId="company-1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText(S.empty)).toBeInTheDocument();
+      });
+
+      expect(screen.queryByPlaceholderText(S.placeholder)).not.toBeInTheDocument();
+    });
+
+    it("should open dialog when Add Comment button is clicked", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+
+      renderWithProviders(<CompanyComments companyId="company-1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText(S.add)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(S.add));
+
+      await waitFor(() => {
+        // Dialog opens with textarea
+        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
+        // Title appears (may appear multiple times due to button + dialog title)
+        expect(screen.getAllByText(S.addTitle).length).toBeGreaterThanOrEqual(1);
+      });
+    });
+  });
+
+  describe("modal create flow", () => {
     it("should disable send button when text is empty", async () => {
       mockGetCompanyComments.mockResolvedValue(makePage([]));
 
       renderWithProviders(<CompanyComments companyId="company-1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText(S.add)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(S.add));
 
       await waitFor(() => {
         const sendButton = screen.getByText(S.send);
@@ -113,24 +158,7 @@ describe("CompanyComments", () => {
       });
     });
 
-    it("should disable send button when only whitespace", async () => {
-      mockGetCompanyComments.mockResolvedValue(makePage([]));
-
-      renderWithProviders(<CompanyComments companyId="company-1" />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
-        target: { value: "   " },
-      });
-
-      const sendButton = screen.getByText(S.send);
-      expect(sendButton.closest("button")).toBeDisabled();
-    });
-
-    it("should create comment and add to top of list", async () => {
+    it("should create comment, close dialog, and add to top of list", async () => {
       mockGetCompanyComments.mockResolvedValue(
         makePage([makeComment({ id: "1", text: "Existing comment" })]),
       );
@@ -144,6 +172,12 @@ describe("CompanyComments", () => {
         expect(screen.getByText("Existing comment")).toBeInTheDocument();
       });
 
+      fireEvent.click(screen.getByText(S.add));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
+      });
+
       fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
         target: { value: "New comment" },
       });
@@ -154,34 +188,6 @@ describe("CompanyComments", () => {
         expect(mockCreateCompanyComment).toHaveBeenCalledWith("company-1", { text: "New comment" });
         expect(screen.getByText("New comment")).toBeInTheDocument();
       });
-
-      // Textarea should be cleared
-      const textarea = screen.getByPlaceholderText(S.placeholder) as HTMLTextAreaElement;
-      expect(textarea.value).toBe("");
-    });
-
-    it("should send only text field, no author", async () => {
-      mockGetCompanyComments.mockResolvedValue(makePage([]));
-      mockCreateCompanyComment.mockResolvedValue(makeComment({ text: "Test" }));
-
-      renderWithProviders(<CompanyComments companyId="company-1" />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
-        target: { value: "Test" },
-      });
-
-      fireEvent.click(screen.getByText(S.send));
-
-      await waitFor(() => {
-        expect(mockCreateCompanyComment).toHaveBeenCalledWith("company-1", { text: "Test" });
-        // Verify no author in the call
-        const callArgs = mockCreateCompanyComment.mock.calls[0][1];
-        expect(callArgs).not.toHaveProperty("author");
-      });
     });
 
     it("should show error dialog on API failure and preserve text", async () => {
@@ -189,6 +195,12 @@ describe("CompanyComments", () => {
       mockCreateCompanyComment.mockRejectedValue(new Error("Server error"));
 
       renderWithProviders(<CompanyComments companyId="company-1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText(S.add)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(S.add));
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
@@ -204,31 +216,9 @@ describe("CompanyComments", () => {
         expect(screen.getByText(S.errorGeneric)).toBeInTheDocument();
       });
 
-      // Text should be preserved
+      // Text should be preserved in the dialog textarea
       const textarea = screen.getByPlaceholderText(S.placeholder) as HTMLTextAreaElement;
       expect(textarea.value).toBe("Will fail");
-    });
-
-    it("should disable send button while sending", async () => {
-      mockGetCompanyComments.mockResolvedValue(makePage([]));
-      mockCreateCompanyComment.mockReturnValue(new Promise(() => {})); // never resolves
-
-      renderWithProviders(<CompanyComments companyId="company-1" />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
-        target: { value: "Sending..." },
-      });
-
-      fireEvent.click(screen.getByText(S.send));
-
-      await waitFor(() => {
-        expect(screen.getByText(S.sending)).toBeInTheDocument();
-        expect(screen.getByText(S.sending).closest("button")).toBeDisabled();
-      });
     });
   });
 

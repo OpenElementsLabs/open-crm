@@ -89,13 +89,13 @@ describe("CompanyDetail", () => {
     expect(deleteButton).toBeInTheDocument();
   });
 
-  it("should show comment section with title and input", async () => {
+  it("should show comment section with title and Add Comment button", async () => {
     renderWithProviders(<CompanyDetail company={testCompany} />);
 
     await waitFor(() => {
       expect(screen.getByText(S.comments.title)).toBeInTheDocument();
       expect(screen.getByText(S.comments.empty)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText(S.comments.placeholder)).toBeInTheDocument();
+      expect(screen.getByText(S.comments.add)).toBeInTheDocument();
     });
   });
 

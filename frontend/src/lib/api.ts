@@ -213,7 +213,7 @@ export async function getCompaniesForSelect(): Promise<CompanyDto[]> {
   return data.content as CompanyDto[];
 }
 
-// Comment API
+// Company Comment API
 
 export async function getCompanyComments(
   companyId: string,
@@ -243,6 +243,41 @@ export async function createCompanyComment(
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || `Failed to create comment: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// Contact Comment API
+
+export async function getContactComments(
+  contactId: string,
+  page: number = 0,
+): Promise<Page<CommentDto>> {
+  const url = `${baseUrl()}/api/contacts/${contactId}/comments?page=${page}&size=20&sort=createdAt,desc`;
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch contact comments: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createContactComment(
+  contactId: string,
+  data: CommentCreateDto,
+): Promise<CommentDto> {
+  const url = `${baseUrl()}/api/contacts/${contactId}/comments`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create contact comment: ${response.status}`);
   }
 
   return response.json();
