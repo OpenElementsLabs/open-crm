@@ -187,3 +187,15 @@ Add a "Kontakte" / "Contacts" entry to the sidebar navigation in `frontend/src/c
 - `frontend/src/lib/types.ts` — add `ContactDto`, `ContactCreateDto`
 - `frontend/src/lib/constants.ts` — add `STRINGS.contacts` block (DE/EN)
 - `frontend/src/components/sidebar.tsx` — add contacts nav item
+
+---
+
+## Appendix: Implementation Deviations
+
+### i18n approach changed
+
+This spec was written before spec 006 (Frontend i18n) was implemented. At the time of writing, UI strings were managed in a centralized `STRINGS` object in `frontend/src/lib/constants.ts`.
+
+Spec 006 replaced that approach with a proper i18n system using `frontend/src/lib/i18n/de.ts` and `frontend/src/lib/i18n/en.ts`, accessed via a `useTranslations()` hook from a React Context (`LanguageProvider`).
+
+The contact frontend was implemented using the new i18n system. References to `constants.ts` and `STRINGS.contacts` in the sections above should be read as `i18n/de.ts` / `i18n/en.ts` with a `contacts` translation block in each file.
