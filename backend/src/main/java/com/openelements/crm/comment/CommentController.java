@@ -49,8 +49,8 @@ public class CommentController {
     @ApiResponse(responseCode = "200", description = "Comment updated")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Comment not found")
-    public CommentResponse update(@PathVariable final UUID id,
-                                  @Valid @RequestBody final CommentUpdateRequest request) {
+    public CommentDto update(@PathVariable final UUID id,
+                                  @Valid @RequestBody final CommentUpdateDto request) {
         return commentService.update(id, request);
     }
 

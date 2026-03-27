@@ -19,7 +19,7 @@ public class HealthController {
     /**
      * Returns the health status of the application.
      *
-     * @return a {@link HealthResponse} with status "UP"
+     * @return a {@link HealthDto} with status "UP"
      */
     @GetMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -27,7 +27,7 @@ public class HealthController {
             description = "Returns the current health status of the backend application"
     )
     @ApiResponse(responseCode = "200", description = "Application is running")
-    public HealthResponse health() {
-        return new HealthResponse("UP");
+    public HealthDto health() {
+        return new HealthDto("UP");
     }
 }

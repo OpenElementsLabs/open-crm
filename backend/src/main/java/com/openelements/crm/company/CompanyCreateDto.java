@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * Request DTO for creating a new company.
+ * DTO for creating a new company.
  *
  * @param name        the company name (required)
  * @param email       the global email address
@@ -17,10 +17,10 @@ import jakarta.validation.constraints.Size;
  * @param country     the country of the address
  */
 @Schema(description = "Request body for creating a new company")
-public record CompanyCreateRequest(
+public record CompanyCreateDto(
         @NotBlank(message = "Name must not be blank")
         @Size(max = 255)
-        @Schema(description = "Company name", example = "Open Elements GmbH")
+        @Schema(description = "Company name", example = "Open Elements GmbH", requiredMode = Schema.RequiredMode.REQUIRED)
         String name,
 
         @Size(max = 255)

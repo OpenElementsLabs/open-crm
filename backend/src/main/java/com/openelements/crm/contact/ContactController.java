@@ -1,7 +1,7 @@
 package com.openelements.crm.contact;
 
-import com.openelements.crm.comment.CommentCreateRequest;
-import com.openelements.crm.comment.CommentResponse;
+import com.openelements.crm.comment.CommentCreateDto;
+import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -61,7 +61,7 @@ public class ContactController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List contacts", description = "Returns a paginated list of contacts with optional filtering")
-    public Page<ContactResponse> list(
+    public Page<ContactDto> list(
             @RequestParam(required = false) final String firstName,
             @RequestParam(required = false) final String lastName,
             @RequestParam(required = false) final String email,
@@ -81,7 +81,7 @@ public class ContactController {
     @Operation(summary = "Get contact by ID")
     @ApiResponse(responseCode = "200", description = "Contact found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public ContactResponse getById(@PathVariable final UUID id) {
+    public ContactDto getById(@PathVariable final UUID id) {
         return contactService.getById(id);
     }
 
@@ -96,7 +96,7 @@ public class ContactController {
     @Operation(summary = "Create a new contact")
     @ApiResponse(responseCode = "201", description = "Contact created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
-    public ContactResponse create(@Valid @RequestBody final ContactCreateRequest request) {
+    public ContactDto create(@Valid @RequestBody final ContactCreateDto request) {
         return contactService.create(request);
     }
 
@@ -112,8 +112,8 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Contact updated")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public ContactResponse update(@PathVariable final UUID id,
-                                  @Valid @RequestBody final ContactUpdateRequest request) {
+    public ContactDto update(@PathVariable final UUID id,
+                                  @Valid @RequestBody final ContactUpdateDto request) {
         return contactService.update(id, request);
     }
 
@@ -142,7 +142,7 @@ public class ContactController {
     @Operation(summary = "List comments for a contact")
     @ApiResponse(responseCode = "200", description = "Comments found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public Page<CommentResponse> listComments(
+    public Page<CommentDto> listComments(
             @PathVariable final UUID id,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByContact(id, pageable);
@@ -161,8 +161,8 @@ public class ContactController {
     @ApiResponse(responseCode = "201", description = "Comment created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public CommentResponse addComment(@PathVariable final UUID id,
-                                      @Valid @RequestBody final CommentCreateRequest request) {
+    public CommentDto addComment(@PathVariable final UUID id,
+                                      @Valid @RequestBody final CommentCreateDto request) {
         return commentService.addToContact(id, request);
     }
 }

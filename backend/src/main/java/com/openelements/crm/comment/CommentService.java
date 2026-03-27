@@ -47,7 +47,7 @@ public class CommentService {
      * @return the created comment response
      * @throws ResponseStatusException with 404 if company not found
      */
-    public CommentResponse addToCompany(final UUID companyId, final CommentCreateRequest request) {
+    public CommentDto addToCompany(final UUID companyId, final CommentCreateDto request) {
         Objects.requireNonNull(companyId, "companyId must not be null");
         Objects.requireNonNull(request, "request must not be null");
         final CompanyEntity company = companyRepository.findById(companyId)
@@ -58,7 +58,7 @@ public class CommentService {
         entity.setAuthor(request.author());
         entity.setCompany(company);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentResponse.fromEntity(saved);
+        return CommentDto.fromEntity(saved);
     }
 
     /**
@@ -69,7 +69,7 @@ public class CommentService {
      * @return the created comment response
      * @throws ResponseStatusException with 404 if contact not found
      */
-    public CommentResponse addToContact(final UUID contactId, final CommentCreateRequest request) {
+    public CommentDto addToContact(final UUID contactId, final CommentCreateDto request) {
         Objects.requireNonNull(contactId, "contactId must not be null");
         Objects.requireNonNull(request, "request must not be null");
         final ContactEntity contact = contactRepository.findById(contactId)
@@ -80,7 +80,7 @@ public class CommentService {
         entity.setAuthor(request.author());
         entity.setContact(contact);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentResponse.fromEntity(saved);
+        return CommentDto.fromEntity(saved);
     }
 
     /**
@@ -91,14 +91,14 @@ public class CommentService {
      * @return the updated comment response
      * @throws ResponseStatusException with 404 if not found
      */
-    public CommentResponse update(final UUID id, final CommentUpdateRequest request) {
+    public CommentDto update(final UUID id, final CommentUpdateDto request) {
         Objects.requireNonNull(id, "id must not be null");
         Objects.requireNonNull(request, "request must not be null");
         final CommentEntity entity = findOrThrow(id);
         entity.setText(request.text());
         entity.setAuthor(request.author());
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentResponse.fromEntity(saved);
+        return CommentDto.fromEntity(saved);
     }
 
     /**
@@ -122,13 +122,13 @@ public class CommentService {
      * @throws ResponseStatusException with 404 if company not found
      */
     @Transactional(readOnly = true)
-    public Page<CommentResponse> listByCompany(final UUID companyId, final Pageable pageable) {
+    public Page<CommentDto> listByCompany(final UUID companyId, final Pageable pageable) {
         Objects.requireNonNull(companyId, "companyId must not be null");
         Objects.requireNonNull(pageable, "pageable must not be null");
         if (!companyRepository.existsById(companyId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found: " + companyId);
         }
-        return commentRepository.findByCompanyId(companyId, pageable).map(CommentResponse::fromEntity);
+        return commentRepository.findByCompanyId(companyId, pageable).map(CommentDto::fromEntity);
     }
 
     /**
@@ -140,13 +140,13 @@ public class CommentService {
      * @throws ResponseStatusException with 404 if contact not found
      */
     @Transactional(readOnly = true)
-    public Page<CommentResponse> listByContact(final UUID contactId, final Pageable pageable) {
+    public Page<CommentDto> listByContact(final UUID contactId, final Pageable pageable) {
         Objects.requireNonNull(contactId, "contactId must not be null");
         Objects.requireNonNull(pageable, "pageable must not be null");
         if (!contactRepository.existsById(contactId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact not found: " + contactId);
         }
-        return commentRepository.findByContactId(contactId, pageable).map(CommentResponse::fromEntity);
+        return commentRepository.findByContactId(contactId, pageable).map(CommentDto::fromEntity);
     }
 
     private CommentEntity findOrThrow(final UUID id) {

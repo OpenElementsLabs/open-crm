@@ -10,13 +10,13 @@ import jakarta.validation.constraints.NotBlank;
  * @param author the author name (required, freetext for now)
  */
 @Schema(description = "Request body for creating a new comment")
-public record CommentCreateRequest(
+public record CommentCreateDto(
         @NotBlank(message = "Text must not be blank")
-        @Schema(description = "Comment text", example = "Had a great meeting today.")
+        @Schema(description = "Comment text", example = "Had a great meeting today.", requiredMode = Schema.RequiredMode.REQUIRED)
         String text,
 
         @NotBlank(message = "Author must not be blank")
-        @Schema(description = "Author name", example = "Hendrik Ebbers")
+        @Schema(description = "Author name", example = "Hendrik Ebbers", requiredMode = Schema.RequiredMode.REQUIRED)
         String author
 ) {
 }

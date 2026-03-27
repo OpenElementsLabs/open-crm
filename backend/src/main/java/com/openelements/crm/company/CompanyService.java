@@ -39,7 +39,7 @@ public class CompanyService {
      * @param request the create request
      * @return the created company response
      */
-    public CompanyResponse create(final CompanyCreateRequest request) {
+    public CompanyDto create(final CompanyCreateDto request) {
         Objects.requireNonNull(request, "request must not be null");
         final CompanyEntity entity = new CompanyEntity();
         entity.setName(request.name());
@@ -51,7 +51,7 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return CompanyResponse.fromEntity(saved);
+        return CompanyDto.fromEntity(saved);
     }
 
     /**
@@ -62,10 +62,10 @@ public class CompanyService {
      * @throws ResponseStatusException with 404 if not found
      */
     @Transactional(readOnly = true)
-    public CompanyResponse getById(final UUID id) {
+    public CompanyDto getById(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final CompanyEntity entity = findOrThrow(id);
-        return CompanyResponse.fromEntity(entity);
+        return CompanyDto.fromEntity(entity);
     }
 
     /**
@@ -76,7 +76,7 @@ public class CompanyService {
      * @return the updated company response
      * @throws ResponseStatusException with 404 if not found
      */
-    public CompanyResponse update(final UUID id, final CompanyUpdateRequest request) {
+    public CompanyDto update(final UUID id, final CompanyUpdateDto request) {
         Objects.requireNonNull(id, "id must not be null");
         Objects.requireNonNull(request, "request must not be null");
         final CompanyEntity entity = findOrThrow(id);
@@ -89,7 +89,7 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return CompanyResponse.fromEntity(saved);
+        return CompanyDto.fromEntity(saved);
     }
 
     /**
@@ -116,12 +116,12 @@ public class CompanyService {
      * @return the restored company response
      * @throws ResponseStatusException with 404 if not found
      */
-    public CompanyResponse restore(final UUID id) {
+    public CompanyDto restore(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final CompanyEntity entity = findOrThrow(id);
         entity.setDeleted(false);
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return CompanyResponse.fromEntity(saved);
+        return CompanyDto.fromEntity(saved);
     }
 
     /**
@@ -135,7 +135,7 @@ public class CompanyService {
      * @return a page of company responses
      */
     @Transactional(readOnly = true)
-    public Page<CompanyResponse> list(final String name,
+    public Page<CompanyDto> list(final String name,
                                       final String city,
                                       final String country,
                                       final boolean includeDeleted,
@@ -159,7 +159,7 @@ public class CompanyService {
                     cb.equal(cb.lower(root.get("country")), country.toLowerCase()));
         }
 
-        return companyRepository.findAll(spec, pageable).map(CompanyResponse::fromEntity);
+        return companyRepository.findAll(spec, pageable).map(CompanyDto::fromEntity);
     }
 
     private CompanyEntity findOrThrow(final UUID id) {

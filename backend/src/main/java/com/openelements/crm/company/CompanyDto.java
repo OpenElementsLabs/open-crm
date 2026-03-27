@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Response DTO representing a company.
+ * DTO representing a company.
  *
  * @param id          the company ID
  * @param name        the company name
@@ -20,10 +20,10 @@ import java.util.UUID;
  * @param createdAt   the creation timestamp
  * @param updatedAt   the last update timestamp
  */
-@Schema(description = "Company response")
-public record CompanyResponse(
-        @Schema(description = "Company ID") UUID id,
-        @Schema(description = "Company name") String name,
+@Schema(description = "Company")
+public record CompanyDto(
+        @Schema(description = "Company ID", requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
+        @Schema(description = "Company name", requiredMode = Schema.RequiredMode.REQUIRED) String name,
         @Schema(description = "Global email address") String email,
         @Schema(description = "Website URL") String website,
         @Schema(description = "Street") String street,
@@ -31,19 +31,19 @@ public record CompanyResponse(
         @Schema(description = "Zip code") String zipCode,
         @Schema(description = "City") String city,
         @Schema(description = "Country") String country,
-        @Schema(description = "Whether the company is soft-deleted") boolean deleted,
-        @Schema(description = "Creation timestamp") Instant createdAt,
-        @Schema(description = "Last update timestamp") Instant updatedAt
+        @Schema(description = "Whether the company is soft-deleted", requiredMode = Schema.RequiredMode.REQUIRED) boolean deleted,
+        @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
+        @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) {
 
     /**
-     * Creates a response DTO from a company entity.
+     * Creates a DTO from a company entity.
      *
      * @param entity the company entity
-     * @return the response DTO
+     * @return the DTO
      */
-    public static CompanyResponse fromEntity(final CompanyEntity entity) {
-        return new CompanyResponse(
+    public static CompanyDto fromEntity(final CompanyEntity entity) {
+        return new CompanyDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getEmail(),

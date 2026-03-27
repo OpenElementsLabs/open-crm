@@ -45,14 +45,14 @@ public class ContactService {
      * @param request the create request
      * @return the created contact response
      */
-    public ContactResponse create(final ContactCreateRequest request) {
+    public ContactDto create(final ContactCreateDto request) {
         Objects.requireNonNull(request, "request must not be null");
         final ContactEntity entity = new ContactEntity();
         applyFields(entity, request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language());
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        return ContactResponse.fromEntity(saved);
+        return ContactDto.fromEntity(saved);
     }
 
     /**
@@ -63,10 +63,10 @@ public class ContactService {
      * @throws ResponseStatusException with 404 if not found
      */
     @Transactional(readOnly = true)
-    public ContactResponse getById(final UUID id) {
+    public ContactDto getById(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final ContactEntity entity = findOrThrow(id);
-        return ContactResponse.fromEntity(entity);
+        return ContactDto.fromEntity(entity);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ContactService {
      * @return the updated contact response
      * @throws ResponseStatusException with 404 if not found
      */
-    public ContactResponse update(final UUID id, final ContactUpdateRequest request) {
+    public ContactDto update(final UUID id, final ContactUpdateDto request) {
         Objects.requireNonNull(id, "id must not be null");
         Objects.requireNonNull(request, "request must not be null");
         final ContactEntity entity = findOrThrow(id);
@@ -85,7 +85,7 @@ public class ContactService {
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language());
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        return ContactResponse.fromEntity(saved);
+        return ContactDto.fromEntity(saved);
     }
 
     /**
@@ -113,7 +113,7 @@ public class ContactService {
      * @return a page of contact responses
      */
     @Transactional(readOnly = true)
-    public Page<ContactResponse> list(final String firstName,
+    public Page<ContactDto> list(final String firstName,
                                       final String lastName,
                                       final String email,
                                       final UUID companyId,
@@ -143,7 +143,7 @@ public class ContactService {
                     cb.equal(root.get("language"), language));
         }
 
-        return contactRepository.findAll(spec, pageable).map(ContactResponse::fromEntity);
+        return contactRepository.findAll(spec, pageable).map(ContactDto::fromEntity);
     }
 
     private void applyFields(final ContactEntity entity,

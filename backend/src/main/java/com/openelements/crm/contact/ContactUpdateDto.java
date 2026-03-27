@@ -20,15 +20,15 @@ import java.util.UUID;
  * @param language    the preferred language (required)
  */
 @Schema(description = "Request body for updating an existing contact")
-public record ContactUpdateRequest(
+public record ContactUpdateDto(
         @NotBlank(message = "First name must not be blank")
         @Size(max = 255)
-        @Schema(description = "First name", example = "Hendrik")
+        @Schema(description = "First name", example = "Hendrik", requiredMode = Schema.RequiredMode.REQUIRED)
         String firstName,
 
         @NotBlank(message = "Last name must not be blank")
         @Size(max = 255)
-        @Schema(description = "Last name", example = "Ebbers")
+        @Schema(description = "Last name", example = "Ebbers", requiredMode = Schema.RequiredMode.REQUIRED)
         String lastName,
 
         @Size(max = 255)
@@ -54,7 +54,7 @@ public record ContactUpdateRequest(
         UUID companyId,
 
         @NotNull(message = "Language must not be null")
-        @Schema(description = "Preferred language", example = "DE")
+        @Schema(description = "Preferred language", example = "DE", requiredMode = Schema.RequiredMode.REQUIRED)
         Language language
 ) {
 }

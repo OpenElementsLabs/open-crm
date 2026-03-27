@@ -1,7 +1,7 @@
 package com.openelements.crm.company;
 
-import com.openelements.crm.comment.CommentCreateRequest;
-import com.openelements.crm.comment.CommentResponse;
+import com.openelements.crm.comment.CommentCreateDto;
+import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,7 +60,7 @@ public class CompanyController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List companies", description = "Returns a paginated list of companies with optional filtering")
-    public Page<CompanyResponse> list(
+    public Page<CompanyDto> list(
             @RequestParam(required = false) final String name,
             @RequestParam(required = false) final String city,
             @RequestParam(required = false) final String country,
@@ -79,7 +79,7 @@ public class CompanyController {
     @Operation(summary = "Get company by ID")
     @ApiResponse(responseCode = "200", description = "Company found")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyResponse getById(@PathVariable final UUID id) {
+    public CompanyDto getById(@PathVariable final UUID id) {
         return companyService.getById(id);
     }
 
@@ -94,7 +94,7 @@ public class CompanyController {
     @Operation(summary = "Create a new company")
     @ApiResponse(responseCode = "201", description = "Company created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
-    public CompanyResponse create(@Valid @RequestBody final CompanyCreateRequest request) {
+    public CompanyDto create(@Valid @RequestBody final CompanyCreateDto request) {
         return companyService.create(request);
     }
 
@@ -110,8 +110,8 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Company updated")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyResponse update(@PathVariable final UUID id,
-                                  @Valid @RequestBody final CompanyUpdateRequest request) {
+    public CompanyDto update(@PathVariable final UUID id,
+                                  @Valid @RequestBody final CompanyUpdateDto request) {
         return companyService.update(id, request);
     }
 
@@ -140,7 +140,7 @@ public class CompanyController {
     @Operation(summary = "Restore a soft-deleted company")
     @ApiResponse(responseCode = "200", description = "Company restored")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyResponse restore(@PathVariable final UUID id) {
+    public CompanyDto restore(@PathVariable final UUID id) {
         return companyService.restore(id);
     }
 
@@ -155,7 +155,7 @@ public class CompanyController {
     @Operation(summary = "List comments for a company")
     @ApiResponse(responseCode = "200", description = "Comments found")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public Page<CommentResponse> listComments(
+    public Page<CommentDto> listComments(
             @PathVariable final UUID id,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByCompany(id, pageable);
@@ -174,8 +174,8 @@ public class CompanyController {
     @ApiResponse(responseCode = "201", description = "Comment created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CommentResponse addComment(@PathVariable final UUID id,
-                                      @Valid @RequestBody final CommentCreateRequest request) {
+    public CommentDto addComment(@PathVariable final UUID id,
+                                      @Valid @RequestBody final CommentCreateDto request) {
         return commentService.addToCompany(id, request);
     }
 }
