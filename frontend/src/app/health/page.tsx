@@ -1,5 +1,4 @@
 import { HealthStatus } from "@/components/health-status";
-import { STRINGS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -24,14 +23,7 @@ export default async function HealthPage() {
 
   return (
     <div className="flex flex-col items-center justify-center py-20">
-      <div className="flex flex-col items-center gap-8">
-        <div className="text-center">
-          <h1 className="font-heading text-3xl font-bold tracking-tight text-oe-dark">
-            {STRINGS.health.title}
-          </h1>
-        </div>
-        <HealthStatus healthy={healthy} />
-      </div>
+      <HealthStatus healthy={healthy} />
     </div>
   );
 }

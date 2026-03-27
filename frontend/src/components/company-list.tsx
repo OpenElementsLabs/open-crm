@@ -25,11 +25,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getCompanies, deleteCompany, restoreCompany } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
-import { STRINGS } from "@/lib/constants";
-
-const S = STRINGS.companies;
+import { useTranslations } from "@/lib/i18n/language-context";
 
 export function CompanyList() {
+  const t = useTranslations();
+  const S = t.companies;
   const router = useRouter();
   const [data, setData] = useState<Page<CompanyDto> | null>(null);
   const [loading, setLoading] = useState(true);

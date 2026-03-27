@@ -1,4 +1,4 @@
-export const STRINGS = {
+export const de = {
   app: {
     title: "Open CRM",
     description: "Customer Relationship Management by Open Elements",
@@ -8,9 +8,9 @@ export const STRINGS = {
     companies: "Firmen",
   },
   health: {
-    title: "System Status",
-    statusUp: "Backend is running",
-    statusDown: "Backend is unavailable",
+    title: "Systemstatus",
+    statusUp: "Backend läuft",
+    statusDown: "Backend ist nicht erreichbar",
   },
   companies: {
     title: "Firmen",
@@ -56,7 +56,7 @@ export const STRINGS = {
       city: "Stadt",
       cityPlaceholder: "Berlin",
       country: "Land",
-      countryPlaceholder: "Germany",
+      countryPlaceholder: "Deutschland",
       save: "Speichern",
       cancel: "Abbrechen",
       errorGeneric: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",

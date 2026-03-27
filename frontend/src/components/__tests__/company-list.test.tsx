@@ -1,10 +1,11 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyList } from "@/components/company-list";
-import { STRINGS } from "@/lib/constants";
+import { de } from "@/lib/i18n/de";
+import { renderWithProviders } from "@/test/test-utils";
 import type { CompanyDto, Page } from "@/lib/types";
 
-const S = STRINGS.companies;
+const S = de.companies;
 
 const mockPush = vi.fn();
 
@@ -68,7 +69,7 @@ describe("CompanyList", () => {
         ]),
       );
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByText("Open Elements")).toBeInTheDocument();
@@ -81,7 +82,7 @@ describe("CompanyList", () => {
     it("should show empty state when no companies exist", async () => {
       mockGetCompanies.mockResolvedValue(makePage([]));
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByText(S.empty)).toBeInTheDocument();
@@ -91,7 +92,7 @@ describe("CompanyList", () => {
     it("should show loading skeleton while fetching", () => {
       mockGetCompanies.mockReturnValue(new Promise(() => {})); // never resolves
 
-      const { container } = render(<CompanyList />);
+      const { container } = renderWithProviders(<CompanyList />);
 
       const skeletons = container.querySelectorAll("[data-slot='skeleton']");
       expect(skeletons.length).toBeGreaterThan(0);
@@ -104,7 +105,7 @@ describe("CompanyList", () => {
         makePage([makeCompany()], 25),
       );
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
@@ -123,7 +124,7 @@ describe("CompanyList", () => {
         last: false,
       });
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
@@ -145,7 +146,7 @@ describe("CompanyList", () => {
     });
 
     it("should filter by name when typing in name filter", async () => {
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText(S.filter.name)).toBeInTheDocument();
@@ -163,7 +164,7 @@ describe("CompanyList", () => {
     });
 
     it("should filter by city when typing in city filter", async () => {
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText(S.filter.city)).toBeInTheDocument();
@@ -181,7 +182,7 @@ describe("CompanyList", () => {
     });
 
     it("should filter by country when typing in country filter", async () => {
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText(S.filter.country)).toBeInTheDocument();
@@ -203,7 +204,7 @@ describe("CompanyList", () => {
     it("should call API with sort parameter", async () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(mockGetCompanies).toHaveBeenCalledWith(
@@ -217,7 +218,7 @@ describe("CompanyList", () => {
     it("should exclude soft-deleted by default", async () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(mockGetCompanies).toHaveBeenCalledWith(
@@ -229,7 +230,7 @@ describe("CompanyList", () => {
     it("should include soft-deleted when toggle clicked", async () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByText(S.showArchived)).toBeInTheDocument();
@@ -249,7 +250,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "deleted-1", name: "Deleted Co", deleted: true })]),
       );
 
-      const { container } = render(<CompanyList />);
+      const { container } = renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         const row = container.querySelector("tr.opacity-50");
@@ -262,7 +263,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "deleted-1", name: "Deleted Co", deleted: true })]),
       );
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         const restoreButton = screen.getByTitle(S.detail.restore);
@@ -277,7 +278,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "test-id-1", name: "Open Elements" })]),
       );
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByText("Open Elements")).toBeInTheDocument();
@@ -291,7 +292,7 @@ describe("CompanyList", () => {
     it("should show Neue Firma button linking to /companies/new", async () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
 
-      const { container } = render(<CompanyList />);
+      const { container } = renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         const newButton = Array.from(container.querySelectorAll("a")).find(
@@ -308,7 +309,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -329,7 +330,7 @@ describe("CompanyList", () => {
       );
       mockDeleteCompany.mockResolvedValue(undefined);
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -353,7 +354,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -376,7 +377,7 @@ describe("CompanyList", () => {
       );
       mockDeleteCompany.mockRejectedValue(new Error("CONFLICT"));
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -403,7 +404,7 @@ describe("CompanyList", () => {
       );
       mockRestoreCompany.mockResolvedValue(makeCompany({ id: "deleted-1", deleted: false }));
 
-      render(<CompanyList />);
+      renderWithProviders(<CompanyList />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.restore)).toBeInTheDocument();
