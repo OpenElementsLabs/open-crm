@@ -1,10 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyForm } from "@/components/company-form";
-import { STRINGS } from "@/lib/constants";
+import { de } from "@/lib/i18n/de";
+import { renderWithProviders } from "@/test/test-utils";
 import type { CompanyDto } from "@/lib/types";
 
-const S = STRINGS.companies.form;
+const S = de.companies.form;
 
 const mockPush = vi.fn();
 
@@ -44,7 +45,7 @@ afterEach(() => {
 describe("CompanyForm", () => {
   describe("create mode", () => {
     it("should render all form fields with save and cancel buttons", () => {
-      render(<CompanyForm />);
+      renderWithProviders(<CompanyForm />);
 
       expect(screen.getByLabelText(new RegExp(S.name))).toBeInTheDocument();
       expect(screen.getByLabelText(S.email)).toBeInTheDocument();
@@ -59,12 +60,12 @@ describe("CompanyForm", () => {
     });
 
     it("should show title for create mode", () => {
-      render(<CompanyForm />);
+      renderWithProviders(<CompanyForm />);
       expect(screen.getByText(S.createTitle)).toBeInTheDocument();
     });
 
     it("should validate name is required", async () => {
-      render(<CompanyForm />);
+      renderWithProviders(<CompanyForm />);
 
       fireEvent.click(screen.getByText(S.save));
 
@@ -78,7 +79,7 @@ describe("CompanyForm", () => {
     it("should submit and redirect to detail page", async () => {
       mockCreateCompany.mockResolvedValue({ ...existingCompany, id: "new-id" });
 
-      render(<CompanyForm />);
+      renderWithProviders(<CompanyForm />);
 
       fireEvent.change(screen.getByLabelText(new RegExp(S.name)), {
         target: { value: "New Corp" },
@@ -95,7 +96,7 @@ describe("CompanyForm", () => {
     });
 
     it("should navigate to list on cancel", () => {
-      render(<CompanyForm />);
+      renderWithProviders(<CompanyForm />);
 
       fireEvent.click(screen.getByText(S.cancel));
 
@@ -105,7 +106,7 @@ describe("CompanyForm", () => {
     it("should show error on API failure", async () => {
       mockCreateCompany.mockRejectedValue(new Error("Server error"));
 
-      render(<CompanyForm />);
+      renderWithProviders(<CompanyForm />);
 
       fireEvent.change(screen.getByLabelText(new RegExp(S.name)), {
         target: { value: "Test" },
@@ -121,7 +122,7 @@ describe("CompanyForm", () => {
 
   describe("edit mode", () => {
     it("should pre-fill form with existing data", () => {
-      render(<CompanyForm company={existingCompany} />);
+      renderWithProviders(<CompanyForm company={existingCompany} />);
 
       expect(screen.getByDisplayValue("Open Elements GmbH")).toBeInTheDocument();
       expect(screen.getByDisplayValue("info@open-elements.com")).toBeInTheDocument();
@@ -129,14 +130,14 @@ describe("CompanyForm", () => {
     });
 
     it("should show title for edit mode", () => {
-      render(<CompanyForm company={existingCompany} />);
+      renderWithProviders(<CompanyForm company={existingCompany} />);
       expect(screen.getByText(S.editTitle)).toBeInTheDocument();
     });
 
     it("should submit update and redirect to detail", async () => {
       mockUpdateCompany.mockResolvedValue(existingCompany);
 
-      render(<CompanyForm company={existingCompany} />);
+      renderWithProviders(<CompanyForm company={existingCompany} />);
 
       fireEvent.change(screen.getByLabelText(new RegExp(S.name)), {
         target: { value: "Updated Corp" },
@@ -154,7 +155,7 @@ describe("CompanyForm", () => {
     });
 
     it("should validate name is required on edit", async () => {
-      render(<CompanyForm company={existingCompany} />);
+      renderWithProviders(<CompanyForm company={existingCompany} />);
 
       fireEvent.change(screen.getByLabelText(new RegExp(S.name)), {
         target: { value: "" },
@@ -170,7 +171,7 @@ describe("CompanyForm", () => {
     });
 
     it("should navigate to detail on cancel", () => {
-      render(<CompanyForm company={existingCompany} />);
+      renderWithProviders(<CompanyForm company={existingCompany} />);
 
       fireEvent.click(screen.getByText(S.cancel));
 

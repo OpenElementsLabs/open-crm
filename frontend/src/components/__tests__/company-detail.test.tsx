@@ -1,10 +1,11 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyDetail } from "@/components/company-detail";
-import { STRINGS } from "@/lib/constants";
+import { de } from "@/lib/i18n/de";
+import { renderWithProviders } from "@/test/test-utils";
 import type { CompanyDto } from "@/lib/types";
 
-const S = STRINGS.companies;
+const S = de.companies;
 
 const mockPush = vi.fn();
 
@@ -41,7 +42,7 @@ afterEach(() => {
 
 describe("CompanyDetail", () => {
   it("should render all company fields", () => {
-    render(<CompanyDetail company={testCompany} />);
+    renderWithProviders(<CompanyDetail company={testCompany} />);
 
     // Name appears in heading and detail — check at least one is present
     expect(screen.getAllByText("Open Elements GmbH").length).toBeGreaterThanOrEqual(1);
@@ -55,7 +56,7 @@ describe("CompanyDetail", () => {
   });
 
   it("should show edit button linking to edit page", () => {
-    const { container } = render(<CompanyDetail company={testCompany} />);
+    const { container } = renderWithProviders(<CompanyDetail company={testCompany} />);
 
     const editLink = Array.from(container.querySelectorAll("a")).find(
       (a) => a.getAttribute("href") === "/companies/test-id/edit",
@@ -66,14 +67,14 @@ describe("CompanyDetail", () => {
   });
 
   it("should show delete button", () => {
-    render(<CompanyDetail company={testCompany} />);
+    renderWithProviders(<CompanyDetail company={testCompany} />);
 
     const deleteButton = screen.getByText(S.detail.delete);
     expect(deleteButton).toBeInTheDocument();
   });
 
   it("should show comment placeholder section", () => {
-    render(<CompanyDetail company={testCompany} />);
+    renderWithProviders(<CompanyDetail company={testCompany} />);
 
     expect(screen.getByText(S.comments.title)).toBeInTheDocument();
     expect(screen.getByText(S.comments.empty)).toBeInTheDocument();
@@ -86,7 +87,7 @@ describe("CompanyDetail", () => {
   it("should open delete dialog and redirect on confirm", async () => {
     mockDeleteCompany.mockResolvedValue(undefined);
 
-    render(<CompanyDetail company={testCompany} />);
+    renderWithProviders(<CompanyDetail company={testCompany} />);
 
     // Click the page-level delete button
     const deleteButtons = screen.getAllByText(S.detail.delete);
@@ -111,7 +112,7 @@ describe("CompanyDetail", () => {
   it("should show error dialog on 409 conflict", async () => {
     mockDeleteCompany.mockRejectedValue(new Error("CONFLICT"));
 
-    render(<CompanyDetail company={testCompany} />);
+    renderWithProviders(<CompanyDetail company={testCompany} />);
 
     // Click the page-level delete button
     const deleteButtons = screen.getAllByText(S.detail.delete);

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Building2, HeartPulse, Menu, X } from "lucide-react";
+import { Building2, HeartPulse, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { STRINGS } from "@/lib/constants";
+import { LanguageSwitch } from "@/components/language-switch";
+import { useTranslations } from "@/lib/i18n/language-context";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -15,17 +16,21 @@ interface NavItem {
   readonly icon: React.ReactNode;
 }
 
-const NAV_ITEMS: readonly NavItem[] = [
-  { label: STRINGS.nav.companies, href: "/companies", icon: <Building2 className="h-5 w-5" /> },
-  { label: STRINGS.nav.health, href: "/health", icon: <HeartPulse className="h-5 w-5" /> },
-];
+function useNavItems(): readonly NavItem[] {
+  const t = useTranslations();
+  return [
+    { label: t.nav.companies, href: "/companies", icon: <Building2 className="h-5 w-5" /> },
+    { label: t.nav.health, href: "/health", icon: <HeartPulse className="h-5 w-5" /> },
+  ];
+}
 
 function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
   const pathname = usePathname();
+  const navItems = useNavItems();
 
   return (
     <nav className="flex flex-col gap-1 px-3 py-4">
-      {NAV_ITEMS.map((item) => {
+      {navItems.map((item) => {
         const isActive = pathname.startsWith(item.href);
         return (
           <Link
@@ -49,16 +54,18 @@ function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
 }
 
 function SidebarHeader() {
+  const t = useTranslations();
   return (
     <div className="flex h-16 items-center border-b border-oe-white/10 px-6">
       <Link href="/companies" className="font-heading text-lg font-bold text-oe-white">
-        {STRINGS.app.title}
+        {t.app.title}
       </Link>
     </div>
   );
 }
 
 export function Sidebar() {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
 
   return (
@@ -67,6 +74,9 @@ export function Sidebar() {
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-oe-dark">
         <SidebarHeader />
         <NavLinks />
+        <div className="mt-auto border-t border-oe-white/10 px-6 py-4">
+          <LanguageSwitch />
+        </div>
       </aside>
 
       {/* Mobile header + hamburger */}
@@ -75,16 +85,19 @@ export function Sidebar() {
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-oe-white hover:bg-oe-white/10">
               <Menu className="h-6 w-6" />
-              <span className="sr-only">Menü öffnen</span>
+              <span className="sr-only">Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 bg-oe-dark p-0 border-none">
+          <SheetContent side="left" className="w-64 bg-oe-dark p-0 border-none flex flex-col">
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SidebarHeader />
             <NavLinks onNavigate={() => setOpen(false)} />
+            <div className="mt-auto border-t border-oe-white/10 px-6 py-4">
+              <LanguageSwitch />
+            </div>
           </SheetContent>
         </Sheet>
-        <span className="ml-3 font-heading text-lg font-bold text-oe-white">{STRINGS.app.title}</span>
+        <span className="ml-3 font-heading text-lg font-bold text-oe-white">{t.app.title}</span>
       </header>
     </>
   );

@@ -8,15 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createCompany, updateCompany } from "@/lib/api";
 import type { CompanyDto, CompanyCreateDto } from "@/lib/types";
-import { STRINGS } from "@/lib/constants";
-
-const S = STRINGS.companies.form;
+import { useTranslations } from "@/lib/i18n/language-context";
 
 interface CompanyFormProps {
   readonly company?: CompanyDto;
 }
 
 export function CompanyForm({ company }: CompanyFormProps) {
+  const t = useTranslations();
+  const S = t.companies.form;
   const router = useRouter();
   const isEdit = !!company;
 

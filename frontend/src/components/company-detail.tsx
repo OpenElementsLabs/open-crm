@@ -10,9 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { deleteCompany } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
-import { STRINGS } from "@/lib/constants";
-
-const S = STRINGS.companies;
+import { useTranslations } from "@/lib/i18n/language-context";
 
 function DetailField({
   label,
@@ -30,6 +28,8 @@ function DetailField({
 }
 
 export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
+  const t = useTranslations();
+  const S = t.companies;
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);

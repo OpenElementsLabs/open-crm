@@ -1,7 +1,8 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, cleanup } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { Sidebar } from "@/components/sidebar";
-import { STRINGS } from "@/lib/constants";
+import { de } from "@/lib/i18n/de";
+import { renderWithProviders } from "@/test/test-utils";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -14,46 +15,46 @@ afterEach(() => {
 
 describe("Sidebar", () => {
   it("should render navigation entries for Firmen and Server-Health", () => {
-    const { container } = render(<Sidebar />);
+    const { container } = renderWithProviders(<Sidebar />);
 
     const links = container.querySelectorAll("a");
     const linkTexts = Array.from(links).map((link) => link.textContent);
 
-    expect(linkTexts).toContain(STRINGS.nav.companies);
-    expect(linkTexts).toContain(STRINGS.nav.health);
+    expect(linkTexts).toContain(de.nav.companies);
+    expect(linkTexts).toContain(de.nav.health);
   });
 
   it("should render app title", () => {
-    const { container } = render(<Sidebar />);
+    const { container } = renderWithProviders(<Sidebar />);
 
     const titles = container.querySelectorAll("a");
     const titleTexts = Array.from(titles).map((t) => t.textContent);
 
-    expect(titleTexts).toContain(STRINGS.app.title);
+    expect(titleTexts).toContain(de.app.title);
   });
 
   it("should have hamburger button for mobile", () => {
-    const { container } = render(<Sidebar />);
+    const { container } = renderWithProviders(<Sidebar />);
 
     const hamburgerButton = container.querySelector("button");
     expect(hamburgerButton).toBeInTheDocument();
   });
 
   it("should link Firmen to /companies", () => {
-    const { container } = render(<Sidebar />);
+    const { container } = renderWithProviders(<Sidebar />);
 
     const companyLink = Array.from(container.querySelectorAll("a")).find(
-      (link) => link.textContent?.includes(STRINGS.nav.companies),
+      (link) => link.textContent?.includes(de.nav.companies),
     );
 
     expect(companyLink).toHaveAttribute("href", "/companies");
   });
 
   it("should link Server-Health to /health", () => {
-    const { container } = render(<Sidebar />);
+    const { container } = renderWithProviders(<Sidebar />);
 
     const healthLink = Array.from(container.querySelectorAll("a")).find(
-      (link) => link.textContent?.includes(STRINGS.nav.health),
+      (link) => link.textContent?.includes(de.nav.health),
     );
 
     expect(healthLink).toHaveAttribute("href", "/health");
