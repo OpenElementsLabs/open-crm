@@ -51,7 +51,9 @@ Present the drafted issues to the user for review and adjustment. **Do not creat
 
 ### 3. Create the spec folder
 
-Create the spec folder under `specs/` following the naming convention from the spec-driven development doc.
+Determine the next sequential ID by reading `specs/INDEX.md`. If the file does not exist yet, create it with the table header (see spec-driven development doc) and start at `001`. Otherwise, increment from the highest existing ID.
+
+Create the spec folder under `specs/` using the format `<ID>-short-description` (e.g., `001-user-auth-flow`).
 
 ### 4. Write `design.md` — Interactive planning
 
@@ -96,8 +98,11 @@ Review the scenarios with the user. Ask explicitly: "Are there edge cases or err
 
 ### 6. Summary
 
-After both files are written, provide a short summary:
-- Link to the created spec folder
-- Count of behavioral scenarios
-- Any open questions from the design
-- Suggest next steps: implement manually, use `/spec-implement` for a step-by-step plan, or use `/spec-review` after implementation to verify completeness
+After both files are written:
+
+1. **Update `specs/INDEX.md`** — Add a new row with the spec's ID, name, GitHub issue reference (or `—`), and status `open`.
+2. Provide a short summary:
+   - Link to the created spec folder
+   - Count of behavioral scenarios
+   - Any open questions from the design
+   - Suggest next steps: implement manually, use `/spec-implement` for a step-by-step plan, or use `/spec-review` after implementation to verify completeness

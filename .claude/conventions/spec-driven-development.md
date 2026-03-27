@@ -15,11 +15,12 @@ Specs live in a `specs/` directory in the project root. Each spec gets its own s
 
 ```
 specs/
-├── 42-user-auth-flow/
+├── INDEX.md
+├── 001-user-auth-flow/
 │   ├── design.md
 │   ├── behaviors.md
 │   └── steps.md          (optional)
-├── 87-csv-export-api/
+├── 002-csv-export-api/
 │   ├── design.md
 │   └── behaviors.md
 └── ...
@@ -27,9 +28,32 @@ specs/
 
 ### Folder Naming
 
-- **Based on a GitHub issue:** `<issue-number>-short-description` (e.g., `42-user-auth-flow`)
-- **Without an issue:** `short-description` (e.g., `csv-export-api`)
-- Keep the description to 3–4 words in kebab-case
+- Format: `<sequential-number>-short-description` (e.g., `001-user-auth-flow`, `002-csv-export-api`)
+- The sequential number is zero-padded to 3 digits and incremented from the last entry in `INDEX.md`.
+- Keep the description to 3–4 words in kebab-case.
+
+### `INDEX.md` — Spec Overview
+
+The file `specs/INDEX.md` is a central index of all specs. It provides Claude and developers with an at-a-glance overview of which specs exist, what they cover, and whether they have been implemented.
+
+Format:
+
+```markdown
+# Spec Index
+
+| ID  | Name | Description | GitHub Issue | Status |
+|-----|------|-------------|--------------|--------|
+| 001 | User auth flow | JWT-based login and registration with refresh tokens | #42 | done |
+| 002 | CSV export API | REST endpoint to export filtered datasets as CSV | #87 | open |
+| 003 | Rate limiting | Token-bucket rate limiting for all public API endpoints | — | in progress |
+```
+
+Rules:
+- Every spec must have an entry in `INDEX.md`. A spec without an index entry is incomplete.
+- **Status** values: `open` (not started), `in progress` (being implemented), `done` (implemented and verified).
+- **GitHub Issue** column contains the issue reference (e.g., `#42`) or `—` if no issue exists.
+- The index is updated whenever a spec is created or its status changes.
+- The sequential ID in the index determines the canonical order of specs.
 
 ## Files
 
@@ -148,6 +172,7 @@ A typical flow:
 
 ## Principles
 
+- **English only** — All spec documents (`design.md`, `behaviors.md`, `steps.md`) must be written in English, regardless of what language the user communicates in. This ensures specs are accessible to all contributors and consistent across projects.
 - **Issue first** — Every PR should have a corresponding GitHub issue
 - **Discuss before writing** — Specs are created through dialogue, not generated silently
 - **Right-size the spec** — A bug fix needs less documentation than a new feature. Skip sections that are not relevant.

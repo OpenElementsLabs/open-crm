@@ -41,7 +41,15 @@ A typical ordering is:
 7. **Backend tests for all backend behavioral scenarios** — Every scenario in `behaviors.md` that describes backend behavior (API responses, data persistence, business logic, validation) must have a corresponding test (unit or integration). Map each given-when-then scenario to at least one test case.
 8. **Frontend tests for all frontend behavioral scenarios** — Every scenario in `behaviors.md` that describes UI behavior (user interactions, form submissions, dialog flows, navigation, error displays, loading states) must have a corresponding frontend test (component test, integration test, or e2e test). This includes CRUD dialogs, form validation visible to the user, conditional UI elements, and any behavior the user can see or trigger. Frontend behaviors are not covered by backend tests — they require their own dedicated tests.
 9. Edge case and error handling tests (both backend and frontend)
-10. Documentation updates (if applicable)
+10. **Update project documentation** — This step is mandatory, not optional. After all code and tests are complete, update the following files to reflect the changes made by this spec:
+    - `.claude/conventions/project-specific/project-features.md` — Add or update feature descriptions
+    - `.claude/conventions/project-specific/project-tech.md` — Add any new technologies, libraries, or services introduced
+    - `.claude/conventions/project-specific/project-structure.md` — Update if new directories, modules, or significant files were added
+    - `.claude/conventions/project-specific/project-architecture.md` — Update if components, data flows, or integrations changed
+    - `README.md` — Update if user-facing behavior, setup instructions, or configuration changed
+    - `CLAUDE.md` — Update if new conventions, paths, or project-specific rules were introduced
+
+    If any of these files are still empty templates (only HTML comments), generate meaningful content based on the **full project state** — not just the current spec. Read the codebase to understand the complete picture and fill in all sections, including aspects outside the scope of the current spec.
 
 Adapt the ordering to the project and technology stack.
 
