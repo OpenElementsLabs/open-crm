@@ -74,6 +74,12 @@ export const de = {
       title: "Kommentare",
       empty: "Keine Kommentare vorhanden",
       add: "Kommentar hinzufügen",
+      placeholder: "Kommentar eingeben...",
+      send: "Senden",
+      loadMore: "Mehr laden",
+      sending: "Wird gesendet...",
+      errorTitle: "Fehler",
+      errorGeneric: "Der Kommentar konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     },
     filter: {
       name: "Nach Name filtern",

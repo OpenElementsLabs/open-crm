@@ -76,6 +76,12 @@ export const en: Translations = {
       title: "Comments",
       empty: "No comments yet",
       add: "Add Comment",
+      placeholder: "Write a comment...",
+      send: "Send",
+      loadMore: "Load more",
+      sending: "Sending...",
+      errorTitle: "Error",
+      errorGeneric: "The comment could not be saved. Please try again.",
     },
     filter: {
       name: "Filter by name",
