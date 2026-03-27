@@ -1,0 +1,168 @@
+package com.openelements.crm.contact;
+
+import com.openelements.crm.comment.CommentCreateRequest;
+import com.openelements.crm.comment.CommentResponse;
+import com.openelements.crm.comment.CommentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.Objects;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * REST controller for contact management.
+ */
+@RestController
+@RequestMapping("/api/contacts")
+@Tag(name = "Contacts", description = "Contact management operations")
+public class ContactController {
+
+    private final ContactService contactService;
+    private final CommentService commentService;
+
+    /**
+     * Creates a new ContactController.
+     *
+     * @param contactService the contact service
+     * @param commentService the comment service
+     */
+    public ContactController(final ContactService contactService, final CommentService commentService) {
+        this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
+        this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
+    }
+
+    /**
+     * Lists contacts with pagination, filtering, and sorting.
+     *
+     * @param firstName partial first name filter
+     * @param lastName  partial last name filter
+     * @param email     partial email filter
+     * @param companyId exact company ID filter
+     * @param language  exact language filter
+     * @param pageable  pagination and sorting parameters
+     * @return a page of contact responses
+     */
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "List contacts", description = "Returns a paginated list of contacts with optional filtering")
+    public Page<ContactResponse> list(
+            @RequestParam(required = false) final String firstName,
+            @RequestParam(required = false) final String lastName,
+            @RequestParam(required = false) final String email,
+            @RequestParam(required = false) final UUID companyId,
+            @RequestParam(required = false) final Language language,
+            @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
+        return contactService.list(firstName, lastName, email, companyId, language, pageable);
+    }
+
+    /**
+     * Returns a contact by its ID.
+     *
+     * @param id the contact ID
+     * @return the contact response
+     */
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get contact by ID")
+    @ApiResponse(responseCode = "200", description = "Contact found")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public ContactResponse getById(@PathVariable final UUID id) {
+        return contactService.getById(id);
+    }
+
+    /**
+     * Creates a new contact.
+     *
+     * @param request the create request
+     * @return the created contact response
+     */
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Create a new contact")
+    @ApiResponse(responseCode = "201", description = "Contact created")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
+    public ContactResponse create(@Valid @RequestBody final ContactCreateRequest request) {
+        return contactService.create(request);
+    }
+
+    /**
+     * Updates an existing contact.
+     *
+     * @param id      the contact ID
+     * @param request the update request
+     * @return the updated contact response
+     */
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update a contact")
+    @ApiResponse(responseCode = "200", description = "Contact updated")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public ContactResponse update(@PathVariable final UUID id,
+                                  @Valid @RequestBody final ContactUpdateRequest request) {
+        return contactService.update(id, request);
+    }
+
+    /**
+     * Hard-deletes a contact and all associated comments.
+     *
+     * @param id the contact ID
+     */
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete a contact", description = "Permanently deletes the contact and all associated comments")
+    @ApiResponse(responseCode = "204", description = "Contact deleted")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public void delete(@PathVariable final UUID id) {
+        contactService.delete(id);
+    }
+
+    /**
+     * Lists comments for a contact, sorted by creation date descending.
+     *
+     * @param id       the contact ID
+     * @param pageable pagination parameters
+     * @return a page of comment responses
+     */
+    @GetMapping(value = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "List comments for a contact")
+    @ApiResponse(responseCode = "200", description = "Comments found")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public Page<CommentResponse> listComments(
+            @PathVariable final UUID id,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
+        return commentService.listByContact(id, pageable);
+    }
+
+    /**
+     * Adds a comment to a contact.
+     *
+     * @param id      the contact ID
+     * @param request the comment create request
+     * @return the created comment response
+     */
+    @PostMapping(value = "/{id}/comments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Add a comment to a contact")
+    @ApiResponse(responseCode = "201", description = "Comment created")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public CommentResponse addComment(@PathVariable final UUID id,
+                                      @Valid @RequestBody final CommentCreateRequest request) {
+        return commentService.addToContact(id, request);
+    }
+}

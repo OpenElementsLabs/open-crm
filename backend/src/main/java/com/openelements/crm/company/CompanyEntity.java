@@ -1,0 +1,278 @@
+package com.openelements.crm.company;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+/**
+ * JPA entity representing a company in the CRM system.
+ */
+@Entity
+@Table(name = "companies")
+public class CompanyEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+
+    @Column(name = "name", nullable = false, length = 255)
+    private String name;
+
+    @Column(name = "email", length = 255)
+    private String email;
+
+    @Column(name = "website", length = 500)
+    private String website;
+
+    @Column(name = "street", length = 255)
+    private String street;
+
+    @Column(name = "house_number", length = 20)
+    private String houseNumber;
+
+    @Column(name = "zip_code", length = 20)
+    private String zipCode;
+
+    @Column(name = "city", length = 255)
+    private String city;
+
+    @Column(name = "country", length = 100)
+    private String country;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    /**
+     * Default constructor required by JPA.
+     */
+    protected CompanyEntity() {
+    }
+
+    /**
+     * Returns the unique identifier of this company.
+     *
+     * @return the company ID
+     */
+    public UUID getId() {
+        return id;
+    }
+
+    /**
+     * Returns the name of this company.
+     *
+     * @return the company name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name of this company.
+     *
+     * @param name the company name
+     */
+    public void setName(final String name) {
+        this.name = Objects.requireNonNull(name, "name must not be null");
+    }
+
+    /**
+     * Returns the global email address of this company.
+     *
+     * @return the email address, or null
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * Sets the global email address of this company.
+     *
+     * @param email the email address
+     */
+    public void setEmail(final String email) {
+        this.email = email;
+    }
+
+    /**
+     * Returns the website URL of this company.
+     *
+     * @return the website URL, or null
+     */
+    public String getWebsite() {
+        return website;
+    }
+
+    /**
+     * Sets the website URL of this company.
+     *
+     * @param website the website URL
+     */
+    public void setWebsite(final String website) {
+        this.website = website;
+    }
+
+    /**
+     * Returns the street of this company's address.
+     *
+     * @return the street, or null
+     */
+    public String getStreet() {
+        return street;
+    }
+
+    /**
+     * Sets the street of this company's address.
+     *
+     * @param street the street
+     */
+    public void setStreet(final String street) {
+        this.street = street;
+    }
+
+    /**
+     * Returns the house number of this company's address.
+     *
+     * @return the house number, or null
+     */
+    public String getHouseNumber() {
+        return houseNumber;
+    }
+
+    /**
+     * Sets the house number of this company's address.
+     *
+     * @param houseNumber the house number
+     */
+    public void setHouseNumber(final String houseNumber) {
+        this.houseNumber = houseNumber;
+    }
+
+    /**
+     * Returns the zip code of this company's address.
+     *
+     * @return the zip code, or null
+     */
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    /**
+     * Sets the zip code of this company's address.
+     *
+     * @param zipCode the zip code
+     */
+    public void setZipCode(final String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    /**
+     * Returns the city of this company's address.
+     *
+     * @return the city, or null
+     */
+    public String getCity() {
+        return city;
+    }
+
+    /**
+     * Sets the city of this company's address.
+     *
+     * @param city the city
+     */
+    public void setCity(final String city) {
+        this.city = city;
+    }
+
+    /**
+     * Returns the country of this company's address.
+     *
+     * @return the country, or null
+     */
+    public String getCountry() {
+        return country;
+    }
+
+    /**
+     * Sets the country of this company's address.
+     *
+     * @param country the country
+     */
+    public void setCountry(final String country) {
+        this.country = country;
+    }
+
+    /**
+     * Returns whether this company is soft-deleted.
+     *
+     * @return true if deleted
+     */
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    /**
+     * Sets the soft-delete flag for this company.
+     *
+     * @param deleted the deleted flag
+     */
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    /**
+     * Returns the creation timestamp.
+     *
+     * @return the creation timestamp
+     */
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    /**
+     * Returns the last update timestamp.
+     *
+     * @return the update timestamp
+     */
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final CompanyEntity that = (CompanyEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "CompanyEntity[id=" + id + ", name=" + name + ", deleted=" + deleted + "]";
+    }
+}

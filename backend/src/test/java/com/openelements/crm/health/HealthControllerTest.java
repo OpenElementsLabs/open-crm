@@ -73,7 +73,15 @@ class HealthControllerTest {
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.paths./api/health").exists());
+                    .andExpect(jsonPath("$.paths./api/health").exists())
+                    .andExpect(jsonPath("$.paths./api/companies").exists())
+                    .andExpect(jsonPath("$.paths./api/companies/{id}").exists())
+                    .andExpect(jsonPath("$.paths./api/companies/{id}/restore").exists())
+                    .andExpect(jsonPath("$.paths./api/companies/{id}/comments").exists())
+                    .andExpect(jsonPath("$.paths./api/contacts").exists())
+                    .andExpect(jsonPath("$.paths./api/contacts/{id}").exists())
+                    .andExpect(jsonPath("$.paths./api/contacts/{id}/comments").exists())
+                    .andExpect(jsonPath("$.paths./api/comments/{id}").exists());
         }
     }
 }
