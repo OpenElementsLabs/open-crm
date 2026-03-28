@@ -17,4 +17,6 @@
 | 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | done   |
 | 014 | Comment count live update  | Increment comment count in heading immediately after successful comment creation                    | — | done   |
 | 015 | Optional contact language  | Make language field on contacts nullable to allow unknown language                                  | — | done   |
+| 016 | Brevo import               | Import companies and contacts from Brevo with field mapping and company-contact association        | — | open   |
+| 017 | Fix image column type      | Fix @Lob/BYTEA type mismatch causing backend startup failure after Spec 013 implementation        | — | open   |
 
