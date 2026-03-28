@@ -30,6 +30,7 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
   const t = useTranslations();
   const S = t.companies.comments;
 
+  const [displayCount, setDisplayCount] = useState(totalCount);
   const [comments, setComments] = useState<CommentDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -65,6 +66,10 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
   }, [companyId]);
 
   useEffect(() => {
+    setDisplayCount(totalCount);
+  }, [totalCount]);
+
+  useEffect(() => {
     fetchComments(0, false);
   }, [fetchComments]);
 
@@ -73,6 +78,7 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
     try {
       const newComment = await createCompanyComment(companyId, { text });
       setComments((prev) => [newComment, ...prev]);
+      setDisplayCount((prev) => (prev !== undefined ? prev + 1 : undefined));
     } finally {
       setSending(false);
     }
@@ -86,7 +92,7 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
     <Card className="border-oe-gray-light">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="font-heading text-lg text-oe-dark">
-          {S.title}{totalCount !== undefined ? ` (${totalCount})` : ""}
+          {S.title}{displayCount !== undefined ? ` (${displayCount})` : ""}
         </CardTitle>
         <Button
           onClick={() => setDialogOpen(true)}
