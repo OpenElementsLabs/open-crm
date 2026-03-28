@@ -175,3 +175,11 @@ sequenceDiagram
 ## Open Questions
 
 - None — all resolved during grill session
+
+---
+
+## Appendix: Known Limitations
+
+### Comment count does not update live after adding a comment
+
+The `totalCount` displayed in the comments heading ("Kommentare (x)") comes from the DTO loaded when the page was first rendered. When a user adds a new comment via the modal dialog, the new comment appears in the list, but the count in the heading remains unchanged until the next page load. This is acceptable for the current project phase — a live update would require either re-fetching the parent entity after each comment creation or maintaining a separate client-side counter synchronized with the comment list state.
