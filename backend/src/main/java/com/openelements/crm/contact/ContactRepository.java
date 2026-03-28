@@ -1,5 +1,6 @@
 package com.openelements.crm.contact;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,4 +26,20 @@ public interface ContactRepository extends JpaRepository<ContactEntity, UUID>,
      * @return the number of contacts
      */
     long countByCompanyId(UUID companyId);
+
+    /**
+     * Finds a contact by its Brevo contact ID.
+     *
+     * @param brevoId the Brevo contact ID
+     * @return the contact, or empty if not found
+     */
+    Optional<ContactEntity> findByBrevoId(Long brevoId);
+
+    /**
+     * Finds a contact by email (case-insensitive exact match).
+     *
+     * @param email the email address
+     * @return the contact, or empty if not found
+     */
+    Optional<ContactEntity> findByEmailIgnoreCase(String email);
 }

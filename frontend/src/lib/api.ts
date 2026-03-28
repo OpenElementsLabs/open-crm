@@ -5,6 +5,8 @@ import type {
   ContactCreateDto,
   CommentDto,
   CommentCreateDto,
+  BrevoSettingsDto,
+  BrevoSyncResultDto,
   Page,
 } from "./types";
 
@@ -330,6 +332,56 @@ export async function createContactComment(
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || `Failed to create contact comment: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// Brevo Sync API
+
+export async function getBrevoSettings(): Promise<BrevoSettingsDto> {
+  const url = `${baseUrl()}/api/brevo/settings`;
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Brevo settings: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateBrevoSettings(apiKey: string): Promise<BrevoSettingsDto> {
+  const url = `${baseUrl()}/api/brevo/settings`;
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ apiKey }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to update Brevo settings: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteBrevoSettings(): Promise<void> {
+  const url = `${baseUrl()}/api/brevo/settings`;
+  const response = await fetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete Brevo settings: ${response.status}`);
+  }
+}
+
+export async function startBrevoSync(): Promise<BrevoSyncResultDto> {
+  const url = `${baseUrl()}/api/brevo/sync`;
+  const response = await fetch(url, { method: "POST" });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to start Brevo sync: ${response.status}`);
   }
 
   return response.json();
