@@ -58,6 +58,9 @@ public class CompanyEntity {
     @Column(name = "logo_content_type", length = 50)
     private String logoContentType;
 
+    @Column(name = "brevo_company_id")
+    private Long brevoCompanyId;
+
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
@@ -72,7 +75,7 @@ public class CompanyEntity {
     /**
      * Default constructor required by JPA.
      */
-    protected CompanyEntity() {
+    public CompanyEntity() {
     }
 
     /**
@@ -262,6 +265,24 @@ public class CompanyEntity {
      */
     public void setLogoContentType(final String logoContentType) {
         this.logoContentType = logoContentType;
+    }
+
+    /**
+     * Returns the Brevo CRM company ID used for import matching.
+     *
+     * @return the Brevo company ID, or null if not imported from Brevo
+     */
+    public Long getBrevoCompanyId() {
+        return brevoCompanyId;
+    }
+
+    /**
+     * Sets the Brevo CRM company ID.
+     *
+     * @param brevoCompanyId the Brevo company ID
+     */
+    public void setBrevoCompanyId(final Long brevoCompanyId) {
+        this.brevoCompanyId = brevoCompanyId;
     }
 
     /**

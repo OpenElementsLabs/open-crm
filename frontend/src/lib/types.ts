@@ -85,3 +85,17 @@ export interface Page<T> {
   readonly first: boolean;
   readonly last: boolean;
 }
+
+export interface BrevoSettingsDto {
+  readonly apiKeyConfigured: boolean;
+}
+
+export interface BrevoSyncResultDto {
+  readonly companiesImported: number;
+  readonly companiesUpdated: number;
+  readonly companiesFailed: number;
+  readonly contactsImported: number;
+  readonly contactsUpdated: number;
+  readonly contactsFailed: number;
+  readonly errors: readonly string[];
+}

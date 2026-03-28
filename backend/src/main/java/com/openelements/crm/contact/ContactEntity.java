@@ -69,6 +69,9 @@ public class ContactEntity {
     @Column(name = "photo_content_type", length = 50)
     private String photoContentType;
 
+    @Column(name = "brevo_id")
+    private Long brevoId;
+
     @Column(name = "synced_to_brevo", nullable = false)
     private boolean syncedToBrevo = false;
 
@@ -90,7 +93,7 @@ public class ContactEntity {
     /**
      * Default constructor required by JPA.
      */
-    protected ContactEntity() {
+    public ContactEntity() {
     }
 
     /**
@@ -298,6 +301,24 @@ public class ContactEntity {
      */
     public void setPhotoContentType(final String photoContentType) {
         this.photoContentType = photoContentType;
+    }
+
+    /**
+     * Returns the Brevo contact ID used for import matching.
+     *
+     * @return the Brevo contact ID, or null if not imported from Brevo
+     */
+    public Long getBrevoId() {
+        return brevoId;
+    }
+
+    /**
+     * Sets the Brevo contact ID.
+     *
+     * @param brevoId the Brevo contact ID
+     */
+    public void setBrevoId(final Long brevoId) {
+        this.brevoId = brevoId;
     }
 
     /**
