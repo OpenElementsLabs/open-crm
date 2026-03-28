@@ -11,14 +11,17 @@ The contact list should fully synchronize URL parameters with the filter UI:
 **Context:** Deferred from spec 009 (contact-company cross-navigation). Currently, only `companyId` is read from the URL
 on initial load, and the filter dropdown does not reflect the URL-driven filter value.
 
+## H2 Tests: Switch to Flyway + validate
+
+Switch H2-based tests from `ddl-auto: create-drop` (Flyway disabled) to Flyway-managed schema creation with `ddl-auto: validate`. This would catch migration/entity mismatches without needing Testcontainers. Requires adding `flyway-database-h2` as a test dependency. All 5 existing migrations are H2-compatible.
+
+**Context:** Identified during the grill session for Spec 018. Prerequisite: Spec 018 (component tests) should be completed first.
+
 ## Testcontainers Integration Tests
 
-Add Testcontainers-based integration tests that run against a real PostgreSQL database. This would catch schema
-mismatches between Flyway migrations and JPA entity mappings (like the `@Lob`/`BYTEA` mismatch from Spec 013) that are
-invisible in H2-based tests with `ddl-auto: create-drop`.
+Add Testcontainers-based integration tests that run against a real PostgreSQL database via a separate Spring profile. This catches PostgreSQL-specific issues that H2 cannot reproduce.
 
-**Context:** Identified during the grill session for Spec 017 (Fix image column type). Currently, tests run against H2
-with Hibernate-generated schema, so Flyway migration correctness is never verified in tests.
+**Context:** Identified during the grill sessions for Spec 017 and 018. Prerequisite: H2 Flyway + validate switch should be done first.
 
 ## Company Duplicate Merging
 
