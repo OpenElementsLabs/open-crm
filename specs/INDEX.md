@@ -17,4 +17,5 @@
 | 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | open   |
 | 014 | Comment count live update  | Increment comment count in heading immediately after successful comment creation                    | — | open   |
 | 015 | Optional contact language  | Make language field on contacts nullable to allow unknown language                                  | — | open   |
+| 016 | Brevo import               | Import companies and contacts from Brevo with field mapping and company-contact association        | — | open   |
 
