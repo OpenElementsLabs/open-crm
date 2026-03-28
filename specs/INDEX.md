@@ -13,4 +13,5 @@
 | 009 | Comment Modal Dialog       | Refactor how comments are added                                                                     | — | done   |
 | 010 | Contact-company navigation | Bidirectional navigation links between contact detail and company detail views                      | — | done   |
 | 011 | Count columns              | Contact and comment counts in company/contact list tables and detail views                          | — | open   |
+| 012 | Contact birthday           | Optional birthday date field for contacts with standard date picker                                 | — | open   |
 
