@@ -12,4 +12,5 @@
 | 008 | Global UI styling fixes    | Add missing shadcn/ui semantic CSS variables for dialog/select backgrounds and table borders        | — | done   |
 | 009 | Comment Modal Dialog       | Refactor how comments are added                                                                     | — | done   |
 | 010 | Contact-company navigation | Bidirectional navigation links between contact detail and company detail views                      | — | done   |
+| 011 | Count columns              | Contact and comment counts in company/contact list tables and detail views                          | — | open   |
 
