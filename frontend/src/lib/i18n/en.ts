@@ -170,7 +170,7 @@ export const en: Translations = {
       company: "Company",
       noCompany: "No company",
       language: "Language",
-      languageRequired: "Language is required",
+      languageUnknown: "Unknown",
       photo: "Photo",
       uploadPhoto: "Upload photo",
       removePhoto: "Remove photo",
@@ -195,6 +195,7 @@ export const en: Translations = {
       language: "Filter by language",
       allCompanies: "All companies",
       allLanguages: "All languages",
+      unknownLanguage: "Unknown",
     },
     pagination: {
       previous: "Previous",

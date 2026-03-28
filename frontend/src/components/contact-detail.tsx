@@ -138,7 +138,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <DetailField label={S.detail.phone} value={contact.phoneNumber} />
             <DetailField label={S.detail.linkedIn} value={contact.linkedInUrl} />
             <DetailField label={S.detail.birthday} value={formatBirthday(contact.birthday, language)} />
-            <DetailField label={S.detail.language} value={contact.language} />
+            <DetailField label={S.detail.language} value={contact.language ?? S.form.languageUnknown} />
             <div>
               <dt className="text-sm font-medium text-oe-gray-mid">{S.detail.company}</dt>
               <dd className="mt-1 text-sm text-oe-black">

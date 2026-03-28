@@ -111,6 +111,12 @@ describe("ContactDetail", () => {
     expect(screen.getByText(S.detail.archivedBadge)).toBeInTheDocument();
   });
 
+  it("should display Unbekannt when language is null", () => {
+    renderWithProviders(<ContactDetail contact={makeContact({ language: null })} />);
+
+    expect(screen.getByText(S.form.languageUnknown)).toBeInTheDocument();
+  });
+
   it("should handle missing optional fields with dash", () => {
     renderWithProviders(
       <ContactDetail

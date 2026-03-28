@@ -168,7 +168,7 @@ export const de = {
       company: "Firma",
       noCompany: "Keine Firma",
       language: "Sprache",
-      languageRequired: "Sprache ist erforderlich",
+      languageUnknown: "Unbekannt",
       photo: "Foto",
       uploadPhoto: "Foto hochladen",
       removePhoto: "Foto entfernen",
@@ -193,6 +193,7 @@ export const de = {
       language: "Nach Sprache filtern",
       allCompanies: "Alle Firmen",
       allLanguages: "Alle Sprachen",
+      unknownLanguage: "Unbekannt",
     },
     pagination: {
       previous: "Zurück",

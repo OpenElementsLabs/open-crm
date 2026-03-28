@@ -78,7 +78,6 @@ export function ContactForm({ contact }: ContactFormProps) {
 
   const [firstNameError, setFirstNameError] = useState<string | null>(null);
   const [lastNameError, setLastNameError] = useState<string | null>(null);
-  const [languageError, setLanguageError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -92,7 +91,6 @@ export function ContactForm({ contact }: ContactFormProps) {
     e.preventDefault();
     setFirstNameError(null);
     setLastNameError(null);
-    setLanguageError(null);
     setApiError(null);
 
     let hasError = false;
@@ -103,10 +101,6 @@ export function ContactForm({ contact }: ContactFormProps) {
     }
     if (!lastName.trim()) {
       setLastNameError(S.lastNameRequired);
-      hasError = true;
-    }
-    if (!language) {
-      setLanguageError(S.languageRequired);
       hasError = true;
     }
 
@@ -121,7 +115,7 @@ export function ContactForm({ contact }: ContactFormProps) {
       linkedInUrl: linkedInUrl.trim() || null,
       phoneNumber: phoneNumber.trim() || null,
       companyId: companyId && companyId !== "none" ? companyId : null,
-      language: language as "DE" | "EN",
+      language: language && language !== "unknown" ? (language as "DE" | "EN") : null,
       birthday: birthday || null,
     };
 
@@ -223,17 +217,17 @@ export function ContactForm({ contact }: ContactFormProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="language">{S.language} *</Label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger id="language" className={languageError ? "border-oe-red" : ""}>
+              <Label htmlFor="language">{S.language}</Label>
+              <Select value={language || "unknown"} onValueChange={setLanguage}>
+                <SelectTrigger id="language">
                   <SelectValue placeholder={S.language} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="unknown">{S.languageUnknown}</SelectItem>
                   <SelectItem value="DE">DE</SelectItem>
                   <SelectItem value="EN">EN</SelectItem>
                 </SelectContent>
               </Select>
-              {languageError && <p className="mt-1 text-sm text-oe-red">{languageError}</p>}
             </div>
           </div>
 

@@ -120,7 +120,7 @@ public class ContactService {
                                       final String lastName,
                                       final String email,
                                       final UUID companyId,
-                                      final Language language,
+                                      final String language,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         Specification<ContactEntity> spec = Specification.where(null);
@@ -141,9 +141,13 @@ public class ContactService {
             spec = spec.and((root, query, cb) ->
                     cb.equal(root.get("company").get("id"), companyId));
         }
-        if (language != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("language"), language));
+        if (language != null && !language.isBlank()) {
+            if ("UNKNOWN".equalsIgnoreCase(language)) {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("language")));
+            } else {
+                final Language lang = Language.valueOf(language.toUpperCase());
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("language"), lang));
+            }
         }
 
         return contactRepository.findAll(spec, pageable).map(this::toDto);

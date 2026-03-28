@@ -598,4 +598,167 @@ class ContactControllerTest {
                     .andExpect(status().isNotFound());
         }
     }
+
+    @Nested
+    @DisplayName("Optional Language")
+    class OptionalLanguage {
+
+        @Test
+        @DisplayName("should create contact with null language")
+        void shouldCreateWithNullLanguage() throws Exception {
+            //GIVEN
+            final String json = """
+                    {"firstName": "Jane", "lastName": "Doe", "language": null}
+                    """;
+
+            //WHEN
+            final var result = mockMvc.perform(post("/api/contacts")
+                    .contentType(MediaType.APPLICATION_JSON).content(json));
+
+            //THEN
+            result.andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.language").isEmpty());
+        }
+
+        @Test
+        @DisplayName("should create contact without language field")
+        void shouldCreateWithoutLanguageField() throws Exception {
+            //GIVEN
+            final String json = """
+                    {"firstName": "Jane", "lastName": "Doe"}
+                    """;
+
+            //WHEN
+            final var result = mockMvc.perform(post("/api/contacts")
+                    .contentType(MediaType.APPLICATION_JSON).content(json));
+
+            //THEN
+            result.andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.language").isEmpty());
+        }
+
+        @Test
+        @DisplayName("should update contact to null language")
+        void shouldUpdateToNullLanguage() throws Exception {
+            //GIVEN
+            final String contactId = createContact("Test", "User", null);
+            final String json = """
+                    {"firstName": "Test", "lastName": "User", "language": null}
+                    """;
+
+            //WHEN
+            final var result = mockMvc.perform(put("/api/contacts/" + contactId)
+                    .contentType(MediaType.APPLICATION_JSON).content(json));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.language").isEmpty());
+        }
+
+        @Test
+        @DisplayName("should return null language in GET response")
+        void shouldReturnNullLanguage() throws Exception {
+            //GIVEN
+            final String json = """
+                    {"firstName": "No", "lastName": "Lang"}
+                    """;
+            final String response = mockMvc.perform(post("/api/contacts")
+                            .contentType(MediaType.APPLICATION_JSON).content(json))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            final String id = objectMapper.readTree(response).get("id").asText();
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts/" + id));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.language").isEmpty());
+        }
+
+        @Test
+        @DisplayName("should filter by UNKNOWN to get null-language contacts")
+        void shouldFilterByUnknown() throws Exception {
+            //GIVEN
+            createContact("DE", "Contact", null); // has language DE
+            mockMvc.perform(post("/api/contacts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {"firstName": "No", "lastName": "Lang"}
+                            """));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts?language=UNKNOWN"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].firstName").value("No"));
+        }
+
+        @Test
+        @DisplayName("should exclude null-language contacts when filtering by DE")
+        void shouldExcludeNullWhenFilteringByDE() throws Exception {
+            //GIVEN
+            createContact("DE", "Contact", null); // has language DE
+            mockMvc.perform(post("/api/contacts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {"firstName": "No", "lastName": "Lang"}
+                            """));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts?language=DE"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].firstName").value("DE"));
+        }
+
+        @Test
+        @DisplayName("should include null-language contacts when no filter")
+        void shouldIncludeNullWhenNoFilter() throws Exception {
+            //GIVEN
+            createContact("DE", "Contact", null); // has language DE
+            mockMvc.perform(post("/api/contacts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {"firstName": "No", "lastName": "Lang"}
+                            """));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(2)));
+        }
+
+        @Test
+        @DisplayName("should change language from unknown to a value")
+        void shouldChangeFromUnknownToValue() throws Exception {
+            //GIVEN
+            final String json = """
+                    {"firstName": "Jane", "lastName": "Doe"}
+                    """;
+            final String response = mockMvc.perform(post("/api/contacts")
+                            .contentType(MediaType.APPLICATION_JSON).content(json))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.language").isEmpty())
+                    .andReturn().getResponse().getContentAsString();
+            final String id = objectMapper.readTree(response).get("id").asText();
+
+            //WHEN
+            final var result = mockMvc.perform(put("/api/contacts/" + id)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                            {"firstName": "Jane", "lastName": "Doe", "language": "EN"}
+                            """));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.language").value("EN"));
+        }
+    }
 }

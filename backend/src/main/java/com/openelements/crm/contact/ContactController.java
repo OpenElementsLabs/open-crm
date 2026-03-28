@@ -69,7 +69,7 @@ public class ContactController {
             @RequestParam(required = false) final String lastName,
             @RequestParam(required = false) final String email,
             @RequestParam(required = false) final UUID companyId,
-            @RequestParam(required = false) final Language language,
+            @RequestParam(required = false) final String language,
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
         return contactService.list(firstName, lastName, email, companyId, language, pageable);
     }

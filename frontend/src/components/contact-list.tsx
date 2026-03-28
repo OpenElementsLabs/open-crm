@@ -144,6 +144,7 @@ export function ContactList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{S.filter.allLanguages}</SelectItem>
+            <SelectItem value="UNKNOWN">{S.filter.unknownLanguage}</SelectItem>
             <SelectItem value="DE">DE</SelectItem>
             <SelectItem value="EN">EN</SelectItem>
           </SelectContent>

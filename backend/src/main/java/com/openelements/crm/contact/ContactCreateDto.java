@@ -2,7 +2,6 @@ package com.openelements.crm.contact;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -18,7 +17,7 @@ import java.util.UUID;
  * @param linkedInUrl the LinkedIn profile URL
  * @param phoneNumber the phone number
  * @param companyId   the company ID (optional)
- * @param language    the preferred language (required)
+ * @param language    the preferred language (optional, null means unknown)
  * @param birthday    the birthday (optional)
  */
 @Schema(description = "Request body for creating a new contact")
@@ -55,8 +54,7 @@ public record ContactCreateDto(
         @Schema(description = "Company ID (optional)")
         UUID companyId,
 
-        @NotNull(message = "Language must not be null")
-        @Schema(description = "Preferred language", example = "DE", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "Preferred language (null if unknown)", example = "DE")
         Language language,
 
         @Schema(description = "Birthday", example = "1990-03-15")

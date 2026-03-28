@@ -1,0 +1,1 @@
+ALTER TABLE contacts ALTER COLUMN language DROP NOT NULL;

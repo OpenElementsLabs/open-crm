@@ -58,7 +58,7 @@ export interface ContactDto {
   readonly birthday: string | null;
   readonly syncedToBrevo: boolean;
   readonly doubleOptIn: boolean;
-  readonly language: "DE" | "EN";
+  readonly language: "DE" | "EN" | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -72,7 +72,7 @@ export interface ContactCreateDto {
   readonly linkedInUrl?: string | null;
   readonly phoneNumber?: string | null;
   readonly companyId?: string | null;
-  readonly language: "DE" | "EN";
+  readonly language?: "DE" | "EN" | null;
   readonly birthday?: string | null;
 }
 

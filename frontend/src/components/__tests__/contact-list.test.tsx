@@ -252,6 +252,21 @@ describe("ContactList", () => {
       });
     });
 
+    it("should show language filter with placeholder text", async () => {
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Max")).toBeInTheDocument();
+      });
+
+      // The language filter select should be rendered with its placeholder
+      const allTriggers = screen.getAllByRole("combobox");
+      const langTrigger = allTriggers.find((el) =>
+        el.textContent?.includes(S.filter.language),
+      );
+      expect(langTrigger).toBeDefined();
+    });
+
     it("should filter by email", async () => {
       renderWithProviders(<ContactList />);
 

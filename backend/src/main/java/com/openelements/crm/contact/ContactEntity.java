@@ -77,7 +77,7 @@ public class ContactEntity {
     private boolean doubleOptIn = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "language", nullable = false, length = 5)
+    @Column(name = "language", length = 5)
     private Language language;
 
     @CreationTimestamp
@@ -349,10 +349,10 @@ public class ContactEntity {
     /**
      * Sets the preferred language of this contact.
      *
-     * @param language the language
+     * @param language the language, or null if unknown
      */
     public void setLanguage(final Language language) {
-        this.language = Objects.requireNonNull(language, "language must not be null");
+        this.language = language;
     }
 
     /**

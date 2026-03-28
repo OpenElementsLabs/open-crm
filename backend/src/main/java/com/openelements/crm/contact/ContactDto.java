@@ -46,7 +46,7 @@ public record ContactDto(
         @Schema(description = "Birthday") LocalDate birthday,
         @Schema(description = "Whether synced to Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean syncedToBrevo,
         @Schema(description = "Whether double opt-in is confirmed", requiredMode = Schema.RequiredMode.REQUIRED) boolean doubleOptIn,
-        @Schema(description = "Preferred language", requiredMode = Schema.RequiredMode.REQUIRED) Language language,
+        @Schema(description = "Preferred language (null if unknown)") Language language,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) {

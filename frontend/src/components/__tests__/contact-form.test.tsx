@@ -129,23 +129,13 @@ describe("ContactForm", () => {
       expect(mockCreateContact).not.toHaveBeenCalled();
     });
 
-    it("should validate language is required", async () => {
+    it("should show Unknown as default language selection in create mode", () => {
       renderWithProviders(<ContactForm />);
 
-      fireEvent.change(screen.getByLabelText(new RegExp(S.firstName)), {
-        target: { value: "Max" },
-      });
-      fireEvent.change(screen.getByLabelText(new RegExp(S.lastName)), {
-        target: { value: "Mustermann" },
-      });
-
-      fireEvent.click(screen.getByText(S.save));
-
-      await waitFor(() => {
-        expect(screen.getByText(S.languageRequired)).toBeInTheDocument();
-      });
-
-      expect(mockCreateContact).not.toHaveBeenCalled();
+      // In create mode, language defaults to "" which maps to "unknown" value,
+      // so the language select trigger should display "Unbekannt"
+      const languageTrigger = screen.getByRole("combobox", { name: S.language });
+      expect(languageTrigger).toHaveTextContent(S.languageUnknown);
     });
 
     it("should load companies for select dropdown", async () => {
@@ -196,6 +186,18 @@ describe("ContactForm", () => {
     it("should show title for edit mode", () => {
       renderWithProviders(<ContactForm contact={existingContact} />);
       expect(screen.getByText(S.editTitle)).toBeInTheDocument();
+    });
+
+    it("should show Unknown as selected when editing contact with null language", () => {
+      const contactWithNullLanguage: ContactDto = {
+        ...existingContact,
+        language: null,
+      };
+      renderWithProviders(<ContactForm contact={contactWithNullLanguage} />);
+
+      // The language select trigger should display "Unbekannt"
+      const languageTrigger = screen.getByRole("combobox", { name: S.language });
+      expect(languageTrigger).toHaveTextContent(S.languageUnknown);
     });
 
     it("should submit update and redirect to detail", async () => {
