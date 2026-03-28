@@ -19,4 +19,5 @@
 | 015 | Optional contact language  | Make language field on contacts nullable to allow unknown language                                  | — | done   |
 | 016 | Brevo import               | Import companies and contacts from Brevo with field mapping and company-contact association        | — | open   |
 | 017 | Fix image column type      | Fix @Lob/BYTEA type mismatch causing backend startup failure after Spec 013 implementation        | — | done   |
+| 018 | Component tests            | Repository, Service, and DTO conversion tests for Company, Contact, and Comment modules           | — | open   |
 
