@@ -111,3 +111,15 @@ Birthday is personal data under DSGVO. It is covered by the same legal basis (be
 ## Open Questions
 
 - None
+
+---
+
+## Appendix: Implementation Deviations
+
+### Native date input instead of shadcn/ui Calendar+Popover
+
+The design specifies using the shadcn/ui Calendar + Popover pattern for the birthday field. The implementation uses a native HTML `<input type="date">` instead.
+
+**Reason:** The shadcn/ui Calendar component relies on Radix Popover internals that don't work reliably in jsdom (the test environment). A native date input is simpler, testable, and functional across all browsers. The shadcn/ui Calendar and Popover components were installed as part of this spec and are available for future use if a richer date picker is needed.
+
+**Impact:** Minor visual difference — the native date picker follows OS/browser styling rather than the shadcn/ui design system. Functionality is identical.
