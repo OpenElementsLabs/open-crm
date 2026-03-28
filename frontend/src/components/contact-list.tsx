@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect } from "@/lib/api";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -192,6 +192,7 @@ export function ContactList() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]"></TableHead>
                   <TableHead>{S.columns.firstName}</TableHead>
                   <TableHead>{S.columns.lastName}</TableHead>
                   <TableHead>{S.columns.company}</TableHead>
@@ -206,6 +207,17 @@ export function ContactList() {
                     className="cursor-pointer"
                     onClick={() => router.push(`/contacts/${contact.id}`)}
                   >
+                    <TableCell>
+                      {contact.hasPhoto ? (
+                        <img
+                          src={getContactPhotoUrl(contact.id)}
+                          alt={`${contact.firstName} ${contact.lastName}`}
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-8 w-8 text-oe-gray-mid" />
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{contact.firstName}</TableCell>
                     <TableCell>{contact.lastName}</TableCell>
                     <TableCell className="text-oe-gray-mid">

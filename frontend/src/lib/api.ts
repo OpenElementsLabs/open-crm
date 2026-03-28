@@ -118,6 +118,32 @@ export async function restoreCompany(id: string): Promise<CompanyDto> {
   return response.json();
 }
 
+// Company Logo API
+
+export async function uploadCompanyLogo(id: string, file: File): Promise<void> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const url = `${baseUrl()}/api/companies/${id}/logo`;
+  const response = await fetch(url, { method: "POST", body: formData });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload logo: ${response.status}`);
+  }
+}
+
+export function getCompanyLogoUrl(id: string): string {
+  return `${baseUrl()}/api/companies/${id}/logo`;
+}
+
+export async function deleteCompanyLogo(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/companies/${id}/logo`;
+  const response = await fetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete logo: ${response.status}`);
+  }
+}
+
 // Contact API
 
 export interface ContactListParams {
@@ -205,6 +231,32 @@ export async function deleteContact(id: string): Promise<void> {
 
   if (!response.ok) {
     throw new Error(`Failed to delete contact: ${response.status}`);
+  }
+}
+
+// Contact Photo API
+
+export async function uploadContactPhoto(id: string, file: File): Promise<void> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const url = `${baseUrl()}/api/contacts/${id}/photo`;
+  const response = await fetch(url, { method: "POST", body: formData });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload photo: ${response.status}`);
+  }
+}
+
+export function getContactPhotoUrl(id: string): string {
+  return `${baseUrl()}/api/contacts/${id}/photo`;
+}
+
+export async function deleteContactPhoto(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/contacts/${id}/photo`;
+  const response = await fetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete photo: ${response.status}`);
   }
 }
 

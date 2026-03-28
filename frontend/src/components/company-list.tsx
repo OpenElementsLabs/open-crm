@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, Archive } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Archive, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { getCompanies, deleteCompany, restoreCompany } from "@/lib/api";
+import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -183,6 +183,7 @@ export function CompanyList() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]"></TableHead>
                   <TableHead>{S.columns.name}</TableHead>
                   <TableHead>{S.columns.website}</TableHead>
                   <TableHead>{S.columns.contacts}</TableHead>
@@ -197,6 +198,17 @@ export function CompanyList() {
                     className={`cursor-pointer ${company.deleted ? "opacity-50" : ""}`}
                     onClick={() => router.push(`/companies/${company.id}`)}
                   >
+                    <TableCell>
+                      {company.hasLogo ? (
+                        <img
+                          src={getCompanyLogoUrl(company.id)}
+                          alt={company.name}
+                          className="h-8 w-8 rounded object-cover"
+                        />
+                      ) : (
+                        <Building2 className="h-8 w-8 text-oe-gray-mid" />
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{company.name}</TableCell>
                     <TableCell className="text-oe-gray-mid">
                       {company.website ?? "—"}

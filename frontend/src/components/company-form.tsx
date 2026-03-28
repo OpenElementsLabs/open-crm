@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Building2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createCompany, updateCompany } from "@/lib/api";
+import { createCompany, updateCompany, uploadCompanyLogo, deleteCompanyLogo, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto, CompanyCreateDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+
+const ALLOWED_LOGO_TYPES = ["image/svg+xml", "image/png", "image/jpeg"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
 interface CompanyFormProps {
   readonly company?: CompanyDto;
@@ -29,9 +33,42 @@ export function CompanyForm({ company }: CompanyFormProps) {
   const [city, setCity] = useState(company?.city ?? "");
   const [country, setCountry] = useState(company?.country ?? "");
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [hasExistingLogo, setHasExistingLogo] = useState(company?.hasLogo ?? false);
+  const [removeExistingLogo, setRemoveExistingLogo] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [nameError, setNameError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      setImageError(S.imageInvalidFormat);
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setImageError(S.imageTooLarge);
+      return;
+    }
+
+    setSelectedFile(file);
+    setFilePreview(URL.createObjectURL(file));
+    setRemoveExistingLogo(false);
+  };
+
+  const handleRemoveLogo = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    setRemoveExistingLogo(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +99,15 @@ export function CompanyForm({ company }: CompanyFormProps) {
       } else {
         result = await createCompany(data);
       }
+
+      // Handle logo upload/delete after entity save
+      if (removeExistingLogo && !selectedFile) {
+        await deleteCompanyLogo(result.id);
+      }
+      if (selectedFile) {
+        await uploadCompanyLogo(result.id, selectedFile);
+      }
+
       router.push(`/companies/${result.id}`);
     } catch {
       setApiError(S.errorGeneric);
@@ -162,6 +208,51 @@ export function CompanyForm({ company }: CompanyFormProps) {
                 placeholder={S.countryPlaceholder}
               />
             </div>
+          </div>
+
+          {/* Logo upload */}
+          <div>
+            <Label>{S.logo}</Label>
+            <div className="mt-2 flex items-center gap-4">
+              {filePreview ? (
+                <img src={filePreview} alt="Logo preview" className="h-16 w-16 rounded object-cover" />
+              ) : hasExistingLogo && !removeExistingLogo ? (
+                <img src={getCompanyLogoUrl(company!.id)} alt="Current logo" className="h-16 w-16 rounded object-cover" />
+              ) : (
+                <Building2 className="h-16 w-16 text-oe-gray-mid" />
+              )}
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/svg+xml,image/png,image/jpeg"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {S.uploadLogo}
+                </Button>
+                {(hasExistingLogo || selectedFile) && !removeExistingLogo && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-oe-red border-oe-red"
+                    onClick={handleRemoveLogo}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {S.removeLogo}
+                  </Button>
+                )}
+              </div>
+            </div>
+            {imageError && <p className="mt-1 text-sm text-oe-red">{imageError}</p>}
           </div>
 
           {apiError && (

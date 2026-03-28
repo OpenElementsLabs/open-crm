@@ -20,6 +20,7 @@ import java.util.UUID;
  * @param companyName    the company name (resolved)
  * @param companyDeleted whether the associated company is soft-deleted
  * @param commentCount   the number of comments on this contact
+ * @param hasPhoto       whether the contact has an uploaded photo
  * @param birthday       the birthday (optional)
  * @param syncedToBrevo  whether synced to Brevo
  * @param doubleOptIn   whether double opt-in is confirmed
@@ -41,6 +42,7 @@ public record ContactDto(
         @Schema(description = "Company name") String companyName,
         @Schema(description = "Whether the associated company is archived", requiredMode = Schema.RequiredMode.REQUIRED) boolean companyDeleted,
         @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
+        @Schema(description = "Whether the contact has an uploaded photo", requiredMode = Schema.RequiredMode.REQUIRED) boolean hasPhoto,
         @Schema(description = "Birthday") LocalDate birthday,
         @Schema(description = "Whether synced to Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean syncedToBrevo,
         @Schema(description = "Whether double opt-in is confirmed", requiredMode = Schema.RequiredMode.REQUIRED) boolean doubleOptIn,
@@ -73,6 +75,7 @@ public record ContactDto(
                 companyName,
                 companyDeleted,
                 commentCount,
+                entity.getPhoto() != null,
                 entity.getBirthday(),
                 entity.isSyncedToBrevo(),
                 entity.isDoubleOptIn(),

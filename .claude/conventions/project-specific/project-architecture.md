@@ -37,6 +37,8 @@ erDiagram
         VARCHAR zip_code
         VARCHAR city
         VARCHAR country
+        BYTEA logo
+        VARCHAR logo_content_type
         BOOLEAN deleted
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
@@ -54,6 +56,8 @@ erDiagram
         BOOLEAN synced_to_brevo
         BOOLEAN double_opt_in
         VARCHAR language
+        BYTEA photo
+        VARCHAR photo_content_type
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
     }
@@ -78,4 +82,5 @@ erDiagram
 - **Flyway for schema management** — Hibernate is set to `validate` only; all schema changes go through versioned SQL migrations.
 - **Separate DTOs per operation** — Each domain uses distinct `CreateDto`, `UpdateDto`, and `Dto` records to control API surface per operation.
 - **No authentication yet** — The application currently has no security layer. Authentik SSO integration is planned.
+- **Image storage in database** — Company logos and contact photos are stored as `bytea` columns in PostgreSQL alongside a `_content_type` column. Dedicated REST endpoints handle upload (`POST`), retrieval (`GET`), and deletion (`DELETE`) at `/api/companies/{id}/logo` and `/api/contacts/{id}/photo`. Spring multipart is configured with a 2 MB limit. DTOs expose `hasLogo`/`hasPhoto` boolean flags instead of binary data; the frontend loads images via the dedicated endpoint only when the flag is true, otherwise showing a placeholder icon. The shared `ImageData` record holds image bytes and MIME type in the backend.
 - **Spec-driven development** — Features are planned in `specs/` with design documents, behavioral scenarios (given-when-then), and implementation steps before coding begins.

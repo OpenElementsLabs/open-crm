@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyComments } from "@/components/company-comments";
+import { LanguageProvider } from "@/lib/i18n/language-context";
 import { de } from "@/lib/i18n/de";
 import { renderWithProviders } from "@/test/test-utils";
 import type { CommentDto, Page } from "@/lib/types";
@@ -273,6 +274,149 @@ describe("CompanyComments", () => {
       await waitFor(() => {
         expect(screen.getByText("First")).toBeInTheDocument();
         expect(screen.getByText("Second")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("comment count live update", () => {
+    it("should show totalCount in heading", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+
+      renderWithProviders(<CompanyComments companyId="company-1" totalCount={3} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (3)`)).toBeInTheDocument();
+      });
+    });
+
+    it("should increment count after adding a comment", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+      mockCreateCompanyComment.mockResolvedValue(
+        makeComment({ id: "new", text: "New comment" }),
+      );
+
+      renderWithProviders(<CompanyComments companyId="company-1" totalCount={3} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (3)`)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(S.add));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
+      });
+
+      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
+        target: { value: "New comment" },
+      });
+      fireEvent.click(screen.getByText(S.send));
+
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (4)`)).toBeInTheDocument();
+      });
+    });
+
+    it("should not increment count on API failure", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+      mockCreateCompanyComment.mockRejectedValue(new Error("Server error"));
+
+      renderWithProviders(<CompanyComments companyId="company-1" totalCount={3} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (3)`)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(S.add));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
+      });
+
+      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
+        target: { value: "Will fail" },
+      });
+      fireEvent.click(screen.getByText(S.send));
+
+      await waitFor(() => {
+        expect(screen.getByText(S.errorGeneric)).toBeInTheDocument();
+      });
+
+      expect(screen.getByText(`${S.title} (3)`)).toBeInTheDocument();
+    });
+
+    it("should not show count when totalCount is undefined", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+      mockCreateCompanyComment.mockResolvedValue(
+        makeComment({ id: "new", text: "New comment" }),
+      );
+
+      renderWithProviders(<CompanyComments companyId="company-1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText(S.title)).toBeInTheDocument();
+      });
+
+      // Verify no parenthesized count
+      expect(screen.queryByText(/\(\d+\)/)).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByText(S.add));
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
+      });
+
+      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
+        target: { value: "New comment" },
+      });
+      fireEvent.click(screen.getByText(S.send));
+
+      await waitFor(() => {
+        expect(screen.getByText("New comment")).toBeInTheDocument();
+      });
+
+      // Still no count shown
+      expect(screen.queryByText(/\(\d+\)/)).not.toBeInTheDocument();
+    });
+
+    it("should reset count when totalCount prop changes", async () => {
+      mockGetCompanyComments.mockResolvedValue(makePage([]));
+      mockCreateCompanyComment.mockResolvedValue(
+        makeComment({ id: "new", text: "New comment" }),
+      );
+
+      const { rerender } = render(
+        <LanguageProvider defaultLanguage="de">
+          <CompanyComments companyId="company-1" totalCount={3} />
+        </LanguageProvider>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (3)`)).toBeInTheDocument();
+      });
+
+      // Add a comment to increment to 4
+      fireEvent.click(screen.getByText(S.add));
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(S.placeholder)).toBeInTheDocument();
+      });
+      fireEvent.change(screen.getByPlaceholderText(S.placeholder), {
+        target: { value: "New comment" },
+      });
+      fireEvent.click(screen.getByText(S.send));
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (4)`)).toBeInTheDocument();
+      });
+
+      // Simulate navigation to a different company by changing the prop
+      rerender(
+        <LanguageProvider defaultLanguage="de">
+          <CompanyComments companyId="company-2" totalCount={1} />
+        </LanguageProvider>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(`${S.title} (1)`)).toBeInTheDocument();
       });
     });
   });

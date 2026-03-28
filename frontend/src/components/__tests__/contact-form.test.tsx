@@ -17,11 +17,17 @@ vi.mock("next/navigation", () => ({
 const mockCreateContact = vi.fn();
 const mockUpdateContact = vi.fn();
 const mockGetCompaniesForSelect = vi.fn();
+const mockUploadContactPhoto = vi.fn();
+const mockDeleteContactPhoto = vi.fn();
+const mockGetContactPhotoUrl = vi.fn().mockReturnValue("/api/contacts/test-id/photo");
 
 vi.mock("@/lib/api", () => ({
   createContact: (...args: unknown[]) => mockCreateContact(...args),
   updateContact: (...args: unknown[]) => mockUpdateContact(...args),
   getCompaniesForSelect: (...args: unknown[]) => mockGetCompaniesForSelect(...args),
+  uploadContactPhoto: (...args: unknown[]) => mockUploadContactPhoto(...args),
+  deleteContactPhoto: (...args: unknown[]) => mockDeleteContactPhoto(...args),
+  getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
 }));
 
 const testCompanies: CompanyDto[] = [
@@ -36,6 +42,7 @@ const testCompanies: CompanyDto[] = [
     city: null,
     country: null,
     deleted: false,
+    hasLogo: false,
     contactCount: 0,
     commentCount: 0,
     createdAt: "2026-01-01T00:00:00Z",
@@ -56,6 +63,7 @@ const existingContact: ContactDto = {
   companyName: "Open Elements",
   companyDeleted: false,
   commentCount: 0,
+  hasPhoto: false,
   birthday: "1990-03-15",
   syncedToBrevo: false,
   doubleOptIn: false,
@@ -248,6 +256,29 @@ describe("ContactForm", () => {
       fireEvent.click(screen.getByText(S.cancel));
 
       expect(mockPush).toHaveBeenCalledWith("/contacts/test-id");
+    });
+  });
+
+  describe("image upload", () => {
+    it("should show upload photo button", () => {
+      renderWithProviders(<ContactForm />);
+
+      expect(screen.getByText(S.uploadPhoto)).toBeInTheDocument();
+    });
+
+    it("should show client-side error for invalid format", async () => {
+      renderWithProviders(<ContactForm />);
+
+      const fileInput = document.querySelector("input[type='file']") as HTMLInputElement;
+      const pngFile = new File(["fake-png-data"], "photo.png", {
+        type: "image/png",
+      });
+
+      fireEvent.change(fileInput, { target: { files: [pngFile] } });
+
+      await waitFor(() => {
+        expect(screen.getByText(S.imageInvalidFormat)).toBeInTheDocument();
+      });
     });
   });
 });

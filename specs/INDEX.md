@@ -14,8 +14,8 @@
 | 010 | Contact-company navigation | Bidirectional navigation links between contact detail and company detail views                      | — | done   |
 | 011 | Count columns              | Contact and comment counts in company/contact list tables and detail views                          | — | done   |
 | 012 | Contact birthday           | Optional birthday date field for contacts with standard date picker                                 | — | done   |
-| 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | open   |
-| 014 | Comment count live update  | Increment comment count in heading immediately after successful comment creation                    | — | open   |
+| 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | done   |
+| 014 | Comment count live update  | Increment comment count in heading immediately after successful comment creation                    | — | done   |
 | 015 | Optional contact language  | Make language field on contacts nullable to allow unknown language                                  | — | open   |
 | 016 | Brevo import               | Import companies and contacts from Brevo with field mapping and company-contact association        | — | open   |
 

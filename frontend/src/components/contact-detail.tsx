@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
-import { deleteContact } from "@/lib/api";
+import { deleteContact, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { useTranslations, useLanguage } from "@/lib/i18n/language-context";
 
@@ -91,7 +91,18 @@ export function ContactDetail({ contact }: ContactDetailProps) {
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-heading text-2xl font-bold text-oe-dark">{fullName}</h1>
+        <div className="flex items-center gap-4">
+          {contact.hasPhoto ? (
+            <img
+              src={getContactPhotoUrl(contact.id)}
+              alt={fullName}
+              className="h-24 w-24 rounded-full object-cover"
+            />
+          ) : (
+            <User className="h-24 w-24 text-oe-gray-mid" />
+          )}
+          <h1 className="font-heading text-2xl font-bold text-oe-dark">{fullName}</h1>
+        </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link href={`/contacts/${contact.id}/edit`}>

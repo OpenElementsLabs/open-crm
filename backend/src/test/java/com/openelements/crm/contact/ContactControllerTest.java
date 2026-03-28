@@ -14,11 +14,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.mock.web.MockMultipartFile;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -435,6 +440,162 @@ class ContactControllerTest {
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[0].lastName").value("Alpha"))
                     .andExpect(jsonPath("$.content[1].lastName").value("Zebra"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Contact Photo")
+    class ContactPhoto {
+
+        @Test
+        @DisplayName("should upload JPEG photo and return 200")
+        void shouldUploadJpegPhoto() throws Exception {
+            //GIVEN
+            final String id = createContact("Photo", "Person", null);
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+            //WHEN
+            final var result = mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+
+            //THEN
+            result.andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should return photo with correct content type")
+        void shouldGetPhotoWithCorrectContentType() throws Exception {
+            //GIVEN
+            final String id = createContact("Get", "Photo", null);
+            final byte[] imageBytes = new byte[]{1, 2, 3, 4, 5};
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "photo.jpg", "image/jpeg", imageBytes);
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts/" + id + "/photo"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(header().string("Content-Type", "image/jpeg"))
+                    .andExpect(content().bytes(imageBytes));
+        }
+
+        @Test
+        @DisplayName("should return 404 when no photo exists")
+        void shouldReturn404WhenNoPhoto() throws Exception {
+            //GIVEN
+            final String id = createContact("No", "Photo", null);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts/" + id + "/photo"));
+
+            //THEN
+            result.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should return 400 for non-JPEG format")
+        void shouldReturn400ForNonJpeg() throws Exception {
+            //GIVEN
+            final String id = createContact("PNG", "Rejected", null);
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "photo.png", "image/png", new byte[]{1, 2, 3});
+
+            //WHEN
+            final var result = mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+
+            //THEN
+            result.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("should delete photo and return 204")
+        void shouldDeletePhoto() throws Exception {
+            //GIVEN
+            final String id = createContact("Delete", "Photo", null);
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+
+            //WHEN
+            final var result = mockMvc.perform(delete("/api/contacts/" + id + "/photo"));
+
+            //THEN
+            result.andExpect(status().isNoContent());
+            mockMvc.perform(get("/api/contacts/" + id + "/photo"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should replace existing photo")
+        void shouldReplaceExistingPhoto() throws Exception {
+            //GIVEN
+            final String id = createContact("Replace", "Photo", null);
+            final MockMultipartFile oldFile = new MockMultipartFile(
+                    "file", "old.jpg", "image/jpeg", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(oldFile));
+
+            final byte[] newBytes = new byte[]{4, 5, 6, 7};
+            final MockMultipartFile newFile = new MockMultipartFile(
+                    "file", "new.jpg", "image/jpeg", newBytes);
+
+            //WHEN
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(newFile));
+
+            //THEN
+            mockMvc.perform(get("/api/contacts/" + id + "/photo"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().bytes(newBytes));
+        }
+
+        @Test
+        @DisplayName("should set hasPhoto to true when photo exists")
+        void shouldSetHasPhotoTrue() throws Exception {
+            //GIVEN
+            final String id = createContact("Has", "Photo", null);
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts/" + id));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.hasPhoto").value(true));
+        }
+
+        @Test
+        @DisplayName("should set hasPhoto to false when no photo exists")
+        void shouldSetHasPhotoFalse() throws Exception {
+            //GIVEN
+            final String id = createContact("No", "Photo2", null);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts/" + id));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.hasPhoto").value(false));
+        }
+
+        @Test
+        @DisplayName("should delete photo when contact is hard-deleted")
+        void shouldDeletePhotoWithContact() throws Exception {
+            //GIVEN
+            final String id = createContact("Hard", "Delete", null);
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+
+            //WHEN
+            mockMvc.perform(delete("/api/contacts/" + id))
+                    .andExpect(status().isNoContent());
+
+            //THEN
+            mockMvc.perform(get("/api/contacts/" + id))
+                    .andExpect(status().isNotFound());
         }
     }
 }

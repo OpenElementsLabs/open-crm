@@ -1,7 +1,9 @@
 package com.openelements.crm.company;
 
+import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.contact.ContactRepository;
+import java.util.Set;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -165,6 +167,62 @@ public class CompanyService {
         }
 
         return companyRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(
+            "image/svg+xml", "image/png", "image/jpeg");
+
+    /**
+     * Uploads or replaces the logo for a company.
+     *
+     * @param id          the company ID
+     * @param data        the image bytes
+     * @param contentType the MIME content type
+     * @throws ResponseStatusException with 404 if not found, 400 if content type is invalid
+     */
+    public void uploadLogo(final UUID id, final byte[] data, final String contentType) {
+        Objects.requireNonNull(id, "id must not be null");
+        Objects.requireNonNull(data, "data must not be null");
+        Objects.requireNonNull(contentType, "contentType must not be null");
+        if (!ALLOWED_LOGO_TYPES.contains(contentType)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid content type: " + contentType + ". Allowed: " + ALLOWED_LOGO_TYPES);
+        }
+        final CompanyEntity entity = findOrThrow(id);
+        entity.setLogo(data);
+        entity.setLogoContentType(contentType);
+        companyRepository.saveAndFlush(entity);
+    }
+
+    /**
+     * Returns the logo data for a company.
+     *
+     * @param id the company ID
+     * @return the image data
+     * @throws ResponseStatusException with 404 if not found or no logo exists
+     */
+    @Transactional(readOnly = true)
+    public ImageData getLogo(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        final CompanyEntity entity = findOrThrow(id);
+        if (entity.getLogo() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No logo for company: " + id);
+        }
+        return new ImageData(entity.getLogo(), entity.getLogoContentType());
+    }
+
+    /**
+     * Removes the logo from a company.
+     *
+     * @param id the company ID
+     * @throws ResponseStatusException with 404 if not found
+     */
+    public void deleteLogo(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        final CompanyEntity entity = findOrThrow(id);
+        entity.setLogo(null);
+        entity.setLogoContentType(null);
+        companyRepository.saveAndFlush(entity);
     }
 
     private CompanyDto toDto(final CompanyEntity entity) {

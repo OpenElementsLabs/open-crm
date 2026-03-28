@@ -1,5 +1,6 @@
 package com.openelements.crm.contact;
 
+import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * REST controller for contact management.
@@ -129,6 +132,58 @@ public class ContactController {
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public void delete(@PathVariable final UUID id) {
         contactService.delete(id);
+    }
+
+    /**
+     * Uploads or replaces the photo for a contact.
+     *
+     * @param id   the contact ID
+     * @param file the image file (JPEG only)
+     */
+    @PostMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload contact photo")
+    @ApiResponse(responseCode = "200", description = "Photo uploaded")
+    @ApiResponse(responseCode = "400", description = "Invalid file format or size")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public void uploadPhoto(@PathVariable final UUID id,
+                            @RequestParam("file") final MultipartFile file) {
+        try {
+            contactService.uploadPhoto(id, file.getBytes(), file.getContentType());
+        } catch (final java.io.IOException e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Failed to read file");
+        }
+    }
+
+    /**
+     * Returns the photo for a contact as binary data.
+     *
+     * @param id the contact ID
+     * @return the photo binary data with correct content type
+     */
+    @GetMapping(value = "/{id}/photo")
+    @Operation(summary = "Get contact photo")
+    @ApiResponse(responseCode = "200", description = "Photo found")
+    @ApiResponse(responseCode = "404", description = "Contact or photo not found")
+    public ResponseEntity<byte[]> getPhoto(@PathVariable final UUID id) {
+        final ImageData imageData = contactService.getPhoto(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(imageData.contentType()))
+                .body(imageData.data());
+    }
+
+    /**
+     * Removes the photo from a contact.
+     *
+     * @param id the contact ID
+     */
+    @DeleteMapping("/{id}/photo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Remove contact photo")
+    @ApiResponse(responseCode = "204", description = "Photo removed")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public void deletePhoto(@PathVariable final UUID id) {
+        contactService.deletePhoto(id);
     }
 
     /**

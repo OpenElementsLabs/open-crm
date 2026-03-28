@@ -1,6 +1,7 @@
 package com.openelements.crm.contact;
 
 import com.openelements.crm.company.CompanyEntity;
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -59,6 +61,14 @@ public class ContactEntity {
 
     @Column(name = "birthday")
     private LocalDate birthday;
+
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "photo")
+    private byte[] photo;
+
+    @Column(name = "photo_content_type", length = 50)
+    private String photoContentType;
 
     @Column(name = "synced_to_brevo", nullable = false)
     private boolean syncedToBrevo = false;
@@ -253,6 +263,42 @@ public class ContactEntity {
      */
     public void setBirthday(final LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    /**
+     * Returns the photo image data.
+     *
+     * @return the photo bytes, or null if no photo is set
+     */
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    /**
+     * Sets the photo image data.
+     *
+     * @param photo the photo bytes, or null to remove
+     */
+    public void setPhoto(final byte[] photo) {
+        this.photo = photo;
+    }
+
+    /**
+     * Returns the MIME content type of the photo.
+     *
+     * @return the content type, or null if no photo is set
+     */
+    public String getPhotoContentType() {
+        return photoContentType;
+    }
+
+    /**
+     * Sets the MIME content type of the photo.
+     *
+     * @param photoContentType the content type
+     */
+    public void setPhotoContentType(final String photoContentType) {
+        this.photoContentType = photoContentType;
     }
 
     /**

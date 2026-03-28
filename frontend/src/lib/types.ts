@@ -9,6 +9,7 @@ export interface CompanyDto {
   readonly city: string | null;
   readonly country: string | null;
   readonly deleted: boolean;
+  readonly hasLogo: boolean;
   readonly contactCount: number;
   readonly commentCount: number;
   readonly createdAt: string;
@@ -53,6 +54,7 @@ export interface ContactDto {
   readonly companyName: string | null;
   readonly companyDeleted: boolean;
   readonly commentCount: number;
+  readonly hasPhoto: boolean;
   readonly birthday: string | null;
   readonly syncedToBrevo: boolean;
   readonly doubleOptIn: boolean;

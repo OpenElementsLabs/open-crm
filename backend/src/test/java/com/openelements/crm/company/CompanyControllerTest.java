@@ -14,11 +14,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.mock.web.MockMultipartFile;
+
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -533,6 +538,211 @@ class CompanyControllerTest {
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[0].name").value("Second"))
                     .andExpect(jsonPath("$.content[1].name").value("First"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Company Logo")
+    class CompanyLogo {
+
+        @Test
+        @DisplayName("should upload PNG logo and return 200")
+        void shouldUploadPngLogo() throws Exception {
+            //GIVEN
+            final String id = createCompany("Logo Corp");
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.png", "image/png", new byte[]{1, 2, 3});
+
+            //WHEN
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //THEN
+            result.andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should upload JPEG logo and return 200")
+        void shouldUploadJpegLogo() throws Exception {
+            //GIVEN
+            final String id = createCompany("JPEG Corp");
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.jpg", "image/jpeg", new byte[]{1, 2, 3});
+
+            //WHEN
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //THEN
+            result.andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should upload SVG logo and return 200")
+        void shouldUploadSvgLogo() throws Exception {
+            //GIVEN
+            final String id = createCompany("SVG Corp");
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.svg", "image/svg+xml", "<svg/>".getBytes());
+
+            //WHEN
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //THEN
+            result.andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should return logo with correct content type")
+        void shouldGetLogoWithCorrectContentType() throws Exception {
+            //GIVEN
+            final String id = createCompany("Get Logo Corp");
+            final byte[] imageBytes = new byte[]{1, 2, 3, 4, 5};
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.png", "image/png", imageBytes);
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies/" + id + "/logo"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(header().string("Content-Type", "image/png"))
+                    .andExpect(content().bytes(imageBytes));
+        }
+
+        @Test
+        @DisplayName("should return 404 when no logo exists")
+        void shouldReturn404WhenNoLogo() throws Exception {
+            //GIVEN
+            final String id = createCompany("No Logo Corp");
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies/" + id + "/logo"));
+
+            //THEN
+            result.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should return 404 for non-existent company")
+        void shouldReturn404ForNonExistentCompany() throws Exception {
+            //GIVEN
+            //  no company exists
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies/00000000-0000-0000-0000-000000000001/logo"));
+
+            //THEN
+            result.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should return 400 for invalid content type")
+        void shouldReturn400ForInvalidContentType() throws Exception {
+            //GIVEN
+            final String id = createCompany("Invalid Type Corp");
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.gif", "image/gif", new byte[]{1, 2, 3});
+
+            //WHEN
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //THEN
+            result.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("should delete logo and return 204")
+        void shouldDeleteLogo() throws Exception {
+            //GIVEN
+            final String id = createCompany("Delete Logo Corp");
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.png", "image/png", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //WHEN
+            final var result = mockMvc.perform(delete("/api/companies/" + id + "/logo"));
+
+            //THEN
+            result.andExpect(status().isNoContent());
+            mockMvc.perform(get("/api/companies/" + id + "/logo"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should replace existing logo")
+        void shouldReplaceExistingLogo() throws Exception {
+            //GIVEN
+            final String id = createCompany("Replace Logo Corp");
+            final MockMultipartFile oldFile = new MockMultipartFile(
+                    "file", "old.png", "image/png", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(oldFile));
+
+            final byte[] newBytes = new byte[]{4, 5, 6, 7};
+            final MockMultipartFile newFile = new MockMultipartFile(
+                    "file", "new.jpg", "image/jpeg", newBytes);
+
+            //WHEN
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(newFile));
+
+            //THEN
+            mockMvc.perform(get("/api/companies/" + id + "/logo"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Content-Type", "image/jpeg"))
+                    .andExpect(content().bytes(newBytes));
+        }
+
+        @Test
+        @DisplayName("should set hasLogo to true when logo exists")
+        void shouldSetHasLogoTrue() throws Exception {
+            //GIVEN
+            final String id = createCompany("HasLogo Corp");
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.png", "image/png", new byte[]{1, 2, 3});
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies/" + id));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.hasLogo").value(true));
+        }
+
+        @Test
+        @DisplayName("should set hasLogo to false when no logo exists")
+        void shouldSetHasLogoFalse() throws Exception {
+            //GIVEN
+            final String id = createCompany("NoLogo Corp");
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies/" + id));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.hasLogo").value(false));
+        }
+
+        @Test
+        @DisplayName("should preserve logo when company is soft-deleted and restored")
+        void shouldPreserveLogoOnSoftDeleteAndRestore() throws Exception {
+            //GIVEN
+            final String id = createCompany("SoftDelete Logo Corp");
+            final byte[] imageBytes = new byte[]{10, 20, 30};
+            final MockMultipartFile file = new MockMultipartFile(
+                    "file", "logo.png", "image/png", imageBytes);
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+
+            //WHEN
+            mockMvc.perform(delete("/api/companies/" + id));
+            mockMvc.perform(post("/api/companies/" + id + "/restore"));
+
+            //THEN
+            mockMvc.perform(get("/api/companies/" + id + "/logo"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().bytes(imageBytes));
+
+            mockMvc.perform(get("/api/companies/" + id))
+                    .andExpect(jsonPath("$.hasLogo").value(true));
         }
     }
 }

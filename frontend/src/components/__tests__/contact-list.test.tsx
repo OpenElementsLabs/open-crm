@@ -19,11 +19,13 @@ vi.mock("next/navigation", () => ({
 const mockGetContacts = vi.fn();
 const mockDeleteContact = vi.fn();
 const mockGetCompaniesForSelect = vi.fn();
+const mockGetContactPhotoUrl = vi.fn().mockReturnValue("/api/contacts/test-id/photo");
 
 vi.mock("@/lib/api", () => ({
   getContacts: (...args: unknown[]) => mockGetContacts(...args),
   deleteContact: (...args: unknown[]) => mockDeleteContact(...args),
   getCompaniesForSelect: (...args: unknown[]) => mockGetCompaniesForSelect(...args),
+  getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
 }));
 
 function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
@@ -40,6 +42,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     companyName: "Open Elements",
     companyDeleted: false,
     commentCount: 0,
+    hasPhoto: false,
     birthday: null,
     syncedToBrevo: false,
     doubleOptIn: false,
@@ -74,6 +77,7 @@ const defaultCompanies: CompanyDto[] = [
     city: null,
     country: null,
     deleted: false,
+    hasLogo: false,
     contactCount: 0,
     commentCount: 0,
     createdAt: "2026-01-01T00:00:00Z",
@@ -147,7 +151,7 @@ describe("ContactList", () => {
       const rows = screen.getAllByRole("row");
       const dataRow = rows[1]; // first data row
       const cells = dataRow.querySelectorAll("td");
-      expect(cells[2].textContent).toBe("");
+      expect(cells[3].textContent).toBe("");
     });
 
     it("should show loading skeleton while fetching", () => {
@@ -364,6 +368,62 @@ describe("ContactList", () => {
       fireEvent.click(screen.getByText(S.deleteDialog.cancel));
 
       expect(mockDeleteContact).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("image display", () => {
+    it("should show photo thumbnail when hasPhoto is true", async () => {
+      mockGetContacts.mockResolvedValue(
+        makePage([makeContact({ id: "photo-1", hasPhoto: true, firstName: "Max", lastName: "Mustermann" })]),
+      );
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        const rows = screen.getAllByRole("row");
+        const dataRow = rows[1];
+        const firstCell = dataRow.querySelectorAll("td")[0];
+        const img = firstCell.querySelector("img");
+        expect(img).toBeInTheDocument();
+        expect(img?.getAttribute("alt")).toBe("Max Mustermann");
+      });
+    });
+
+    it("should show placeholder icon when hasPhoto is false", async () => {
+      mockGetContacts.mockResolvedValue(
+        makePage([makeContact({ hasPhoto: false })]),
+      );
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        const rows = screen.getAllByRole("row");
+        const dataRow = rows[1];
+        const firstCell = dataRow.querySelectorAll("td")[0];
+        const img = firstCell.querySelector("img");
+        expect(img).toBeNull();
+        const svg = firstCell.querySelector("svg");
+        expect(svg).toBeInTheDocument();
+      });
+    });
+
+    it("should have correct column order", async () => {
+      mockGetContacts.mockResolvedValue(
+        makePage([makeContact()]),
+      );
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        const headerRow = screen.getAllByRole("row")[0];
+        const headers = headerRow.querySelectorAll("th");
+        expect(headers[0].textContent).toBe("");
+        expect(headers[1].textContent).toBe(S.columns.firstName);
+        expect(headers[2].textContent).toBe(S.columns.lastName);
+        expect(headers[3].textContent).toBe(S.columns.company);
+        expect(headers[4].textContent).toBe(S.columns.comments);
+        expect(headers[5].textContent).toBe(S.columns.actions);
+      });
     });
   });
 

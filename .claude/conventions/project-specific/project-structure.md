@@ -10,10 +10,11 @@ open-crm/
 │   │   ├── company/                — Company domain (controller, service, repository, DTOs, entity)
 │   │   ├── contact/                — Contact domain (controller, service, repository, DTOs, entity, enums)
 │   │   ├── comment/                — Comment domain (controller, service, repository, DTOs, entity)
-│   │   └── health/                 — Health check endpoint
+│   │   ├── health/                 — Health check endpoint
+│   │   └── ImageData.java          — Shared record holding image bytes + content type
 │   ├── src/main/resources/
 │   │   ├── application.yml         — Application configuration
-│   │   └── db/migration/           — Flyway SQL migrations (V1–V3)
+│   │   └── db/migration/           — Flyway SQL migrations (V1–V5)
 │   ├── src/test/                   — Integration tests (one per controller)
 │   ├── pom.xml                     — Maven build configuration
 │   ├── Dockerfile                  — Multi-stage Docker build
@@ -48,6 +49,12 @@ open-crm/
 │   ├── company-frontend/           — Company frontend feature spec
 │   ├── company-comments/           — Company comments feature spec
 │   ├── 007-contact-frontend/       — Contact frontend feature spec
+│   ├── 008-global-ui-styling-fixes/— UI styling fixes spec
+│   ├── 009-comment-modal-dialog/   — Comment modal dialog spec
+│   ├── 010-contact-company-navigation/ — Bidirectional navigation spec
+│   ├── 011-count-columns/          — Count columns spec
+│   ├── 012-contact-birthday/       — Contact birthday field spec
+│   ├── 013-image-upload/           — Image upload feature spec (company logos, contact photos)
 │   ├── core-data-model/            — Core data model spec
 │   ├── dto-refactoring/            — DTO refactoring spec
 │   └── frontend-i18n/              — Internationalization spec
@@ -68,4 +75,4 @@ open-crm/
 
 ## Naming Convention
 
-Each backend domain follows a consistent package structure: `Controller`, `Service`, `Repository`, `Entity`, `Dto`, `CreateDto`, `UpdateDto`.
+Each backend domain follows a consistent package structure: `Controller`, `Service`, `Repository`, `Entity`, `Dto`, `CreateDto`, `UpdateDto`. Shared types like `ImageData` (a record holding image bytes and content type) live in the root `crm` package.
