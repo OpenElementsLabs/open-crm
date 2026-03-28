@@ -13,6 +13,7 @@ It focuses on the core needs of small teams: keeping track of companies, contact
 
 - **Company Management** — Create and manage company records with relevant business details
 - **Contact Management** — Track individual contacts and their associations with companies
+- **Image Upload** — Upload and manage company logos (SVG, PNG, JPEG) and contact photos (JPEG) with thumbnails in list views
 - **Customer Management** — Manage customer relationships and history
 - **Single Sign-On (SSO)** — Integration with [Authentik](https://goauthentik.io/) for authentication and user management
 - **Brevo Sync** — Automatic synchronization of customers and companies with [Brevo](https://www.brevo.com/) for marketing and communication workflows

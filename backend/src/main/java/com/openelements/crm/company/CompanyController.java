@@ -1,5 +1,6 @@
 package com.openelements.crm.company;
 
+import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * REST controller for company management.
@@ -142,6 +145,58 @@ public class CompanyController {
     @ApiResponse(responseCode = "404", description = "Company not found")
     public CompanyDto restore(@PathVariable final UUID id) {
         return companyService.restore(id);
+    }
+
+    /**
+     * Uploads or replaces the logo for a company.
+     *
+     * @param id   the company ID
+     * @param file the image file
+     */
+    @PostMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload company logo")
+    @ApiResponse(responseCode = "200", description = "Logo uploaded")
+    @ApiResponse(responseCode = "400", description = "Invalid file format or size")
+    @ApiResponse(responseCode = "404", description = "Company not found")
+    public void uploadLogo(@PathVariable final UUID id,
+                           @RequestParam("file") final MultipartFile file) {
+        try {
+            companyService.uploadLogo(id, file.getBytes(), file.getContentType());
+        } catch (final java.io.IOException e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Failed to read file");
+        }
+    }
+
+    /**
+     * Returns the logo for a company as binary data.
+     *
+     * @param id the company ID
+     * @return the logo binary data with correct content type
+     */
+    @GetMapping(value = "/{id}/logo")
+    @Operation(summary = "Get company logo")
+    @ApiResponse(responseCode = "200", description = "Logo found")
+    @ApiResponse(responseCode = "404", description = "Company or logo not found")
+    public ResponseEntity<byte[]> getLogo(@PathVariable final UUID id) {
+        final ImageData imageData = companyService.getLogo(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(imageData.contentType()))
+                .body(imageData.data());
+    }
+
+    /**
+     * Removes the logo from a company.
+     *
+     * @param id the company ID
+     */
+    @DeleteMapping("/{id}/logo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Remove company logo")
+    @ApiResponse(responseCode = "204", description = "Logo removed")
+    @ApiResponse(responseCode = "404", description = "Company not found")
+    public void deleteLogo(@PathVariable final UUID id) {
+        companyService.deleteLogo(id);
     }
 
     /**

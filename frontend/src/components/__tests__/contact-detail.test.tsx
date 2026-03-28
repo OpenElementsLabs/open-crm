@@ -16,11 +16,13 @@ vi.mock("next/navigation", () => ({
 
 const mockDeleteContact = vi.fn();
 const mockGetContactComments = vi.fn();
+const mockGetContactPhotoUrl = vi.fn().mockReturnValue("/api/contacts/test-id/photo");
 
 vi.mock("@/lib/api", () => ({
   deleteContact: (...args: unknown[]) => mockDeleteContact(...args),
   getContactComments: (...args: unknown[]) => mockGetContactComments(...args),
   createContactComment: vi.fn(),
+  getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
 }));
 
 function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
@@ -37,6 +39,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     companyName: "Open Elements",
     companyDeleted: false,
     commentCount: 2,
+    hasPhoto: false,
     birthday: "1990-03-15",
     syncedToBrevo: true,
     doubleOptIn: false,
@@ -194,5 +197,26 @@ describe("ContactDetail", () => {
     fireEvent.click(screen.getByText(S.deleteDialog.cancel));
 
     expect(mockDeleteContact).not.toHaveBeenCalled();
+  });
+
+  it("should show photo image when contact has photo", () => {
+    const { container } = renderWithProviders(
+      <ContactDetail contact={makeContact({ hasPhoto: true })} />,
+    );
+
+    const img = container.querySelector("img");
+    expect(img).toBeInTheDocument();
+    expect(img?.getAttribute("alt")).toBe("Max Mustermann");
+  });
+
+  it("should show placeholder when contact has no photo", () => {
+    const { container } = renderWithProviders(
+      <ContactDetail contact={makeContact({ hasPhoto: false })} />,
+    );
+
+    const img = container.querySelector("img");
+    expect(img).toBeNull();
+    const svg = container.querySelector("svg");
+    expect(svg).toBeInTheDocument();
   });
 });

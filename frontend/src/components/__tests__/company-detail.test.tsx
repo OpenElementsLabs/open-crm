@@ -15,13 +15,14 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockDeleteCompany = vi.fn();
-
 const mockGetCompanyComments = vi.fn();
+const mockGetCompanyLogoUrl = vi.fn().mockReturnValue("/api/companies/test-id/logo");
 
 vi.mock("@/lib/api", () => ({
   deleteCompany: (...args: unknown[]) => mockDeleteCompany(...args),
   getCompanyComments: (...args: unknown[]) => mockGetCompanyComments(...args),
   createCompanyComment: vi.fn(),
+  getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
 }));
 
 const testCompany: CompanyDto = {
@@ -35,6 +36,7 @@ const testCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   deleted: false,
+  hasLogo: false,
   contactCount: 3,
   commentCount: 5,
   createdAt: "2026-01-01T00:00:00Z",
@@ -147,5 +149,26 @@ describe("CompanyDetail", () => {
     await waitFor(() => {
       expect(screen.getByText(S.deleteDialog.errorConflict)).toBeInTheDocument();
     });
+  });
+
+  it("should show logo image when company has logo", () => {
+    const { container } = renderWithProviders(
+      <CompanyDetail company={{ ...testCompany, hasLogo: true }} />,
+    );
+
+    const img = container.querySelector("img");
+    expect(img).toBeInTheDocument();
+    expect(img?.getAttribute("alt")).toBe("Open Elements GmbH");
+  });
+
+  it("should show placeholder when company has no logo", () => {
+    const { container } = renderWithProviders(
+      <CompanyDetail company={{ ...testCompany, hasLogo: false }} />,
+    );
+
+    const img = container.querySelector("img");
+    expect(img).toBeNull();
+    const svg = container.querySelector("svg");
+    expect(svg).toBeInTheDocument();
   });
 });

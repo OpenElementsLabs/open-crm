@@ -1,5 +1,6 @@
 package com.openelements.crm.contact;
 
+import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
@@ -146,6 +147,59 @@ public class ContactService {
         }
 
         return contactRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    /**
+     * Uploads or replaces the photo for a contact.
+     *
+     * @param id          the contact ID
+     * @param data        the image bytes
+     * @param contentType the MIME content type
+     * @throws ResponseStatusException with 404 if not found, 400 if content type is not JPEG
+     */
+    public void uploadPhoto(final UUID id, final byte[] data, final String contentType) {
+        Objects.requireNonNull(id, "id must not be null");
+        Objects.requireNonNull(data, "data must not be null");
+        Objects.requireNonNull(contentType, "contentType must not be null");
+        if (!"image/jpeg".equals(contentType)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid content type: " + contentType + ". Only image/jpeg is allowed.");
+        }
+        final ContactEntity entity = findOrThrow(id);
+        entity.setPhoto(data);
+        entity.setPhotoContentType(contentType);
+        contactRepository.saveAndFlush(entity);
+    }
+
+    /**
+     * Returns the photo data for a contact.
+     *
+     * @param id the contact ID
+     * @return the image data
+     * @throws ResponseStatusException with 404 if not found or no photo exists
+     */
+    @Transactional(readOnly = true)
+    public ImageData getPhoto(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        final ContactEntity entity = findOrThrow(id);
+        if (entity.getPhoto() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No photo for contact: " + id);
+        }
+        return new ImageData(entity.getPhoto(), entity.getPhotoContentType());
+    }
+
+    /**
+     * Removes the photo from a contact.
+     *
+     * @param id the contact ID
+     * @throws ResponseStatusException with 404 if not found
+     */
+    public void deletePhoto(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        final ContactEntity entity = findOrThrow(id);
+        entity.setPhoto(null);
+        entity.setPhotoContentType(null);
+        contactRepository.saveAndFlush(entity);
     }
 
     private ContactDto toDto(final ContactEntity entity) {

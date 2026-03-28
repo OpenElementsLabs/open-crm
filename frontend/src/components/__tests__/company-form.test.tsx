@@ -16,10 +16,16 @@ vi.mock("next/navigation", () => ({
 
 const mockCreateCompany = vi.fn();
 const mockUpdateCompany = vi.fn();
+const mockUploadCompanyLogo = vi.fn();
+const mockDeleteCompanyLogo = vi.fn();
+const mockGetCompanyLogoUrl = vi.fn().mockReturnValue("/api/companies/test-id/logo");
 
 vi.mock("@/lib/api", () => ({
   createCompany: (...args: unknown[]) => mockCreateCompany(...args),
   updateCompany: (...args: unknown[]) => mockUpdateCompany(...args),
+  uploadCompanyLogo: (...args: unknown[]) => mockUploadCompanyLogo(...args),
+  deleteCompanyLogo: (...args: unknown[]) => mockDeleteCompanyLogo(...args),
+  getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
 }));
 
 const existingCompany: CompanyDto = {
@@ -33,6 +39,7 @@ const existingCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   deleted: false,
+  hasLogo: false,
   contactCount: 0,
   commentCount: 0,
   createdAt: "2026-01-01T00:00:00Z",
@@ -178,6 +185,29 @@ describe("CompanyForm", () => {
       fireEvent.click(screen.getByText(S.cancel));
 
       expect(mockPush).toHaveBeenCalledWith("/companies/test-id");
+    });
+  });
+
+  describe("image upload", () => {
+    it("should show upload logo button", () => {
+      renderWithProviders(<CompanyForm />);
+
+      expect(screen.getByText(S.uploadLogo)).toBeInTheDocument();
+    });
+
+    it("should show client-side error for oversized file", async () => {
+      renderWithProviders(<CompanyForm />);
+
+      const fileInput = document.querySelector("input[type='file']") as HTMLInputElement;
+      const oversizedFile = new File(["x".repeat(3 * 1024 * 1024)], "big.png", {
+        type: "image/png",
+      });
+
+      fireEvent.change(fileInput, { target: { files: [oversizedFile] } });
+
+      await waitFor(() => {
+        expect(screen.getByText(S.imageTooLarge)).toBeInTheDocument();
+      });
     });
   });
 });

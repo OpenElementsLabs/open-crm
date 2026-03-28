@@ -14,5 +14,5 @@
 | 010 | Contact-company navigation | Bidirectional navigation links between contact detail and company detail views                      | — | done   |
 | 011 | Count columns              | Contact and comment counts in company/contact list tables and detail views                          | — | done   |
 | 012 | Contact birthday           | Optional birthday date field for contacts with standard date picker                                 | — | done   |
-| 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | open   |
+| 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | done   |
 

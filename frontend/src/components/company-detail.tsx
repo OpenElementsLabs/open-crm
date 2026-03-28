@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2, Users } from "lucide-react";
+import { Pencil, Trash2, Users, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { CompanyComments } from "@/components/company-comments";
-import { deleteCompany } from "@/lib/api";
+import { deleteCompany, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -51,7 +51,18 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-heading text-2xl font-bold text-oe-dark">{company.name}</h1>
+        <div className="flex items-center gap-4">
+          {company.hasLogo ? (
+            <img
+              src={getCompanyLogoUrl(company.id)}
+              alt={company.name}
+              className="h-24 w-24 rounded object-cover"
+            />
+          ) : (
+            <Building2 className="h-24 w-24 text-oe-gray-mid" />
+          )}
+          <h1 className="font-heading text-2xl font-bold text-oe-dark">{company.name}</h1>
+        </div>
         <div className="flex gap-2">
           {company.deleted ? (
             <Button variant="outline" disabled className="opacity-50">

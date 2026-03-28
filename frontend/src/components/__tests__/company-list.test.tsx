@@ -17,11 +17,13 @@ vi.mock("next/navigation", () => ({
 const mockGetCompanies = vi.fn();
 const mockDeleteCompany = vi.fn();
 const mockRestoreCompany = vi.fn();
+const mockGetCompanyLogoUrl = vi.fn().mockReturnValue("/api/companies/test-id/logo");
 
 vi.mock("@/lib/api", () => ({
   getCompanies: (...args: unknown[]) => mockGetCompanies(...args),
   deleteCompany: (...args: unknown[]) => mockDeleteCompany(...args),
   restoreCompany: (...args: unknown[]) => mockRestoreCompany(...args),
+  getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
 }));
 
 function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
@@ -36,6 +38,7 @@ function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
     city: null,
     country: null,
     deleted: false,
+    hasLogo: false,
     contactCount: 0,
     commentCount: 0,
     createdAt: "2026-01-01T00:00:00Z",
@@ -395,6 +398,62 @@ describe("CompanyList", () => {
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.errorConflict)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("image display", () => {
+    it("should show logo thumbnail when hasLogo is true", async () => {
+      mockGetCompanies.mockResolvedValue(
+        makePage([makeCompany({ id: "logo-1", hasLogo: true, name: "Logo Corp" })]),
+      );
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        const rows = screen.getAllByRole("row");
+        const dataRow = rows[1];
+        const firstCell = dataRow.querySelectorAll("td")[0];
+        const img = firstCell.querySelector("img");
+        expect(img).toBeInTheDocument();
+        expect(img?.getAttribute("alt")).toBe("Logo Corp");
+      });
+    });
+
+    it("should show placeholder icon when hasLogo is false", async () => {
+      mockGetCompanies.mockResolvedValue(
+        makePage([makeCompany({ hasLogo: false })]),
+      );
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        const rows = screen.getAllByRole("row");
+        const dataRow = rows[1];
+        const firstCell = dataRow.querySelectorAll("td")[0];
+        const img = firstCell.querySelector("img");
+        expect(img).toBeNull();
+        const svg = firstCell.querySelector("svg");
+        expect(svg).toBeInTheDocument();
+      });
+    });
+
+    it("should have correct column order", async () => {
+      mockGetCompanies.mockResolvedValue(
+        makePage([makeCompany()]),
+      );
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        const headerRow = screen.getAllByRole("row")[0];
+        const headers = headerRow.querySelectorAll("th");
+        expect(headers[0].textContent).toBe("");
+        expect(headers[1].textContent).toBe(S.columns.name);
+        expect(headers[2].textContent).toBe(S.columns.website);
+        expect(headers[3].textContent).toBe(S.columns.contacts);
+        expect(headers[4].textContent).toBe(S.columns.comments);
+        expect(headers[5].textContent).toBe(S.columns.actions);
       });
     });
   });

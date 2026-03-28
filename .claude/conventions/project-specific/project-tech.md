@@ -19,7 +19,7 @@
 
 ## Databases & External Services
 
-- PostgreSQL 17 (primary database, via Docker or standalone)
+- PostgreSQL 17 (primary database, via Docker or standalone; uses `bytea` columns for binary image storage)
 - Authentik (SSO via OpenID Connect) — planned
 - Brevo API (contact/company sync) — planned
 
@@ -31,6 +31,7 @@
 - Flyway (database migrations, `db/migration/V*.sql`)
 - SpringDoc OpenAPI 2.8.6 (Swagger UI + OpenAPI spec generation)
 - Jakarta Bean Validation (request validation)
+- Spring Multipart (file upload with 2 MB max, configured in `application.yml`)
 - PostgreSQL JDBC driver (runtime)
 - CycloneDX Maven Plugin 2.9.1 (SBOM generation)
 
