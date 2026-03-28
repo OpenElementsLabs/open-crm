@@ -11,7 +11,7 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
 import { deleteContact } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { useTranslations, useLanguage } from "@/lib/i18n/language-context";
 
 function DetailField({
   label,
@@ -58,6 +58,13 @@ function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations
   }
 }
 
+function formatBirthday(dateStr: string | null, lang: string): string | null {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split("-");
+  if (lang === "de") return `${day}.${month}.${year}`;
+  return `${month}/${day}/${year}`;
+}
+
 interface ContactDetailProps {
   readonly contact: ContactDto;
 }
@@ -65,6 +72,7 @@ interface ContactDetailProps {
 export function ContactDetail({ contact }: ContactDetailProps) {
   const t = useTranslations();
   const S = t.contacts;
+  const { language } = useLanguage();
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -118,6 +126,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <DetailField label={S.detail.gender} value={genderLabel(contact.gender, t)} />
             <DetailField label={S.detail.phone} value={contact.phoneNumber} />
             <DetailField label={S.detail.linkedIn} value={contact.linkedInUrl} />
+            <DetailField label={S.detail.birthday} value={formatBirthday(contact.birthday, language)} />
             <DetailField label={S.detail.language} value={contact.language} />
             <div>
               <dt className="text-sm font-medium text-oe-gray-mid">{S.detail.company}</dt>

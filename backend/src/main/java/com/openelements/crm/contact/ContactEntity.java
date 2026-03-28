@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
@@ -55,6 +56,9 @@ public class ContactEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
+
+    @Column(name = "birthday")
+    private LocalDate birthday;
 
     @Column(name = "synced_to_brevo", nullable = false)
     private boolean syncedToBrevo = false;
@@ -231,6 +235,24 @@ public class ContactEntity {
      */
     public void setCompany(final CompanyEntity company) {
         this.company = company;
+    }
+
+    /**
+     * Returns the birthday of this contact.
+     *
+     * @return the birthday, or null
+     */
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    /**
+     * Sets the birthday of this contact.
+     *
+     * @param birthday the birthday, or null
+     */
+    public void setBirthday(final LocalDate birthday) {
+        this.birthday = birthday;
     }
 
     /**

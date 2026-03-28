@@ -40,6 +40,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     companyName: "Open Elements",
     companyDeleted: false,
     commentCount: 0,
+    birthday: null,
     syncedToBrevo: false,
     doubleOptIn: false,
     language: "DE",

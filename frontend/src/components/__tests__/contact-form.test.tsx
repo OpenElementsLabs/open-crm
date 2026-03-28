@@ -56,6 +56,7 @@ const existingContact: ContactDto = {
   companyName: "Open Elements",
   companyDeleted: false,
   commentCount: 0,
+  birthday: "1990-03-15",
   syncedToBrevo: false,
   doubleOptIn: false,
   language: "DE",

@@ -50,7 +50,8 @@ public class ContactService {
         final ContactEntity entity = new ContactEntity();
         applyFields(entity, request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
-                request.phoneNumber(), request.companyId(), request.language());
+                request.phoneNumber(), request.companyId(), request.language(),
+                request.birthday());
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
         return ContactDto.fromEntity(saved, 0);
     }
@@ -83,7 +84,8 @@ public class ContactService {
         final ContactEntity entity = findOrThrow(id);
         applyFields(entity, request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
-                request.phoneNumber(), request.companyId(), request.language());
+                request.phoneNumber(), request.companyId(), request.language(),
+                request.birthday());
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
         return toDto(saved);
     }
@@ -156,7 +158,7 @@ public class ContactService {
                               final String email, final String position,
                               final Gender gender, final String linkedInUrl,
                               final String phoneNumber, final UUID companyId,
-                              final Language language) {
+                              final Language language, final java.time.LocalDate birthday) {
         entity.setFirstName(firstName);
         entity.setLastName(lastName);
         entity.setEmail(email);
@@ -165,6 +167,7 @@ public class ContactService {
         entity.setLinkedInUrl(linkedInUrl);
         entity.setPhoneNumber(phoneNumber);
         entity.setLanguage(language);
+        entity.setBirthday(birthday);
 
         if (companyId != null) {
             final CompanyEntity company = companyRepository.findById(companyId)

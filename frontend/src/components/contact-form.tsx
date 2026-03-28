@@ -36,6 +36,7 @@ export function ContactForm({ contact }: ContactFormProps) {
   const [phoneNumber, setPhoneNumber] = useState(contact?.phoneNumber ?? "");
   const [companyId, setCompanyId] = useState(contact?.companyId ?? "");
   const [language, setLanguage] = useState(contact?.language ?? "");
+  const [birthday, setBirthday] = useState(contact?.birthday ?? "");
 
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
 
@@ -85,6 +86,7 @@ export function ContactForm({ contact }: ContactFormProps) {
       phoneNumber: phoneNumber.trim() || null,
       companyId: companyId && companyId !== "none" ? companyId : null,
       language: language as "DE" | "EN",
+      birthday: birthday || null,
     };
 
     setSubmitting(true);
@@ -207,6 +209,18 @@ export function ContactForm({ contact }: ContactFormProps) {
                 value={linkedInUrl}
                 onChange={(e) => setLinkedInUrl(e.target.value)}
                 placeholder={S.linkedInPlaceholder}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="birthday">{S.birthday}</Label>
+              <Input
+                id="birthday"
+                type="date"
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
               />
             </div>
           </div>

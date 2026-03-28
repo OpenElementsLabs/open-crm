@@ -53,6 +53,7 @@ export interface ContactDto {
   readonly companyName: string | null;
   readonly companyDeleted: boolean;
   readonly commentCount: number;
+  readonly birthday: string | null;
   readonly syncedToBrevo: boolean;
   readonly doubleOptIn: boolean;
   readonly language: "DE" | "EN";
@@ -70,6 +71,7 @@ export interface ContactCreateDto {
   readonly phoneNumber?: string | null;
   readonly companyId?: string | null;
   readonly language: "DE" | "EN";
+  readonly birthday?: string | null;
 }
 
 export interface Page<T> {

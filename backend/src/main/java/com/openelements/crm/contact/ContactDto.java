@@ -2,6 +2,7 @@ package com.openelements.crm.contact;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -19,6 +20,7 @@ import java.util.UUID;
  * @param companyName    the company name (resolved)
  * @param companyDeleted whether the associated company is soft-deleted
  * @param commentCount   the number of comments on this contact
+ * @param birthday       the birthday (optional)
  * @param syncedToBrevo  whether synced to Brevo
  * @param doubleOptIn   whether double opt-in is confirmed
  * @param language      the preferred language
@@ -39,6 +41,7 @@ public record ContactDto(
         @Schema(description = "Company name") String companyName,
         @Schema(description = "Whether the associated company is archived", requiredMode = Schema.RequiredMode.REQUIRED) boolean companyDeleted,
         @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
+        @Schema(description = "Birthday") LocalDate birthday,
         @Schema(description = "Whether synced to Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean syncedToBrevo,
         @Schema(description = "Whether double opt-in is confirmed", requiredMode = Schema.RequiredMode.REQUIRED) boolean doubleOptIn,
         @Schema(description = "Preferred language", requiredMode = Schema.RequiredMode.REQUIRED) Language language,
@@ -70,6 +73,7 @@ public record ContactDto(
                 companyName,
                 companyDeleted,
                 commentCount,
+                entity.getBirthday(),
                 entity.isSyncedToBrevo(),
                 entity.isDoubleOptIn(),
                 entity.getLanguage(),

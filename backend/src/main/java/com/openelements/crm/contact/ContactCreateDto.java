@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -18,6 +19,7 @@ import java.util.UUID;
  * @param phoneNumber the phone number
  * @param companyId   the company ID (optional)
  * @param language    the preferred language (required)
+ * @param birthday    the birthday (optional)
  */
 @Schema(description = "Request body for creating a new contact")
 public record ContactCreateDto(
@@ -55,6 +57,9 @@ public record ContactCreateDto(
 
         @NotNull(message = "Language must not be null")
         @Schema(description = "Preferred language", example = "DE", requiredMode = Schema.RequiredMode.REQUIRED)
-        Language language
+        Language language,
+
+        @Schema(description = "Birthday", example = "1990-03-15")
+        LocalDate birthday
 ) {
 }
