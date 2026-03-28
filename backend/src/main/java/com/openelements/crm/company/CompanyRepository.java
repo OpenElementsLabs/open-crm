@@ -17,7 +17,7 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, UUID>,
      * @param brevoCompanyId the Brevo company ID
      * @return the company, or empty if not found
      */
-    Optional<CompanyEntity> findByBrevoCompanyId(Long brevoCompanyId);
+    Optional<CompanyEntity> findByBrevoCompanyId(String brevoCompanyId);
 
     /**
      * Finds a company by name (case-insensitive exact match).

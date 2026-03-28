@@ -81,15 +81,18 @@ public class BrevoSyncService {
         // Phase 1: Companies
         LOG.info("Starting Brevo company sync");
         final List<BrevoCompany> brevoCompanies = brevoApiClient.fetchAllCompanies();
-        final Map<Long, Long> contactToCompanyBrevoId = new HashMap<>();
+        final Map<Long, String> contactToCompanyBrevoId = new HashMap<>();
 
         for (final BrevoCompany brevoCompany : brevoCompanies) {
+            LOG.debug("Fetched Brevo company: id={}, name={}", brevoCompany.id(), brevoCompany.name());
             try {
                 final boolean isNew = syncCompany(brevoCompany);
                 if (isNew) {
                     companiesImported++;
+                    LOG.info("Created company '{}' (Brevo ID {})", brevoCompany.name(), brevoCompany.id());
                 } else {
                     companiesUpdated++;
+                    LOG.info("Updated company '{}' (Brevo ID {})", brevoCompany.name(), brevoCompany.id());
                 }
                 for (final Long contactId : brevoCompany.linkedContactsIds()) {
                     contactToCompanyBrevoId.put(contactId, brevoCompany.id());
@@ -186,7 +189,7 @@ public class BrevoSyncService {
      * @return true if a new contact was created, false if an existing one was updated
      */
     private boolean syncContact(final BrevoContact brevoContact,
-                                final Map<Long, Long> contactToCompanyBrevoId) {
+                                final Map<Long, String> contactToCompanyBrevoId) {
         final Boolean isNew = transactionTemplate.execute(status -> {
             Optional<ContactEntity> existing = contactRepository.findByBrevoId(brevoContact.id());
             if (existing.isEmpty() && brevoContact.email() != null) {
@@ -240,13 +243,15 @@ public class BrevoSyncService {
     }
 
     private CompanyEntity resolveCompany(final long brevoContactId,
-                                         final Map<Long, Long> contactToCompanyBrevoId,
+                                         final Map<Long, String> contactToCompanyBrevoId,
                                          final String firmaManuell) {
         // First: check if linked via Brevo company
-        final Long companyBrevoId = contactToCompanyBrevoId.get(brevoContactId);
+        final String companyBrevoId = contactToCompanyBrevoId.get(brevoContactId);
         if (companyBrevoId != null) {
             final Optional<CompanyEntity> company = companyRepository.findByBrevoCompanyId(companyBrevoId);
             if (company.isPresent()) {
+                LOG.debug("Contact {} resolved to company '{}' via Brevo company ID {}",
+                        brevoContactId, company.get().getName(), companyBrevoId);
                 return company.get();
             }
         }
@@ -255,14 +260,19 @@ public class BrevoSyncService {
         if (!isBlank(firmaManuell)) {
             final Optional<CompanyEntity> existing = companyRepository.findByNameIgnoreCase(firmaManuell);
             if (existing.isPresent()) {
+                LOG.debug("Contact {} resolved to existing company '{}' via FIRMA_MANUELL",
+                        brevoContactId, firmaManuell);
                 return existing.get();
             }
             // Create new company from FIRMA_MANUELL
             final CompanyEntity newCompany = new CompanyEntity();
             newCompany.setName(firmaManuell);
+            LOG.debug("Contact {} created new company '{}' from FIRMA_MANUELL",
+                    brevoContactId, firmaManuell);
             return companyRepository.saveAndFlush(newCompany);
         }
 
+        LOG.debug("Contact {} has no company association", brevoContactId);
         return null;
     }
 

@@ -58,8 +58,8 @@ public class CompanyEntity {
     @Column(name = "logo_content_type", length = 50)
     private String logoContentType;
 
-    @Column(name = "brevo_company_id")
-    private Long brevoCompanyId;
+    @Column(name = "brevo_company_id", length = 50)
+    private String brevoCompanyId;
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
@@ -272,7 +272,7 @@ public class CompanyEntity {
      *
      * @return the Brevo company ID, or null if not imported from Brevo
      */
-    public Long getBrevoCompanyId() {
+    public String getBrevoCompanyId() {
         return brevoCompanyId;
     }
 
@@ -281,7 +281,7 @@ public class CompanyEntity {
      *
      * @param brevoCompanyId the Brevo company ID
      */
-    public void setBrevoCompanyId(final Long brevoCompanyId) {
+    public void setBrevoCompanyId(final String brevoCompanyId) {
         this.brevoCompanyId = brevoCompanyId;
     }
 

@@ -83,7 +83,7 @@ public class BrevoApiClient {
                 break;
             }
             for (final JsonNode item : items) {
-                final long id = item.get("id").asLong();
+                final String id = item.get("id").asText();
                 final JsonNode attrs = item.get("attributes");
                 final String name = attrs != null && attrs.has("name")
                         ? attrs.get("name").asText(null) : null;

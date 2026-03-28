@@ -10,5 +10,5 @@ import java.util.List;
  * @param domain            the company domain/website
  * @param linkedContactsIds the IDs of contacts linked to this company
  */
-record BrevoCompany(long id, String name, String domain, List<Long> linkedContactsIds) {
+record BrevoCompany(String id, String name, String domain, List<Long> linkedContactsIds) {
 }

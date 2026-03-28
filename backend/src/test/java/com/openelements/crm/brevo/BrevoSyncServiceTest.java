@@ -66,7 +66,7 @@ class BrevoSyncServiceTest {
         settingsService.set("brevo.api-key", "test-key");
     }
 
-    private BrevoCompany makeBrevoCompany(final long id, final String name, final String domain,
+    private BrevoCompany makeBrevoCompany(final String id, final String name, final String domain,
                                            final List<Long> linkedContactsIds) {
         return new BrevoCompany(id, name, domain, linkedContactsIds);
     }
@@ -100,7 +100,7 @@ class BrevoSyncServiceTest {
         @DisplayName("imports new company")
         void importsNewCompany() {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "Acme", "acme.com", List.of())));
+                    List.of(makeBrevoCompany("aaa111", "Acme", "acme.com", List.of())));
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
             final BrevoSyncResultDto result = brevoSyncService.syncAll();
@@ -111,7 +111,7 @@ class BrevoSyncServiceTest {
             assertEquals(1, companies.size());
             assertEquals("Acme", companies.get(0).getName());
             assertEquals("acme.com", companies.get(0).getWebsite());
-            assertEquals(100L, companies.get(0).getBrevoCompanyId());
+            assertEquals("aaa111", companies.get(0).getBrevoCompanyId());
         }
 
         @Test
@@ -119,18 +119,18 @@ class BrevoSyncServiceTest {
         void updatesCompanyMatchedByBrevoId() {
             final CompanyEntity existing = new CompanyEntity();
             existing.setName("Old Name");
-            existing.setBrevoCompanyId(100L);
+            existing.setBrevoCompanyId("aaa111");
             companyRepository.saveAndFlush(existing);
 
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "New Name", "new.com", List.of())));
+                    List.of(makeBrevoCompany("aaa111", "New Name", "new.com", List.of())));
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
             final BrevoSyncResultDto result = brevoSyncService.syncAll();
 
             assertEquals(0, result.companiesImported());
             assertEquals(1, result.companiesUpdated());
-            final CompanyEntity updated = companyRepository.findByBrevoCompanyId(100L).orElseThrow();
+            final CompanyEntity updated = companyRepository.findByBrevoCompanyId("aaa111").orElseThrow();
             assertEquals("New Name", updated.getName());
             assertEquals("new.com", updated.getWebsite());
         }
@@ -143,15 +143,15 @@ class BrevoSyncServiceTest {
             companyRepository.saveAndFlush(existing);
 
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "Acme Corp", "acme.com", List.of())));
+                    List.of(makeBrevoCompany("aaa111", "Acme Corp", "acme.com", List.of())));
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
             brevoSyncService.syncAll();
 
             assertEquals(1, companyRepository.count());
-            final CompanyEntity matched = companyRepository.findByBrevoCompanyId(100L).orElseThrow();
+            final CompanyEntity matched = companyRepository.findByBrevoCompanyId("aaa111").orElseThrow();
             assertEquals("Acme Corp", matched.getName());
-            assertEquals(100L, matched.getBrevoCompanyId());
+            assertEquals("aaa111", matched.getBrevoCompanyId());
         }
 
         @Test
@@ -162,13 +162,13 @@ class BrevoSyncServiceTest {
             companyRepository.saveAndFlush(existing);
 
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "ACME CORP", "acme.com", List.of())));
+                    List.of(makeBrevoCompany("aaa111", "ACME CORP", "acme.com", List.of())));
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
             brevoSyncService.syncAll();
 
             assertEquals(1, companyRepository.count());
-            final CompanyEntity matched = companyRepository.findByBrevoCompanyId(100L).orElseThrow();
+            final CompanyEntity matched = companyRepository.findByBrevoCompanyId("aaa111").orElseThrow();
             assertNotNull(matched.getBrevoCompanyId());
         }
 
@@ -176,12 +176,12 @@ class BrevoSyncServiceTest {
         @DisplayName("imports company without domain")
         void importsCompanyWithoutDomain() {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "NoDomain Inc", null, List.of())));
+                    List.of(makeBrevoCompany("aaa111", "NoDomain Inc", null, List.of())));
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
             brevoSyncService.syncAll();
 
-            final CompanyEntity company = companyRepository.findByBrevoCompanyId(100L).orElseThrow();
+            final CompanyEntity company = companyRepository.findByBrevoCompanyId("aaa111").orElseThrow();
             assertNull(company.getWebsite());
         }
 
@@ -193,7 +193,7 @@ class BrevoSyncServiceTest {
             companyRepository.saveAndFlush(local);
 
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "Brevo Corp", "brevo.com", List.of())));
+                    List.of(makeBrevoCompany("aaa111", "Brevo Corp", "brevo.com", List.of())));
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
             brevoSyncService.syncAll();
@@ -212,7 +212,7 @@ class BrevoSyncServiceTest {
         @DisplayName("imports new contact with all fields")
         void importsNewContactWithAllFields() {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "Acme", "acme.com", List.of(200L))));
+                    List.of(makeBrevoCompany("aaa111", "Acme", "acme.com", List.of(200L))));
             final Map<String, Object> attrs = new HashMap<>();
             attrs.put("VORNAME", "John");
             attrs.put("NACHNAME", "Doe");
@@ -240,7 +240,7 @@ class BrevoSyncServiceTest {
             assertTrue(contact.isSyncedToBrevo());
             final CompanyEntity company = getCompanyForContact(contact);
             assertNotNull(company);
-            assertEquals(100L, company.getBrevoCompanyId());
+            assertEquals("aaa111", company.getBrevoCompanyId());
         }
 
         @Test
@@ -412,7 +412,7 @@ class BrevoSyncServiceTest {
         @DisplayName("links contact to CRM company via linkedContactsIds")
         void linksContactToCompanyViaLinkedContactsIds() {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "Acme", "acme.com", List.of(200L))));
+                    List.of(makeBrevoCompany("aaa111", "Acme", "acme.com", List.of(200L))));
             final Map<String, Object> attrs = new HashMap<>();
             attrs.put("VORNAME", "John");
             attrs.put("NACHNAME", "Doe");
@@ -424,7 +424,7 @@ class BrevoSyncServiceTest {
             final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
             final CompanyEntity linkedCompany = getCompanyForContact(contact);
             assertNotNull(linkedCompany);
-            assertEquals(100L, linkedCompany.getBrevoCompanyId());
+            assertEquals("aaa111", linkedCompany.getBrevoCompanyId());
         }
 
         @Test
@@ -450,7 +450,7 @@ class BrevoSyncServiceTest {
         @DisplayName("CRM link takes priority over FIRMA_MANUELL")
         void crmLinkTakesPriorityOverFirmaManuell() {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(
-                    List.of(makeBrevoCompany(100L, "CRM Company", "crm.com", List.of(200L))));
+                    List.of(makeBrevoCompany("aaa111", "CRM Company", "crm.com", List.of(200L))));
             final Map<String, Object> attrs = new HashMap<>();
             attrs.put("VORNAME", "John");
             attrs.put("NACHNAME", "Doe");
@@ -464,7 +464,7 @@ class BrevoSyncServiceTest {
             final CompanyEntity priorityCompany = getCompanyForContact(contact);
             assertNotNull(priorityCompany);
             assertEquals("CRM Company", priorityCompany.getName());
-            assertEquals(100L, priorityCompany.getBrevoCompanyId());
+            assertEquals("aaa111", priorityCompany.getBrevoCompanyId());
         }
 
         @Test
@@ -617,7 +617,7 @@ class BrevoSyncServiceTest {
             // Pre-create 1 company (will be updated)
             final CompanyEntity existingCompany = new CompanyEntity();
             existingCompany.setName("Existing Co");
-            existingCompany.setBrevoCompanyId(100L);
+            existingCompany.setBrevoCompanyId("aaa111");
             companyRepository.saveAndFlush(existingCompany);
 
             // Pre-create 1 contact (will be updated)
@@ -629,9 +629,9 @@ class BrevoSyncServiceTest {
 
             // Mock: 3 companies (1 existing update + 2 new)
             when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of(
-                    makeBrevoCompany(100L, "Existing Co Updated", "existing.com", List.of()),
-                    makeBrevoCompany(101L, "New Co 1", "new1.com", List.of()),
-                    makeBrevoCompany(102L, "New Co 2", "new2.com", List.of())));
+                    makeBrevoCompany("aaa111", "Existing Co Updated", "existing.com", List.of()),
+                    makeBrevoCompany("bbb222", "New Co 1", "new1.com", List.of()),
+                    makeBrevoCompany("ccc333", "New Co 2", "new2.com", List.of())));
 
             // Mock: 4 contacts (1 existing update + 2 new + 1 failed)
             final Map<String, Object> existingAttrs = new HashMap<>();
