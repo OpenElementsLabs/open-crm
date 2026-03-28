@@ -1,5 +1,6 @@
 package com.openelements.crm.contact;
 
+import com.openelements.crm.ImageData;
 import com.openelements.crm.company.CompanyEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -11,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -62,9 +62,8 @@ public class ContactEntity {
     @Column(name = "birthday")
     private LocalDate birthday;
 
-    @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "photo")
+    @Column(name = "photo", length = ImageData.MAX_IMAGE_SIZE)
     private byte[] photo;
 
     @Column(name = "photo_content_type", length = 50)
