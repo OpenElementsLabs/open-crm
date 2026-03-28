@@ -168,55 +168,6 @@ describe("CompanyList", () => {
       });
     });
 
-    it("should filter by city when typing in city filter", async () => {
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.filter.city)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.filter.city), {
-        target: { value: "Berlin" },
-      });
-
-      await waitFor(() => {
-        expect(mockGetCompanies).toHaveBeenCalledWith(
-          expect.objectContaining({ city: "Berlin" }),
-        );
-      });
-    });
-
-    it("should filter by country when typing in country filter", async () => {
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.filter.country)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.filter.country), {
-        target: { value: "Germany" },
-      });
-
-      await waitFor(() => {
-        expect(mockGetCompanies).toHaveBeenCalledWith(
-          expect.objectContaining({ country: "Germany" }),
-        );
-      });
-    });
-  });
-
-  describe("sorting", () => {
-    it("should call API with sort parameter", async () => {
-      mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
-
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(mockGetCompanies).toHaveBeenCalledWith(
-          expect.objectContaining({ sort: "name,asc" }),
-        );
-      });
-    });
   });
 
   describe("archived companies", () => {

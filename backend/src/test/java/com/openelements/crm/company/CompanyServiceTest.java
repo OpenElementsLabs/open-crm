@@ -236,7 +236,7 @@ class CompanyServiceTest {
             final CompanyDto toDelete = createCompany("To Delete");
             companyService.delete(toDelete.id());
 
-            final var page = companyService.list(null, null, null, false, PageRequest.of(0, 20));
+            final var page = companyService.list(null, false, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -248,7 +248,7 @@ class CompanyServiceTest {
             final CompanyDto toDelete = createCompany("Deleted");
             companyService.delete(toDelete.id());
 
-            final var page = companyService.list(null, null, null, true, PageRequest.of(0, 20));
+            final var page = companyService.list(null, true, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -259,35 +259,12 @@ class CompanyServiceTest {
             createCompany("Open Elements");
             createCompany("Acme Corp");
 
-            final var page = companyService.list("open", null, null, false, PageRequest.of(0, 20));
+            final var page = companyService.list("open", false, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Open Elements", page.getContent().get(0).name());
         }
 
-        @Test
-        @DisplayName("should filter by city")
-        void shouldFilterByCity() {
-            companyService.create(new CompanyCreateDto("Berlin Co", null, null, null, null, null, "Berlin", null));
-            companyService.create(new CompanyCreateDto("Munich Co", null, null, null, null, null, "Munich", null));
-
-            final var page = companyService.list(null, "Berlin", null, false, PageRequest.of(0, 20));
-
-            assertEquals(1, page.getTotalElements());
-            assertEquals("Berlin Co", page.getContent().get(0).name());
-        }
-
-        @Test
-        @DisplayName("should filter by country")
-        void shouldFilterByCountry() {
-            companyService.create(new CompanyCreateDto("German Co", null, null, null, null, null, null, "Germany"));
-            companyService.create(new CompanyCreateDto("Austrian Co", null, null, null, null, null, null, "Austria"));
-
-            final var page = companyService.list(null, null, "Germany", false, PageRequest.of(0, 20));
-
-            assertEquals(1, page.getTotalElements());
-            assertEquals("German Co", page.getContent().get(0).name());
-        }
     }
 
     @Nested

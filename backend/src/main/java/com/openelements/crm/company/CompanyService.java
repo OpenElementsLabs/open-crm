@@ -135,16 +135,12 @@ public class CompanyService {
      * Lists companies with pagination, filtering, and sorting.
      *
      * @param name           partial name filter (case-insensitive)
-     * @param city           city filter
-     * @param country        country filter
      * @param includeDeleted whether to include soft-deleted companies
      * @param pageable       pagination and sorting parameters
      * @return a page of company responses
      */
     @Transactional(readOnly = true)
     public Page<CompanyDto> list(final String name,
-                                      final String city,
-                                      final String country,
                                       final boolean includeDeleted,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
@@ -156,14 +152,6 @@ public class CompanyService {
         if (name != null && !name.isBlank()) {
             spec = spec.and((root, query, cb) ->
                     cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
-        }
-        if (city != null && !city.isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(cb.lower(root.get("city")), city.toLowerCase()));
-        }
-        if (country != null && !country.isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(cb.lower(root.get("country")), country.toLowerCase()));
         }
 
         return companyRepository.findAll(spec, pageable).map(this::toDto);

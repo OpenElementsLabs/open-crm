@@ -23,10 +23,7 @@ function baseUrl(): string {
 export interface CompanyListParams {
   readonly page?: number;
   readonly size?: number;
-  readonly sort?: string;
   readonly name?: string;
-  readonly city?: string;
-  readonly country?: string;
   readonly includeDeleted?: boolean;
 }
 
@@ -34,10 +31,7 @@ export async function getCompanies(params: CompanyListParams = {}): Promise<Page
   const searchParams = new URLSearchParams();
   if (params.page !== undefined) searchParams.set("page", String(params.page));
   if (params.size !== undefined) searchParams.set("size", String(params.size));
-  if (params.sort) searchParams.set("sort", params.sort);
   if (params.name) searchParams.set("name", params.name);
-  if (params.city) searchParams.set("city", params.city);
-  if (params.country) searchParams.set("country", params.country);
   if (params.includeDeleted) searchParams.set("includeDeleted", "true");
 
   const query = searchParams.toString();
@@ -263,7 +257,7 @@ export async function deleteContactPhoto(id: string): Promise<void> {
 }
 
 export async function getCompaniesForSelect(): Promise<CompanyDto[]> {
-  const data = await getCompanies({ includeDeleted: false, size: 1000, sort: "name,asc" });
+  const data = await getCompanies({ includeDeleted: false, size: 1000 });
   return data.content as CompanyDto[];
 }
 

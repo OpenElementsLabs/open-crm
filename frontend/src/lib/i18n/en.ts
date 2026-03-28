@@ -96,20 +96,11 @@ export const en: Translations = {
     },
     filter: {
       name: "Filter by name",
-      city: "Filter by city",
-      country: "Filter by country",
     },
     pagination: {
       previous: "Previous",
       next: "Next",
       page: "Page {current} of {total}",
-    },
-    sort: {
-      label: "Sort by",
-      nameAsc: "Name (A-Z)",
-      nameDesc: "Name (Z-A)",
-      createdAtDesc: "Newest first",
-      createdAtAsc: "Oldest first",
     },
   },
   contacts: {
