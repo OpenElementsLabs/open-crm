@@ -1,5 +1,6 @@
 package com.openelements.crm.company;
 
+import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.contact.ContactRepository;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,17 +21,21 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * Creates a new CompanyService.
      *
      * @param companyRepository the company repository
      * @param contactRepository the contact repository
+     * @param commentRepository the comment repository
      */
     public CompanyService(final CompanyRepository companyRepository,
-                          final ContactRepository contactRepository) {
+                          final ContactRepository contactRepository,
+                          final CommentRepository commentRepository) {
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
     }
 
     /**
@@ -51,7 +56,7 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return CompanyDto.fromEntity(saved);
+        return CompanyDto.fromEntity(saved, 0, 0);
     }
 
     /**
@@ -65,7 +70,7 @@ public class CompanyService {
     public CompanyDto getById(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final CompanyEntity entity = findOrThrow(id);
-        return CompanyDto.fromEntity(entity);
+        return toDto(entity);
     }
 
     /**
@@ -89,7 +94,7 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return CompanyDto.fromEntity(saved);
+        return toDto(saved);
     }
 
     /**
@@ -121,7 +126,7 @@ public class CompanyService {
         final CompanyEntity entity = findOrThrow(id);
         entity.setDeleted(false);
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return CompanyDto.fromEntity(saved);
+        return toDto(saved);
     }
 
     /**
@@ -159,7 +164,13 @@ public class CompanyService {
                     cb.equal(cb.lower(root.get("country")), country.toLowerCase()));
         }
 
-        return companyRepository.findAll(spec, pageable).map(CompanyDto::fromEntity);
+        return companyRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    private CompanyDto toDto(final CompanyEntity entity) {
+        final long contactCount = contactRepository.countByCompanyId(entity.getId());
+        final long commentCount = commentRepository.countByCompanyId(entity.getId());
+        return CompanyDto.fromEntity(entity, contactCount, commentCount);
     }
 
     private CompanyEntity findOrThrow(final UUID id) {

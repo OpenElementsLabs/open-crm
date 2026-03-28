@@ -16,9 +16,11 @@ import java.util.UUID;
  * @param zipCode     the zip code of the address
  * @param city        the city of the address
  * @param country     the country of the address
- * @param deleted     whether the company is soft-deleted
- * @param createdAt   the creation timestamp
- * @param updatedAt   the last update timestamp
+ * @param deleted      whether the company is soft-deleted
+ * @param contactCount the number of associated contacts
+ * @param commentCount the number of comments on this company
+ * @param createdAt    the creation timestamp
+ * @param updatedAt    the last update timestamp
  */
 @Schema(description = "Company")
 public record CompanyDto(
@@ -32,17 +34,23 @@ public record CompanyDto(
         @Schema(description = "City") String city,
         @Schema(description = "Country") String country,
         @Schema(description = "Whether the company is soft-deleted", requiredMode = Schema.RequiredMode.REQUIRED) boolean deleted,
+        @Schema(description = "Number of associated contacts", requiredMode = Schema.RequiredMode.REQUIRED) long contactCount,
+        @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) {
 
     /**
-     * Creates a DTO from a company entity.
+     * Creates a DTO from a company entity with counts.
      *
-     * @param entity the company entity
+     * @param entity       the company entity
+     * @param contactCount the number of associated contacts
+     * @param commentCount the number of comments
      * @return the DTO
      */
-    public static CompanyDto fromEntity(final CompanyEntity entity) {
+    public static CompanyDto fromEntity(final CompanyEntity entity,
+                                        final long contactCount,
+                                        final long commentCount) {
         return new CompanyDto(
                 entity.getId(),
                 entity.getName(),
@@ -54,6 +62,8 @@ public record CompanyDto(
                 entity.getCity(),
                 entity.getCountry(),
                 entity.isDeleted(),
+                contactCount,
+                commentCount,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

@@ -18,6 +18,7 @@ import java.util.UUID;
  * @param companyId     the company ID
  * @param companyName    the company name (resolved)
  * @param companyDeleted whether the associated company is soft-deleted
+ * @param commentCount   the number of comments on this contact
  * @param syncedToBrevo  whether synced to Brevo
  * @param doubleOptIn   whether double opt-in is confirmed
  * @param language      the preferred language
@@ -37,6 +38,7 @@ public record ContactDto(
         @Schema(description = "Company ID") UUID companyId,
         @Schema(description = "Company name") String companyName,
         @Schema(description = "Whether the associated company is archived", requiredMode = Schema.RequiredMode.REQUIRED) boolean companyDeleted,
+        @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
         @Schema(description = "Whether synced to Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean syncedToBrevo,
         @Schema(description = "Whether double opt-in is confirmed", requiredMode = Schema.RequiredMode.REQUIRED) boolean doubleOptIn,
         @Schema(description = "Preferred language", requiredMode = Schema.RequiredMode.REQUIRED) Language language,
@@ -45,12 +47,13 @@ public record ContactDto(
 ) {
 
     /**
-     * Creates a response DTO from a contact entity.
+     * Creates a response DTO from a contact entity with comment count.
      *
-     * @param entity the contact entity
+     * @param entity       the contact entity
+     * @param commentCount the number of comments
      * @return the response DTO
      */
-    public static ContactDto fromEntity(final ContactEntity entity) {
+    public static ContactDto fromEntity(final ContactEntity entity, final long commentCount) {
         final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
         final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
         final boolean companyDeleted = entity.getCompany() != null && entity.getCompany().isDeleted();
@@ -66,6 +69,7 @@ public record ContactDto(
                 companyId,
                 companyName,
                 companyDeleted,
+                commentCount,
                 entity.isSyncedToBrevo(),
                 entity.isDoubleOptIn(),
                 entity.getLanguage(),

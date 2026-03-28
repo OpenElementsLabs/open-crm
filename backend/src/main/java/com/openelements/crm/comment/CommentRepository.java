@@ -34,4 +34,20 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
      * @param contactId the contact ID
      */
     void deleteByContactId(UUID contactId);
+
+    /**
+     * Counts all comments attached to the given company.
+     *
+     * @param companyId the company ID
+     * @return the number of comments
+     */
+    long countByCompanyId(UUID companyId);
+
+    /**
+     * Counts all comments attached to the given contact.
+     *
+     * @param contactId the contact ID
+     * @return the number of comments
+     */
+    long countByContactId(UUID contactId);
 }

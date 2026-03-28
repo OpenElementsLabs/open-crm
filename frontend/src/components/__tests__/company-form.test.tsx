@@ -33,6 +33,8 @@ const existingCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   deleted: false,
+  contactCount: 0,
+  commentCount: 0,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 };

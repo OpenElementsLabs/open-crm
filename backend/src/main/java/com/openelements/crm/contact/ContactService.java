@@ -52,7 +52,7 @@ public class ContactService {
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language());
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        return ContactDto.fromEntity(saved);
+        return ContactDto.fromEntity(saved, 0);
     }
 
     /**
@@ -66,7 +66,7 @@ public class ContactService {
     public ContactDto getById(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final ContactEntity entity = findOrThrow(id);
-        return ContactDto.fromEntity(entity);
+        return toDto(entity);
     }
 
     /**
@@ -85,7 +85,7 @@ public class ContactService {
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language());
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        return ContactDto.fromEntity(saved);
+        return toDto(saved);
     }
 
     /**
@@ -143,7 +143,12 @@ public class ContactService {
                     cb.equal(root.get("language"), language));
         }
 
-        return contactRepository.findAll(spec, pageable).map(ContactDto::fromEntity);
+        return contactRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    private ContactDto toDto(final ContactEntity entity) {
+        final long commentCount = commentRepository.countByContactId(entity.getId());
+        return ContactDto.fromEntity(entity, commentCount);
     }
 
     private void applyFields(final ContactEntity entity,

@@ -185,6 +185,8 @@ export function CompanyList() {
                 <TableRow>
                   <TableHead>{S.columns.name}</TableHead>
                   <TableHead>{S.columns.website}</TableHead>
+                  <TableHead>{S.columns.contacts}</TableHead>
+                  <TableHead>{S.columns.comments}</TableHead>
                   <TableHead className="w-[100px] text-right">{S.columns.actions}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -199,6 +201,8 @@ export function CompanyList() {
                     <TableCell className="text-oe-gray-mid">
                       {company.website ?? "—"}
                     </TableCell>
+                    <TableCell>{company.contactCount}</TableCell>
+                    <TableCell>{company.commentCount}</TableCell>
                     <TableCell className="text-right">
                       {company.deleted ? (
                         <Button

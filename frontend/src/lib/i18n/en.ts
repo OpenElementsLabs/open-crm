@@ -25,6 +25,8 @@ export const en: Translations = {
     columns: {
       name: "Name",
       website: "Website",
+      contacts: "Contacts",
+      comments: "Comments",
       actions: "Actions",
     },
     detail: {
@@ -113,6 +115,7 @@ export const en: Translations = {
       firstName: "First Name",
       lastName: "Last Name",
       company: "Company",
+      comments: "Comments",
       actions: "Actions",
     },
     detail: {

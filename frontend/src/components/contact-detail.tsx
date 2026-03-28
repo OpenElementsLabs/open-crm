@@ -155,7 +155,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
 
       <Separator className="my-8" />
 
-      <ContactComments contactId={contact.id} />
+      <ContactComments contactId={contact.id} totalCount={contact.commentCount} />
 
       <DeleteConfirmDialog
         open={deleteOpen}

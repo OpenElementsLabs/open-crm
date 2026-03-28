@@ -56,13 +56,13 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
           {company.deleted ? (
             <Button variant="outline" disabled className="opacity-50">
               <Users className="mr-2 h-4 w-4" />
-              {S.detail.showEmployees}
+              {S.detail.showEmployees} ({company.contactCount})
             </Button>
           ) : (
             <Button asChild variant="outline">
               <Link href={`/contacts?companyId=${company.id}`}>
                 <Users className="mr-2 h-4 w-4" />
-                {S.detail.showEmployees}
+                {S.detail.showEmployees} ({company.contactCount})
               </Link>
             </Button>
           )}
@@ -106,7 +106,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
 
       <Separator className="my-8" />
 
-      <CompanyComments companyId={company.id} />
+      <CompanyComments companyId={company.id} totalCount={company.commentCount} />
 
       <DeleteConfirmDialog
         open={deleteOpen}

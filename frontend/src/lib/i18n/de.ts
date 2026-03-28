@@ -23,6 +23,8 @@ export const de = {
     columns: {
       name: "Name",
       website: "Website",
+      contacts: "Kontakte",
+      comments: "Kommentare",
       actions: "Aktionen",
     },
     detail: {
@@ -111,6 +113,7 @@ export const de = {
       firstName: "Vorname",
       lastName: "Nachname",
       company: "Firma",
+      comments: "Kommentare",
       actions: "Aktionen",
     },
     detail: {

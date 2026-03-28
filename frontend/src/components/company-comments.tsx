@@ -23,9 +23,10 @@ function formatDate(dateString: string, language: string): string {
 
 interface CompanyCommentsProps {
   readonly companyId: string;
+  readonly totalCount?: number;
 }
 
-export function CompanyComments({ companyId }: CompanyCommentsProps) {
+export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps) {
   const t = useTranslations();
   const S = t.companies.comments;
 
@@ -84,7 +85,9 @@ export function CompanyComments({ companyId }: CompanyCommentsProps) {
   return (
     <Card className="border-oe-gray-light">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="font-heading text-lg text-oe-dark">{S.title}</CardTitle>
+        <CardTitle className="font-heading text-lg text-oe-dark">
+          {S.title}{totalCount !== undefined ? ` (${totalCount})` : ""}
+        </CardTitle>
         <Button
           onClick={() => setDialogOpen(true)}
           className="bg-oe-green hover:bg-oe-green-dark text-white"

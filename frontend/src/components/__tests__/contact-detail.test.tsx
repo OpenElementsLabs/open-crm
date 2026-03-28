@@ -36,6 +36,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     companyId: "company-1",
     companyName: "Open Elements",
     companyDeleted: false,
+    commentCount: 2,
     syncedToBrevo: true,
     doubleOptIn: false,
     language: "DE",
@@ -126,11 +127,11 @@ describe("ContactDetail", () => {
     expect(dashes.length).toBeGreaterThanOrEqual(5);
   });
 
-  it("should show comments section with Add Comment button", async () => {
-    renderWithProviders(<ContactDetail contact={makeContact()} />);
+  it("should show comments section with count and Add Comment button", async () => {
+    renderWithProviders(<ContactDetail contact={makeContact({ commentCount: 2 })} />);
 
     await waitFor(() => {
-      expect(screen.getByText(de.companies.comments.title)).toBeInTheDocument();
+      expect(screen.getByText(`${de.companies.comments.title} (2)`)).toBeInTheDocument();
       expect(screen.getByText(de.companies.comments.add)).toBeInTheDocument();
     });
   });

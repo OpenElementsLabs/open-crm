@@ -35,6 +35,8 @@ const testCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   deleted: false,
+  contactCount: 3,
+  commentCount: 5,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 };
@@ -89,11 +91,11 @@ describe("CompanyDetail", () => {
     expect(deleteButton).toBeInTheDocument();
   });
 
-  it("should show comment section with title and Add Comment button", async () => {
+  it("should show comment section with title, count, and Add Comment button", async () => {
     renderWithProviders(<CompanyDetail company={testCompany} />);
 
     await waitFor(() => {
-      expect(screen.getByText(S.comments.title)).toBeInTheDocument();
+      expect(screen.getByText(`${S.comments.title} (5)`)).toBeInTheDocument();
       expect(screen.getByText(S.comments.empty)).toBeInTheDocument();
       expect(screen.getByText(S.comments.add)).toBeInTheDocument();
     });

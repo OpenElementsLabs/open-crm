@@ -17,4 +17,12 @@ public interface ContactRepository extends JpaRepository<ContactEntity, UUID>,
      * @return true if at least one contact references the company
      */
     boolean existsByCompanyId(UUID companyId);
+
+    /**
+     * Counts contacts associated with the given company.
+     *
+     * @param companyId the company ID
+     * @return the number of contacts
+     */
+    long countByCompanyId(UUID companyId);
 }
