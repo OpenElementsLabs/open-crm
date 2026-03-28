@@ -16,4 +16,5 @@
 | 012 | Contact birthday           | Optional birthday date field for contacts with standard date picker                                 | — | done   |
 | 013 | Image upload               | Company logo and contact photo upload with PostgreSQL storage and list/detail display               | — | open   |
 | 014 | Comment count live update  | Increment comment count in heading immediately after successful comment creation                    | — | open   |
+| 015 | Optional contact language  | Make language field on contacts nullable to allow unknown language                                  | — | open   |
 
