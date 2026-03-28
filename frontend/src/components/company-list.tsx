@@ -203,7 +203,7 @@ export function CompanyList() {
                         <img
                           src={getCompanyLogoUrl(company.id)}
                           alt={company.name}
-                          className="h-8 w-8 rounded object-cover"
+                          className="h-8 w-8 object-contain"
                         />
                       ) : (
                         <Building2 className="h-8 w-8 text-oe-gray-mid" />

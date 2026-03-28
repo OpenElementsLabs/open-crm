@@ -215,9 +215,9 @@ export function CompanyForm({ company }: CompanyFormProps) {
             <Label>{S.logo}</Label>
             <div className="mt-2 flex items-center gap-4">
               {filePreview ? (
-                <img src={filePreview} alt="Logo preview" className="h-16 w-16 rounded object-cover" />
+                <img src={filePreview} alt="Logo preview" className="h-16 w-16 object-contain" />
               ) : hasExistingLogo && !removeExistingLogo ? (
-                <img src={getCompanyLogoUrl(company!.id)} alt="Current logo" className="h-16 w-16 rounded object-cover" />
+                <img src={getCompanyLogoUrl(company!.id)} alt="Current logo" className="h-16 w-16 object-contain" />
               ) : (
                 <Building2 className="h-16 w-16 text-oe-gray-mid" />
               )}

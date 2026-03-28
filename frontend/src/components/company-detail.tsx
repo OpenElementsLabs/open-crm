@@ -56,7 +56,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
             <img
               src={getCompanyLogoUrl(company.id)}
               alt={company.name}
-              className="h-24 w-24 rounded object-cover"
+              className="h-24 w-24 object-contain"
             />
           ) : (
             <Building2 className="h-24 w-24 text-oe-gray-mid" />
