@@ -111,6 +111,8 @@ export const de = {
     columns: {
       firstName: "Vorname",
       lastName: "Nachname",
+      name: "Name",
+      email: "E-Mail",
       company: "Firma",
       comments: "Kommentare",
       actions: "Aktionen",

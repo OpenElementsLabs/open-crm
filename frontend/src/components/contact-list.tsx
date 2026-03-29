@@ -206,8 +206,8 @@ export function ContactList() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
-                  <TableHead>{S.columns.firstName}</TableHead>
-                  <TableHead>{S.columns.lastName}</TableHead>
+                  <TableHead>{S.columns.name}</TableHead>
+                  <TableHead>{S.columns.email}</TableHead>
                   <TableHead>{S.columns.company}</TableHead>
                   <TableHead>{S.columns.comments}</TableHead>
                   <TableHead className="w-[100px] text-right">{S.columns.actions}</TableHead>
@@ -231,8 +231,12 @@ export function ContactList() {
                         <User className="h-8 w-8 text-oe-gray-mid" />
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">{contact.firstName}</TableCell>
-                    <TableCell>{contact.lastName}</TableCell>
+                    <TableCell className="font-medium">
+                      {`${contact.firstName} ${contact.lastName}`.trim()}
+                    </TableCell>
+                    <TableCell className="text-oe-gray-mid">
+                      {contact.email ?? "—"}
+                    </TableCell>
                     <TableCell className="text-oe-gray-mid">
                       {contact.companyName ?? ""}
                     </TableCell>

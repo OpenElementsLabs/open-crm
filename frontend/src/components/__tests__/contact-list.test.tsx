@@ -96,22 +96,22 @@ describe("ContactList", () => {
   });
 
   describe("data display", () => {
-    it("should render contacts with firstName, lastName, and company", async () => {
+    it("should render contacts with merged name, email, and company", async () => {
       mockGetContacts.mockResolvedValue(
         makePage([
-          makeContact({ id: "1", firstName: "Max", lastName: "Mustermann", companyName: "Open Elements" }),
-          makeContact({ id: "2", firstName: "Anna", lastName: "Schmidt", companyName: "Acme Corp" }),
+          makeContact({ id: "1", firstName: "Max", lastName: "Mustermann", email: "max@example.com", companyName: "Open Elements" }),
+          makeContact({ id: "2", firstName: "Anna", lastName: "Schmidt", email: "anna@example.com", companyName: "Acme Corp" }),
         ]),
       );
 
       renderWithProviders(<ContactList />);
 
       await waitFor(() => {
-        expect(screen.getByText("Max")).toBeInTheDocument();
-        expect(screen.getByText("Mustermann")).toBeInTheDocument();
+        expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
+        expect(screen.getByText("max@example.com")).toBeInTheDocument();
         expect(screen.getByText("Open Elements")).toBeInTheDocument();
-        expect(screen.getByText("Anna")).toBeInTheDocument();
-        expect(screen.getByText("Schmidt")).toBeInTheDocument();
+        expect(screen.getByText("Anna Schmidt")).toBeInTheDocument();
+        expect(screen.getByText("anna@example.com")).toBeInTheDocument();
         expect(screen.getByText("Acme Corp")).toBeInTheDocument();
       });
     });
@@ -144,7 +144,7 @@ describe("ContactList", () => {
       renderWithProviders(<ContactList />);
 
       await waitFor(() => {
-        expect(screen.getByText("Max")).toBeInTheDocument();
+        expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
       });
 
       // The company cell should be empty (no text content beyond header)
@@ -286,7 +286,7 @@ describe("ContactList", () => {
       renderWithProviders(<ContactList />);
 
       await waitFor(() => {
-        expect(screen.getByText("Max")).toBeInTheDocument();
+        expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
       });
 
       // The language filter select should be rendered with its placeholder
@@ -339,10 +339,10 @@ describe("ContactList", () => {
       renderWithProviders(<ContactList />);
 
       await waitFor(() => {
-        expect(screen.getByText("Max")).toBeInTheDocument();
+        expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText("Max"));
+      fireEvent.click(screen.getByText("Max Mustermann"));
 
       expect(mockPush).toHaveBeenCalledWith("/contacts/contact-1");
     });
@@ -452,6 +452,22 @@ describe("ContactList", () => {
       });
     });
 
+    it("should show merged name and email columns", async () => {
+      mockGetContacts.mockResolvedValue(
+        makePage([makeContact({ firstName: "Max", lastName: "Mustermann", email: "max@example.com" })]),
+      );
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        const rows = screen.getAllByRole("row");
+        const dataRow = rows[1];
+        const cells = dataRow.querySelectorAll("td");
+        expect(cells[1].textContent).toBe("Max Mustermann");
+        expect(cells[2].textContent).toBe("max@example.com");
+      });
+    });
+
     it("should have correct column order", async () => {
       mockGetContacts.mockResolvedValue(
         makePage([makeContact()]),
@@ -463,8 +479,8 @@ describe("ContactList", () => {
         const headerRow = screen.getAllByRole("row")[0];
         const headers = headerRow.querySelectorAll("th");
         expect(headers[0].textContent).toBe("");
-        expect(headers[1].textContent).toBe(S.columns.firstName);
-        expect(headers[2].textContent).toBe(S.columns.lastName);
+        expect(headers[1].textContent).toBe(S.columns.name);
+        expect(headers[2].textContent).toBe(S.columns.email);
         expect(headers[3].textContent).toBe(S.columns.company);
         expect(headers[4].textContent).toBe(S.columns.comments);
         expect(headers[5].textContent).toBe(S.columns.actions);
@@ -480,8 +496,8 @@ describe("ContactList", () => {
 
       await waitFor(() => {
         expect(screen.getByText(de.contacts.title)).toBeInTheDocument();
-        expect(screen.getByText(de.contacts.columns.firstName)).toBeInTheDocument();
-        expect(screen.getByText(de.contacts.columns.lastName)).toBeInTheDocument();
+        expect(screen.getByText(de.contacts.columns.name)).toBeInTheDocument();
+        expect(screen.getByText(de.contacts.columns.email)).toBeInTheDocument();
       });
     });
 
@@ -492,8 +508,8 @@ describe("ContactList", () => {
 
       await waitFor(() => {
         expect(screen.getByText(en.contacts.title)).toBeInTheDocument();
-        expect(screen.getByText(en.contacts.columns.firstName)).toBeInTheDocument();
-        expect(screen.getByText(en.contacts.columns.lastName)).toBeInTheDocument();
+        expect(screen.getByText(en.contacts.columns.name)).toBeInTheDocument();
+        expect(screen.getByText(en.contacts.columns.email)).toBeInTheDocument();
       });
     });
   });

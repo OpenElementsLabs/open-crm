@@ -113,6 +113,8 @@ export const en: Translations = {
     columns: {
       firstName: "First Name",
       lastName: "Last Name",
+      name: "Name",
+      email: "Email",
       company: "Company",
       comments: "Comments",
       actions: "Actions",
