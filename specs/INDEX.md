@@ -23,4 +23,5 @@
 | 019 | Logo display fix           | Show company logos fully (object-contain, no rounded corners) instead of cropping                   | —            | done   |
 | 020 | Simplify company filters   | Remove unused city/country filters and sorting dropdown from company list                         | — | open   |
 | 021 | Fix Brevo company ID       | Brevo company IDs are hex strings, not longs — all companies collapse into one entity            | — | done   |
+| 022 | Remove double opt-in       | Remove unused doubleOptIn boolean field from contacts across entire stack                         | — | open   |
 
