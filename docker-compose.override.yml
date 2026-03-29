@@ -10,3 +10,13 @@ services:
   frontend:
     ports:
       - "${FRONTEND_PORT:-4001}:3000"
+
+  mock-oauth2:
+    image: ghcr.io/navikt/mock-oauth2-server
+    ports:
+      - "${MOCK_OAUTH2_PORT:-8888}:8080"
+    volumes:
+      - ./mock-oauth2-config.json:/config.json
+    environment:
+      - JSON_CONFIG_PATH=/config.json
+      - LOG_LEVEL=INFO

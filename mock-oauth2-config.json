@@ -1,0 +1,38 @@
+{
+  "interactiveLogin": true,
+  "tokenCallbacks": [
+    {
+      "issuerId": "default",
+      "tokenExpiry": 3600,
+      "requestMappings": [
+        {
+          "requestParam": "scope",
+          "match": "*",
+          "claims": {
+            "name": "Demo User",
+            "email": "demo@example.com",
+            "picture": ""
+          }
+        }
+      ]
+    }
+  ],
+  "httpServer": {
+    "port": 8080
+  },
+  "issuers": [
+    {
+      "issuerId": "default",
+      "clients": [
+        {
+          "clientId": "open-crm",
+          "clientSecret": "open-crm-secret",
+          "redirectUris": [
+            "http://localhost:4001/api/auth/callback/oidc",
+            "http://localhost:9081/login/oauth2/code/oidc"
+          ]
+        }
+      ]
+    }
+  ]
+}
