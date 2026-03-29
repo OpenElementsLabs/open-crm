@@ -32,6 +32,7 @@ export function CompanyForm({ company }: CompanyFormProps) {
   const [zipCode, setZipCode] = useState(company?.zipCode ?? "");
   const [city, setCity] = useState(company?.city ?? "");
   const [country, setCountry] = useState(company?.country ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(company?.phoneNumber ?? "");
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -89,6 +90,7 @@ export function CompanyForm({ company }: CompanyFormProps) {
       zipCode: zipCode.trim() || null,
       city: city.trim() || null,
       country: country.trim() || null,
+      phoneNumber: phoneNumber.trim() || null,
     };
 
     setSubmitting(true);
@@ -146,6 +148,16 @@ export function CompanyForm({ company }: CompanyFormProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={S.emailPlaceholder}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone">{S.phone}</Label>
+            <Input
+              id="phone"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder={S.phonePlaceholder}
             />
           </div>
 

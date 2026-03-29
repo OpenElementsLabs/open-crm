@@ -35,6 +35,7 @@ const testCompany: CompanyDto = {
   zipCode: "12345",
   city: "Berlin",
   country: "Germany",
+  phoneNumber: "+49 30 12345678",
   deleted: false,
   brevo: false,
   hasLogo: false,
@@ -81,9 +82,13 @@ describe("CompanyDetail", () => {
 
   it("should skip street line when street is null", () => {
     renderWithProviders(
-      <CompanyDetail company={{ ...testCompany, street: null, houseNumber: "7" }} />,
+      <CompanyDetail company={{ ...testCompany, street: null, houseNumber: "7", phoneNumber: null }} />,
     );
-    expect(screen.queryByText(/7/)).not.toBeInTheDocument();
+    // House number alone should not appear in the address
+    const addressLabel = screen.getByText(S.detail.address);
+    const addressContainer = addressLabel.closest("div");
+    const addressText = addressContainer?.querySelector("dd span")?.textContent ?? "";
+    expect(addressText).not.toContain("7\n");
     expect(screen.getByText(/12345 Berlin/)).toBeInTheDocument();
   });
 

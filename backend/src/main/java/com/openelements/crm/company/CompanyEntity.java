@@ -51,6 +51,9 @@ public class CompanyEntity {
     @Column(name = "country", length = 100)
     private String country;
 
+    @Column(name = "phone_number", length = 255)
+    private String phoneNumber;
+
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "logo", length = ImageData.MAX_IMAGE_SIZE)
     private byte[] logo;
@@ -229,6 +232,24 @@ public class CompanyEntity {
      */
     public void setCountry(final String country) {
         this.country = country;
+    }
+
+    /**
+     * Returns the phone number.
+     *
+     * @return the phone number, or null
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    /**
+     * Sets the phone number.
+     *
+     * @param phoneNumber the phone number
+     */
+    public void setPhoneNumber(final String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     /**

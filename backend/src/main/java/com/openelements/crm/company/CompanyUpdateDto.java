@@ -49,6 +49,10 @@ public record CompanyUpdateDto(
 
         @Size(max = 100)
         @Schema(description = "Country", example = "Germany")
-        String country
+        String country,
+
+        @Size(max = 255)
+        @Schema(description = "Phone number", example = "+49 30 12345678")
+        String phoneNumber
 ) {
 }

@@ -77,6 +77,7 @@ const defaultCompanies: CompanyDto[] = [
     zipCode: null,
     city: null,
     country: null,
+    phoneNumber: null,
     deleted: false,
     brevo: false,
     hasLogo: false,

@@ -100,6 +100,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
           <dl className="grid gap-4 sm:grid-cols-2">
             <DetailField label={S.form.name} value={company.name} />
             <DetailField label={S.detail.email} value={company.email} copyable mailable />
+            <DetailField label={S.detail.phone} value={company.phoneNumber} copyable callable />
             <DetailField label={S.detail.website} value={company.website} copyable linkable />
             {(() => {
               const lines: string[] = [];

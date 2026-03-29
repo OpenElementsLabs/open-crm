@@ -42,7 +42,7 @@
 | 038 | CSV export                 | Backend CSV generation with dynamic column selection via frontend checkbox dialog                   | — | done   |
 | 039 | No company filter          | Add "No company" option to contact list company filter for unassigned contacts                     | — | done   |
 | 040 | Detail field actions       | Copy-to-clipboard, open URL, mailto:, tel: action icons on detail view fields                     | — | done   |
-| 041 | Company phone number       | Add optional phone number field to Company entity, detail view, form, and CSV export              | — | open   |
+| 041 | Company phone number       | Add optional phone number field to Company entity, detail view, form, and CSV export              | — | done   |
 | 042 | Print Safari fix           | Fix table cell text wrapping in Safari print by applying classes at component level                | — | open   |
 | 043 | Always-visible actions     | Show detail field action icons always (light color), darken on hover, dark on touch devices        | — | open   |
 

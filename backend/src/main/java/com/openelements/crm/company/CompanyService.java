@@ -59,6 +59,7 @@ public class CompanyService {
         entity.setZipCode(request.zipCode());
         entity.setCity(request.city());
         entity.setCountry(request.country());
+        entity.setPhoneNumber(request.phoneNumber());
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
         return CompanyDto.fromEntity(saved, 0, 0);
     }
@@ -97,6 +98,7 @@ public class CompanyService {
         entity.setZipCode(request.zipCode());
         entity.setCity(request.city());
         entity.setCountry(request.country());
+        entity.setPhoneNumber(request.phoneNumber());
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
         return toDto(saved);
     }

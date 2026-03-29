@@ -38,6 +38,7 @@ const existingCompany: CompanyDto = {
   zipCode: "12345",
   city: "Berlin",
   country: "Germany",
+  phoneNumber: null,
   deleted: false,
   brevo: false,
   hasLogo: false,

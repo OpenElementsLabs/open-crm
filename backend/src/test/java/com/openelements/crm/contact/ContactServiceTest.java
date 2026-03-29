@@ -57,7 +57,7 @@ class ContactServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null));
     }
 
     private ContactDto createContact(final String firstName, final String lastName, final UUID companyId) {

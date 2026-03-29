@@ -39,6 +39,7 @@ function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
     zipCode: null,
     city: null,
     country: null,
+    phoneNumber: null,
     deleted: false,
     brevo: false,
     hasLogo: false,

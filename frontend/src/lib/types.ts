@@ -8,6 +8,7 @@ export interface CompanyDto {
   readonly zipCode: string | null;
   readonly city: string | null;
   readonly country: string | null;
+  readonly phoneNumber: string | null;
   readonly deleted: boolean;
   readonly brevo: boolean;
   readonly hasLogo: boolean;
@@ -26,6 +27,7 @@ export interface CompanyCreateDto {
   readonly zipCode?: string | null;
   readonly city?: string | null;
   readonly country?: string | null;
+  readonly phoneNumber?: string | null;
 }
 
 export interface CommentDto {

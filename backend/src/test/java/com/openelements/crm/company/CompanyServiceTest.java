@@ -58,7 +58,7 @@ class CompanyServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null));
     }
 
     private void createContact(final String firstName, final String lastName, final UUID companyId) {
@@ -131,7 +131,7 @@ class CompanyServiceTest {
 
             final CompanyDto updated = companyService.update(company.id(),
                     new CompanyUpdateDto("New Name", "new@test.com", "https://new.com",
-                            "New Street", "99", "54321", "Munich", "Austria"));
+                            "New Street", "99", "54321", "Munich", "Austria", "+49 123"));
 
             assertEquals("New Name", updated.name());
             assertEquals("new@test.com", updated.email());
@@ -149,7 +149,7 @@ class CompanyServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> companyService.update(fakeId, new CompanyUpdateDto("Name", null, null, null, null, null, null, null)));
+                    () -> companyService.update(fakeId, new CompanyUpdateDto("Name", null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
