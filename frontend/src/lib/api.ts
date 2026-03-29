@@ -149,6 +149,7 @@ export interface ContactListParams {
   readonly size?: number;
   readonly search?: string;
   readonly companyId?: string;
+  readonly noCompany?: boolean;
   readonly language?: string;
   readonly brevo?: boolean;
 }
@@ -159,6 +160,7 @@ export async function getContacts(params: ContactListParams = {}): Promise<Page<
   if (params.size !== undefined) searchParams.set("size", String(params.size));
   if (params.search) searchParams.set("search", params.search);
   if (params.companyId) searchParams.set("companyId", params.companyId);
+  if (params.noCompany) searchParams.set("noCompany", "true");
   if (params.language) searchParams.set("language", params.language);
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
 
@@ -269,6 +271,7 @@ export function getContactExportUrl(params: ContactListParams, columns: string[]
   const searchParams = new URLSearchParams();
   if (params.search) searchParams.set("search", params.search);
   if (params.companyId) searchParams.set("companyId", params.companyId);
+  if (params.noCompany) searchParams.set("noCompany", "true");
   if (params.language) searchParams.set("language", params.language);
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
   for (const col of columns) {

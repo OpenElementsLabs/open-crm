@@ -37,6 +37,7 @@ function ContactPrintContent() {
 
   const searchFilter = searchParams.get("search") ?? "";
   const companyIdFilter = searchParams.get("companyId") ?? "";
+  const noCompanyFilter = searchParams.get("noCompany") === "true";
   const languageFilter = searchParams.get("language") ?? "";
   const brevoFilter = searchParams.get("brevo") ?? "";
 
@@ -63,6 +64,7 @@ function ContactPrintContent() {
             size: 250,
             search: searchFilter || undefined,
             companyId: companyIdFilter || undefined,
+            noCompany: noCompanyFilter || undefined,
             language: languageFilter || undefined,
             brevo: brevoFilter === "" ? undefined : brevoFilter === "true",
           });
@@ -78,7 +80,7 @@ function ContactPrintContent() {
       }
     }
     loadAll();
-  }, [searchFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [searchFilter, companyIdFilter, noCompanyFilter, languageFilter, brevoFilter]);
 
   useEffect(() => {
     if (!loading && !error) {
@@ -89,7 +91,8 @@ function ContactPrintContent() {
 
   const filterParts: string[] = [];
   if (searchFilter) filterParts.push(`${S.filter.search.replace("...", "")}: ${searchFilter}`);
-  if (companyIdFilter) filterParts.push(`${S.columns.company}: ${companyIdFilter}`);
+  if (noCompanyFilter) filterParts.push(`${S.columns.company}: ${S.form.noCompany}`);
+  else if (companyIdFilter) filterParts.push(`${S.columns.company}: ${companyIdFilter}`);
   if (languageFilter) filterParts.push(`${S.filter.language}: ${languageFilter}`);
   if (brevoFilter === "true") filterParts.push(`Brevo: ${P.filterYes}`);
   if (brevoFilter === "false") filterParts.push(`Brevo: ${P.filterNo}`);

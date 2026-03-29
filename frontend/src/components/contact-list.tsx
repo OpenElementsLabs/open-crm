@@ -67,7 +67,8 @@ export function ContactList() {
         page,
         size: 20,
         search: searchFilter || undefined,
-        companyId: companyIdFilter && companyIdFilter !== "all" ? companyIdFilter : undefined,
+        companyId: companyIdFilter && companyIdFilter !== "all" && companyIdFilter !== "none" ? companyIdFilter : undefined,
+        noCompany: companyIdFilter === "none" ? true : undefined,
         language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
       });
@@ -109,7 +110,11 @@ export function ContactList() {
             onClick={() => {
               const params = new URLSearchParams();
               if (searchFilter) params.set("search", searchFilter);
-              if (companyIdFilter && companyIdFilter !== "all") params.set("companyId", companyIdFilter);
+              if (companyIdFilter === "none") {
+                params.set("noCompany", "true");
+              } else if (companyIdFilter && companyIdFilter !== "all") {
+                params.set("companyId", companyIdFilter);
+              }
               if (languageFilter && languageFilter !== "all") params.set("language", languageFilter);
               if (brevoFilter !== "all") params.set("brevo", brevoFilter);
               const query = params.toString();
@@ -150,6 +155,7 @@ export function ContactList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{S.filter.allCompanies}</SelectItem>
+            <SelectItem value="none">{S.form.noCompany}</SelectItem>
             {companies.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}
@@ -365,8 +371,9 @@ export function ContactList() {
           const url = getContactExportUrl(
             {
               search: searchFilter || undefined,
-              companyId: companyIdFilter || undefined,
-              language: languageFilter || undefined,
+              companyId: companyIdFilter && companyIdFilter !== "all" && companyIdFilter !== "none" ? companyIdFilter : undefined,
+              noCompany: companyIdFilter === "none" ? true : undefined,
+              language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
               brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
             },
             columns,

@@ -238,7 +238,7 @@ class ContactServiceTest {
             createContact("Alice", "A", null);
             createContact("Bob", "B", null);
 
-            final var page = contactService.list(null, null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -249,12 +249,12 @@ class ContactServiceTest {
             createContact("Hendrik", "A", null);
             createContact("Hans", "B", null);
 
-            final var page = contactService.list("ali", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("ali", null, false, null, null, PageRequest.of(0, 20));
 
             // "ali" does not match either contact
             assertEquals(0, page.getTotalElements());
 
-            final var page2 = contactService.list("Hendrik", null, null, null, PageRequest.of(0, 20));
+            final var page2 = contactService.list("Hendrik", null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page2.getTotalElements());
             assertEquals("Hendrik", page2.getContent().get(0).firstName());
@@ -266,7 +266,7 @@ class ContactServiceTest {
             createContact("A", "Ebbers", null);
             createContact("B", "Schmidt", null);
 
-            final var page = contactService.list("Ebbers", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("Ebbers", null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Ebbers", page.getContent().get(0).lastName());
@@ -278,7 +278,7 @@ class ContactServiceTest {
             contactService.create(new ContactCreateDto("A", "A", "a@example.com", null, null, null, null, null, null, null));
             contactService.create(new ContactCreateDto("B", "B", "b@example.com", null, null, null, null, null, null, null));
 
-            final var page = contactService.list("a@example", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("a@example", null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
         }
@@ -290,7 +290,7 @@ class ContactServiceTest {
             createContact("John", "Doe", company.id());
             createContact("Jane", "Smith", null);
 
-            final var page = contactService.list("Acme", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("Acme", null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("John", page.getContent().get(0).firstName());
@@ -302,7 +302,7 @@ class ContactServiceTest {
             createContact("Anna", "Schmidt", null);
             createContact("Anna", "Mueller", null);
 
-            final var page = contactService.list("Anna Schmidt", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("Anna Schmidt", null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Schmidt", page.getContent().get(0).lastName());
@@ -315,7 +315,7 @@ class ContactServiceTest {
             final CompanyDto company = createCompany("BigCorp");
             createContact("Corp", "Employee", company.id());
 
-            final var page = contactService.list("Solo", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("Solo", null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Solo", page.getContent().get(0).firstName());
@@ -329,7 +329,7 @@ class ContactServiceTest {
             createContact("Alice", "A", companyA.id());
             createContact("Bob", "B", companyB.id());
 
-            final var page = contactService.list(null, companyA.id(), null, null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, companyA.id(), false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Alice", page.getContent().get(0).firstName());
@@ -341,7 +341,7 @@ class ContactServiceTest {
             contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null));
             contactService.create(new ContactCreateDto("EN", "Contact", null, null, null, null, null, null, Language.EN, null));
 
-            final var page = contactService.list(null, null, "DE", null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, false, "DE", null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("DE", page.getContent().get(0).firstName());
@@ -353,7 +353,7 @@ class ContactServiceTest {
             contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null));
             createContact("No", "Lang", null);
 
-            final var page = contactService.list(null, null, "UNKNOWN", null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, false, "UNKNOWN", null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("No", page.getContent().get(0).firstName());
@@ -369,7 +369,7 @@ class ContactServiceTest {
             brevoEntity.setBrevoId("brevo-456");
             contactRepository.saveAndFlush(brevoEntity);
 
-            final var page = contactService.list(null, null, null, true, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, false, null, true, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Brevo", page.getContent().get(0).firstName());
@@ -385,7 +385,7 @@ class ContactServiceTest {
             brevoEntity.setBrevoId("brevo-456");
             contactRepository.saveAndFlush(brevoEntity);
 
-            final var page = contactService.list(null, null, null, false, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, false, null, false, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Normal", page.getContent().get(0).firstName());

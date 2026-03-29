@@ -142,10 +142,15 @@ public class ContactService {
     @Transactional(readOnly = true)
     public Page<ContactDto> list(final String search,
                                       final UUID companyId,
+                                      final boolean noCompany,
                                       final String language,
                                       final Boolean brevo,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
+        if (companyId != null && noCompany) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot combine companyId and noCompany filters");
+        }
         Specification<ContactEntity> spec = Specification.where(null);
 
         if (search != null && !search.isBlank()) {
@@ -166,6 +171,9 @@ public class ContactService {
         if (companyId != null) {
             spec = spec.and((root, query, cb) ->
                     cb.equal(root.get("company").get("id"), companyId));
+        }
+        if (noCompany) {
+            spec = spec.and((root, query, cb) -> cb.isNull(root.get("company")));
         }
         if (language != null && !language.isBlank()) {
             if ("UNKNOWN".equalsIgnoreCase(language)) {
@@ -198,8 +206,13 @@ public class ContactService {
     @Transactional(readOnly = true)
     public List<ContactDto> listAll(final String search,
                                     final UUID companyId,
+                                    final boolean noCompany,
                                     final String language,
                                     final Boolean brevo) {
+        if (companyId != null && noCompany) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot combine companyId and noCompany filters");
+        }
         Specification<ContactEntity> spec = Specification.where(null);
 
         if (search != null && !search.isBlank()) {
@@ -220,6 +233,9 @@ public class ContactService {
         if (companyId != null) {
             spec = spec.and((root, query, cb) ->
                     cb.equal(root.get("company").get("id"), companyId));
+        }
+        if (noCompany) {
+            spec = spec.and((root, query, cb) -> cb.isNull(root.get("company")));
         }
         if (language != null && !language.isBlank()) {
             if ("UNKNOWN".equalsIgnoreCase(language)) {

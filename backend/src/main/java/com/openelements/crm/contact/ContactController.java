@@ -76,11 +76,13 @@ public class ContactController {
             @RequestParam(required = false) final UUID companyId,
             @Parameter(description = "Filter by language code (DE, EN, or UNKNOWN for null)")
             @RequestParam(required = false) final String language,
+            @Parameter(description = "Filter for contacts without a company association")
+            @RequestParam(defaultValue = "false") final boolean noCompany,
             @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
             @RequestParam(required = false) final Boolean brevo,
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
-        return contactService.list(search, companyId, language, brevo, pageable);
+        return contactService.list(search, companyId, noCompany, language, brevo, pageable);
     }
 
     /**
@@ -100,13 +102,14 @@ public class ContactController {
             @Parameter(description = "Multi-word search filter") @RequestParam(required = false) final String search,
             @Parameter(description = "Filter by company ID") @RequestParam(required = false) final UUID companyId,
             @Parameter(description = "Filter by language code") @RequestParam(required = false) final String language,
+            @Parameter(description = "Filter for contacts without a company") @RequestParam(defaultValue = "false") final boolean noCompany,
             @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
             @Parameter(description = "Columns to include in the CSV") @RequestParam final List<ContactExportColumn> columns,
             final HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"contacts.csv\"");
 
-        final List<ContactDto> contacts = contactService.listAll(search, companyId, language, brevo);
+        final List<ContactDto> contacts = contactService.listAll(search, companyId, noCompany, language, brevo);
         final String[] headers = columns.stream().map(ContactExportColumn::getHeader).toArray(String[]::new);
 
         final var writer = response.getWriter();
