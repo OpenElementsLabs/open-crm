@@ -114,7 +114,7 @@ class CommentControllerTest {
             //THEN
             result.andExpect(status().isCreated())
                     .andExpect(jsonPath("$.text").value("Great meeting"))
-                    .andExpect(jsonPath("$.author").value("UNKNOWN"))
+                    .andExpect(jsonPath("$.author").value("Demo User"))
                     .andExpect(jsonPath("$.companyId").value(companyId))
                     .andExpect(jsonPath("$.contactId").isEmpty())
                     .andExpect(jsonPath("$.createdAt").exists());

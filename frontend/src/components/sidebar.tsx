@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Building2, HeartPulse, Menu, RefreshCw, Users } from "lucide-react";
+import { Building2, CircleUser, HeartPulse, LogOut, Menu, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { currentUser } from "@/lib/user";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -66,6 +67,29 @@ function SidebarHeader() {
   );
 }
 
+function UserSection() {
+  const t = useTranslations();
+  return (
+    <div className="border-t border-oe-white/10 px-6 py-4">
+      <div className="flex items-center gap-3">
+        <CircleUser className="h-8 w-8 text-oe-gray-light" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-oe-white truncate">{currentUser.name}</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white"
+          onClick={() => {}}
+          title={t.user.logout}
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function Sidebar() {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
@@ -76,8 +100,11 @@ export function Sidebar() {
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-oe-dark">
         <SidebarHeader />
         <NavLinks />
-        <div className="mt-auto border-t border-oe-white/10 px-6 py-4">
-          <LanguageSwitch />
+        <div className="mt-auto">
+          <div className="border-t border-oe-white/10 px-6 py-4">
+            <LanguageSwitch />
+          </div>
+          <UserSection />
         </div>
       </aside>
 
@@ -94,8 +121,11 @@ export function Sidebar() {
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SidebarHeader />
             <NavLinks onNavigate={() => setOpen(false)} />
-            <div className="mt-auto border-t border-oe-white/10 px-6 py-4">
-              <LanguageSwitch />
+            <div className="mt-auto">
+              <div className="border-t border-oe-white/10 px-6 py-4">
+                <LanguageSwitch />
+              </div>
+              <UserSection />
             </div>
           </SheetContent>
         </Sheet>

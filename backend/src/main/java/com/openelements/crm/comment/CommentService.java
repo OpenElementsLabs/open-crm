@@ -4,6 +4,7 @@ import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
+import com.openelements.crm.user.UserService;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final UserService userService;
 
     /**
      * Creates a new CommentService.
@@ -30,13 +32,16 @@ public class CommentService {
      * @param commentRepository the comment repository
      * @param companyRepository the company repository
      * @param contactRepository the contact repository
+     * @param userService       the user service
      */
     public CommentService(final CommentRepository commentRepository,
                           final CompanyRepository companyRepository,
-                          final ContactRepository contactRepository) {
+                          final ContactRepository contactRepository,
+                          final UserService userService) {
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.userService = Objects.requireNonNull(userService, "userService must not be null");
     }
 
     /**
@@ -55,7 +60,7 @@ public class CommentService {
                         "Company not found: " + companyId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor("UNKNOWN");
+        entity.setAuthor(userService.getCurrentUser().name());
         entity.setCompany(company);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);
@@ -77,7 +82,7 @@ public class CommentService {
                         "Contact not found: " + contactId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor("UNKNOWN");
+        entity.setAuthor(userService.getCurrentUser().name());
         entity.setContact(contact);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);

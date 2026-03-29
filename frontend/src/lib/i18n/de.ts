@@ -290,4 +290,7 @@ export const de = {
     fromBrevo: "Aus Brevo",
     notFromBrevo: "Nicht aus Brevo",
   },
+  user: {
+    logout: "Abmelden",
+  },
 } as const;

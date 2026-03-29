@@ -292,4 +292,7 @@ export const en: Translations = {
     fromBrevo: "From Brevo",
     notFromBrevo: "Not from Brevo",
   },
+  user: {
+    logout: "Logout",
+  },
 } as const;
