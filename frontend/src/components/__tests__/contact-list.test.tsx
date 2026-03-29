@@ -316,20 +316,6 @@ describe("ContactList", () => {
     });
   });
 
-  describe("sorting", () => {
-    it("should call API with default sort parameter lastName,asc", async () => {
-      mockGetContacts.mockResolvedValue(makePage([makeContact()]));
-
-      renderWithProviders(<ContactList />);
-
-      await waitFor(() => {
-        expect(mockGetContacts).toHaveBeenCalledWith(
-          expect.objectContaining({ sort: "lastName,asc" }),
-        );
-      });
-    });
-  });
-
   describe("navigation", () => {
     it("should navigate to detail when clicking a row", async () => {
       mockGetContacts.mockResolvedValue(

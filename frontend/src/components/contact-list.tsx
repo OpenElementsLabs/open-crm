@@ -35,7 +35,6 @@ export function ContactList() {
   const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [sort, setSort] = useState("lastName,asc");
   const [firstNameFilter, setFirstNameFilter] = useState("");
   const [lastNameFilter, setLastNameFilter] = useState("");
   const [emailFilter, setEmailFilter] = useState("");
@@ -59,7 +58,6 @@ export function ContactList() {
       const result = await getContacts({
         page,
         size: 20,
-        sort,
         firstName: firstNameFilter || undefined,
         lastName: lastNameFilter || undefined,
         email: emailFilter || undefined,
@@ -73,7 +71,7 @@ export function ContactList() {
     } finally {
       setLoading(false);
     }
-  }, [page, sort, firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [page, firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   useEffect(() => {
     fetchContacts();
@@ -81,7 +79,7 @@ export function ContactList() {
 
   useEffect(() => {
     setPage(0);
-  }, [firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter, sort]);
+  }, [firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -159,19 +157,6 @@ export function ContactList() {
             <SelectItem value="all">{t.brevoFilter.all}</SelectItem>
             <SelectItem value="true">{t.brevoFilter.fromBrevo}</SelectItem>
             <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="sm:max-w-[200px]">
-            <SelectValue placeholder={S.sort.label} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="lastName,asc">{S.sort.lastNameAsc}</SelectItem>
-            <SelectItem value="lastName,desc">{S.sort.lastNameDesc}</SelectItem>
-            <SelectItem value="firstName,asc">{S.sort.firstNameAsc}</SelectItem>
-            <SelectItem value="firstName,desc">{S.sort.firstNameDesc}</SelectItem>
-            <SelectItem value="createdAt,desc">{S.sort.createdAtDesc}</SelectItem>
-            <SelectItem value="createdAt,asc">{S.sort.createdAtAsc}</SelectItem>
           </SelectContent>
         </Select>
       </div>

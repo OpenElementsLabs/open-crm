@@ -199,15 +199,6 @@ export const en: Translations = {
       totalOne: "{count} Contact",
       totalOther: "{count} Contacts",
     },
-    sort: {
-      label: "Sort by",
-      lastNameAsc: "Last name (A-Z)",
-      lastNameDesc: "Last name (Z-A)",
-      firstNameAsc: "First name (A-Z)",
-      firstNameDesc: "First name (Z-A)",
-      createdAtDesc: "Newest first",
-      createdAtAsc: "Oldest first",
-    },
   },
   brevo: {
     title: "Brevo Import",

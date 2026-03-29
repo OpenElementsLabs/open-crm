@@ -197,15 +197,6 @@ export const de = {
       totalOne: "{count} Kontakt",
       totalOther: "{count} Kontakte",
     },
-    sort: {
-      label: "Sortierung",
-      lastNameAsc: "Nachname (A-Z)",
-      lastNameDesc: "Nachname (Z-A)",
-      firstNameAsc: "Vorname (A-Z)",
-      firstNameDesc: "Vorname (Z-A)",
-      createdAtDesc: "Neueste zuerst",
-      createdAtAsc: "Älteste zuerst",
-    },
   },
   brevo: {
     title: "Brevo Import",
