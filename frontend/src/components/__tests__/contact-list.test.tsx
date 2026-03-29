@@ -366,6 +366,18 @@ describe("ContactList", () => {
     });
   });
 
+  describe("print", () => {
+    it("should show print button", async () => {
+      mockGetContacts.mockResolvedValue(makePage([makeContact()]));
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        expect(screen.getByText(de.print.button)).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("image display", () => {
     it("should show photo thumbnail when hasPhoto is true", async () => {
       mockGetContacts.mockResolvedValue(

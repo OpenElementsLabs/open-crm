@@ -1,6 +1,15 @@
 import type { Translations } from "./index";
 
 export const en: Translations = {
+  print: {
+    button: "Print",
+    loading: "Loading data...",
+    noFilters: "No filters",
+    noRecords: "No records found",
+    filterYes: "Yes",
+    filterNo: "No",
+    filterArchived: "Included",
+  },
   app: {
     title: "Open CRM",
     description: "Customer Relationship Management by Open Elements",

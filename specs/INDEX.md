@@ -33,7 +33,7 @@
 | 029 | Contact table columns      | Merge firstName/lastName into single Name column, add Email column to contact list table            | — | done   |
 | 030 | Remove contact sorting     | Remove sorting dropdown from contact list, fixed lastName ascending default                        | — | done   |
 | 031 | Contact unified search     | Replace three text filters with single search field across name, email, and company name           | — | done   |
-| 032 | Print table view           | Print button opens new tab with all filtered records in print-optimized table, auto-triggers print | — | open   |
+| 032 | Print table view           | Print button opens new tab with all filtered records in print-optimized table, auto-triggers print | — | done   |
 | 033 | OpenAPI parameter docs     | Add @Parameter annotations to all REST controller method parameters for Swagger UI descriptions    | — | open   |
 | 034 | Table action buttons       | Add edit and comment action buttons to company and contact list table rows                         | — | open   |
 
