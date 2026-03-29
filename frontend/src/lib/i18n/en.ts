@@ -131,7 +131,6 @@ export const en: Translations = {
       company: "Company",
       showCompany: "show company",
       archivedBadge: "Archived",
-      brevo: "Synced to Brevo",
       commentsTitle: "Comments",
       commentsPlaceholder: "Add Comment",
     },

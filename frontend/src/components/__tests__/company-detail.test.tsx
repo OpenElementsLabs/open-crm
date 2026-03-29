@@ -36,6 +36,7 @@ const testCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   deleted: false,
+  brevo: false,
   hasLogo: false,
   contactCount: 3,
   commentCount: 5,
@@ -149,6 +150,18 @@ describe("CompanyDetail", () => {
     await waitFor(() => {
       expect(screen.getByText(S.deleteDialog.errorConflict)).toBeInTheDocument();
     });
+  });
+
+  it("should show Brevo tag when company is from Brevo", () => {
+    renderWithProviders(<CompanyDetail company={{ ...testCompany, brevo: true }} />);
+
+    expect(screen.getByText("Brevo")).toBeInTheDocument();
+  });
+
+  it("should not show Brevo tag when company is not from Brevo", () => {
+    renderWithProviders(<CompanyDetail company={{ ...testCompany, brevo: false }} />);
+
+    expect(screen.queryByText("Brevo")).not.toBeInTheDocument();
   });
 
   it("should show logo image when company has logo", () => {

@@ -28,21 +28,6 @@ function DetailField({
   );
 }
 
-function CheckboxField({
-  label,
-  checked,
-}: {
-  readonly label: string;
-  readonly checked: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <input type="checkbox" checked={checked} disabled className="h-4 w-4" />
-      <span className="text-sm text-oe-gray-mid">{label}</span>
-    </div>
-  );
-}
-
 function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations>): string | null {
   if (!gender) return null;
   const S = t.contacts.form;
@@ -101,7 +86,16 @@ export function ContactDetail({ contact }: ContactDetailProps) {
           ) : (
             <User className="h-24 w-24 text-oe-gray-mid" />
           )}
-          <h1 className="font-heading text-2xl font-bold text-oe-dark">{fullName}</h1>
+          <div className="flex flex-col">
+            <h1 className="font-heading text-2xl font-bold text-oe-dark">{fullName}</h1>
+            <div className="h-6">
+              {contact.brevo && (
+                <span className="inline-block rounded border border-oe-gray-light bg-oe-gray-light/30 px-2 py-0.5 text-xs text-oe-gray-mid">
+                  Brevo
+                </span>
+              )}
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -165,10 +159,6 @@ export function ContactDetail({ contact }: ContactDetailProps) {
               </dd>
             </div>
           </dl>
-
-          <div className="mt-6 flex gap-6">
-            <CheckboxField label={S.detail.brevo} checked={contact.brevo} />
-          </div>
         </CardContent>
       </Card>
 

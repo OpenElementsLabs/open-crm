@@ -95,6 +95,27 @@ class CompanyDtoTest {
         }
 
         @Test
+        @DisplayName("Sets brevo to true when brevoCompanyId is present")
+        void setsBrevoTrueWhenBrevoCompanyIdPresent() throws Exception {
+            CompanyEntity entity = createEntity();
+            entity.setBrevoCompanyId("brevo-123");
+
+            CompanyDto dto = CompanyDto.fromEntity(entity, 0, 0);
+
+            assertTrue(dto.brevo());
+        }
+
+        @Test
+        @DisplayName("Sets brevo to false when brevoCompanyId is null")
+        void setsBrevoFalseWhenBrevoCompanyIdNull() throws Exception {
+            CompanyEntity entity = createEntity();
+
+            CompanyDto dto = CompanyDto.fromEntity(entity, 0, 0);
+
+            assertFalse(dto.brevo());
+        }
+
+        @Test
         @DisplayName("Handles null optional fields")
         void handlesNullOptionalFields() throws Exception {
             CompanyEntity entity = createEntity();

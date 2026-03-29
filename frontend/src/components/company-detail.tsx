@@ -61,7 +61,16 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
           ) : (
             <Building2 className="h-24 w-24 text-oe-gray-mid" />
           )}
-          <h1 className="font-heading text-2xl font-bold text-oe-dark">{company.name}</h1>
+          <div className="flex flex-col">
+            <h1 className="font-heading text-2xl font-bold text-oe-dark">{company.name}</h1>
+            <div className="h-6">
+              {company.brevo && (
+                <span className="inline-block rounded border border-oe-gray-light bg-oe-gray-light/30 px-2 py-0.5 text-xs text-oe-gray-mid">
+                  Brevo
+                </span>
+              )}
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
           {company.deleted ? (
