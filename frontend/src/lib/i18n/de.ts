@@ -167,6 +167,7 @@ export const de = {
       errorGeneric: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
       imageTooLarge: "Datei ist zu groß (max. 2 MB)",
       imageInvalidFormat: "Ungültiges Dateiformat",
+      managedByBrevo: "Wird von Brevo verwaltet",
     },
     deleteDialog: {
       title: "Kontakt löschen",

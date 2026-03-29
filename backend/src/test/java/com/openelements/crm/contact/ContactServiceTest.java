@@ -350,6 +350,113 @@ class ContactServiceTest {
     }
 
     @Nested
+    @DisplayName("BrevoFieldProtection")
+    class BrevoFieldProtection {
+
+        @Test
+        @DisplayName("update rejects changed firstName on Brevo contact")
+        void updateRejectsChangedFirstNameOnBrevoContact() {
+            final ContactDto contact = createContact("Original", "Last", null);
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> contactService.update(contact.id(),
+                            new ContactUpdateDto("Changed", "Last", null, null, null, null, null, null, null, null)));
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("update rejects changed email on Brevo contact")
+        void updateRejectsChangedEmailOnBrevoContact() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto("Jane", "Doe", "old@test.com", null, null, null, null, null, null, null));
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> contactService.update(contact.id(),
+                            new ContactUpdateDto("Jane", "Doe", "new@test.com", null, null, null, null, null, null, null)));
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("update rejects changed language on Brevo contact")
+        void updateRejectsChangedLanguageOnBrevoContact() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto("Jane", "Doe", null, null, null, null, null, null, Language.DE, null));
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> contactService.update(contact.id(),
+                            new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, Language.EN, null)));
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("update lists all violated fields")
+        void updateListsAllViolatedFields() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto("Jane", "Doe", "old@test.com", null, null, null, null, null, null, null));
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> contactService.update(contact.id(),
+                            new ContactUpdateDto("Changed", "Doe", "new@test.com", null, null, null, null, null, null, null)));
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+            assertNotNull(ex.getReason());
+            assert ex.getReason().contains("firstName");
+            assert ex.getReason().contains("email");
+        }
+
+        @Test
+        @DisplayName("update succeeds with unchanged protected fields on Brevo contact")
+        void updateSucceedsWithUnchangedProtectedFieldsOnBrevoContact() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto("Jane", "Doe", "jane@test.com", "Dev", null, null, null, null, Language.DE, null));
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto("Jane", "Doe", "jane@test.com", "Manager", null, null, null, null, Language.DE, null));
+
+            assertEquals("Manager", updated.position());
+        }
+
+        @Test
+        @DisplayName("update allows all changes on non-Brevo contact")
+        void updateAllowsAllChangesOnNonBrevoContact() {
+            final ContactDto contact = createContact("Original", "Last", null);
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto("Changed", "Last", null, null, null, null, null, null, null, null));
+
+            assertEquals("Changed", updated.firstName());
+        }
+
+        @Test
+        @DisplayName("update succeeds when null email unchanged on Brevo contact")
+        void updateSucceedsWhenNullEmailUnchangedOnBrevoContact() {
+            final ContactDto contact = createContact("Jane", "Doe", null);
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto("Jane", "Doe", null, "Manager", null, null, null, null, null, null));
+
+            assertEquals("Manager", updated.position());
+        }
+    }
+
+    @Nested
     @DisplayName("photo")
     class Photo {
 

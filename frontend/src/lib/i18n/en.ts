@@ -169,6 +169,7 @@ export const en: Translations = {
       errorGeneric: "An error occurred. Please try again.",
       imageTooLarge: "File is too large (max. 2 MB)",
       imageInvalidFormat: "Invalid file format",
+      managedByBrevo: "Managed by Brevo",
     },
     deleteDialog: {
       title: "Delete Contact",

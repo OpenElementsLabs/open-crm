@@ -261,6 +261,43 @@ describe("ContactForm", () => {
     });
   });
 
+  describe("Brevo field protection", () => {
+    const brevoContact: ContactDto = {
+      ...existingContact,
+      brevo: true,
+    };
+
+    it("should disable firstName, lastName, email, language for Brevo contacts in edit mode", () => {
+      renderWithProviders(<ContactForm contact={brevoContact} />);
+
+      expect(screen.getByLabelText(new RegExp(S.firstName))).toBeDisabled();
+      expect(screen.getByLabelText(new RegExp(S.lastName))).toBeDisabled();
+      expect(screen.getByLabelText(S.email)).toBeDisabled();
+
+      const languageTrigger = screen.getByRole("combobox", { name: S.language });
+      expect(languageTrigger).toBeDisabled();
+    });
+
+    it("should show managed by Brevo hint text for Brevo contacts", () => {
+      renderWithProviders(<ContactForm contact={brevoContact} />);
+
+      const hints = screen.getAllByText(S.managedByBrevo);
+      expect(hints).toHaveLength(4);
+    });
+
+    it("should not disable fields for non-Brevo contacts", () => {
+      renderWithProviders(<ContactForm contact={existingContact} />);
+
+      expect(screen.getByLabelText(new RegExp(S.firstName))).not.toBeDisabled();
+    });
+
+    it("should not disable fields in create mode", () => {
+      renderWithProviders(<ContactForm />);
+
+      expect(screen.getByLabelText(new RegExp(S.firstName))).not.toBeDisabled();
+    });
+  });
+
   describe("image upload", () => {
     it("should show upload photo button", () => {
       renderWithProviders(<ContactForm />);

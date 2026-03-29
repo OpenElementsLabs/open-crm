@@ -4,6 +4,8 @@ import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -83,6 +85,26 @@ public class ContactService {
         Objects.requireNonNull(id, "id must not be null");
         Objects.requireNonNull(request, "request must not be null");
         final ContactEntity entity = findOrThrow(id);
+        if (entity.getBrevoId() != null) {
+            final List<String> violations = new ArrayList<>();
+            if (!Objects.equals(request.firstName(), entity.getFirstName())) {
+                violations.add("firstName");
+            }
+            if (!Objects.equals(request.lastName(), entity.getLastName())) {
+                violations.add("lastName");
+            }
+            if (!Objects.equals(request.email(), entity.getEmail())) {
+                violations.add("email");
+            }
+            if (request.language() != entity.getLanguage()) {
+                violations.add("language");
+            }
+            if (!violations.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The fields " + String.join(", ", violations)
+                    + " are managed by Brevo and cannot be modified");
+            }
+        }
         applyFields(entity, request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),

@@ -29,6 +29,7 @@ export function ContactForm({ contact }: ContactFormProps) {
   const S = t.contacts.form;
   const router = useRouter();
   const isEdit = !!contact;
+  const isBrevoEdit = isEdit && (contact?.brevo === true);
 
   const [firstName, setFirstName] = useState(contact?.firstName ?? "");
   const [lastName, setLastName] = useState(contact?.lastName ?? "");
@@ -164,7 +165,9 @@ export function ContactForm({ contact }: ContactFormProps) {
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder={S.firstNamePlaceholder}
                 className={firstNameError ? "border-oe-red" : ""}
+                disabled={isBrevoEdit}
               />
+              {isBrevoEdit && <p className="mt-1 text-xs text-oe-gray-mid">{S.managedByBrevo}</p>}
               {firstNameError && <p className="mt-1 text-sm text-oe-red">{firstNameError}</p>}
             </div>
             <div>
@@ -175,7 +178,9 @@ export function ContactForm({ contact }: ContactFormProps) {
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder={S.lastNamePlaceholder}
                 className={lastNameError ? "border-oe-red" : ""}
+                disabled={isBrevoEdit}
               />
+              {isBrevoEdit && <p className="mt-1 text-xs text-oe-gray-mid">{S.managedByBrevo}</p>}
               {lastNameError && <p className="mt-1 text-sm text-oe-red">{lastNameError}</p>}
             </div>
           </div>
@@ -188,7 +193,9 @@ export function ContactForm({ contact }: ContactFormProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={S.emailPlaceholder}
+                disabled={isBrevoEdit}
               />
+              {isBrevoEdit && <p className="mt-1 text-xs text-oe-gray-mid">{S.managedByBrevo}</p>}
             </div>
             <div>
               <Label htmlFor="position">{S.position}</Label>
@@ -218,7 +225,7 @@ export function ContactForm({ contact }: ContactFormProps) {
             </div>
             <div>
               <Label htmlFor="language">{S.language}</Label>
-              <Select value={language || "unknown"} onValueChange={setLanguage}>
+              <Select value={language || "unknown"} onValueChange={setLanguage} disabled={isBrevoEdit}>
                 <SelectTrigger id="language">
                   <SelectValue placeholder={S.language} />
                 </SelectTrigger>
@@ -228,6 +235,7 @@ export function ContactForm({ contact }: ContactFormProps) {
                   <SelectItem value="EN">EN</SelectItem>
                 </SelectContent>
               </Select>
+              {isBrevoEdit && <p className="mt-1 text-xs text-oe-gray-mid">{S.managedByBrevo}</p>}
             </div>
           </div>
 

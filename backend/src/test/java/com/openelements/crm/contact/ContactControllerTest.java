@@ -276,6 +276,33 @@ class ContactControllerTest {
     }
 
     @Nested
+    @DisplayName("Brevo Field Protection")
+    class BrevoFieldProtection {
+
+        @Test
+        @DisplayName("should return 400 when changing protected field on Brevo contact")
+        void shouldReturn400WhenChangingProtectedFieldOnBrevoContact() throws Exception {
+            //GIVEN
+            final String contactId = createContact("Original", "Name", null);
+            final ContactEntity entity = contactRepository.findById(
+                    java.util.UUID.fromString(contactId)).orElseThrow();
+            entity.setBrevoId("brevo-123");
+            contactRepository.saveAndFlush(entity);
+
+            final String json = """
+                    {"firstName": "Changed", "lastName": "Name", "language": "DE"}
+                    """;
+
+            //WHEN
+            final var result = mockMvc.perform(put("/api/contacts/" + contactId)
+                    .contentType(MediaType.APPLICATION_JSON).content(json));
+
+            //THEN
+            result.andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
     @DisplayName("DELETE /api/contacts/{id}")
     class DeleteContact {
 
