@@ -23,7 +23,6 @@ import java.util.UUID;
  * @param hasPhoto       whether the contact has an uploaded photo
  * @param birthday       the birthday (optional)
  * @param syncedToBrevo  whether synced to Brevo
- * @param doubleOptIn   whether double opt-in is confirmed
  * @param language      the preferred language
  * @param createdAt     the creation timestamp
  * @param updatedAt     the last update timestamp
@@ -45,7 +44,6 @@ public record ContactDto(
         @Schema(description = "Whether the contact has an uploaded photo", requiredMode = Schema.RequiredMode.REQUIRED) boolean hasPhoto,
         @Schema(description = "Birthday") LocalDate birthday,
         @Schema(description = "Whether synced to Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean syncedToBrevo,
-        @Schema(description = "Whether double opt-in is confirmed", requiredMode = Schema.RequiredMode.REQUIRED) boolean doubleOptIn,
         @Schema(description = "Preferred language (null if unknown)") Language language,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
@@ -78,7 +76,6 @@ public record ContactDto(
                 entity.getPhoto() != null,
                 entity.getBirthday(),
                 entity.isSyncedToBrevo(),
-                entity.isDoubleOptIn(),
                 entity.getLanguage(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()

@@ -72,7 +72,7 @@ public class ContactService {
     }
 
     /**
-     * Updates an existing contact. Brevo-managed fields (syncedToBrevo, doubleOptIn) are not modified.
+     * Updates an existing contact. Brevo-managed fields (syncedToBrevo) are not modified.
      *
      * @param id      the contact ID
      * @param request the update request

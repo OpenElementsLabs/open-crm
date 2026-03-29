@@ -57,7 +57,6 @@ export interface ContactDto {
   readonly hasPhoto: boolean;
   readonly birthday: string | null;
   readonly syncedToBrevo: boolean;
-  readonly doubleOptIn: boolean;
   readonly language: "DE" | "EN" | null;
   readonly createdAt: string;
   readonly updatedAt: string;

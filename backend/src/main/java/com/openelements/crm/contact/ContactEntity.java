@@ -75,9 +75,6 @@ public class ContactEntity {
     @Column(name = "synced_to_brevo", nullable = false)
     private boolean syncedToBrevo = false;
 
-    @Column(name = "double_opt_in", nullable = false)
-    private boolean doubleOptIn = false;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "language", length = 5)
     private Language language;
@@ -337,24 +334,6 @@ public class ContactEntity {
      */
     public void setSyncedToBrevo(final boolean syncedToBrevo) {
         this.syncedToBrevo = syncedToBrevo;
-    }
-
-    /**
-     * Returns whether this contact has completed double opt-in via Brevo.
-     *
-     * @return true if double opt-in is confirmed
-     */
-    public boolean isDoubleOptIn() {
-        return doubleOptIn;
-    }
-
-    /**
-     * Sets the double opt-in status. This should only be called by the Brevo synchronization service.
-     *
-     * @param doubleOptIn the double opt-in status
-     */
-    public void setDoubleOptIn(final boolean doubleOptIn) {
-        this.doubleOptIn = doubleOptIn;
     }
 
     /**

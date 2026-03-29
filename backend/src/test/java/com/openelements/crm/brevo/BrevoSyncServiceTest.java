@@ -221,7 +221,6 @@ class BrevoSyncServiceTest {
             attrs.put("JOB_TITLE", "CTO");
             attrs.put("LINKEDIN", "https://li");
             attrs.put("SPRACHE", 1.0);
-            attrs.put("DOUBLE_OPT-IN", true);
             when(brevoApiClient.fetchAllContacts()).thenReturn(
                     List.of(makeBrevoContact(200L, "john@test.com", attrs)));
 
@@ -236,7 +235,6 @@ class BrevoSyncServiceTest {
             assertEquals("CTO", contact.getPosition());
             assertEquals("https://li", contact.getLinkedInUrl());
             assertEquals(Language.DE, contact.getLanguage());
-            assertTrue(contact.isDoubleOptIn());
             assertTrue(contact.isSyncedToBrevo());
             final CompanyEntity company = getCompanyForContact(contact);
             assertNotNull(company);

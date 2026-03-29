@@ -64,7 +64,6 @@ class ContactDtoTest {
             entity.setPhoneNumber("+49 123 456");
             entity.setBirthday(birthday);
             entity.setSyncedToBrevo(true);
-            entity.setDoubleOptIn(true);
             entity.setLanguage(Language.DE);
             setField(entity, "createdAt", createdAt);
             setField(entity, "updatedAt", updatedAt);
@@ -81,7 +80,6 @@ class ContactDtoTest {
             assertEquals("+49 123 456", dto.phoneNumber());
             assertEquals(birthday, dto.birthday());
             assertTrue(dto.syncedToBrevo());
-            assertTrue(dto.doubleOptIn());
             assertEquals(Language.DE, dto.language());
             assertEquals(7, dto.commentCount());
             assertEquals(createdAt, dto.createdAt());

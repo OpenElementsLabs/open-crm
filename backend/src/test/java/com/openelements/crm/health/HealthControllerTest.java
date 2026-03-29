@@ -167,7 +167,6 @@ class HealthControllerTest {
                     .andExpect(jsonPath("$.components.schemas.ContactDto.required", hasItem("firstName")))
                     .andExpect(jsonPath("$.components.schemas.ContactDto.required", hasItem("lastName")))
                     .andExpect(jsonPath("$.components.schemas.ContactDto.required", hasItem("syncedToBrevo")))
-                    .andExpect(jsonPath("$.components.schemas.ContactDto.required", hasItem("doubleOptIn")))
                     .andExpect(jsonPath("$.components.schemas.ContactDto.required", not(hasItem("language"))))
                     .andExpect(jsonPath("$.components.schemas.ContactDto.required", hasItem("createdAt")))
                     .andExpect(jsonPath("$.components.schemas.ContactDto.required", hasItem("updatedAt")));

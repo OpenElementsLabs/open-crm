@@ -132,7 +132,6 @@ export const en: Translations = {
       showCompany: "show company",
       archivedBadge: "Archived",
       syncedToBrevo: "Synced to Brevo",
-      doubleOptIn: "Double Opt-In",
       commentsTitle: "Comments",
       commentsPlaceholder: "Add Comment",
     },

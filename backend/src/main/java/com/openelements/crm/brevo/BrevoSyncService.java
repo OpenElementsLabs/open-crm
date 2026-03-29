@@ -227,10 +227,6 @@ public class BrevoSyncService {
             // Language mapping
             entity.setLanguage(mapLanguage(attrs.get("SPRACHE")));
 
-            // Double opt-in
-            final Object doubleOptInVal = attrs.get("DOUBLE_OPT-IN");
-            entity.setDoubleOptIn(Boolean.TRUE.equals(doubleOptInVal));
-
             // Company resolution
             final CompanyEntity company = resolveCompany(
                     brevoContact.id(), contactToCompanyBrevoId, firmaManuell);
