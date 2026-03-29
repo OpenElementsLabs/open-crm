@@ -42,4 +42,5 @@
 | 038 | CSV export                 | Backend CSV generation with dynamic column selection via frontend checkbox dialog                   | — | open   |
 | 039 | No company filter          | Add "No company" option to contact list company filter for unassigned contacts                     | — | open   |
 | 040 | Detail field actions       | Copy-to-clipboard, open URL, mailto:, tel: action icons on detail view fields                     | — | open   |
+| 041 | Company phone number       | Add optional phone number field to Company entity, detail view, form, and CSV export              | — | open   |
 

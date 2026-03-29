@@ -30,3 +30,7 @@ from the `COMPANY` text field on contacts without matching against existing comp
 acceptable during import. A separate merge feature will allow cleaning these up later.
 
 **Context:** Deferred from the Brevo import integration spec.
+
+## Wenn Kontakt nicht mehr in Bre3vo, dann auch Brevo-ID und Tag beoi uns entfernen
+
+Der Kontakt bleibt bei uns bestehen aber die verbisnugn wird entfernt und der Kontakt kann bei uns editiert werden.
