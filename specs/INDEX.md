@@ -48,4 +48,5 @@
 | 044 | Page serialization fix     | Enable VIA_DTO page serialization to fix PageImpl warning, update frontend Page type               | — | done   |
 | 045 | User model prep            | Hardcoded dummy user for comments and sidebar, prepare for future Authentik SSO                    | — | done   |
 | 046 | OE branding                | Sidebar header with app logo placeholder, "Open CRM" name, and "Developed by" OE branding         | — | done   |
+| 047 | OIDC infrastructure        | mock-oauth2-server for local dev, OIDC env vars for Authentik in production                       | — | open   |
 
