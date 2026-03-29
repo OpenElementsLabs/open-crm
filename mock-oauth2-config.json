@@ -11,7 +11,7 @@
           "claims": {
             "name": "Demo User",
             "email": "demo@example.com",
-            "picture": ""
+            "picture": "https://open-elements.com/team/hendrik.jpg"
           }
         }
       ]

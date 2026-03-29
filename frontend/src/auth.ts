@@ -22,6 +22,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: { strategy: "jwt" },
   callbacks: {
+    authorized({ auth: session }) {
+      // Returning false triggers a redirect to the sign-in page
+      return !!session?.user;
+    },
+    async signIn() {
+      return true;
+    },
     async jwt({ token, account, profile }) {
       const t = token as Record<string, unknown>;
 
