@@ -233,4 +233,10 @@ export const de = {
       errorGeneric: "Der Import konnte nicht gestartet werden.",
     },
   },
+  brevoFilter: {
+    label: "Brevo",
+    all: "Alle",
+    fromBrevo: "Aus Brevo",
+    notFromBrevo: "Nicht aus Brevo",
+  },
 } as const;

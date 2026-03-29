@@ -150,6 +150,18 @@ describe("CompanyList", () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
     });
 
+    it("should render brevo filter dropdown", async () => {
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        const allTriggers = screen.getAllByRole("combobox");
+        const brevoTrigger = allTriggers.find((el) =>
+          el.textContent?.includes(de.brevoFilter.all),
+        );
+        expect(brevoTrigger).toBeDefined();
+      });
+    });
+
     it("should filter by name when typing in name filter", async () => {
       renderWithProviders(<CompanyList />);
 

@@ -439,6 +439,46 @@ class ContactControllerTest {
                     .andExpect(jsonPath("$.content[0].lastName").value("Alpha"))
                     .andExpect(jsonPath("$.content[1].lastName").value("Zebra"));
         }
+
+        @Test
+        @DisplayName("should filter by brevo=true")
+        void shouldFilterByBrevoTrue() throws Exception {
+            //GIVEN
+            createContact("Normal", "Contact", null);
+            final ContactEntity brevoEntity = new ContactEntity();
+            brevoEntity.setFirstName("Brevo");
+            brevoEntity.setLastName("Contact");
+            brevoEntity.setBrevoId("brevo-456");
+            contactRepository.saveAndFlush(brevoEntity);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts?brevo=true"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].firstName").value("Brevo"));
+        }
+
+        @Test
+        @DisplayName("should filter by brevo=false")
+        void shouldFilterByBrevoFalse() throws Exception {
+            //GIVEN
+            createContact("Normal", "Contact", null);
+            final ContactEntity brevoEntity = new ContactEntity();
+            brevoEntity.setFirstName("Brevo");
+            brevoEntity.setLastName("Contact");
+            brevoEntity.setBrevoId("brevo-456");
+            contactRepository.saveAndFlush(brevoEntity);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts?brevo=false"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].firstName").value("Normal"));
+        }
     }
 
     @Nested

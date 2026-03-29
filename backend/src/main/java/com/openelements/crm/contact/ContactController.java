@@ -59,6 +59,7 @@ public class ContactController {
      * @param email     partial email filter
      * @param companyId exact company ID filter
      * @param language  exact language filter
+     * @param brevo     filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
      * @param pageable  pagination and sorting parameters
      * @return a page of contact responses
      */
@@ -70,8 +71,9 @@ public class ContactController {
             @RequestParam(required = false) final String email,
             @RequestParam(required = false) final UUID companyId,
             @RequestParam(required = false) final String language,
+            @RequestParam(required = false) final Boolean brevo,
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
-        return contactService.list(firstName, lastName, email, companyId, language, pageable);
+        return contactService.list(firstName, lastName, email, companyId, language, brevo, pageable);
     }
 
     /**

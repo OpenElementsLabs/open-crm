@@ -25,6 +25,6 @@
 | 021 | Fix Brevo company ID       | Brevo company IDs are hex strings, not longs — all companies collapse into one entity            | — | done   |
 | 022 | Remove double opt-in       | Remove unused doubleOptIn boolean field from contacts across entire stack                         | — | done   |
 | 023 | Contact brevo cleanup      | Remove syncedToBrevo flag, change brevoId from Long to String, expose computed brevo boolean      | — | done   |
-| 024 | Brevo origin filter        | Three-way filter (All/From Brevo/Not from Brevo) on company and contact list tables               | — | open   |
+| 024 | Brevo origin filter        | Three-way filter (All/From Brevo/Not from Brevo) on company and contact list tables               | — | done   |
 | 025 | Brevo detail badge         | Show "Brevo" tag below name in company/contact detail views, remove synced checkbox               | — | open   |
 

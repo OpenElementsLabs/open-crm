@@ -56,6 +56,7 @@ public class CompanyController {
      *
      * @param name           partial name filter (case-insensitive)
      * @param includeDeleted whether to include soft-deleted companies
+     * @param brevo          filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
      * @param pageable       pagination and sorting parameters
      * @return a page of company responses
      */
@@ -64,8 +65,9 @@ public class CompanyController {
     public Page<CompanyDto> list(
             @RequestParam(required = false) final String name,
             @RequestParam(defaultValue = "false") final boolean includeDeleted,
+            @RequestParam(required = false) final Boolean brevo,
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return companyService.list(name, includeDeleted, pageable);
+        return companyService.list(name, includeDeleted, brevo, pageable);
     }
 
     /**

@@ -41,6 +41,7 @@ export function ContactList() {
   const [emailFilter, setEmailFilter] = useState("");
   const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
   const [languageFilter, setLanguageFilter] = useState("");
+  const [brevoFilter, setBrevoFilter] = useState("all");
 
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ContactDto | null>(null);
@@ -64,6 +65,7 @@ export function ContactList() {
         email: emailFilter || undefined,
         companyId: companyIdFilter && companyIdFilter !== "all" ? companyIdFilter : undefined,
         language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
+        brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
       });
       setData(result);
     } catch {
@@ -71,7 +73,7 @@ export function ContactList() {
     } finally {
       setLoading(false);
     }
-  }, [page, sort, firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter]);
+  }, [page, sort, firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   useEffect(() => {
     fetchContacts();
@@ -79,7 +81,7 @@ export function ContactList() {
 
   useEffect(() => {
     setPage(0);
-  }, [firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, sort]);
+  }, [firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter, sort]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -147,6 +149,16 @@ export function ContactList() {
             <SelectItem value="UNKNOWN">{S.filter.unknownLanguage}</SelectItem>
             <SelectItem value="DE">DE</SelectItem>
             <SelectItem value="EN">EN</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={brevoFilter} onValueChange={setBrevoFilter}>
+          <SelectTrigger className="sm:max-w-[200px]">
+            <SelectValue placeholder={t.brevoFilter.label} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t.brevoFilter.all}</SelectItem>
+            <SelectItem value="true">{t.brevoFilter.fromBrevo}</SelectItem>
+            <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sort} onValueChange={setSort}>

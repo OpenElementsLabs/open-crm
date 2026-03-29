@@ -235,4 +235,10 @@ export const en: Translations = {
       errorGeneric: "The import could not be started.",
     },
   },
+  brevoFilter: {
+    label: "Brevo",
+    all: "All",
+    fromBrevo: "From Brevo",
+    notFromBrevo: "Not from Brevo",
+  },
 } as const;

@@ -503,6 +503,44 @@ class CompanyControllerTest {
                     .andExpect(jsonPath("$.content[0].name").value("Second"))
                     .andExpect(jsonPath("$.content[1].name").value("First"));
         }
+
+        @Test
+        @DisplayName("should filter by brevo=true")
+        void shouldFilterByBrevoTrue() throws Exception {
+            //GIVEN
+            createCompany("Normal Corp");
+            final CompanyEntity brevoEntity = new CompanyEntity();
+            brevoEntity.setName("Brevo Corp");
+            brevoEntity.setBrevoCompanyId("brevo-123");
+            companyRepository.saveAndFlush(brevoEntity);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies?brevo=true"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].name").value("Brevo Corp"));
+        }
+
+        @Test
+        @DisplayName("should filter by brevo=false")
+        void shouldFilterByBrevoFalse() throws Exception {
+            //GIVEN
+            createCompany("Normal Corp");
+            final CompanyEntity brevoEntity = new CompanyEntity();
+            brevoEntity.setName("Brevo Corp");
+            brevoEntity.setBrevoCompanyId("brevo-123");
+            companyRepository.saveAndFlush(brevoEntity);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies?brevo=false"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].name").value("Normal Corp"));
+        }
     }
 
     @Nested
