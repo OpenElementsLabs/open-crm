@@ -22,4 +22,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8888/default}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8888/default/jwks}
