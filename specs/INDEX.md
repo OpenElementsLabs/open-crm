@@ -45,4 +45,5 @@
 | 041 | Company phone number       | Add optional phone number field to Company entity, detail view, form, and CSV export              | — | done   |
 | 042 | Print Safari fix           | Fix table cell text wrapping in Safari print by applying classes at component level                | — | done   |
 | 043 | Always-visible actions     | Show detail field action icons always (light color), darken on hover, dark on touch devices        | — | done   |
+| 044 | Page serialization fix     | Enable VIA_DTO page serialization to fix PageImpl warning, update frontend Page type               | — | open   |
 
