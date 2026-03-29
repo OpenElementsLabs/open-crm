@@ -132,11 +132,11 @@ function CompanyPrintContent() {
                       <Building2 className="h-8 w-8 text-oe-gray-mid" />
                     )}
                   </TableCell>
-                  <TableCell className="font-medium">{company.name}</TableCell>
-                  <TableCell className="text-oe-gray-mid">
+                  <TableCell className="font-medium whitespace-normal break-words">{company.name}</TableCell>
+                  <TableCell className="text-oe-gray-mid whitespace-normal break-words">
                     {company.website ?? "\u2014"}
                   </TableCell>
-                  <TableCell>{company.contactCount}</TableCell>
+                  <TableCell className="whitespace-normal break-words">{company.contactCount}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

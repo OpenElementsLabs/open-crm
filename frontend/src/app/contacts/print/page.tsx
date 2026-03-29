@@ -138,13 +138,13 @@ function ContactPrintContent() {
                       <User className="h-8 w-8 text-oe-gray-mid" />
                     )}
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium whitespace-normal break-words">
                     {`${contact.firstName} ${contact.lastName}`.trim()}
                   </TableCell>
-                  <TableCell className="text-oe-gray-mid">
+                  <TableCell className="text-oe-gray-mid whitespace-normal break-words">
                     {contact.email ?? "\u2014"}
                   </TableCell>
-                  <TableCell className="text-oe-gray-mid">
+                  <TableCell className="text-oe-gray-mid whitespace-normal break-words">
                     {contact.companyName ?? ""}
                   </TableCell>
                 </TableRow>
