@@ -29,4 +29,5 @@
 | 025 | Brevo detail badge         | Show "Brevo" tag below name in company/contact detail views, remove synced checkbox               | — | done   |
 | 026 | Brevo fields readonly      | Prevent editing of firstName, lastName, email, language on Brevo contacts (400 + disabled UI)     | — | done   |
 | 027 | Brevo reimport protect     | Only overwrite Brevo-managed fields on contact re-import, preserve user-editable fields           | — | open   |
+| 028 | Record count display       | Show total filtered record count in company and contact list pagination ("42 Firmen · Seite 1 von 3") | — | open   |
 
