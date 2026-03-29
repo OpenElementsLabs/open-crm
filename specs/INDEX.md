@@ -21,7 +21,7 @@
 | 017 | Fix image column type      | Fix @Lob/BYTEA type mismatch causing backend startup failure after Spec 013 implementation          | —            | done   |
 | 018 | Component tests            | Repository, Service, and DTO conversion tests for Company, Contact, and Comment modules             | —            | done   |
 | 019 | Logo display fix           | Show company logos fully (object-contain, no rounded corners) instead of cropping                   | —            | done   |
-| 020 | Simplify company filters   | Remove unused city/country filters and sorting dropdown from company list                         | — | open   |
+| 020 | Simplify company filters   | Remove unused city/country filters and sorting dropdown from company list                         | — | done   |
 | 021 | Fix Brevo company ID       | Brevo company IDs are hex strings, not longs — all companies collapse into one entity            | — | done   |
 | 022 | Remove double opt-in       | Remove unused doubleOptIn boolean field from contacts across entire stack                         | — | open   |
 

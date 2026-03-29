@@ -473,42 +473,6 @@ class CompanyControllerTest {
         }
 
         @Test
-        @DisplayName("should filter by city")
-        void shouldFilterByCity() throws Exception {
-            //GIVEN
-            final String berlinJson = createCompanyJson("Berlin Co", null, "Berlin", null);
-            final String munichJson = createCompanyJson("Munich Co", null, "Munich", null);
-            mockMvc.perform(post("/api/companies").contentType(MediaType.APPLICATION_JSON).content(berlinJson));
-            mockMvc.perform(post("/api/companies").contentType(MediaType.APPLICATION_JSON).content(munichJson));
-
-            //WHEN
-            final var result = mockMvc.perform(get("/api/companies?city=Berlin"));
-
-            //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(1)))
-                    .andExpect(jsonPath("$.content[0].name").value("Berlin Co"));
-        }
-
-        @Test
-        @DisplayName("should filter by country")
-        void shouldFilterByCountry() throws Exception {
-            //GIVEN
-            final String germanJson = createCompanyJson("German Co", null, null, "Germany");
-            final String austrianJson = createCompanyJson("Austrian Co", null, null, "Austria");
-            mockMvc.perform(post("/api/companies").contentType(MediaType.APPLICATION_JSON).content(germanJson));
-            mockMvc.perform(post("/api/companies").contentType(MediaType.APPLICATION_JSON).content(austrianJson));
-
-            //WHEN
-            final var result = mockMvc.perform(get("/api/companies?country=Germany"));
-
-            //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(1)))
-                    .andExpect(jsonPath("$.content[0].name").value("German Co"));
-        }
-
-        @Test
         @DisplayName("should sort by name ascending")
         void shouldSortByName() throws Exception {
             //GIVEN

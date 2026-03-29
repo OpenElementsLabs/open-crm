@@ -14,13 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl } from "@/lib/api";
@@ -34,10 +27,7 @@ export function CompanyList() {
   const [data, setData] = useState<Page<CompanyDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [sort, setSort] = useState("name,asc");
   const [nameFilter, setNameFilter] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
-  const [countryFilter, setCountryFilter] = useState("");
   const [includeDeleted, setIncludeDeleted] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
@@ -49,10 +39,7 @@ export function CompanyList() {
       const result = await getCompanies({
         page,
         size: 20,
-        sort,
         name: nameFilter || undefined,
-        city: cityFilter || undefined,
-        country: countryFilter || undefined,
         includeDeleted,
       });
       setData(result);
@@ -61,7 +48,7 @@ export function CompanyList() {
     } finally {
       setLoading(false);
     }
-  }, [page, sort, nameFilter, cityFilter, countryFilter, includeDeleted]);
+  }, [page, nameFilter, includeDeleted]);
 
   useEffect(() => {
     fetchCompanies();
@@ -69,7 +56,7 @@ export function CompanyList() {
 
   useEffect(() => {
     setPage(0);
-  }, [nameFilter, cityFilter, countryFilter, sort, includeDeleted]);
+  }, [nameFilter, includeDeleted]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -116,29 +103,6 @@ export function CompanyList() {
           onChange={(e) => setNameFilter(e.target.value)}
           className="sm:max-w-[200px]"
         />
-        <Input
-          placeholder={S.filter.city}
-          value={cityFilter}
-          onChange={(e) => setCityFilter(e.target.value)}
-          className="sm:max-w-[200px]"
-        />
-        <Input
-          placeholder={S.filter.country}
-          value={countryFilter}
-          onChange={(e) => setCountryFilter(e.target.value)}
-          className="sm:max-w-[200px]"
-        />
-        <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="sm:max-w-[200px]">
-            <SelectValue placeholder={S.sort.label} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name,asc">{S.sort.nameAsc}</SelectItem>
-            <SelectItem value="name,desc">{S.sort.nameDesc}</SelectItem>
-            <SelectItem value="createdAt,desc">{S.sort.createdAtDesc}</SelectItem>
-            <SelectItem value="createdAt,asc">{S.sort.createdAtAsc}</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Archive toggle */}

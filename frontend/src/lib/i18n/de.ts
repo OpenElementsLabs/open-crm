@@ -94,20 +94,11 @@ export const de = {
     },
     filter: {
       name: "Nach Name filtern",
-      city: "Nach Stadt filtern",
-      country: "Nach Land filtern",
     },
     pagination: {
       previous: "Zurück",
       next: "Weiter",
       page: "Seite {current} von {total}",
-    },
-    sort: {
-      label: "Sortierung",
-      nameAsc: "Name (A-Z)",
-      nameDesc: "Name (Z-A)",
-      createdAtDesc: "Neueste zuerst",
-      createdAtAsc: "Älteste zuerst",
     },
   },
   contacts: {

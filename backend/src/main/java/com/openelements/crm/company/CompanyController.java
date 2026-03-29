@@ -55,8 +55,6 @@ public class CompanyController {
      * Lists companies with pagination, filtering, and sorting.
      *
      * @param name           partial name filter (case-insensitive)
-     * @param city           city filter
-     * @param country        country filter
      * @param includeDeleted whether to include soft-deleted companies
      * @param pageable       pagination and sorting parameters
      * @return a page of company responses
@@ -65,11 +63,9 @@ public class CompanyController {
     @Operation(summary = "List companies", description = "Returns a paginated list of companies with optional filtering")
     public Page<CompanyDto> list(
             @RequestParam(required = false) final String name,
-            @RequestParam(required = false) final String city,
-            @RequestParam(required = false) final String country,
             @RequestParam(defaultValue = "false") final boolean includeDeleted,
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return companyService.list(name, city, country, includeDeleted, pageable);
+        return companyService.list(name, includeDeleted, pageable);
     }
 
     /**
