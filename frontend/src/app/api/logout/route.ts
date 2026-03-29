@@ -6,7 +6,8 @@ export async function GET() {
   const idToken = session?.idToken;
 
   // Discover the OIDC provider's end-session endpoint
-  let endSessionUrl = "/";
+  const baseUrl = process.env.AUTH_URL ?? "http://localhost:3000";
+  let endSessionUrl = baseUrl;
   if (oidcIssuer) {
     try {
       const wellKnownResponse = await fetch(
