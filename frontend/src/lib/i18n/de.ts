@@ -181,9 +181,7 @@ export const de = {
       cancel: "Abbrechen",
     },
     filter: {
-      firstName: "Nach Vorname filtern",
-      lastName: "Nach Nachname filtern",
-      email: "Nach E-Mail filtern",
+      search: "Suche...",
       company: "Nach Firma filtern",
       language: "Nach Sprache filtern",
       allCompanies: "Alle Firmen",
@@ -196,15 +194,6 @@ export const de = {
       page: "Seite {current} von {total}",
       totalOne: "{count} Kontakt",
       totalOther: "{count} Kontakte",
-    },
-    sort: {
-      label: "Sortierung",
-      lastNameAsc: "Nachname (A-Z)",
-      lastNameDesc: "Nachname (Z-A)",
-      firstNameAsc: "Vorname (A-Z)",
-      firstNameDesc: "Vorname (Z-A)",
-      createdAtDesc: "Neueste zuerst",
-      createdAtAsc: "Älteste zuerst",
     },
   },
   brevo: {

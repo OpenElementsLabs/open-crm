@@ -54,9 +54,7 @@ public class ContactController {
     /**
      * Lists contacts with pagination, filtering, and sorting.
      *
-     * @param firstName partial first name filter
-     * @param lastName  partial last name filter
-     * @param email     partial email filter
+     * @param search   multi-word search across firstName, lastName, email, and company name
      * @param companyId exact company ID filter
      * @param language  exact language filter
      * @param brevo     filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
@@ -66,14 +64,12 @@ public class ContactController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List contacts", description = "Returns a paginated list of contacts with optional filtering")
     public Page<ContactDto> list(
-            @RequestParam(required = false) final String firstName,
-            @RequestParam(required = false) final String lastName,
-            @RequestParam(required = false) final String email,
+            @RequestParam(required = false) final String search,
             @RequestParam(required = false) final UUID companyId,
             @RequestParam(required = false) final String language,
             @RequestParam(required = false) final Boolean brevo,
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
-        return contactService.list(firstName, lastName, email, companyId, language, brevo, pageable);
+        return contactService.list(search, companyId, language, brevo, pageable);
     }
 
     /**

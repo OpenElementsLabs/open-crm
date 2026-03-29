@@ -183,9 +183,7 @@ export const en: Translations = {
       cancel: "Cancel",
     },
     filter: {
-      firstName: "Filter by first name",
-      lastName: "Filter by last name",
-      email: "Filter by email",
+      search: "Search...",
       company: "Filter by company",
       language: "Filter by language",
       allCompanies: "All companies",
@@ -198,15 +196,6 @@ export const en: Translations = {
       page: "Page {current} of {total}",
       totalOne: "{count} Contact",
       totalOther: "{count} Contacts",
-    },
-    sort: {
-      label: "Sort by",
-      lastNameAsc: "Last name (A-Z)",
-      lastNameDesc: "Last name (Z-A)",
-      firstNameAsc: "First name (A-Z)",
-      firstNameDesc: "First name (Z-A)",
-      createdAtDesc: "Newest first",
-      createdAtAsc: "Oldest first",
     },
   },
   brevo: {

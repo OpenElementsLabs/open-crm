@@ -35,10 +35,7 @@ export function ContactList() {
   const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [sort, setSort] = useState("lastName,asc");
-  const [firstNameFilter, setFirstNameFilter] = useState("");
-  const [lastNameFilter, setLastNameFilter] = useState("");
-  const [emailFilter, setEmailFilter] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
   const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
   const [languageFilter, setLanguageFilter] = useState("");
   const [brevoFilter, setBrevoFilter] = useState("all");
@@ -59,10 +56,7 @@ export function ContactList() {
       const result = await getContacts({
         page,
         size: 20,
-        sort,
-        firstName: firstNameFilter || undefined,
-        lastName: lastNameFilter || undefined,
-        email: emailFilter || undefined,
+        search: searchFilter || undefined,
         companyId: companyIdFilter && companyIdFilter !== "all" ? companyIdFilter : undefined,
         language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
@@ -73,7 +67,7 @@ export function ContactList() {
     } finally {
       setLoading(false);
     }
-  }, [page, sort, firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [page, searchFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   useEffect(() => {
     fetchContacts();
@@ -81,7 +75,7 @@ export function ContactList() {
 
   useEffect(() => {
     setPage(0);
-  }, [firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter, sort]);
+  }, [searchFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -110,21 +104,9 @@ export function ContactList() {
       {/* Filters */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Input
-          placeholder={S.filter.firstName}
-          value={firstNameFilter}
-          onChange={(e) => setFirstNameFilter(e.target.value)}
-          className="sm:max-w-[180px]"
-        />
-        <Input
-          placeholder={S.filter.lastName}
-          value={lastNameFilter}
-          onChange={(e) => setLastNameFilter(e.target.value)}
-          className="sm:max-w-[180px]"
-        />
-        <Input
-          placeholder={S.filter.email}
-          value={emailFilter}
-          onChange={(e) => setEmailFilter(e.target.value)}
+          placeholder={S.filter.search}
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
           className="sm:max-w-[180px]"
         />
         <Select value={companyIdFilter} onValueChange={setCompanyIdFilter}>
@@ -159,19 +141,6 @@ export function ContactList() {
             <SelectItem value="all">{t.brevoFilter.all}</SelectItem>
             <SelectItem value="true">{t.brevoFilter.fromBrevo}</SelectItem>
             <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="sm:max-w-[200px]">
-            <SelectValue placeholder={S.sort.label} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="lastName,asc">{S.sort.lastNameAsc}</SelectItem>
-            <SelectItem value="lastName,desc">{S.sort.lastNameDesc}</SelectItem>
-            <SelectItem value="firstName,asc">{S.sort.firstNameAsc}</SelectItem>
-            <SelectItem value="firstName,desc">{S.sort.firstNameDesc}</SelectItem>
-            <SelectItem value="createdAt,desc">{S.sort.createdAtDesc}</SelectItem>
-            <SelectItem value="createdAt,asc">{S.sort.createdAtAsc}</SelectItem>
           </SelectContent>
         </Select>
       </div>

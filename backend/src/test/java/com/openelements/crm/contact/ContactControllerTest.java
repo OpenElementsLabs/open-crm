@@ -362,14 +362,14 @@ class ContactControllerTest {
         }
 
         @Test
-        @DisplayName("should filter by lastName")
-        void shouldFilterByLastName() throws Exception {
+        @DisplayName("should search by lastName")
+        void shouldSearchByLastName() throws Exception {
             //GIVEN
             createContact("Hendrik", "Ebbers", null);
             createContact("Hans", "Schmidt", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?lastName=ebb"));
+            final var result = mockMvc.perform(get("/api/contacts?search=ebb"));
 
             //THEN
             result.andExpect(status().isOk())
@@ -378,14 +378,14 @@ class ContactControllerTest {
         }
 
         @Test
-        @DisplayName("should filter by firstName")
-        void shouldFilterByFirstName() throws Exception {
+        @DisplayName("should search by firstName")
+        void shouldSearchByFirstName() throws Exception {
             //GIVEN
             createContact("Hendrik", "A", null);
             createContact("Hans", "B", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?firstName=Hendrik"));
+            final var result = mockMvc.perform(get("/api/contacts?search=Hendrik"));
 
             //THEN
             result.andExpect(status().isOk())
@@ -394,8 +394,8 @@ class ContactControllerTest {
         }
 
         @Test
-        @DisplayName("should filter by email")
-        void shouldFilterByEmail() throws Exception {
+        @DisplayName("should search by email")
+        void shouldSearchByEmail() throws Exception {
             //GIVEN
             final String json1 = """
                     {"firstName": "A", "lastName": "A", "language": "DE", "email": "a@example.com"}
@@ -407,11 +407,44 @@ class ContactControllerTest {
             mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(json2));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?email=a@example"));
+            final var result = mockMvc.perform(get("/api/contacts?search=a@example"));
 
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(1)));
+        }
+
+        @Test
+        @DisplayName("should search across company name")
+        void shouldSearchAcrossCompanyName() throws Exception {
+            //GIVEN
+            final String companyId = createCompany("Acme");
+            createContact("John", "Doe", companyId);
+            createContact("Jane", "Smith", null);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts?search=Acme"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].firstName").value("John"));
+        }
+
+        @Test
+        @DisplayName("should AND multiple words")
+        void shouldAndMultipleWords() throws Exception {
+            //GIVEN
+            createContact("Anna", "Schmidt", null);
+            createContact("Anna", "Mueller", null);
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/contacts").param("search", "Anna Schmidt"));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content", hasSize(1)))
+                    .andExpect(jsonPath("$.content[0].lastName").value("Schmidt"));
         }
 
         @Test

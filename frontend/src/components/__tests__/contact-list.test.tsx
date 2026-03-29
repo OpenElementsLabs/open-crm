@@ -246,38 +246,20 @@ describe("ContactList", () => {
       });
     });
 
-    it("should filter by first name", async () => {
+    it("should call API with search parameter", async () => {
       renderWithProviders(<ContactList />);
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.filter.firstName)).toBeInTheDocument();
+        expect(screen.getByPlaceholderText(S.filter.search)).toBeInTheDocument();
       });
 
-      fireEvent.change(screen.getByPlaceholderText(S.filter.firstName), {
-        target: { value: "Max" },
+      fireEvent.change(screen.getByPlaceholderText(S.filter.search), {
+        target: { value: "Anna" },
       });
 
       await waitFor(() => {
         expect(mockGetContacts).toHaveBeenCalledWith(
-          expect.objectContaining({ firstName: "Max" }),
-        );
-      });
-    });
-
-    it("should filter by last name", async () => {
-      renderWithProviders(<ContactList />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.filter.lastName)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.filter.lastName), {
-        target: { value: "Muster" },
-      });
-
-      await waitFor(() => {
-        expect(mockGetContacts).toHaveBeenCalledWith(
-          expect.objectContaining({ lastName: "Muster" }),
+          expect.objectContaining({ search: "Anna" }),
         );
       });
     });
@@ -295,38 +277,6 @@ describe("ContactList", () => {
         el.textContent?.includes(S.filter.language),
       );
       expect(langTrigger).toBeDefined();
-    });
-
-    it("should filter by email", async () => {
-      renderWithProviders(<ContactList />);
-
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText(S.filter.email)).toBeInTheDocument();
-      });
-
-      fireEvent.change(screen.getByPlaceholderText(S.filter.email), {
-        target: { value: "max@" },
-      });
-
-      await waitFor(() => {
-        expect(mockGetContacts).toHaveBeenCalledWith(
-          expect.objectContaining({ email: "max@" }),
-        );
-      });
-    });
-  });
-
-  describe("sorting", () => {
-    it("should call API with default sort parameter lastName,asc", async () => {
-      mockGetContacts.mockResolvedValue(makePage([makeContact()]));
-
-      renderWithProviders(<ContactList />);
-
-      await waitFor(() => {
-        expect(mockGetContacts).toHaveBeenCalledWith(
-          expect.objectContaining({ sort: "lastName,asc" }),
-        );
-      });
     });
   });
 

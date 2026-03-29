@@ -4,6 +4,8 @@ import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -129,9 +131,7 @@ public class ContactService {
     /**
      * Lists contacts with pagination, filtering, and sorting.
      *
-     * @param firstName partial first name filter (case-insensitive)
-     * @param lastName  partial last name filter (case-insensitive)
-     * @param email     partial email filter (case-insensitive)
+     * @param search    multi-word search across firstName, lastName, email, and company name (case-insensitive)
      * @param companyId exact company ID filter
      * @param language  exact language filter
      * @param brevo     filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
@@ -139,9 +139,7 @@ public class ContactService {
      * @return a page of contact responses
      */
     @Transactional(readOnly = true)
-    public Page<ContactDto> list(final String firstName,
-                                      final String lastName,
-                                      final String email,
+    public Page<ContactDto> list(final String search,
                                       final UUID companyId,
                                       final String language,
                                       final Boolean brevo,
@@ -149,17 +147,20 @@ public class ContactService {
         Objects.requireNonNull(pageable, "pageable must not be null");
         Specification<ContactEntity> spec = Specification.where(null);
 
-        if (firstName != null && !firstName.isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("firstName")), "%" + firstName.toLowerCase() + "%"));
-        }
-        if (lastName != null && !lastName.isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("lastName")), "%" + lastName.toLowerCase() + "%"));
-        }
-        if (email != null && !email.isBlank()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+        if (search != null && !search.isBlank()) {
+            final String[] words = search.trim().split("\\s+");
+            for (final String word : words) {
+                final String pattern = "%" + word.toLowerCase() + "%";
+                spec = spec.and((root, query, cb) -> {
+                    final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
+                    return cb.or(
+                        cb.like(cb.lower(root.get("firstName")), pattern),
+                        cb.like(cb.lower(root.get("lastName")), pattern),
+                        cb.like(cb.lower(root.get("email")), pattern),
+                        cb.like(cb.lower(companyJoin.get("name")), pattern)
+                    );
+                });
+            }
         }
         if (companyId != null) {
             spec = spec.and((root, query, cb) ->
