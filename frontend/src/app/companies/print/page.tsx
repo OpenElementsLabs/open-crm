@@ -116,7 +116,6 @@ function CompanyPrintContent() {
                 <TableHead>{S.columns.name}</TableHead>
                 <TableHead>{S.columns.website}</TableHead>
                 <TableHead>{S.columns.contacts}</TableHead>
-                <TableHead>{S.columns.comments}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,7 +137,6 @@ function CompanyPrintContent() {
                     {company.website ?? "\u2014"}
                   </TableCell>
                   <TableCell>{company.contactCount}</TableCell>
-                  <TableCell>{company.commentCount}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

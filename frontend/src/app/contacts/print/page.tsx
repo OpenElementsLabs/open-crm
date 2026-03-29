@@ -119,7 +119,6 @@ function ContactPrintContent() {
                 <TableHead>{S.columns.name}</TableHead>
                 <TableHead>{S.columns.email}</TableHead>
                 <TableHead>{S.columns.company}</TableHead>
-                <TableHead>{S.columns.comments}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -145,7 +144,6 @@ function ContactPrintContent() {
                   <TableCell className="text-oe-gray-mid">
                     {contact.companyName ?? ""}
                   </TableCell>
-                  <TableCell>{contact.commentCount}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

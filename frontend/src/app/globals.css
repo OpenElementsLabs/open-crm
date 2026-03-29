@@ -60,6 +60,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media print {
+  @page { size: A4 portrait; margin: 15mm; }
   tr { page-break-inside: avoid; }
   img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  thead { display: table-header-group; }
+  table { width: 100%; }
+  td, th { white-space: normal !important; word-break: break-word; }
 }
