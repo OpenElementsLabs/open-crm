@@ -35,6 +35,12 @@ acceptable during import. A separate merge feature will allow cleaning these up 
 
 Der Kontakt bleibt bei uns bestehen aber die verbisnugn wird entfernt und der Kontakt kann bei uns editiert werden.
 
+## Admin-View mit Bearer Token für Swagger
+
+Eine Admin-Seite im Frontend, die den aktuellen Bearer Token (Access Token) des eingeloggten Users anzeigt. So kann man den Token einfach kopieren und in Swagger UIs "Authorize"-Dialog einfügen, ohne die Browser-DevTools bemühen zu müssen.
+
+**Context:** Identifiziert nach Implementierung von Specs 048/049. Swagger UI nutzt einen manuellen Bearer-Token-Paste-Workflow.
+
 ## Comment Author-Feld: Limitierungen des String-Ansatzes
 
 Das `author`-Feld in Kommentaren ist ein einfacher String, der beim Erstellen mit dem Benutzernamen befüllt wird. Dieser Ansatz hat mehrere Einschränkungen, die bei der Authentik-Integration adressiert werden sollten:
