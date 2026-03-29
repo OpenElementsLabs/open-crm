@@ -1,0 +1,12 @@
+services:
+  db:
+    ports:
+      - "${DB_PORT:-5432}:5432"
+
+  backend:
+    ports:
+      - "${BACKEND_PORT:-9081}:8080"
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-4001}:3000"
