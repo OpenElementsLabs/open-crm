@@ -18,6 +18,7 @@
     }
   ],
   "httpServer": {
+    "type": "default",
     "port": 8080
   },
   "issuers": [
