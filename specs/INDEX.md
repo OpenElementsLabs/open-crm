@@ -39,4 +39,5 @@
 | 035 | Company filter layout      | Move archive toggle into the same row as name filter and Brevo dropdown                           | — | done   |
 | 036 | Detail view cleanup        | Remove redundant name fields, improve language display, merge address into block                   | — | open   |
 | 037 | Print view A4 fit          | Scale print tables to fit DIN A4 portrait, remove comment column, wrap text, repeat headers       | — | open   |
+| 038 | CSV export                 | Backend CSV generation with dynamic column selection via frontend checkbox dialog                   | — | open   |
 
