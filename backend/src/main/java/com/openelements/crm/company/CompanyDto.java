@@ -18,6 +18,7 @@ import java.util.UUID;
  * @param country     the country of the address
  * @param deleted      whether the company is soft-deleted
  * @param hasLogo      whether the company has an uploaded logo
+ * @param brevo        whether the company was imported from Brevo
  * @param contactCount the number of associated contacts
  * @param commentCount the number of comments on this company
  * @param createdAt    the creation timestamp
@@ -36,6 +37,7 @@ public record CompanyDto(
         @Schema(description = "Country") String country,
         @Schema(description = "Whether the company is soft-deleted", requiredMode = Schema.RequiredMode.REQUIRED) boolean deleted,
         @Schema(description = "Whether the company has an uploaded logo", requiredMode = Schema.RequiredMode.REQUIRED) boolean hasLogo,
+        @Schema(description = "Whether the company was imported from Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean brevo,
         @Schema(description = "Number of associated contacts", requiredMode = Schema.RequiredMode.REQUIRED) long contactCount,
         @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
@@ -65,6 +67,7 @@ public record CompanyDto(
                 entity.getCountry(),
                 entity.isDeleted(),
                 entity.getLogo() != null,
+                entity.getBrevoCompanyId() != null,
                 contactCount,
                 commentCount,
                 entity.getCreatedAt(),

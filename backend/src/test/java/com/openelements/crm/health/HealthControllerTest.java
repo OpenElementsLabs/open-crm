@@ -148,6 +148,7 @@ class HealthControllerTest {
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("id")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("name")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("deleted")))
+                    .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("brevo")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("createdAt")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("updatedAt")));
         }

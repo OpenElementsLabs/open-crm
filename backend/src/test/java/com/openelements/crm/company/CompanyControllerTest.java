@@ -114,6 +114,7 @@ class CompanyControllerTest {
                     .andExpect(jsonPath("$.email").value("info@open-elements.com"))
                     .andExpect(jsonPath("$.city").value("Berlin"))
                     .andExpect(jsonPath("$.deleted").value(false))
+                    .andExpect(jsonPath("$.brevo").value(false))
                     .andExpect(jsonPath("$.createdAt").exists())
                     .andExpect(jsonPath("$.updatedAt").exists());
         }

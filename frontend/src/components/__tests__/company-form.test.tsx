@@ -39,6 +39,7 @@ const existingCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   deleted: false,
+  brevo: false,
   hasLogo: false,
   contactCount: 0,
   commentCount: 0,

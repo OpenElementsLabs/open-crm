@@ -80,20 +80,20 @@ describe("ContactDetail", () => {
     expect(screen.getByText("Open Elements")).toBeInTheDocument();
   });
 
-  it("should display Brevo fields as disabled checkboxes", () => {
+  it("should show Brevo tag when contact is from Brevo", () => {
     renderWithProviders(
       <ContactDetail contact={makeContact({ brevo: true })} />,
     );
 
-    const checkboxes = screen.getAllByRole("checkbox");
-    expect(checkboxes).toHaveLength(1);
+    expect(screen.getByText("Brevo")).toBeInTheDocument();
+  });
 
-    // brevo: checked and disabled
-    const brevoCheckbox = checkboxes[0];
-    expect(brevoCheckbox).toBeChecked();
-    expect(brevoCheckbox).toBeDisabled();
+  it("should not show Brevo tag when contact is not from Brevo", () => {
+    renderWithProviders(
+      <ContactDetail contact={makeContact({ brevo: false })} />,
+    );
 
-    expect(screen.getByText(S.detail.brevo)).toBeInTheDocument();
+    expect(screen.queryByText("Brevo")).not.toBeInTheDocument();
   });
 
   it("should show archived badge when company is soft-deleted", () => {
