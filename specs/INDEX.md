@@ -27,4 +27,5 @@
 | 023 | Contact brevo cleanup      | Remove syncedToBrevo flag, change brevoId from Long to String, expose computed brevo boolean      | — | done   |
 | 024 | Brevo origin filter        | Three-way filter (All/From Brevo/Not from Brevo) on company and contact list tables               | — | done   |
 | 025 | Brevo detail badge         | Show "Brevo" tag below name in company/contact detail views, remove synced checkbox               | — | open   |
+| 026 | Brevo fields readonly      | Prevent editing of firstName, lastName, email, language on Brevo contacts (400 + disabled UI)     | — | open   |
 
