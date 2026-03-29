@@ -50,4 +50,5 @@
 | 046 | OE branding                | Sidebar header with app logo placeholder, "Open CRM" name, and "Developed by" OE branding         | — | done   |
 | 047 | OIDC infrastructure        | mock-oauth2-server for local dev, OIDC env vars for Authentik in production                       | — | done   |
 | 048 | Frontend OIDC auth         | Auth.js v5 login, session management, token forwarding, sidebar user display, logout              | — | open   |
+| 049 | Backend OIDC auth          | Spring Security Resource Server, JWT validation, UserService from token, Swagger authorize        | — | open   |
 
