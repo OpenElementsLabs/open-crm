@@ -606,6 +606,206 @@ class BrevoSyncServiceTest {
     }
 
     @Nested
+    @DisplayName("Reimport Field Protection")
+    class ReimportFieldProtection {
+
+        @Test
+        @DisplayName("position is NOT overwritten on re-import")
+        void positionIsNotOverwrittenOnReimport() {
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Anna");
+            existing.setLastName("Smith");
+            existing.setBrevoId("200");
+            existing.setPosition("CTO");
+            contactRepository.saveAndFlush(existing);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Anna");
+            attrs.put("NACHNAME", "Smith");
+            attrs.put("JOB_TITLE", "CEO");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "anna@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("CTO", updated.getPosition());
+        }
+
+        @Test
+        @DisplayName("phoneNumber is NOT overwritten on re-import")
+        void phoneNumberIsNotOverwrittenOnReimport() {
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Anna");
+            existing.setLastName("Smith");
+            existing.setBrevoId("200");
+            existing.setPhoneNumber("+49999");
+            contactRepository.saveAndFlush(existing);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Anna");
+            attrs.put("NACHNAME", "Smith");
+            attrs.put("SMS", "+49123");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "anna@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("+49999", updated.getPhoneNumber());
+        }
+
+        @Test
+        @DisplayName("linkedInUrl is NOT overwritten on re-import")
+        void linkedInUrlIsNotOverwrittenOnReimport() {
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Anna");
+            existing.setLastName("Smith");
+            existing.setBrevoId("200");
+            existing.setLinkedInUrl("https://linkedin.com/in/old");
+            contactRepository.saveAndFlush(existing);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Anna");
+            attrs.put("NACHNAME", "Smith");
+            attrs.put("LINKEDIN", "https://linkedin.com/in/new");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "anna@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("https://linkedin.com/in/old", updated.getLinkedInUrl());
+        }
+
+        @Test
+        @DisplayName("company is NOT overwritten on re-import")
+        void companyIsNotOverwrittenOnReimport() {
+            final CompanyEntity myCompany = new CompanyEntity();
+            myCompany.setName("MyCompany");
+            companyRepository.saveAndFlush(myCompany);
+
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Anna");
+            existing.setLastName("Smith");
+            existing.setBrevoId("200");
+            existing.setCompany(myCompany);
+            contactRepository.saveAndFlush(existing);
+
+            final CompanyEntity otherCompany = new CompanyEntity();
+            otherCompany.setName("OtherCompany");
+            otherCompany.setBrevoCompanyId("aaa111");
+            companyRepository.saveAndFlush(otherCompany);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(
+                    List.of(makeBrevoCompany("aaa111", "OtherCompany", "other.com", List.of(200L))));
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Anna");
+            attrs.put("NACHNAME", "Smith");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "anna@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            final CompanyEntity linkedCompany = getCompanyForContact(updated);
+            assertNotNull(linkedCompany);
+            assertEquals("MyCompany", linkedCompany.getName());
+        }
+
+        @Test
+        @DisplayName("Brevo-managed fields ARE overwritten on re-import")
+        void brevoManagedFieldsAreOverwrittenOnReimport() {
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Old");
+            existing.setLastName("Name");
+            existing.setEmail("old@test.com");
+            existing.setBrevoId("200");
+            existing.setLanguage(Language.EN);
+            contactRepository.saveAndFlush(existing);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "New");
+            attrs.put("NACHNAME", "Person");
+            attrs.put("E-MAIL", "new@test.com");
+            attrs.put("SPRACHE", 1.0);
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "new@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("New", updated.getFirstName());
+            assertEquals("Person", updated.getLastName());
+            assertEquals("new@test.com", updated.getEmail());
+            assertEquals(Language.DE, updated.getLanguage());
+            assertEquals("200", updated.getBrevoId());
+        }
+
+        @Test
+        @DisplayName("all fields populated on first import")
+        void allFieldsPopulatedOnFirstImport() {
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(
+                    List.of(makeBrevoCompany("aaa111", "ImportCo", "import.com", List.of(200L))));
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Jane");
+            attrs.put("NACHNAME", "Doe");
+            attrs.put("E-MAIL", "jane@test.com");
+            attrs.put("SMS", "+49555");
+            attrs.put("JOB_TITLE", "Engineer");
+            attrs.put("LINKEDIN", "https://linkedin.com/in/jane");
+            attrs.put("SPRACHE", 2.0);
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "jane@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("Jane", contact.getFirstName());
+            assertEquals("Doe", contact.getLastName());
+            assertEquals("jane@test.com", contact.getEmail());
+            assertEquals("+49555", contact.getPhoneNumber());
+            assertEquals("Engineer", contact.getPosition());
+            assertEquals("https://linkedin.com/in/jane", contact.getLinkedInUrl());
+            assertEquals(Language.EN, contact.getLanguage());
+            assertEquals("200", contact.getBrevoId());
+            final CompanyEntity company = getCompanyForContact(contact);
+            assertNotNull(company);
+            assertEquals("ImportCo", company.getName());
+        }
+
+        @Test
+        @DisplayName("contact matched by email treated as existing")
+        void contactMatchedByEmailTreatedAsExisting() {
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Anna");
+            existing.setLastName("Test");
+            existing.setEmail("anna@test.com");
+            existing.setPosition("CEO");
+            contactRepository.saveAndFlush(existing);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Anna");
+            attrs.put("NACHNAME", "Test");
+            attrs.put("JOB_TITLE", "Developer");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "anna@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            assertEquals(1, contactRepository.count());
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("CEO", updated.getPosition());
+            assertEquals("200", updated.getBrevoId());
+        }
+    }
+
+    @Nested
     @DisplayName("Result Counts")
     class ResultCounts {
 
