@@ -32,12 +32,12 @@ function makeComment(overrides: Partial<CommentDto> = {}): CommentDto {
 function makePage(comments: CommentDto[], last: boolean = true): Page<CommentDto> {
   return {
     content: comments,
-    totalElements: comments.length,
-    totalPages: last ? 1 : 2,
-    number: 0,
-    size: 20,
-    first: true,
-    last,
+    page: {
+      size: 20,
+      number: 0,
+      totalElements: comments.length,
+      totalPages: last ? 1 : 2,
+    },
   };
 }
 

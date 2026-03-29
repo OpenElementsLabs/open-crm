@@ -358,7 +358,7 @@ class ContactControllerTest {
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(20)))
-                    .andExpect(jsonPath("$.totalElements").value(25));
+                    .andExpect(jsonPath("$.page.totalElements").value(25));
         }
 
         @Test

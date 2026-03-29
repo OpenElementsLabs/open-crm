@@ -80,12 +80,12 @@ export interface ContactCreateDto {
 
 export interface Page<T> {
   readonly content: readonly T[];
-  readonly totalElements: number;
-  readonly totalPages: number;
-  readonly number: number;
-  readonly size: number;
-  readonly first: boolean;
-  readonly last: boolean;
+  readonly page: {
+    readonly size: number;
+    readonly number: number;
+    readonly totalElements: number;
+    readonly totalPages: number;
+  };
 }
 
 export interface BrevoSettingsDto {

@@ -53,7 +53,7 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
       } else {
         setComments([...result.content]);
       }
-      setHasMore(!result.last);
+      setHasMore(result.page.number < result.page.totalPages - 1);
       setPage(pageNum);
     } catch {
       if (!append) {

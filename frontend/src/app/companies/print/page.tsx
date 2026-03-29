@@ -65,7 +65,7 @@ function CompanyPrintContent() {
             brevo: brevoFilter === "" ? undefined : brevoFilter === "true",
           });
           records.push(...result.content);
-          isLast = result.last;
+          isLast = result.page.number >= result.page.totalPages - 1;
           page++;
         }
         setAllRecords(records);

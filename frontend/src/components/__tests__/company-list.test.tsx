@@ -54,12 +54,12 @@ function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
 function makePage(companies: CompanyDto[], totalElements?: number): Page<CompanyDto> {
   return {
     content: companies,
-    totalElements: totalElements ?? companies.length,
-    totalPages: Math.ceil((totalElements ?? companies.length) / 20),
-    number: 0,
-    size: 20,
-    first: true,
-    last: (totalElements ?? companies.length) <= 20,
+    page: {
+      size: 20,
+      number: 0,
+      totalElements: totalElements ?? companies.length,
+      totalPages: Math.ceil((totalElements ?? companies.length) / 20),
+    },
   };
 }
 
@@ -125,12 +125,12 @@ describe("CompanyList", () => {
     it("should show record count in pagination", async () => {
       mockGetCompanies.mockResolvedValue({
         content: [makeCompany()],
-        totalElements: 42,
-        totalPages: 3,
-        number: 0,
-        size: 20,
-        first: true,
-        last: false,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 42,
+          totalPages: 3,
+        },
       });
 
       renderWithProviders(<CompanyList />);
@@ -143,12 +143,12 @@ describe("CompanyList", () => {
     it("should navigate to next page when clicking next", async () => {
       mockGetCompanies.mockResolvedValue({
         content: [makeCompany()],
-        totalElements: 25,
-        totalPages: 2,
-        number: 0,
-        size: 20,
-        first: true,
-        last: false,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 25,
+          totalPages: 2,
+        },
       });
 
       renderWithProviders(<CompanyList />);

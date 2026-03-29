@@ -32,12 +32,12 @@ function makeComment(overrides: Partial<CommentDto> = {}): CommentDto {
 function makePage(comments: CommentDto[], last: boolean = true): Page<CommentDto> {
   return {
     content: comments,
-    totalElements: comments.length,
-    totalPages: last ? 1 : 2,
-    number: 0,
-    size: 20,
-    first: true,
-    last,
+    page: {
+      size: 20,
+      number: 0,
+      totalElements: comments.length,
+      totalPages: last ? 1 : 2,
+    },
   };
 }
 
@@ -255,12 +255,12 @@ describe("CompanyComments", () => {
         .mockResolvedValueOnce(makePage([makeComment({ id: "1", text: "First" })], false))
         .mockResolvedValueOnce({
           content: [makeComment({ id: "2", text: "Second" })],
-          totalElements: 2,
-          totalPages: 2,
-          number: 1,
-          size: 20,
-          first: false,
-          last: true,
+          page: {
+            size: 20,
+            number: 1,
+            totalElements: 2,
+            totalPages: 2,
+          },
         });
 
       renderWithProviders(<CompanyComments companyId="company-1" />);

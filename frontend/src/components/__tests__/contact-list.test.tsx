@@ -57,12 +57,12 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
 function makePage(contacts: ContactDto[], totalElements?: number): Page<ContactDto> {
   return {
     content: contacts,
-    totalElements: totalElements ?? contacts.length,
-    totalPages: Math.ceil((totalElements ?? contacts.length) / 20) || 1,
-    number: 0,
-    size: 20,
-    first: true,
-    last: (totalElements ?? contacts.length) <= 20,
+    page: {
+      size: 20,
+      number: 0,
+      totalElements: totalElements ?? contacts.length,
+      totalPages: Math.ceil((totalElements ?? contacts.length) / 20) || 1,
+    },
   };
 }
 
@@ -171,12 +171,12 @@ describe("ContactList", () => {
     it("should show pagination controls", async () => {
       mockGetContacts.mockResolvedValue({
         content: [makeContact()],
-        totalElements: 25,
-        totalPages: 2,
-        number: 0,
-        size: 20,
-        first: true,
-        last: false,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 25,
+          totalPages: 2,
+        },
       });
 
       renderWithProviders(<ContactList />);
@@ -190,12 +190,12 @@ describe("ContactList", () => {
     it("should show record count in pagination", async () => {
       mockGetContacts.mockResolvedValue({
         content: [makeContact()],
-        totalElements: 1,
-        totalPages: 1,
-        number: 0,
-        size: 20,
-        first: true,
-        last: true,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 1,
+          totalPages: 1,
+        },
       });
 
       renderWithProviders(<ContactList />);
@@ -208,12 +208,12 @@ describe("ContactList", () => {
     it("should navigate to next page when clicking next", async () => {
       mockGetContacts.mockResolvedValue({
         content: [makeContact()],
-        totalElements: 25,
-        totalPages: 2,
-        number: 0,
-        size: 20,
-        first: true,
-        last: false,
+        page: {
+          size: 20,
+          number: 0,
+          totalElements: 25,
+          totalPages: 2,
+        },
       });
 
       renderWithProviders(<ContactList />);

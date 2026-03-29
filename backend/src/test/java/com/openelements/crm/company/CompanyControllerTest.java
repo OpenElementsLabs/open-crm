@@ -401,8 +401,8 @@ class CompanyControllerTest {
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(20)))
-                    .andExpect(jsonPath("$.totalElements").value(25))
-                    .andExpect(jsonPath("$.totalPages").value(2));
+                    .andExpect(jsonPath("$.page.totalElements").value(25))
+                    .andExpect(jsonPath("$.page.totalPages").value(2));
         }
 
         @Test
@@ -419,7 +419,7 @@ class CompanyControllerTest {
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(10)))
-                    .andExpect(jsonPath("$.totalElements").value(25));
+                    .andExpect(jsonPath("$.page.totalElements").value(25));
         }
 
         @Test
@@ -437,7 +437,7 @@ class CompanyControllerTest {
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.totalElements").value(2));
+                    .andExpect(jsonPath("$.page.totalElements").value(2));
         }
 
         @Test
@@ -454,7 +454,7 @@ class CompanyControllerTest {
             //THEN
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.totalElements").value(2));
+                    .andExpect(jsonPath("$.page.totalElements").value(2));
         }
 
         @Test

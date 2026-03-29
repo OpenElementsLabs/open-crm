@@ -52,12 +52,12 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
 beforeEach(() => {
   mockGetContactComments.mockResolvedValue({
     content: [],
-    totalElements: 0,
-    totalPages: 0,
-    number: 0,
-    size: 20,
-    first: true,
-    last: true,
+    page: {
+      size: 20,
+      number: 0,
+      totalElements: 0,
+      totalPages: 0,
+    },
   });
 });
 

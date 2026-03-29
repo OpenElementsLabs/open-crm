@@ -126,7 +126,7 @@ export function ContactList() {
           </Button>
           <Button
             variant="outline"
-            disabled={!data || data.totalElements === 0}
+            disabled={!data || data.page.totalElements === 0}
             onClick={() => setCsvOpen(true)}
           >
             <FileDown className="mr-2 h-4 w-4" />
@@ -296,15 +296,15 @@ export function ContactList() {
           {/* Pagination */}
           <div className="mt-4 flex items-center justify-between">
             <p className="text-sm text-oe-gray-mid">
-              {(data.totalElements === 1 ? S.pagination.totalOne : S.pagination.totalOther).replace("{count}", String(data.totalElements))} · {S.pagination.page
-                .replace("{current}", String(data.number + 1))
-                .replace("{total}", String(data.totalPages))}
+              {(data.page.totalElements === 1 ? S.pagination.totalOne : S.pagination.totalOther).replace("{count}", String(data.page.totalElements))} · {S.pagination.page
+                .replace("{current}", String(data.page.number + 1))
+                .replace("{total}", String(data.page.totalPages))}
             </p>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                disabled={data.first}
+                disabled={data.page.number === 0}
                 onClick={() => setPage(page - 1)}
               >
                 {S.pagination.previous}
@@ -312,7 +312,7 @@ export function ContactList() {
               <Button
                 variant="outline"
                 size="sm"
-                disabled={data.last}
+                disabled={data.page.number >= data.page.totalPages - 1}
                 onClick={() => setPage(page + 1)}
               >
                 {S.pagination.next}

@@ -53,7 +53,7 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
       } else {
         setComments([...result.content]);
       }
-      setHasMore(!result.last);
+      setHasMore(result.page.number < result.page.totalPages - 1);
       setPage(pageNum);
     } catch {
       if (!append) {
