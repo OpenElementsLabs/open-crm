@@ -59,19 +59,19 @@ export function DetailField({
   };
 
   return (
-    <div className="group">
+    <div>
       <dt className="text-sm font-medium text-oe-gray-mid">{label}</dt>
       <dd className="mt-1 text-sm text-oe-black flex items-start gap-1">
         <span className={multiline ? "whitespace-pre-line" : ""}>
           {children ?? (hasValue ? value : "—")}
         </span>
         {hasActions && (
-          <span className="inline-flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5">
+          <span className="inline-flex gap-0.5 shrink-0 mt-0.5">
             {copyable && (
               <button
                 type="button"
                 onClick={handleCopy}
-                className="text-oe-gray-mid hover:text-oe-dark"
+                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
                 title="Copy"
               >
                 {copied ? (
@@ -85,7 +85,7 @@ export function DetailField({
               <button
                 type="button"
                 onClick={handleOpenUrl}
-                className="text-oe-gray-mid hover:text-oe-dark"
+                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
                 title="Open"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -95,7 +95,7 @@ export function DetailField({
               <button
                 type="button"
                 onClick={handleMailto}
-                className="text-oe-gray-mid hover:text-oe-dark"
+                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
                 title="Email"
               >
                 <Mail className="h-3.5 w-3.5" />
@@ -105,7 +105,7 @@ export function DetailField({
               <button
                 type="button"
                 onClick={handleTel}
-                className="text-oe-gray-mid hover:text-oe-dark"
+                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
                 title="Call"
               >
                 <Phone className="h-3.5 w-3.5" />
