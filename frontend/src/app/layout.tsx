@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Lato } from "next/font/google";
 import { Sidebar } from "@/components/sidebar";
+import { SessionProvider } from "@/components/session-provider";
 import { LanguageProvider } from "@/lib/i18n/language-context";
 import "./globals.css";
 
@@ -26,12 +27,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${montserrat.variable} ${lato.variable}`}>
       <body className="antialiased">
-        <LanguageProvider>
-          <Sidebar />
-          <main className="md:ml-64 min-h-screen bg-oe-white">
-            <div className="p-6 md:p-8">{children}</div>
-          </main>
-        </LanguageProvider>
+        <SessionProvider>
+          <LanguageProvider>
+            <Sidebar />
+            <main className="md:ml-64 min-h-screen bg-oe-white">
+              <div className="p-6 md:p-8">{children}</div>
+            </main>
+          </LanguageProvider>
+        </SessionProvider>
       </body>
     </html>
   );

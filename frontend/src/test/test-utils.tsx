@@ -1,4 +1,5 @@
 import { render, type RenderOptions } from "@testing-library/react";
+import { SessionProvider } from "next-auth/react";
 import { LanguageProvider } from "@/lib/i18n/language-context";
 import type { Language } from "@/lib/i18n/index";
 
@@ -10,7 +11,11 @@ function renderWithProviders(ui: React.ReactElement, options?: TestRenderOptions
   const { language = "de", ...renderOptions } = options ?? {};
 
   function TestWrapper({ children }: { readonly children: React.ReactNode }) {
-    return <LanguageProvider defaultLanguage={language}>{children}</LanguageProvider>;
+    return (
+      <SessionProvider session={null}>
+        <LanguageProvider defaultLanguage={language}>{children}</LanguageProvider>
+      </SessionProvider>
+    );
   }
 
   return render(ui, { wrapper: TestWrapper, ...renderOptions });

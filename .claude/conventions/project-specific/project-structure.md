@@ -22,6 +22,8 @@ open-crm/
 │   ├── pom.xml                     — Maven build configuration
 │   └── Dockerfile                  — Multi-stage Docker build
 ├── frontend/                       — Next.js TypeScript frontend
+│   ├── src/auth.ts                 — Auth.js v5 OIDC configuration (provider, JWT, session callbacks)
+│   ├── src/middleware.ts            — Route protection (redirects unauthenticated users)
 │   ├── src/app/                    — Next.js App Router pages
 │   │   ├── page.tsx                — Home page (redirects to companies)
 │   │   ├── layout.tsx              — Root layout (fonts, sidebar, language provider)
@@ -29,10 +31,14 @@ open-crm/
 │   │   ├── health/                 — Health status page
 │   │   ├── brevo-sync/             — Brevo import page
 │   │   ├── companies/              — Company pages (list, detail, new, edit, print)
-│   │   └── contacts/               — Contact pages (list, detail, new, edit, print)
+│   │   ├── contacts/               — Contact pages (list, detail, new, edit, print)
+│   │   └── api/                    — API routes
+│   │       ├── auth/[...nextauth]/ — Auth.js route handlers
+│   │       └── [...path]/          — API proxy with JWT token forwarding
 │   ├── src/components/             — React components
 │   │   ├── ui/                     — shadcn/ui primitives (button, card, table, dialog, etc.)
-│   │   ├── sidebar.tsx             — Navigation sidebar with branding and user section
+│   │   ├── sidebar.tsx             — Navigation sidebar with branding and authenticated user section
+│   │   ├── session-provider.tsx    — Auth.js SessionProvider wrapper
 │   │   ├── detail-field.tsx        — Shared detail field with action icons (copy, link, mail, tel)
 │   │   ├── company-list.tsx        — Company list with filters, print, CSV export
 │   │   ├── company-detail.tsx      — Company detail view with merged address block
@@ -46,7 +52,6 @@ open-crm/
 │   ├── src/lib/                    — Shared utilities
 │   │   ├── api.ts                  — Backend API client functions
 │   │   ├── types.ts                — TypeScript type definitions (DTOs, Page)
-│   │   ├── user.ts                 — Hardcoded dummy user (Authentik prep)
 │   │   ├── constants.ts            — Shared constants
 │   │   ├── utils.ts                — General utilities (cn helper)
 │   │   └── i18n/                   — Internationalization

@@ -20,7 +20,8 @@
 ## Databases & External Services
 
 - PostgreSQL 17 (primary database, via Docker or standalone; uses `bytea` columns for binary image storage)
-- Authentik (SSO via OpenID Connect) — planned
+- Authentik (SSO via OpenID Connect) — production identity provider
+- mock-oauth2-server (local development OIDC provider, via Docker Compose)
 - Brevo API (contact/company import) — implemented
 
 ## Key Libraries
@@ -47,6 +48,7 @@
 - Lucide React (icon library)
 - class-variance-authority + clsx + tailwind-merge (styling utilities)
 - react-day-picker + date-fns (date picker for birthday field)
+- next-auth 5 / Auth.js v5 (OIDC authentication, JWT session management, token refresh)
 
 ### Frontend Testing
 

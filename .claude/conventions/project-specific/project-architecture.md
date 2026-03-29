@@ -2,14 +2,14 @@
 
 ## Components
 
-- **Frontend (Next.js)** — Server-side rendered React application using the App Router. Communicates with the backend via REST API calls from both server components (SSR) and client components (browser). Uses `BACKEND_URL` env var for server-side requests and proxies client-side requests through Next.js rewrites. Bilingual UI (DE/EN) with client-side language detection and switching.
+- **Frontend (Next.js)** — Server-side rendered React application using the App Router. All pages require OIDC authentication via Auth.js v5 (middleware redirects unauthenticated users). API calls are proxied through a catch-all Route Handler that injects the JWT access token as an Authorization Bearer header. Uses `BACKEND_URL` env var for server-side requests. Bilingual UI (DE/EN) with client-side language detection and switching.
 - **Backend (Spring Boot)** — RESTful JSON API handling business logic, validation, and data persistence. Organized by domain packages (company, contact, comment, brevo, health, settings, user). Exposes OpenAPI documentation via Swagger UI. CSV export endpoints generate files server-side using Apache Commons CSV.
 - **Database (PostgreSQL)** — Relational storage for all domain data. Schema managed by Flyway migrations (V1–V11). Uses UUID primary keys, soft-delete pattern for companies, and timestamp tracking.
 - **Brevo** — External marketing platform. One-directional import of companies and contacts via Brevo API, triggered manually. API key stored in settings table.
 
 ## Communication
 
-- **Frontend → Backend:** HTTP REST (JSON). Server-side calls go directly to `BACKEND_URL`; client-side calls go to the Next.js server which proxies to the backend via rewrites.
+- **Frontend → Backend:** HTTP REST (JSON). All API calls go through a server-side Route Handler (`app/api/[...path]/route.ts`) that reads the Auth.js session, injects the JWT access token as an `Authorization: Bearer` header, and forwards the request to the backend at `BACKEND_URL`.
 - **Backend → Database:** JDBC via Spring Data JPA. Hibernate validates schema against entity mappings (`ddl-auto: validate`).
 - **Backend → Brevo:** HTTP REST via Brevo Java SDK. Import-only (CRM reads from Brevo, never writes back).
 - **Schema management:** Flyway runs migrations on startup from `classpath:db/migration`.
@@ -23,7 +23,8 @@ graph LR
     Frontend -->|REST API| Backend["Spring Boot Backend<br/>:8080"]
     Backend -->|JDBC/JPA| DB[("PostgreSQL<br/>:5432")]
     Backend -->|REST API| Brevo["Brevo<br/>(Import)"]
-    Backend -.->|planned| Authentik["Authentik<br/>(SSO)"]
+    Frontend -->|OIDC| OIDC["OIDC Provider<br/>(Authentik / mock-oauth2)"]
+    Frontend -->|Bearer Token| Backend
     Coolify["Coolify + Traefik"] -->|Reverse Proxy| Frontend
     Coolify -->|Reverse Proxy| Backend
 ```
@@ -90,10 +91,10 @@ erDiagram
 ## Key Architectural Decisions
 
 - **Soft-delete for companies** — Companies are marked as `deleted=true` rather than physically removed, allowing restoration. Contacts block company deletion (409 Conflict).
-- **Comments are polymorphic** — A comment belongs to either a company or a contact (enforced by a CHECK constraint), never both. Author is a simple string field set from the current user (hardcoded "Demo User" until Authentik integration).
+- **Comments are polymorphic** — A comment belongs to either a company or a contact (enforced by a CHECK constraint), never both. Author is a simple string field set from the authenticated user's name.
 - **Flyway for schema management** — Hibernate is set to `validate` only; all schema changes go through versioned SQL migrations.
 - **Separate DTOs per operation** — Each domain uses distinct `CreateDto`, `UpdateDto`, and `Dto` records to control API surface per operation.
-- **User model without database** — No user table exists. User info will come from the Authentik auth token. A `UserService` currently returns hardcoded dummy values. Both frontend and backend resolve user info independently (no user API endpoint).
+- **User model without database** — No user table exists. Frontend user info comes from the OIDC token via Auth.js session. Backend user info comes from the JWT token claims. Both frontend and backend resolve user info independently (no user API endpoint).
 - **Image storage in database** — Company logos and contact photos are stored as `bytea` columns in PostgreSQL alongside a `_content_type` column. Dedicated REST endpoints handle upload, retrieval, and deletion. DTOs expose `hasLogo`/`hasPhoto` boolean flags instead of binary data.
 - **Brevo import is one-directional** — The CRM imports from Brevo but never writes back. Brevo-managed fields on contacts are read-only. Re-import preserves user-editable fields.
 - **Docker Compose split for Coolify** — `docker-compose.yml` has no port bindings (for Coolify/Traefik deployment); `docker-compose.override.yml` adds host ports for local development. Docker Compose auto-merges the override file locally.

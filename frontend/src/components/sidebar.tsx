@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { Building2, CircleUser, HeartPulse, LayoutDashboard, LogOut, Menu, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
 import { useTranslations } from "@/lib/i18n/language-context";
-import { currentUser } from "@/lib/user";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -83,18 +83,31 @@ function SidebarHeader() {
 
 function UserSection() {
   const t = useTranslations();
+  const { data: session } = useSession();
+
+  const userName = session?.user?.name ?? "User";
+  const userImage = session?.user?.image;
+
   return (
     <div className="border-t border-oe-white/10 px-6 py-4">
       <div className="flex items-center gap-3">
-        <CircleUser className="h-8 w-8 text-oe-gray-light" />
+        {userImage ? (
+          <img
+            src={userImage}
+            alt={userName}
+            className="h-8 w-8 rounded-full object-cover"
+          />
+        ) : (
+          <CircleUser className="h-8 w-8 text-oe-gray-light" />
+        )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-oe-white truncate">{currentUser.name}</p>
+          <p className="text-sm font-medium text-oe-white truncate">{userName}</p>
         </div>
         <Button
           variant="ghost"
           size="icon"
           className="text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white"
-          onClick={() => {}}
+          onClick={() => { window.location.href = "/api/logout"; }}
           title={t.user.logout}
         >
           <LogOut className="h-4 w-4" />
