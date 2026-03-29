@@ -2,7 +2,7 @@
 
 ## Languages
 
-- Java 21 (via SDKMAN!, see `backend/.sdkmanrc`)
+- Java 21 (backend)
 - TypeScript 5.8 (frontend)
 
 ## Frameworks
@@ -21,7 +21,7 @@
 
 - PostgreSQL 17 (primary database, via Docker or standalone; uses `bytea` columns for binary image storage)
 - Authentik (SSO via OpenID Connect) — planned
-- Brevo API (contact/company sync) — planned
+- Brevo API (contact/company import) — implemented
 
 ## Key Libraries
 
@@ -31,6 +31,7 @@
 - Flyway (database migrations, `db/migration/V*.sql`)
 - SpringDoc OpenAPI 2.8.6 (Swagger UI + OpenAPI spec generation)
 - Jakarta Bean Validation (request validation)
+- Apache Commons CSV 1.12.0 (CSV export generation)
 - Spring Multipart (file upload with 2 MB max, configured in `application.yml`)
 - PostgreSQL JDBC driver (runtime)
 - CycloneDX Maven Plugin 2.9.1 (SBOM generation)
@@ -45,6 +46,7 @@
 - Radix UI (accessible component primitives via shadcn/ui)
 - Lucide React (icon library)
 - class-variance-authority + clsx + tailwind-merge (styling utilities)
+- react-day-picker + date-fns (date picker for birthday field)
 
 ### Frontend Testing
 
@@ -62,5 +64,6 @@
 
 - Docker & Docker Compose (multi-service orchestration)
 - Eclipse Temurin 21 (backend Docker base image)
-- Node.js 22 Alpine (frontend Docker base image)
+- Node.js 22 Alpine (frontend Docker base image, pinned via `.nvmrc` to v22.19.0)
 - GitHub Actions (CI/CD: build, test, Docker image verification)
+- Coolify (deployment platform, uses Traefik reverse proxy for FQDN-based routing and TLS)
