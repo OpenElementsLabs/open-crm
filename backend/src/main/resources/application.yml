@@ -18,3 +18,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8888/default}

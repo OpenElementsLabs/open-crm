@@ -7,6 +7,8 @@ open-crm/
 ├── backend/                        — Java Spring Boot backend
 │   ├── src/main/java/com/openelements/crm/
 │   │   ├── CrmApplication.java     — Application entry point
+│   │   ├── SecurityConfig.java     — Spring Security filter chain (JWT Resource Server)
+│   │   ├── OpenApiConfig.java      — Swagger UI OIDC security scheme
 │   │   ├── ImageData.java          — Shared record holding image bytes + content type
 │   │   ├── company/                — Company domain (controller, service, repository, DTOs, entity, export enum)
 │   │   ├── contact/                — Contact domain (controller, service, repository, DTOs, entity, enums, export enum)
@@ -14,7 +16,7 @@ open-crm/
 │   │   ├── brevo/                  — Brevo integration (sync service, controller, DTOs, records)
 │   │   ├── health/                 — Health check endpoint
 │   │   ├── settings/               — Settings storage (Brevo API key)
-│   │   └── user/                   — User model (UserInfo record, UserService stub)
+│   │   └── user/                   — User model (UserInfo record, UserService with JWT extraction)
 │   ├── src/main/resources/
 │   │   ├── application.yml         — Application configuration
 │   │   └── db/migration/           — Flyway SQL migrations (V1–V11)

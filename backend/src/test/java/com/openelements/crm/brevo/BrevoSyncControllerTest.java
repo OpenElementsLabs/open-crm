@@ -22,6 +22,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static com.openelements.crm.TestSecurityUtil.testJwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -59,7 +60,7 @@ class BrevoSyncControllerTest {
         @Test
         @DisplayName("GET /api/brevo/settings returns apiKeyConfigured=false when no key")
         void getSettingsReturnsFalseWhenNoKey() throws Exception {
-            mockMvc.perform(get("/api/brevo/settings"))
+            mockMvc.perform(get("/api/brevo/settings").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.apiKeyConfigured").value(false));
         }
@@ -69,7 +70,7 @@ class BrevoSyncControllerTest {
         void getSettingsReturnsTrueWhenKeyExists() throws Exception {
             settingsService.set("brevo.api-key", "test-key");
 
-            mockMvc.perform(get("/api/brevo/settings"))
+            mockMvc.perform(get("/api/brevo/settings").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.apiKeyConfigured").value(true));
         }
@@ -81,11 +82,11 @@ class BrevoSyncControllerTest {
 
             mockMvc.perform(put("/api/brevo/settings")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"apiKey\":\"xkeysib-test\"}"))
+                            .content("{\"apiKey\":\"xkeysib-test\"}").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.apiKeyConfigured").value(true));
 
-            mockMvc.perform(get("/api/brevo/settings"))
+            mockMvc.perform(get("/api/brevo/settings").with(testJwt()))
                     .andExpect(jsonPath("$.apiKeyConfigured").value(true));
         }
 
@@ -94,7 +95,7 @@ class BrevoSyncControllerTest {
         void putSettingsRejectsBlankKey() throws Exception {
             mockMvc.perform(put("/api/brevo/settings")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"apiKey\":\"\"}"))
+                            .content("{\"apiKey\":\"\"}").with(testJwt()))
                     .andExpect(status().isBadRequest());
         }
 
@@ -106,7 +107,7 @@ class BrevoSyncControllerTest {
 
             mockMvc.perform(put("/api/brevo/settings")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"apiKey\":\"bad-key\"}"))
+                            .content("{\"apiKey\":\"bad-key\"}").with(testJwt()))
                     .andExpect(status().isBadRequest());
         }
 
@@ -115,10 +116,10 @@ class BrevoSyncControllerTest {
         void deleteSettingsRemovesKey() throws Exception {
             settingsService.set("brevo.api-key", "test-key");
 
-            mockMvc.perform(delete("/api/brevo/settings"))
+            mockMvc.perform(delete("/api/brevo/settings").with(testJwt()))
                     .andExpect(status().isNoContent());
 
-            mockMvc.perform(get("/api/brevo/settings"))
+            mockMvc.perform(get("/api/brevo/settings").with(testJwt()))
                     .andExpect(jsonPath("$.apiKeyConfigured").value(false));
         }
     }
@@ -130,7 +131,7 @@ class BrevoSyncControllerTest {
         @Test
         @DisplayName("POST /api/brevo/sync returns 400 when no API key configured")
         void syncReturns400WhenNoApiKey() throws Exception {
-            mockMvc.perform(post("/api/brevo/sync"))
+            mockMvc.perform(post("/api/brevo/sync").with(testJwt()))
                     .andExpect(status().isBadRequest());
         }
 
@@ -141,7 +142,7 @@ class BrevoSyncControllerTest {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
             when(brevoApiClient.fetchAllContacts()).thenReturn(List.of());
 
-            mockMvc.perform(post("/api/brevo/sync"))
+            mockMvc.perform(post("/api/brevo/sync").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.companiesImported").value(0))
                     .andExpect(jsonPath("$.companiesUpdated").value(0))

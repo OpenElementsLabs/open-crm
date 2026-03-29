@@ -7,6 +7,7 @@ import com.openelements.crm.comment.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -41,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/companies")
 @Tag(name = "Companies", description = "Company management operations")
+@SecurityRequirement(name = "oidc")
 public class CompanyController {
 
     private final CompanyService companyService;

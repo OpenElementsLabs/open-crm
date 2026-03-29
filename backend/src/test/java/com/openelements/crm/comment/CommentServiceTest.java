@@ -8,7 +8,9 @@ import com.openelements.crm.contact.ContactCreateDto;
 import com.openelements.crm.contact.ContactDto;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.ContactService;
+import com.openelements.crm.TestSecurityUtil;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +54,12 @@ class CommentServiceTest {
         commentRepository.deleteAll();
         contactRepository.deleteAll();
         companyRepository.deleteAll();
+        TestSecurityUtil.setSecurityContext();
+    }
+
+    @AfterEach
+    void tearDown() {
+        TestSecurityUtil.clearSecurityContext();
     }
 
     private CompanyDto createCompany(final String name) {

@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static com.openelements.crm.TestSecurityUtil.testJwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -75,7 +76,7 @@ class CompanyControllerTest {
         final String json = createCompanyJson(name, null, null, null);
         final String response = mockMvc.perform(post("/api/companies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -105,7 +106,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(post("/api/companies")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -130,7 +131,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(post("/api/companies")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -151,7 +152,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(post("/api/companies")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -168,7 +169,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(post("/api/companies")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -186,7 +187,7 @@ class CompanyControllerTest {
             final String id = createCompany("Test Corp");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + id));
+            final var result = mockMvc.perform(get("/api/companies/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -201,7 +202,7 @@ class CompanyControllerTest {
             //  no company exists
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/00000000-0000-0000-0000-000000000001"));
+            final var result = mockMvc.perform(get("/api/companies/00000000-0000-0000-0000-000000000001").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -212,10 +213,10 @@ class CompanyControllerTest {
         void shouldReturnSoftDeletedCompany() throws Exception {
             //GIVEN
             final String id = createCompany("Deleted Corp");
-            mockMvc.perform(delete("/api/companies/" + id));
+            mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + id));
+            final var result = mockMvc.perform(get("/api/companies/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -239,7 +240,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(put("/api/companies/" + id)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -258,7 +259,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(put("/api/companies/00000000-0000-0000-0000-000000000001")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -276,7 +277,7 @@ class CompanyControllerTest {
             //WHEN
             final var result = mockMvc.perform(put("/api/companies/" + id)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(json));
+                    .content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -294,12 +295,12 @@ class CompanyControllerTest {
             final String id = createCompany("To Delete");
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/companies/" + id));
+            final var result = mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isNoContent());
 
-            mockMvc.perform(get("/api/companies/" + id))
+            mockMvc.perform(get("/api/companies/" + id).with(testJwt()))
                     .andExpect(jsonPath("$.deleted").value(true));
         }
 
@@ -313,10 +314,10 @@ class CompanyControllerTest {
                     """.formatted(companyId);
             mockMvc.perform(post("/api/contacts")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(contactJson));
+                    .content(contactJson).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/companies/" + companyId));
+            final var result = mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
 
             //THEN
             result.andExpect(status().isConflict());
@@ -329,7 +330,7 @@ class CompanyControllerTest {
             //  no company exists
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/companies/00000000-0000-0000-0000-000000000001"));
+            final var result = mockMvc.perform(delete("/api/companies/00000000-0000-0000-0000-000000000001").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -345,10 +346,10 @@ class CompanyControllerTest {
         void shouldRestore() throws Exception {
             //GIVEN
             final String id = createCompany("Restore Me");
-            mockMvc.perform(delete("/api/companies/" + id));
+            mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(post("/api/companies/" + id + "/restore"));
+            final var result = mockMvc.perform(post("/api/companies/" + id + "/restore").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -362,7 +363,7 @@ class CompanyControllerTest {
             final String id = createCompany("Not Deleted");
 
             //WHEN
-            final var result = mockMvc.perform(post("/api/companies/" + id + "/restore"));
+            final var result = mockMvc.perform(post("/api/companies/" + id + "/restore").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -376,7 +377,7 @@ class CompanyControllerTest {
             //  no company exists
 
             //WHEN
-            final var result = mockMvc.perform(post("/api/companies/00000000-0000-0000-0000-000000000001/restore"));
+            final var result = mockMvc.perform(post("/api/companies/00000000-0000-0000-0000-000000000001/restore").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -396,7 +397,7 @@ class CompanyControllerTest {
             }
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies"));
+            final var result = mockMvc.perform(get("/api/companies").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -414,7 +415,7 @@ class CompanyControllerTest {
             }
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?page=0&size=10"));
+            final var result = mockMvc.perform(get("/api/companies?page=0&size=10").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -429,10 +430,10 @@ class CompanyControllerTest {
             createCompany("Active 1");
             createCompany("Active 2");
             final String deletedId = createCompany("To Delete");
-            mockMvc.perform(delete("/api/companies/" + deletedId));
+            mockMvc.perform(delete("/api/companies/" + deletedId).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies"));
+            final var result = mockMvc.perform(get("/api/companies").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -446,10 +447,10 @@ class CompanyControllerTest {
             //GIVEN
             createCompany("Active");
             final String deletedId = createCompany("Deleted");
-            mockMvc.perform(delete("/api/companies/" + deletedId));
+            mockMvc.perform(delete("/api/companies/" + deletedId).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?includeDeleted=true"));
+            final var result = mockMvc.perform(get("/api/companies?includeDeleted=true").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -465,7 +466,7 @@ class CompanyControllerTest {
             createCompany("Acme Corp");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?name=open"));
+            final var result = mockMvc.perform(get("/api/companies?name=open").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -481,7 +482,7 @@ class CompanyControllerTest {
             createCompany("Alpha GmbH");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?sort=name,asc"));
+            final var result = mockMvc.perform(get("/api/companies?sort=name,asc").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -497,7 +498,7 @@ class CompanyControllerTest {
             createCompany("Second");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?sort=createdAt,desc"));
+            final var result = mockMvc.perform(get("/api/companies?sort=createdAt,desc").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -516,7 +517,7 @@ class CompanyControllerTest {
             companyRepository.saveAndFlush(brevoEntity);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?brevo=true"));
+            final var result = mockMvc.perform(get("/api/companies?brevo=true").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -535,7 +536,7 @@ class CompanyControllerTest {
             companyRepository.saveAndFlush(brevoEntity);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies?brevo=false"));
+            final var result = mockMvc.perform(get("/api/companies?brevo=false").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -557,7 +558,7 @@ class CompanyControllerTest {
                     "file", "logo.png", "image/png", new byte[]{1, 2, 3});
 
             //WHEN
-            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk());
@@ -572,7 +573,7 @@ class CompanyControllerTest {
                     "file", "logo.jpg", "image/jpeg", new byte[]{1, 2, 3});
 
             //WHEN
-            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk());
@@ -587,7 +588,7 @@ class CompanyControllerTest {
                     "file", "logo.svg", "image/svg+xml", "<svg/>".getBytes());
 
             //WHEN
-            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk());
@@ -601,10 +602,10 @@ class CompanyControllerTest {
             final byte[] imageBytes = new byte[]{1, 2, 3, 4, 5};
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "logo.png", "image/png", imageBytes);
-            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + id + "/logo"));
+            final var result = mockMvc.perform(get("/api/companies/" + id + "/logo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -619,7 +620,7 @@ class CompanyControllerTest {
             final String id = createCompany("No Logo Corp");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + id + "/logo"));
+            final var result = mockMvc.perform(get("/api/companies/" + id + "/logo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -632,7 +633,7 @@ class CompanyControllerTest {
             //  no company exists
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/00000000-0000-0000-0000-000000000001/logo"));
+            final var result = mockMvc.perform(get("/api/companies/00000000-0000-0000-0000-000000000001/logo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -647,7 +648,7 @@ class CompanyControllerTest {
                     "file", "logo.gif", "image/gif", new byte[]{1, 2, 3});
 
             //WHEN
-            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            final var result = mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -660,14 +661,14 @@ class CompanyControllerTest {
             final String id = createCompany("Delete Logo Corp");
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "logo.png", "image/png", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/companies/" + id + "/logo"));
+            final var result = mockMvc.perform(delete("/api/companies/" + id + "/logo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNoContent());
-            mockMvc.perform(get("/api/companies/" + id + "/logo"))
+            mockMvc.perform(get("/api/companies/" + id + "/logo").with(testJwt()))
                     .andExpect(status().isNotFound());
         }
 
@@ -678,17 +679,17 @@ class CompanyControllerTest {
             final String id = createCompany("Replace Logo Corp");
             final MockMultipartFile oldFile = new MockMultipartFile(
                     "file", "old.png", "image/png", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(oldFile));
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(oldFile).with(testJwt()));
 
             final byte[] newBytes = new byte[]{4, 5, 6, 7};
             final MockMultipartFile newFile = new MockMultipartFile(
                     "file", "new.jpg", "image/jpeg", newBytes);
 
             //WHEN
-            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(newFile));
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(newFile).with(testJwt()));
 
             //THEN
-            mockMvc.perform(get("/api/companies/" + id + "/logo"))
+            mockMvc.perform(get("/api/companies/" + id + "/logo").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(header().string("Content-Type", "image/jpeg"))
                     .andExpect(content().bytes(newBytes));
@@ -701,10 +702,10 @@ class CompanyControllerTest {
             final String id = createCompany("HasLogo Corp");
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "logo.png", "image/png", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + id));
+            final var result = mockMvc.perform(get("/api/companies/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -718,7 +719,7 @@ class CompanyControllerTest {
             final String id = createCompany("NoLogo Corp");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + id));
+            final var result = mockMvc.perform(get("/api/companies/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -733,18 +734,18 @@ class CompanyControllerTest {
             final byte[] imageBytes = new byte[]{10, 20, 30};
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "logo.png", "image/png", imageBytes);
-            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file));
+            mockMvc.perform(multipart("/api/companies/" + id + "/logo").file(file).with(testJwt()));
 
             //WHEN
-            mockMvc.perform(delete("/api/companies/" + id));
-            mockMvc.perform(post("/api/companies/" + id + "/restore"));
+            mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
+            mockMvc.perform(post("/api/companies/" + id + "/restore").with(testJwt()));
 
             //THEN
-            mockMvc.perform(get("/api/companies/" + id + "/logo"))
+            mockMvc.perform(get("/api/companies/" + id + "/logo").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(content().bytes(imageBytes));
 
-            mockMvc.perform(get("/api/companies/" + id))
+            mockMvc.perform(get("/api/companies/" + id).with(testJwt()))
                     .andExpect(jsonPath("$.hasLogo").value(true));
         }
     }

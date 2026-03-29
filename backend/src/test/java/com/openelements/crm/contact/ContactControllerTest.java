@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static com.openelements.crm.TestSecurityUtil.testJwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -60,7 +61,7 @@ class ContactControllerTest {
                 {"name": "%s"}
                 """.formatted(name);
         final String response = mockMvc.perform(post("/api/companies")
-                        .contentType(MediaType.APPLICATION_JSON).content(json))
+                        .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -76,7 +77,7 @@ class ContactControllerTest {
                 }
                 """.formatted(firstName, lastName, companyId != null ? "\"" + companyId + "\"" : "null");
         final String response = mockMvc.perform(post("/api/contacts")
-                        .contentType(MediaType.APPLICATION_JSON).content(json))
+                        .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -107,7 +108,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -131,7 +132,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -150,7 +151,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -161,7 +162,7 @@ class ContactControllerTest {
         void shouldFailWithSoftDeletedCompany() throws Exception {
             //GIVEN
             final String companyId = createCompany("Deleted Co");
-            mockMvc.perform(delete("/api/companies/" + companyId));
+            mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
 
             final String json = """
                     {"firstName": "Jane", "lastName": "Doe", "language": "EN",
@@ -170,7 +171,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -186,7 +187,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -202,7 +203,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -222,7 +223,7 @@ class ContactControllerTest {
             final String contactId = createContact("Hendrik", "Ebbers", companyId);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + contactId));
+            final var result = mockMvc.perform(get("/api/contacts/" + contactId).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -246,7 +247,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(put("/api/contacts/" + contactId)
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -267,7 +268,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(put("/api/contacts/" + contactId)
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -295,7 +296,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(put("/api/contacts/" + contactId)
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -315,14 +316,14 @@ class ContactControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             {"text": "A comment", "author": "Test"}
-                            """));
+                            """).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/contacts/" + contactId));
+            final var result = mockMvc.perform(delete("/api/contacts/" + contactId).with(testJwt()));
 
             //THEN
             result.andExpect(status().isNoContent());
-            mockMvc.perform(get("/api/contacts/" + contactId))
+            mockMvc.perform(get("/api/contacts/" + contactId).with(testJwt()))
                     .andExpect(status().isNotFound());
         }
 
@@ -333,7 +334,7 @@ class ContactControllerTest {
             //  no contact exists
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/contacts/00000000-0000-0000-0000-000000000001"));
+            final var result = mockMvc.perform(delete("/api/contacts/00000000-0000-0000-0000-000000000001").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -353,7 +354,7 @@ class ContactControllerTest {
             }
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts"));
+            final var result = mockMvc.perform(get("/api/contacts").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -369,7 +370,7 @@ class ContactControllerTest {
             createContact("Hans", "Schmidt", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?search=ebb"));
+            final var result = mockMvc.perform(get("/api/contacts?search=ebb").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -385,7 +386,7 @@ class ContactControllerTest {
             createContact("Hans", "B", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?search=Hendrik"));
+            final var result = mockMvc.perform(get("/api/contacts?search=Hendrik").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -403,11 +404,11 @@ class ContactControllerTest {
             final String json2 = """
                     {"firstName": "B", "lastName": "B", "language": "DE", "email": "b@example.com"}
                     """;
-            mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(json1));
-            mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(json2));
+            mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(json1).with(testJwt()));
+            mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(json2).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?search=a@example"));
+            final var result = mockMvc.perform(get("/api/contacts?search=a@example").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -423,7 +424,7 @@ class ContactControllerTest {
             createContact("Jane", "Smith", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?search=Acme"));
+            final var result = mockMvc.perform(get("/api/contacts?search=Acme").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -439,7 +440,7 @@ class ContactControllerTest {
             createContact("Anna", "Mueller", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts").param("search", "Anna Schmidt"));
+            final var result = mockMvc.perform(get("/api/contacts").param("search", "Anna Schmidt").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -457,7 +458,7 @@ class ContactControllerTest {
             createContact("Bob", "B", companyB);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?companyId=" + companyA));
+            final var result = mockMvc.perform(get("/api/contacts?companyId=" + companyA).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -473,10 +474,10 @@ class ContactControllerTest {
             final String enJson = """
                     {"firstName": "EN", "lastName": "Contact", "language": "EN"}
                     """;
-            mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(enJson));
+            mockMvc.perform(post("/api/contacts").contentType(MediaType.APPLICATION_JSON).content(enJson).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?language=DE"));
+            final var result = mockMvc.perform(get("/api/contacts?language=DE").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -492,7 +493,7 @@ class ContactControllerTest {
             createContact("B", "Alpha", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?sort=lastName,asc"));
+            final var result = mockMvc.perform(get("/api/contacts?sort=lastName,asc").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -512,7 +513,7 @@ class ContactControllerTest {
             contactRepository.saveAndFlush(brevoEntity);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?brevo=true"));
+            final var result = mockMvc.perform(get("/api/contacts?brevo=true").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -532,7 +533,7 @@ class ContactControllerTest {
             contactRepository.saveAndFlush(brevoEntity);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?brevo=false"));
+            final var result = mockMvc.perform(get("/api/contacts?brevo=false").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -554,7 +555,7 @@ class ContactControllerTest {
                     "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
 
             //WHEN
-            final var result = mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+            final var result = mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk());
@@ -568,10 +569,10 @@ class ContactControllerTest {
             final byte[] imageBytes = new byte[]{1, 2, 3, 4, 5};
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "photo.jpg", "image/jpeg", imageBytes);
-            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + id + "/photo"));
+            final var result = mockMvc.perform(get("/api/contacts/" + id + "/photo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -586,7 +587,7 @@ class ContactControllerTest {
             final String id = createContact("No", "Photo", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + id + "/photo"));
+            final var result = mockMvc.perform(get("/api/contacts/" + id + "/photo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -601,7 +602,7 @@ class ContactControllerTest {
                     "file", "photo.png", "image/png", new byte[]{1, 2, 3});
 
             //WHEN
-            final var result = mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+            final var result = mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -614,14 +615,14 @@ class ContactControllerTest {
             final String id = createContact("Delete", "Photo", null);
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/contacts/" + id + "/photo"));
+            final var result = mockMvc.perform(delete("/api/contacts/" + id + "/photo").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNoContent());
-            mockMvc.perform(get("/api/contacts/" + id + "/photo"))
+            mockMvc.perform(get("/api/contacts/" + id + "/photo").with(testJwt()))
                     .andExpect(status().isNotFound());
         }
 
@@ -632,17 +633,17 @@ class ContactControllerTest {
             final String id = createContact("Replace", "Photo", null);
             final MockMultipartFile oldFile = new MockMultipartFile(
                     "file", "old.jpg", "image/jpeg", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(oldFile));
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(oldFile).with(testJwt()));
 
             final byte[] newBytes = new byte[]{4, 5, 6, 7};
             final MockMultipartFile newFile = new MockMultipartFile(
                     "file", "new.jpg", "image/jpeg", newBytes);
 
             //WHEN
-            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(newFile));
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(newFile).with(testJwt()));
 
             //THEN
-            mockMvc.perform(get("/api/contacts/" + id + "/photo"))
+            mockMvc.perform(get("/api/contacts/" + id + "/photo").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(content().bytes(newBytes));
         }
@@ -654,10 +655,10 @@ class ContactControllerTest {
             final String id = createContact("Has", "Photo", null);
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + id));
+            final var result = mockMvc.perform(get("/api/contacts/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -671,7 +672,7 @@ class ContactControllerTest {
             final String id = createContact("No", "Photo2", null);
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + id));
+            final var result = mockMvc.perform(get("/api/contacts/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -685,14 +686,14 @@ class ContactControllerTest {
             final String id = createContact("Hard", "Delete", null);
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "photo.jpg", "image/jpeg", new byte[]{1, 2, 3});
-            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file));
+            mockMvc.perform(multipart("/api/contacts/" + id + "/photo").file(file).with(testJwt()));
 
             //WHEN
-            mockMvc.perform(delete("/api/contacts/" + id))
+            mockMvc.perform(delete("/api/contacts/" + id).with(testJwt()))
                     .andExpect(status().isNoContent());
 
             //THEN
-            mockMvc.perform(get("/api/contacts/" + id))
+            mockMvc.perform(get("/api/contacts/" + id).with(testJwt()))
                     .andExpect(status().isNotFound());
         }
     }
@@ -711,7 +712,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -728,7 +729,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
@@ -746,7 +747,7 @@ class ContactControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(put("/api/contacts/" + contactId)
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -761,13 +762,13 @@ class ContactControllerTest {
                     {"firstName": "No", "lastName": "Lang"}
                     """;
             final String response = mockMvc.perform(post("/api/contacts")
-                            .contentType(MediaType.APPLICATION_JSON).content(json))
+                            .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                     .andExpect(status().isCreated())
                     .andReturn().getResponse().getContentAsString();
             final String id = objectMapper.readTree(response).get("id").asText();
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + id));
+            final var result = mockMvc.perform(get("/api/contacts/" + id).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -783,10 +784,10 @@ class ContactControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             {"firstName": "No", "lastName": "Lang"}
-                            """));
+                            """).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?language=UNKNOWN"));
+            final var result = mockMvc.perform(get("/api/contacts?language=UNKNOWN").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -803,10 +804,10 @@ class ContactControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             {"firstName": "No", "lastName": "Lang"}
-                            """));
+                            """).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts?language=DE"));
+            final var result = mockMvc.perform(get("/api/contacts?language=DE").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -823,10 +824,10 @@ class ContactControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             {"firstName": "No", "lastName": "Lang"}
-                            """));
+                            """).with(testJwt()));
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts"));
+            final var result = mockMvc.perform(get("/api/contacts").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -841,7 +842,7 @@ class ContactControllerTest {
                     {"firstName": "Jane", "lastName": "Doe"}
                     """;
             final String response = mockMvc.perform(post("/api/contacts")
-                            .contentType(MediaType.APPLICATION_JSON).content(json))
+                            .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.language").isEmpty())
                     .andReturn().getResponse().getContentAsString();
@@ -852,7 +853,7 @@ class ContactControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                             {"firstName": "Jane", "lastName": "Doe", "language": "EN"}
-                            """));
+                            """).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())

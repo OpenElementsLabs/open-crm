@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static com.openelements.crm.TestSecurityUtil.testJwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -55,7 +56,7 @@ class CommentControllerTest {
                 {"name": "%s"}
                 """.formatted(name);
         final String response = mockMvc.perform(post("/api/companies")
-                        .contentType(MediaType.APPLICATION_JSON).content(json))
+                        .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -66,7 +67,7 @@ class CommentControllerTest {
                 {"firstName": "%s", "lastName": "%s", "language": "DE"}
                 """.formatted(firstName, lastName);
         final String response = mockMvc.perform(post("/api/contacts")
-                        .contentType(MediaType.APPLICATION_JSON).content(json))
+                        .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -77,7 +78,7 @@ class CommentControllerTest {
                 {"text": "%s"}
                 """.formatted(text);
         final String response = mockMvc.perform(post("/api/companies/" + companyId + "/comments")
-                        .contentType(MediaType.APPLICATION_JSON).content(json))
+                        .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -88,7 +89,7 @@ class CommentControllerTest {
                 {"text": "%s"}
                 """.formatted(text);
         final String response = mockMvc.perform(post("/api/contacts/" + contactId + "/comments")
-                        .contentType(MediaType.APPLICATION_JSON).content(json))
+                        .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(response).get("id").asText();
@@ -109,12 +110,12 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/companies/" + companyId + "/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
                     .andExpect(jsonPath("$.text").value("Great meeting"))
-                    .andExpect(jsonPath("$.author").value("Demo User"))
+                    .andExpect(jsonPath("$.author").value("Test User"))
                     .andExpect(jsonPath("$.companyId").value(companyId))
                     .andExpect(jsonPath("$.contactId").isEmpty())
                     .andExpect(jsonPath("$.createdAt").exists());
@@ -131,11 +132,11 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts/" + contactId + "/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.author").value("Demo User"))
+                    .andExpect(jsonPath("$.author").value("Test User"))
                     .andExpect(jsonPath("$.contactId").value(contactId))
                     .andExpect(jsonPath("$.companyId").isEmpty());
         }
@@ -150,7 +151,7 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/companies/00000000-0000-0000-0000-000000000001/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -166,7 +167,7 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/contacts/00000000-0000-0000-0000-000000000001/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -183,7 +184,7 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(post("/api/companies/" + companyId + "/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -194,14 +195,14 @@ class CommentControllerTest {
         void shouldAllowOnSoftDeletedCompany() throws Exception {
             //GIVEN
             final String companyId = createCompany("Deleted Co");
-            mockMvc.perform(delete("/api/companies/" + companyId));
+            mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
             final String json = """
                     {"text": "Still commenting"}
                     """;
 
             //WHEN
             final var result = mockMvc.perform(post("/api/companies/" + companyId + "/comments")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isCreated());
@@ -222,7 +223,7 @@ class CommentControllerTest {
             addCommentToCompany(companyId, "Third");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/companies/" + companyId + "/comments"));
+            final var result = mockMvc.perform(get("/api/companies/" + companyId + "/comments").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -241,7 +242,7 @@ class CommentControllerTest {
             addCommentToContact(contactId, "Note 3");
 
             //WHEN
-            final var result = mockMvc.perform(get("/api/contacts/" + contactId + "/comments"));
+            final var result = mockMvc.perform(get("/api/contacts/" + contactId + "/comments").with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -266,7 +267,7 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(put("/api/comments/" + commentId)
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isOk())
@@ -285,7 +286,7 @@ class CommentControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(put("/api/comments/" + commentId)
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -304,7 +305,7 @@ class CommentControllerTest {
             final String commentId = addCommentToCompany(companyId, "To delete");
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/comments/" + commentId));
+            final var result = mockMvc.perform(delete("/api/comments/" + commentId).with(testJwt()));
 
             //THEN
             result.andExpect(status().isNoContent());
@@ -317,7 +318,7 @@ class CommentControllerTest {
             //  no comment exists
 
             //WHEN
-            final var result = mockMvc.perform(delete("/api/comments/00000000-0000-0000-0000-000000000001"));
+            final var result = mockMvc.perform(delete("/api/comments/00000000-0000-0000-0000-000000000001").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -338,12 +339,12 @@ class CommentControllerTest {
             addCommentToContact(contactId, "Comment 3");
 
             //WHEN
-            mockMvc.perform(delete("/api/contacts/" + contactId))
+            mockMvc.perform(delete("/api/contacts/" + contactId).with(testJwt()))
                     .andExpect(status().isNoContent());
 
             //THEN
             // Contact is gone
-            mockMvc.perform(get("/api/contacts/" + contactId))
+            mockMvc.perform(get("/api/contacts/" + contactId).with(testJwt()))
                     .andExpect(status().isNotFound());
             // All comments are gone too (verified via repository)
             org.assertj.core.api.Assertions.assertThat(commentRepository.count()).isZero();
@@ -358,11 +359,11 @@ class CommentControllerTest {
             addCommentToCompany(companyId, "Comment 2");
 
             //WHEN
-            mockMvc.perform(delete("/api/companies/" + companyId))
+            mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()))
                     .andExpect(status().isNoContent());
 
             //THEN
-            mockMvc.perform(get("/api/companies/" + companyId + "/comments"))
+            mockMvc.perform(get("/api/companies/" + companyId + "/comments").with(testJwt()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(2)));
         }
@@ -372,14 +373,14 @@ class CommentControllerTest {
         void contactCannotReferenceSoftDeletedCompany() throws Exception {
             //GIVEN
             final String companyId = createCompany("Deleted Co");
-            mockMvc.perform(delete("/api/companies/" + companyId));
+            mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
 
             //WHEN
             final String json = """
                     {"firstName": "Jane", "lastName": "Doe", "language": "EN", "companyId": "%s"}
                     """.formatted(companyId);
             final var result = mockMvc.perform(post("/api/contacts")
-                    .contentType(MediaType.APPLICATION_JSON).content(json));
+                    .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());
@@ -395,18 +396,18 @@ class CommentControllerTest {
                     {"firstName": "Jane", "lastName": "Doe", "language": "EN", "companyId": "%s"}
                     """.formatted(companyA);
             final String response = mockMvc.perform(post("/api/contacts")
-                            .contentType(MediaType.APPLICATION_JSON).content(contactJson))
+                            .contentType(MediaType.APPLICATION_JSON).content(contactJson).with(testJwt()))
                     .andReturn().getResponse().getContentAsString();
             final String contactId = objectMapper.readTree(response).get("id").asText();
 
-            mockMvc.perform(delete("/api/companies/" + companyB));
+            mockMvc.perform(delete("/api/companies/" + companyB).with(testJwt()));
 
             //WHEN
             final String updateJson = """
                     {"firstName": "Jane", "lastName": "Doe", "language": "EN", "companyId": "%s"}
                     """.formatted(companyB);
             final var result = mockMvc.perform(put("/api/contacts/" + contactId)
-                    .contentType(MediaType.APPLICATION_JSON).content(updateJson));
+                    .contentType(MediaType.APPLICATION_JSON).content(updateJson).with(testJwt()));
 
             //THEN
             result.andExpect(status().isBadRequest());

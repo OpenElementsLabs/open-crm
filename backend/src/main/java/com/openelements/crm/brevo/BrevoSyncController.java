@@ -3,6 +3,7 @@ package com.openelements.crm.brevo;
 import com.openelements.crm.settings.SettingsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Objects;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/brevo")
 @Tag(name = "Brevo Sync", description = "Brevo import and settings management")
+@SecurityRequirement(name = "oidc")
 public class BrevoSyncController {
 
     private static final String BREVO_API_KEY = "brevo.api-key";

@@ -3,6 +3,7 @@ package com.openelements.crm.comment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Objects;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/comments")
 @Tag(name = "Comments", description = "Comment management operations")
+@SecurityRequirement(name = "oidc")
 public class CommentController {
 
     private final CommentService commentService;

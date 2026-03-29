@@ -3,7 +3,7 @@
 ## Components
 
 - **Frontend (Next.js)** — Server-side rendered React application using the App Router. All pages require OIDC authentication via Auth.js v5 (middleware redirects unauthenticated users). API calls are proxied through a catch-all Route Handler that injects the JWT access token as an Authorization Bearer header. Uses `BACKEND_URL` env var for server-side requests. Bilingual UI (DE/EN) with client-side language detection and switching.
-- **Backend (Spring Boot)** — RESTful JSON API handling business logic, validation, and data persistence. Organized by domain packages (company, contact, comment, brevo, health, settings, user). Exposes OpenAPI documentation via Swagger UI. CSV export endpoints generate files server-side using Apache Commons CSV.
+- **Backend (Spring Boot)** — RESTful JSON API handling business logic, validation, and data persistence. All API endpoints require JWT Bearer token authentication via Spring Security OAuth2 Resource Server (except health and Swagger UI which are public). User info is extracted from JWT claims. Organized by domain packages (company, contact, comment, brevo, health, settings, user). Exposes OpenAPI documentation via Swagger UI with OIDC authorize button. CSV export endpoints generate files server-side using Apache Commons CSV.
 - **Database (PostgreSQL)** — Relational storage for all domain data. Schema managed by Flyway migrations (V1–V11). Uses UUID primary keys, soft-delete pattern for companies, and timestamp tracking.
 - **Brevo** — External marketing platform. One-directional import of companies and contacts via Brevo API, triggered manually. API key stored in settings table.
 

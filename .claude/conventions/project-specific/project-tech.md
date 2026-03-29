@@ -35,11 +35,13 @@
 - Apache Commons CSV 1.12.0 (CSV export generation)
 - Spring Multipart (file upload with 2 MB max, configured in `application.yml`)
 - PostgreSQL JDBC driver (runtime)
+- Spring Security OAuth2 Resource Server (JWT token validation for OIDC authentication)
 - CycloneDX Maven Plugin 2.9.1 (SBOM generation)
 
 ### Backend Testing
 
 - Spring Boot Test (integration tests with `@WebMvcTest`)
+- Spring Security Test (mock JWT tokens for authenticated endpoint testing)
 - H2 Database (in-memory test database)
 
 ### Frontend
