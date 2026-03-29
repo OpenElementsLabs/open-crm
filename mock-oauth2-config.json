@@ -16,20 +16,5 @@
         }
       ]
     }
-  ],
-  "issuers": [
-    {
-      "issuerId": "default",
-      "clients": [
-        {
-          "clientId": "open-crm",
-          "clientSecret": "open-crm-secret",
-          "redirectUris": [
-            "http://localhost:4001/api/auth/callback/oidc",
-            "http://localhost:9081/login/oauth2/code/oidc"
-          ]
-        }
-      ]
-    }
   ]
 }
