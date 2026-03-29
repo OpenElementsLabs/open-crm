@@ -101,6 +101,8 @@ export const en: Translations = {
       previous: "Previous",
       next: "Next",
       page: "Page {current} of {total}",
+      totalOne: "{count} Company",
+      totalOther: "{count} Companies",
     },
   },
   contacts: {
@@ -192,6 +194,8 @@ export const en: Translations = {
       previous: "Previous",
       next: "Next",
       page: "Page {current} of {total}",
+      totalOne: "{count} Contact",
+      totalOther: "{count} Contacts",
     },
     sort: {
       label: "Sort by",

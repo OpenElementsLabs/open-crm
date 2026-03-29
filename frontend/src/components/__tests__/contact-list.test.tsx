@@ -76,6 +76,7 @@ const defaultCompanies: CompanyDto[] = [
     city: null,
     country: null,
     deleted: false,
+    brevo: false,
     hasLogo: false,
     contactCount: 0,
     commentCount: 0,
@@ -180,6 +181,24 @@ describe("ContactList", () => {
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
         expect(screen.getByText(S.pagination.previous)).toBeInTheDocument();
+      });
+    });
+
+    it("should show record count in pagination", async () => {
+      mockGetContacts.mockResolvedValue({
+        content: [makeContact()],
+        totalElements: 1,
+        totalPages: 1,
+        number: 0,
+        size: 20,
+        first: true,
+        last: true,
+      });
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/1 Kontakt/)).toBeInTheDocument();
       });
     });
 
