@@ -7,6 +7,13 @@ import { Plus, Trash2, RotateCcw, Archive, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -28,6 +35,7 @@ export function CompanyList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [nameFilter, setNameFilter] = useState("");
+  const [brevoFilter, setBrevoFilter] = useState("all");
   const [includeDeleted, setIncludeDeleted] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
@@ -41,6 +49,7 @@ export function CompanyList() {
         size: 20,
         name: nameFilter || undefined,
         includeDeleted,
+        brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
       });
       setData(result);
     } catch {
@@ -48,7 +57,7 @@ export function CompanyList() {
     } finally {
       setLoading(false);
     }
-  }, [page, nameFilter, includeDeleted]);
+  }, [page, nameFilter, brevoFilter, includeDeleted]);
 
   useEffect(() => {
     fetchCompanies();
@@ -56,7 +65,7 @@ export function CompanyList() {
 
   useEffect(() => {
     setPage(0);
-  }, [nameFilter, includeDeleted]);
+  }, [nameFilter, brevoFilter, includeDeleted]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -103,6 +112,16 @@ export function CompanyList() {
           onChange={(e) => setNameFilter(e.target.value)}
           className="sm:max-w-[200px]"
         />
+        <Select value={brevoFilter} onValueChange={setBrevoFilter}>
+          <SelectTrigger className="sm:max-w-[200px]">
+            <SelectValue placeholder={t.brevoFilter.label} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t.brevoFilter.all}</SelectItem>
+            <SelectItem value="true">{t.brevoFilter.fromBrevo}</SelectItem>
+            <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Archive toggle */}

@@ -112,6 +112,7 @@ public class ContactService {
      * @param email     partial email filter (case-insensitive)
      * @param companyId exact company ID filter
      * @param language  exact language filter
+     * @param brevo     filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
      * @param pageable  pagination and sorting parameters
      * @return a page of contact responses
      */
@@ -121,6 +122,7 @@ public class ContactService {
                                       final String email,
                                       final UUID companyId,
                                       final String language,
+                                      final Boolean brevo,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         Specification<ContactEntity> spec = Specification.where(null);
@@ -147,6 +149,13 @@ public class ContactService {
             } else {
                 final Language lang = Language.valueOf(language.toUpperCase());
                 spec = spec.and((root, query, cb) -> cb.equal(root.get("language"), lang));
+            }
+        }
+        if (brevo != null) {
+            if (brevo) {
+                spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("brevoId")));
+            } else {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoId")));
             }
         }
 

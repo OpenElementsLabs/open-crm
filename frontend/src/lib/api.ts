@@ -25,6 +25,7 @@ export interface CompanyListParams {
   readonly size?: number;
   readonly name?: string;
   readonly includeDeleted?: boolean;
+  readonly brevo?: boolean;
 }
 
 export async function getCompanies(params: CompanyListParams = {}): Promise<Page<CompanyDto>> {
@@ -33,6 +34,7 @@ export async function getCompanies(params: CompanyListParams = {}): Promise<Page
   if (params.size !== undefined) searchParams.set("size", String(params.size));
   if (params.name) searchParams.set("name", params.name);
   if (params.includeDeleted) searchParams.set("includeDeleted", "true");
+  if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
 
   const query = searchParams.toString();
   const url = `${baseUrl()}/api/companies${query ? `?${query}` : ""}`;
@@ -151,6 +153,7 @@ export interface ContactListParams {
   readonly email?: string;
   readonly companyId?: string;
   readonly language?: string;
+  readonly brevo?: boolean;
 }
 
 export async function getContacts(params: ContactListParams = {}): Promise<Page<ContactDto>> {
@@ -163,6 +166,7 @@ export async function getContacts(params: ContactListParams = {}): Promise<Page<
   if (params.email) searchParams.set("email", params.email);
   if (params.companyId) searchParams.set("companyId", params.companyId);
   if (params.language) searchParams.set("language", params.language);
+  if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
 
   const query = searchParams.toString();
   const url = `${baseUrl()}/api/contacts${query ? `?${query}` : ""}`;

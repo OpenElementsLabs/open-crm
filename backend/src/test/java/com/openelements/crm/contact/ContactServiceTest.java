@@ -238,7 +238,7 @@ class ContactServiceTest {
             createContact("Alice", "A", null);
             createContact("Bob", "B", null);
 
-            final var page = contactService.list(null, null, null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, null, null, null, null, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -249,7 +249,7 @@ class ContactServiceTest {
             createContact("Hendrik", "A", null);
             createContact("Hans", "B", null);
 
-            final var page = contactService.list("Hendrik", null, null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list("Hendrik", null, null, null, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Hendrik", page.getContent().get(0).firstName());
@@ -261,7 +261,7 @@ class ContactServiceTest {
             createContact("A", "Ebbers", null);
             createContact("B", "Schmidt", null);
 
-            final var page = contactService.list(null, "Ebbers", null, null, null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, "Ebbers", null, null, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Ebbers", page.getContent().get(0).lastName());
@@ -273,7 +273,7 @@ class ContactServiceTest {
             contactService.create(new ContactCreateDto("A", "A", "a@example.com", null, null, null, null, null, null, null));
             contactService.create(new ContactCreateDto("B", "B", "b@example.com", null, null, null, null, null, null, null));
 
-            final var page = contactService.list(null, null, "a@example", null, null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, "a@example", null, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
         }
@@ -286,7 +286,7 @@ class ContactServiceTest {
             createContact("Alice", "A", companyA.id());
             createContact("Bob", "B", companyB.id());
 
-            final var page = contactService.list(null, null, null, companyA.id(), null, PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, null, companyA.id(), null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Alice", page.getContent().get(0).firstName());
@@ -298,7 +298,7 @@ class ContactServiceTest {
             contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null));
             contactService.create(new ContactCreateDto("EN", "Contact", null, null, null, null, null, null, Language.EN, null));
 
-            final var page = contactService.list(null, null, null, null, "DE", PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, null, null, "DE", null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("DE", page.getContent().get(0).firstName());
@@ -310,10 +310,42 @@ class ContactServiceTest {
             contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null));
             createContact("No", "Lang", null);
 
-            final var page = contactService.list(null, null, null, null, "UNKNOWN", PageRequest.of(0, 20));
+            final var page = contactService.list(null, null, null, null, "UNKNOWN", null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("No", page.getContent().get(0).firstName());
+        }
+
+        @Test
+        @DisplayName("filters by brevo true")
+        void filtersByBrevoTrue() {
+            createContact("Normal", "Contact", null);
+            final ContactEntity brevoEntity = new ContactEntity();
+            brevoEntity.setFirstName("Brevo");
+            brevoEntity.setLastName("Contact");
+            brevoEntity.setBrevoId("brevo-456");
+            contactRepository.saveAndFlush(brevoEntity);
+
+            final var page = contactService.list(null, null, null, null, null, true, PageRequest.of(0, 20));
+
+            assertEquals(1, page.getTotalElements());
+            assertEquals("Brevo", page.getContent().get(0).firstName());
+        }
+
+        @Test
+        @DisplayName("filters by brevo false")
+        void filtersByBrevoFalse() {
+            createContact("Normal", "Contact", null);
+            final ContactEntity brevoEntity = new ContactEntity();
+            brevoEntity.setFirstName("Brevo");
+            brevoEntity.setLastName("Contact");
+            brevoEntity.setBrevoId("brevo-456");
+            contactRepository.saveAndFlush(brevoEntity);
+
+            final var page = contactService.list(null, null, null, null, null, false, PageRequest.of(0, 20));
+
+            assertEquals(1, page.getTotalElements());
+            assertEquals("Normal", page.getContent().get(0).firstName());
         }
     }
 

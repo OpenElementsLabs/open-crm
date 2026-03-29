@@ -136,12 +136,14 @@ public class CompanyService {
      *
      * @param name           partial name filter (case-insensitive)
      * @param includeDeleted whether to include soft-deleted companies
+     * @param brevo          filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
      * @param pageable       pagination and sorting parameters
      * @return a page of company responses
      */
     @Transactional(readOnly = true)
     public Page<CompanyDto> list(final String name,
                                       final boolean includeDeleted,
+                                      final Boolean brevo,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         Specification<CompanyEntity> spec = Specification.where(null);
@@ -152,6 +154,13 @@ public class CompanyService {
         if (name != null && !name.isBlank()) {
             spec = spec.and((root, query, cb) ->
                     cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+        if (brevo != null) {
+            if (brevo) {
+                spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("brevoCompanyId")));
+            } else {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoCompanyId")));
+            }
         }
 
         return companyRepository.findAll(spec, pageable).map(this::toDto);

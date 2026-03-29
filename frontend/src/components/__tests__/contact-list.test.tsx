@@ -215,6 +215,18 @@ describe("ContactList", () => {
       mockGetContacts.mockResolvedValue(makePage([makeContact()]));
     });
 
+    it("should render brevo filter dropdown", async () => {
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        const allTriggers = screen.getAllByRole("combobox");
+        const brevoTrigger = allTriggers.find((el) =>
+          el.textContent?.includes(de.brevoFilter.all),
+        );
+        expect(brevoTrigger).toBeDefined();
+      });
+    });
+
     it("should filter by first name", async () => {
       renderWithProviders(<ContactList />);
 
