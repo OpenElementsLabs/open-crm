@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, Archive, Building2, Printer } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl } from "@/lib/api";
+import { AddCommentDialog } from "@/components/add-comment-dialog";
+import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl, createCompanyComment } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -40,6 +41,8 @@ export function CompanyList() {
 
   const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [commentTarget, setCommentTarget] = useState<CompanyDto | null>(null);
+  const [commentSending, setCommentSending] = useState(false);
 
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
@@ -138,10 +141,6 @@ export function CompanyList() {
             <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      {/* Archive toggle */}
-      <div className="mb-4">
         <Button
           variant="outline"
           size="sm"
@@ -187,7 +186,7 @@ export function CompanyList() {
                   <TableHead>{S.columns.website}</TableHead>
                   <TableHead>{S.columns.contacts}</TableHead>
                   <TableHead>{S.columns.comments}</TableHead>
-                  <TableHead className="w-[100px] text-right">{S.columns.actions}</TableHead>
+                  <TableHead className="w-[140px] text-right">{S.columns.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -215,6 +214,28 @@ export function CompanyList() {
                     <TableCell>{company.contactCount}</TableCell>
                     <TableCell>{company.commentCount}</TableCell>
                     <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={S.detail.edit}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/companies/${company.id}/edit`);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 text-oe-blue" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={S.comments.addTitle}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCommentTarget(company);
+                        }}
+                      >
+                        <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
+                      </Button>
                       {company.deleted ? (
                         <Button
                           variant="ghost"
@@ -293,6 +314,27 @@ export function CompanyList() {
         onConfirm={handleDelete}
         error={deleteError}
         errorTitle={S.deleteDialog.errorTitle}
+      />
+
+      <AddCommentDialog
+        open={commentTarget !== null}
+        onOpenChange={(open) => { if (!open) setCommentTarget(null); }}
+        onSubmit={async (text) => {
+          setCommentSending(true);
+          try {
+            await createCompanyComment(commentTarget!.id, { text });
+            setCommentTarget(null);
+          } finally {
+            setCommentSending(false);
+          }
+        }}
+        sending={commentSending}
+        title={S.comments.addTitle}
+        placeholder={S.comments.placeholder}
+        sendLabel={S.comments.send}
+        sendingLabel={S.comments.sending}
+        errorTitle={S.comments.errorTitle}
+        errorMessage={S.comments.errorGeneric}
       />
     </div>
   );

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl } from "@/lib/api";
+import { AddCommentDialog } from "@/components/add-comment-dialog";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment } from "@/lib/api";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -43,6 +44,8 @@ export function ContactList() {
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ContactDto | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [commentTarget, setCommentTarget] = useState<ContactDto | null>(null);
+  const [commentSending, setCommentSending] = useState(false);
 
   useEffect(() => {
     getCompaniesForSelect()
@@ -196,7 +199,7 @@ export function ContactList() {
                   <TableHead>{S.columns.email}</TableHead>
                   <TableHead>{S.columns.company}</TableHead>
                   <TableHead>{S.columns.comments}</TableHead>
-                  <TableHead className="w-[100px] text-right">{S.columns.actions}</TableHead>
+                  <TableHead className="w-[140px] text-right">{S.columns.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -228,6 +231,28 @@ export function ContactList() {
                     </TableCell>
                     <TableCell>{contact.commentCount}</TableCell>
                     <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={S.detail.edit}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/contacts/${contact.id}/edit`);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 text-oe-blue" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={t.companies.comments.addTitle}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCommentTarget(contact);
+                        }}
+                      >
+                        <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -294,6 +319,27 @@ export function ContactList() {
         cancelLabel={S.deleteDialog.cancel}
         onConfirm={handleDelete}
         error={deleteError}
+      />
+
+      <AddCommentDialog
+        open={commentTarget !== null}
+        onOpenChange={(open) => { if (!open) setCommentTarget(null); }}
+        onSubmit={async (text) => {
+          setCommentSending(true);
+          try {
+            await createContactComment(commentTarget!.id, { text });
+            setCommentTarget(null);
+          } finally {
+            setCommentSending(false);
+          }
+        }}
+        sending={commentSending}
+        title={t.companies.comments.addTitle}
+        placeholder={t.companies.comments.placeholder}
+        sendLabel={t.companies.comments.send}
+        sendingLabel={t.companies.comments.sending}
+        errorTitle={t.companies.comments.errorTitle}
+        errorMessage={t.companies.comments.errorGeneric}
       />
     </div>
   );

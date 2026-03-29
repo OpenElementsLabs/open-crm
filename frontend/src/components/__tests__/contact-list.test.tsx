@@ -20,12 +20,14 @@ const mockGetContacts = vi.fn();
 const mockDeleteContact = vi.fn();
 const mockGetCompaniesForSelect = vi.fn();
 const mockGetContactPhotoUrl = vi.fn().mockReturnValue("/api/contacts/test-id/photo");
+const mockCreateContactComment = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getContacts: (...args: unknown[]) => mockGetContacts(...args),
   deleteContact: (...args: unknown[]) => mockDeleteContact(...args),
   getCompaniesForSelect: (...args: unknown[]) => mockGetCompaniesForSelect(...args),
   getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
+  createContactComment: (...args: unknown[]) => mockCreateContactComment(...args),
 }));
 
 function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
@@ -363,6 +365,20 @@ describe("ContactList", () => {
       fireEvent.click(screen.getByText(S.deleteDialog.cancel));
 
       expect(mockDeleteContact).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("actions", () => {
+    it("should show edit button in actions column", async () => {
+      mockGetContacts.mockResolvedValue(
+        makePage([makeContact({ id: "1", firstName: "Max", lastName: "Mustermann" })]),
+      );
+
+      renderWithProviders(<ContactList />);
+
+      await waitFor(() => {
+        expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();
+      });
     });
   });
 

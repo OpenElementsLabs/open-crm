@@ -18,12 +18,14 @@ const mockGetCompanies = vi.fn();
 const mockDeleteCompany = vi.fn();
 const mockRestoreCompany = vi.fn();
 const mockGetCompanyLogoUrl = vi.fn().mockReturnValue("/api/companies/test-id/logo");
+const mockCreateCompanyComment = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCompanies: (...args: unknown[]) => mockGetCompanies(...args),
   deleteCompany: (...args: unknown[]) => mockDeleteCompany(...args),
   restoreCompany: (...args: unknown[]) => mockRestoreCompany(...args),
   getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
+  createCompanyComment: (...args: unknown[]) => mockCreateCompanyComment(...args),
 }));
 
 function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
@@ -448,6 +450,20 @@ describe("CompanyList", () => {
 
       await waitFor(() => {
         expect(screen.getByText(de.print.button)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("actions", () => {
+    it("should show edit button in actions column", async () => {
+      mockGetCompanies.mockResolvedValue(
+        makePage([makeCompany({ id: "1", name: "Test Corp" })]),
+      );
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();
       });
     });
   });
