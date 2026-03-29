@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Building2 } from "lucide-react";
 import {
@@ -18,6 +18,14 @@ import { useTranslations } from "@/lib/i18n/language-context";
 export const dynamic = "force-dynamic";
 
 export default function CompanyPrintPage() {
+  return (
+    <Suspense fallback={<p className="p-8 text-oe-gray-mid">Loading...</p>}>
+      <CompanyPrintContent />
+    </Suspense>
+  );
+}
+
+function CompanyPrintContent() {
   const t = useTranslations();
   const S = t.companies;
   const P = t.print;

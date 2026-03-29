@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "lucide-react";
 import {
@@ -18,6 +18,14 @@ import { useTranslations } from "@/lib/i18n/language-context";
 export const dynamic = "force-dynamic";
 
 export default function ContactPrintPage() {
+  return (
+    <Suspense fallback={<p className="p-8 text-oe-gray-mid">Loading...</p>}>
+      <ContactPrintContent />
+    </Suspense>
+  );
+}
+
+function ContactPrintContent() {
   const t = useTranslations();
   const S = t.contacts;
   const P = t.print;
