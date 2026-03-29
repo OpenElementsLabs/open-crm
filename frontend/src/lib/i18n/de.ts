@@ -181,9 +181,7 @@ export const de = {
       cancel: "Abbrechen",
     },
     filter: {
-      firstName: "Nach Vorname filtern",
-      lastName: "Nach Nachname filtern",
-      email: "Nach E-Mail filtern",
+      search: "Suche...",
       company: "Nach Firma filtern",
       language: "Nach Sprache filtern",
       allCompanies: "Alle Firmen",

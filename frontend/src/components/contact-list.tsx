@@ -35,9 +35,7 @@ export function ContactList() {
   const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [firstNameFilter, setFirstNameFilter] = useState("");
-  const [lastNameFilter, setLastNameFilter] = useState("");
-  const [emailFilter, setEmailFilter] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
   const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
   const [languageFilter, setLanguageFilter] = useState("");
   const [brevoFilter, setBrevoFilter] = useState("all");
@@ -58,9 +56,7 @@ export function ContactList() {
       const result = await getContacts({
         page,
         size: 20,
-        firstName: firstNameFilter || undefined,
-        lastName: lastNameFilter || undefined,
-        email: emailFilter || undefined,
+        search: searchFilter || undefined,
         companyId: companyIdFilter && companyIdFilter !== "all" ? companyIdFilter : undefined,
         language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
@@ -71,7 +67,7 @@ export function ContactList() {
     } finally {
       setLoading(false);
     }
-  }, [page, firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [page, searchFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   useEffect(() => {
     fetchContacts();
@@ -79,7 +75,7 @@ export function ContactList() {
 
   useEffect(() => {
     setPage(0);
-  }, [firstNameFilter, lastNameFilter, emailFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [searchFilter, companyIdFilter, languageFilter, brevoFilter]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -108,21 +104,9 @@ export function ContactList() {
       {/* Filters */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Input
-          placeholder={S.filter.firstName}
-          value={firstNameFilter}
-          onChange={(e) => setFirstNameFilter(e.target.value)}
-          className="sm:max-w-[180px]"
-        />
-        <Input
-          placeholder={S.filter.lastName}
-          value={lastNameFilter}
-          onChange={(e) => setLastNameFilter(e.target.value)}
-          className="sm:max-w-[180px]"
-        />
-        <Input
-          placeholder={S.filter.email}
-          value={emailFilter}
-          onChange={(e) => setEmailFilter(e.target.value)}
+          placeholder={S.filter.search}
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
           className="sm:max-w-[180px]"
         />
         <Select value={companyIdFilter} onValueChange={setCompanyIdFilter}>

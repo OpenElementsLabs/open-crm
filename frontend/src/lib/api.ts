@@ -147,9 +147,7 @@ export async function deleteCompanyLogo(id: string): Promise<void> {
 export interface ContactListParams {
   readonly page?: number;
   readonly size?: number;
-  readonly firstName?: string;
-  readonly lastName?: string;
-  readonly email?: string;
+  readonly search?: string;
   readonly companyId?: string;
   readonly language?: string;
   readonly brevo?: boolean;
@@ -159,9 +157,7 @@ export async function getContacts(params: ContactListParams = {}): Promise<Page<
   const searchParams = new URLSearchParams();
   if (params.page !== undefined) searchParams.set("page", String(params.page));
   if (params.size !== undefined) searchParams.set("size", String(params.size));
-  if (params.firstName) searchParams.set("firstName", params.firstName);
-  if (params.lastName) searchParams.set("lastName", params.lastName);
-  if (params.email) searchParams.set("email", params.email);
+  if (params.search) searchParams.set("search", params.search);
   if (params.companyId) searchParams.set("companyId", params.companyId);
   if (params.language) searchParams.set("language", params.language);
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));

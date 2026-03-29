@@ -32,6 +32,6 @@
 | 028 | Record count display       | Show total filtered record count in company and contact list pagination ("42 Firmen · Seite 1 von 3") | — | done   |
 | 029 | Contact table columns      | Merge firstName/lastName into single Name column, add Email column to contact list table            | — | done   |
 | 030 | Remove contact sorting     | Remove sorting dropdown from contact list, fixed lastName ascending default                        | — | done   |
-| 031 | Contact unified search     | Replace three text filters with single search field across name, email, and company name           | — | open   |
+| 031 | Contact unified search     | Replace three text filters with single search field across name, email, and company name           | — | done   |
 | 032 | Print table view           | Print button opens new tab with all filtered records in print-optimized table, auto-triggers print | — | open   |
 

@@ -183,9 +183,7 @@ export const en: Translations = {
       cancel: "Cancel",
     },
     filter: {
-      firstName: "Filter by first name",
-      lastName: "Filter by last name",
-      email: "Filter by email",
+      search: "Search...",
       company: "Filter by company",
       language: "Filter by language",
       allCompanies: "All companies",
