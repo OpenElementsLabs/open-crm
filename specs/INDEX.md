@@ -35,4 +35,5 @@
 | 031 | Contact unified search     | Replace three text filters with single search field across name, email, and company name           | — | done   |
 | 032 | Print table view           | Print button opens new tab with all filtered records in print-optimized table, auto-triggers print | — | open   |
 | 033 | OpenAPI parameter docs     | Add @Parameter annotations to all REST controller method parameters for Swagger UI descriptions    | — | open   |
+| 034 | Table action buttons       | Add edit and comment action buttons to company and contact list table rows                         | — | open   |
 
