@@ -62,18 +62,98 @@ afterEach(() => {
 });
 
 describe("CompanyDetail", () => {
-  it("should render all company fields", () => {
+  it("should render all company fields with merged address", () => {
     renderWithProviders(<CompanyDetail company={testCompany} />);
 
-    // Name appears in heading and detail — check at least one is present
     expect(screen.getAllByText("Open Elements GmbH").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("info@open-elements.com")).toBeInTheDocument();
     expect(screen.getByText("https://open-elements.com")).toBeInTheDocument();
-    expect(screen.getByText("Musterstraße")).toBeInTheDocument();
-    expect(screen.getByText("42")).toBeInTheDocument();
-    expect(screen.getByText("12345")).toBeInTheDocument();
-    expect(screen.getByText("Berlin")).toBeInTheDocument();
+    expect(screen.getByText(S.detail.address)).toBeInTheDocument();
+    expect(screen.getByText(/Musterstraße 42/)).toBeInTheDocument();
+    expect(screen.getByText(/12345 Berlin/)).toBeInTheDocument();
     expect(screen.getByText("Germany")).toBeInTheDocument();
+  });
+
+  it("should show address without house number", () => {
+    renderWithProviders(
+      <CompanyDetail company={{ ...testCompany, houseNumber: null }} />,
+    );
+    expect(screen.getByText("Musterstraße")).toBeInTheDocument();
+  });
+
+  it("should skip street line when street is null", () => {
+    renderWithProviders(
+      <CompanyDetail company={{ ...testCompany, street: null, houseNumber: "7" }} />,
+    );
+    expect(screen.queryByText(/7/)).not.toBeInTheDocument();
+    expect(screen.getByText(/12345 Berlin/)).toBeInTheDocument();
+  });
+
+  it("should show address with only city and country", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          street: null,
+          houseNumber: null,
+          zipCode: null,
+          city: "Hamburg",
+          country: "Deutschland",
+        }}
+      />,
+    );
+    expect(screen.getByText("Hamburg")).toBeInTheDocument();
+    expect(screen.getByText("Deutschland")).toBeInTheDocument();
+  });
+
+  it("should show address with only zip code", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          street: null,
+          houseNumber: null,
+          zipCode: "50667",
+          city: null,
+          country: null,
+        }}
+      />,
+    );
+    expect(screen.getByText("50667")).toBeInTheDocument();
+  });
+
+  it("should show address with only country", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          street: null,
+          houseNumber: null,
+          zipCode: null,
+          city: null,
+          country: "Deutschland",
+        }}
+      />,
+    );
+    expect(screen.getByText("Deutschland")).toBeInTheDocument();
+  });
+
+  it("should show dash when all address fields are null", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          street: null,
+          houseNumber: null,
+          zipCode: null,
+          city: null,
+          country: null,
+        }}
+      />,
+    );
+    const addressLabel = screen.getByText(S.detail.address);
+    const addressContainer = addressLabel.closest("div");
+    expect(addressContainer?.querySelector("dd")?.textContent).toBe("—");
   });
 
   it("should show edit button linking to edit page", () => {

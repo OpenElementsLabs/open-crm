@@ -76,8 +76,25 @@ describe("ContactDetail", () => {
     expect(screen.getByText(S.form.male)).toBeInTheDocument();
     expect(screen.getByText("+49 123 456")).toBeInTheDocument();
     expect(screen.getByText("https://linkedin.com/in/max")).toBeInTheDocument();
-    expect(screen.getByText("DE")).toBeInTheDocument();
+    expect(screen.getByText(S.detail.languageDE)).toBeInTheDocument();
     expect(screen.getByText("Open Elements")).toBeInTheDocument();
+  });
+
+  it("should not show firstName/lastName as detail fields", () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+
+    expect(screen.queryByText(S.detail.firstName)).not.toBeInTheDocument();
+    expect(screen.queryByText(S.detail.lastName)).not.toBeInTheDocument();
+  });
+
+  it("should show language DE as Deutsch", () => {
+    renderWithProviders(<ContactDetail contact={makeContact({ language: "DE" })} />);
+    expect(screen.getByText(S.detail.languageDE)).toBeInTheDocument();
+  });
+
+  it("should show language EN as Englisch", () => {
+    renderWithProviders(<ContactDetail contact={makeContact({ language: "EN" })} />);
+    expect(screen.getByText(S.detail.languageEN)).toBeInTheDocument();
   });
 
   it("should show Brevo tag when contact is from Brevo", () => {
@@ -107,7 +124,7 @@ describe("ContactDetail", () => {
   it("should display Unbekannt when language is null", () => {
     renderWithProviders(<ContactDetail contact={makeContact({ language: null })} />);
 
-    expect(screen.getByText(S.form.languageUnknown)).toBeInTheDocument();
+    expect(screen.getByText(S.detail.languageUnknown)).toBeInTheDocument();
   });
 
   it("should handle missing optional fields with dash", () => {

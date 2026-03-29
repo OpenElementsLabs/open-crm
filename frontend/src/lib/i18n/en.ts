@@ -52,6 +52,7 @@ export const en: Translations = {
       zipCode: "Zip Code",
       city: "City",
       country: "Country",
+      address: "Address",
     },
     form: {
       createTitle: "Create New Company",
@@ -140,6 +141,9 @@ export const en: Translations = {
       phone: "Phone",
       linkedIn: "LinkedIn",
       language: "Language",
+      languageDE: "German",
+      languageEN: "English",
+      languageUnknown: "Unknown",
       birthday: "Birthday",
       company: "Company",
       showCompany: "show company",

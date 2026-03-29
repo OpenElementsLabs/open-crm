@@ -50,6 +50,7 @@ export const de = {
       zipCode: "PLZ",
       city: "Stadt",
       country: "Land",
+      address: "Adresse",
     },
     form: {
       createTitle: "Neue Firma erstellen",
@@ -138,6 +139,9 @@ export const de = {
       phone: "Telefon",
       linkedIn: "LinkedIn",
       language: "Sprache",
+      languageDE: "Deutsch",
+      languageEN: "Englisch",
+      languageUnknown: "Unbekannt",
       birthday: "Geburtstag",
       company: "Firma",
       showCompany: "zur Firma",

@@ -37,7 +37,7 @@
 | 033 | OpenAPI parameter docs     | Add @Parameter annotations to all REST controller method parameters for Swagger UI descriptions    | — | done   |
 | 034 | Table action buttons       | Add edit and comment action buttons to company and contact list table rows                         | — | done   |
 | 035 | Company filter layout      | Move archive toggle into the same row as name filter and Brevo dropdown                           | — | done   |
-| 036 | Detail view cleanup        | Remove redundant name fields, improve language display, merge address into block                   | — | open   |
+| 036 | Detail view cleanup        | Remove redundant name fields, improve language display, merge address into block                   | — | done   |
 | 037 | Print view A4 fit          | Scale print tables to fit DIN A4 portrait, remove comment column, wrap text, repeat headers       | — | open   |
 | 038 | CSV export                 | Backend CSV generation with dynamic column selection via frontend checkbox dialog                   | — | open   |
 | 039 | No company filter          | Add "No company" option to contact list company filter for unassigned contacts                     | — | open   |

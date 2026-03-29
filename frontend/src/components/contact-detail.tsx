@@ -43,6 +43,18 @@ function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations
   }
 }
 
+function languageLabel(language: string | null, t: ReturnType<typeof useTranslations>): string {
+  const S = t.contacts.detail;
+  switch (language) {
+    case "DE":
+      return S.languageDE;
+    case "EN":
+      return S.languageEN;
+    default:
+      return S.languageUnknown;
+  }
+}
+
 function formatBirthday(dateStr: string | null, lang: string): string | null {
   if (!dateStr) return null;
   const [year, month, day] = dateStr.split("-");
@@ -124,15 +136,13 @@ export function ContactDetail({ contact }: ContactDetailProps) {
         </CardHeader>
         <CardContent>
           <dl className="grid gap-4 sm:grid-cols-2">
-            <DetailField label={S.detail.firstName} value={contact.firstName} />
-            <DetailField label={S.detail.lastName} value={contact.lastName} />
             <DetailField label={S.detail.email} value={contact.email} />
             <DetailField label={S.detail.position} value={contact.position} />
             <DetailField label={S.detail.gender} value={genderLabel(contact.gender, t)} />
             <DetailField label={S.detail.phone} value={contact.phoneNumber} />
             <DetailField label={S.detail.linkedIn} value={contact.linkedInUrl} />
             <DetailField label={S.detail.birthday} value={formatBirthday(contact.birthday, language)} />
-            <DetailField label={S.detail.language} value={contact.language ?? S.form.languageUnknown} />
+            <DetailField label={S.detail.language} value={languageLabel(contact.language, t)} />
             <div>
               <dt className="text-sm font-medium text-oe-gray-mid">{S.detail.company}</dt>
               <dd className="mt-1 text-sm text-oe-black">

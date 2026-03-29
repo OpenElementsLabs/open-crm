@@ -115,11 +115,31 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
             <DetailField label={S.form.name} value={company.name} />
             <DetailField label={S.detail.email} value={company.email} />
             <DetailField label={S.detail.website} value={company.website} />
-            <DetailField label={S.detail.street} value={company.street} />
-            <DetailField label={S.detail.houseNumber} value={company.houseNumber} />
-            <DetailField label={S.detail.zipCode} value={company.zipCode} />
-            <DetailField label={S.detail.city} value={company.city} />
-            <DetailField label={S.detail.country} value={company.country} />
+            <div>
+              <dt className="text-sm font-medium text-oe-gray-mid">{S.detail.address}</dt>
+              <dd className="mt-1 text-sm text-oe-black">
+                {(() => {
+                  const lines: string[] = [];
+                  if (company.street) {
+                    lines.push(company.houseNumber ? `${company.street} ${company.houseNumber}` : company.street);
+                  }
+                  const line2Parts = [company.zipCode, company.city].filter(Boolean);
+                  if (line2Parts.length > 0) {
+                    lines.push(line2Parts.join(" "));
+                  }
+                  if (company.country) {
+                    lines.push(company.country);
+                  }
+                  if (lines.length === 0) return "—";
+                  return lines.map((line, i) => (
+                    <span key={i}>
+                      {i > 0 && <br />}
+                      {line}
+                    </span>
+                  ));
+                })()}
+              </dd>
+            </div>
           </dl>
         </CardContent>
       </Card>
