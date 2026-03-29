@@ -16,11 +16,11 @@ Specs live in a `specs/` directory in the project root. Each spec gets its own s
 ```
 specs/
 ├── INDEX.md
-├── 001-user-auth-flow/
+├── user-auth-flow/
 │   ├── design.md
 │   ├── behaviors.md
 │   └── steps.md          (optional)
-├── 002-csv-export-api/
+├── csv-export-api/
 │   ├── design.md
 │   └── behaviors.md
 └── ...
@@ -28,9 +28,9 @@ specs/
 
 ### Folder Naming
 
-- Format: `<sequential-number>-short-description` (e.g., `001-user-auth-flow`, `002-csv-export-api`)
-- The sequential number is zero-padded to 3 digits and incremented from the last entry in `INDEX.md`.
-- Keep the description to 3–4 words in kebab-case.
+- Format: `short-description` in kebab-case (e.g., `user-auth-flow`, `csv-export-api`)
+- Keep the description to 3–4 words.
+- The sequential ID is tracked exclusively in `INDEX.md`, not in the folder name.
 
 ### `INDEX.md` — Spec Overview
 
@@ -41,15 +41,16 @@ Format:
 ```markdown
 # Spec Index
 
-| ID  | Name | Description | GitHub Issue | Status |
-|-----|------|-------------|--------------|--------|
-| 001 | User auth flow | JWT-based login and registration with refresh tokens | #42 | done |
-| 002 | CSV export API | REST endpoint to export filtered datasets as CSV | #87 | open |
-| 003 | Rate limiting | Token-bucket rate limiting for all public API endpoints | — | in progress |
+| ID  | Name | Areas | Description | GitHub Issue | Status |
+|-----|------|-------|-------------|--------------|--------|
+| 001 | User auth flow | backend, authentication, database | JWT-based login and registration with refresh tokens | #42 | done |
+| 002 | CSV export API | backend, frontend | REST endpoint to export filtered datasets as CSV | #87 | open |
+| 003 | Rate limiting | backend, security | Token-bucket rate limiting for all public API endpoints | — | in progress |
 ```
 
 Rules:
 - Every spec must have an entry in `INDEX.md`. A spec without an index entry is incomplete.
+- **Areas** lists the affected parts of the project as comma-separated lowercase tags. Common values: `frontend`, `backend`, `database`, `build`, `docker`, `styling`, `documentation`, `authentication`, `security`, `architecture`, `api`, `testing`, `infrastructure`. Use project-appropriate terms — this list is not exhaustive.
 - **Status** values: `open` (not started), `in progress` (being implemented), `done` (implemented and verified).
 - **GitHub Issue** column contains the issue reference (e.g., `#42`) or `—` if no issue exists.
 - The index is updated whenever a spec is created or its status changes.
@@ -122,6 +123,48 @@ Coverage should include:
 
 Each scenario should be specific enough to translate directly into a test case.
 
+### Drift Log — Tracking Post-Implementation Divergence
+
+After a spec is implemented and its status is `done`, the original `design.md` and `behaviors.md` must not be modified — they serve as a historical record of the design decisions made at the time.
+
+However, later specs may change shared code, causing the implementation to diverge from the original design or behaviors. When `/spec-review` detects such drift, it is recorded in a **Drift Log** section appended to the end of the affected file (`design.md` or `behaviors.md`).
+
+Format for `design.md`:
+
+```markdown
+---
+
+## Drift Log
+
+### <Date> — Caused by spec `<spec-folder-name>`
+
+- **Affected element:** <design element that drifted>
+- **Original design:** <what was specified>
+- **Current state:** <what the code does now>
+- **Reason:** <brief explanation of why the other spec changed this>
+```
+
+Format for `behaviors.md`:
+
+```markdown
+---
+
+## Drift Log
+
+### <Date> — Caused by spec `<spec-folder-name>`
+
+- **Affected scenario:** <scenario name>
+- **Original behavior:** <what was specified>
+- **Current behavior:** <what the code does now>
+- **Reason:** <brief explanation of why the other spec changed this>
+```
+
+Rules:
+- The Drift Log is always the last section in the file, separated by a horizontal rule (`---`).
+- Each entry identifies the causing spec so the chain of changes is traceable.
+- Only `/spec-review` writes Drift Log entries — they are not added during normal implementation.
+- If drift is detected but no causing spec can be identified, use `unknown` as the spec reference.
+
 ### `steps.md` — Implementation Steps (optional)
 
 An ordered, actionable checklist for implementing the spec. Uses GitHub-flavored Markdown checkboxes for tracking progress:
@@ -176,6 +219,6 @@ A typical flow:
 - **Issue first** — Every PR should have a corresponding GitHub issue
 - **Discuss before writing** — Specs are created through dialogue, not generated silently
 - **Right-size the spec** — A bug fix needs less documentation than a new feature. Skip sections that are not relevant.
-- **Living documents** — Specs can be updated during implementation if decisions change. Keep them in sync.
+- **Living documents during implementation** — Specs can be updated during implementation if decisions change. Once a spec reaches `done` status, the original design and behaviors are frozen. Post-implementation divergence is tracked in the Drift Log.
 - **Specs are not throwaway** — They remain in the repository as documentation of design decisions and expected behavior
 - **Commits and PRs are human work** — Developers create commits and pull requests themselves. The spec folder and its design decisions should be referenced in the PR description, but the PR itself is authored by the developer, not generated by AI.

@@ -53,7 +53,7 @@ Present the drafted issues to the user for review and adjustment. **Do not creat
 
 Determine the next sequential ID by reading `specs/INDEX.md`. If the file does not exist yet, create it with the table header (see spec-driven development doc) and start at `001`. Otherwise, increment from the highest existing ID.
 
-Create the spec folder under `specs/` using the format `<ID>-short-description` (e.g., `001-user-auth-flow`).
+Create the spec folder under `specs/` using a descriptive kebab-case name (e.g., `user-auth-flow`). The sequential ID is tracked only in `INDEX.md`, not in the folder name.
 
 ### 4. Write `design.md` — Interactive planning
 

@@ -43,6 +43,8 @@ const nextConfig = {
 };
 ```
 
+**IMPORTANT**: Next.js evaluates `next.config.ts` — including `rewrites()` — at **build time**. Any environment variable used in `next.config.ts` (e.g., `BACKEND_URL` for API rewrites) must be available during `pnpm build`. In Docker, this means declaring it as a build argument (`ARG`) and setting it as an environment variable (`ENV`) in the Dockerfile **before** the build step. A runtime-only `environment:` entry in `docker-compose.yml` is too late — the rewrite rules are already baked into the build output. See `fullstack-architecture.md` for the Dockerfile and Docker Compose configuration.
+
 ### Step 3: Enable Strict TypeScript
 
 Verify `tsconfig.json` has `"strict": true`. This is non-negotiable.
@@ -76,9 +78,29 @@ Add to the project's `.mcp.json`:
 }
 ```
 
-### Step 6: Set Up Brand Colors
+### Step 6: Set Up Brand Colors and Semantic Tokens
 
 Configure Open Elements brand colors in `tailwind.config.ts` so they are available as utility classes. Use the `open-elements-brand-guidelines` skill to get the exact color values.
+
+**IMPORTANT**: shadcn/ui components reference semantic CSS custom properties (e.g., `--color-background`, `--color-popover`, `--color-border`). These must be defined in the `@theme` block of `src/app/globals.css`, mapped to the project's brand colors. Without them, dialogs, dropdowns, tables, and inputs will render with transparent backgrounds and missing borders.
+
+Required semantic tokens (each with `-foreground` counterpart where applicable):
+
+| Token | Purpose |
+|-------|---------|
+| `background` / `foreground` | Main page background and text |
+| `card` / `card-foreground` | Card surfaces |
+| `popover` / `popover-foreground` | Dialogs, dropdowns, popovers |
+| `muted` / `muted-foreground` | Hover states, disabled elements, secondary text |
+| `accent` / `accent-foreground` | Highlighted items (e.g., hovered select option) |
+| `primary` / `primary-foreground` | Primary action buttons |
+| `secondary` / `secondary-foreground` | Secondary action buttons |
+| `destructive` / `destructive-foreground` | Delete/error buttons |
+| `border` | All component borders (tables, cards, inputs) |
+| `input` | Input field borders |
+| `ring` | Focus ring indicators |
+
+See the [shadcn/ui Theming docs](https://ui.shadcn.com/docs/theming) for details. Never hardcode colors in component files — always use semantic tokens.
 
 ### Step 7: Verify Setup
 
@@ -161,6 +183,7 @@ Before considering a feature complete, verify:
 - [ ] No sensitive data logged to the browser console
 - [ ] Standalone output configured in `next.config.ts`
 - [ ] Brand colors applied via Tailwind config
+- [ ] All shadcn/ui semantic CSS tokens defined in `globals.css` `@theme` block
 
 ## Reference
 

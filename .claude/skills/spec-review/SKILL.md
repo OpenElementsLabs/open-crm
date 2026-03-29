@@ -17,7 +17,9 @@ Before starting, read `../../conventions/spec-driven-development.md` for the ful
 
 ### 1. Identify the spec
 
-Ask the user which spec to review, or detect it from context. Locate the spec folder under `specs/` and read both `design.md` and `behaviors.md` completely.
+Ask the user which spec to review, or detect it from context. If no spec is specified, check `specs/INDEX.md` for specs with status `done` or `in progress` — these are candidates for review.
+
+Locate the spec folder under `specs/` and read both `design.md` and `behaviors.md` completely.
 
 ### 2. Review against `design.md`
 
@@ -102,11 +104,34 @@ Classify each as:
 - **Outdated** — Documentation describes old behavior or is missing updates
 - **Missing** — No documentation exists where it should
 
-### 6. Discuss with the user
+### 6. Detect drift caused by other specs
+
+For items classified as **Partially covered** (design) or **Not implemented** / behavior mismatches (behaviors), investigate whether the divergence was caused by a different spec's implementation:
+
+- Use `git log` and `git blame` on the affected code to identify which changes altered the behavior.
+- Check if those changes correspond to another spec folder in `specs/`.
+- If the reviewed spec has status `done` in `INDEX.md` and the code was changed by a later spec, this is **drift** — not an oversight in the original implementation.
+
+For each confirmed drift item, add an entry to the **Drift Log** section at the end of the affected file (`design.md` or `behaviors.md`). Follow the Drift Log format defined in the spec-driven-development convention. Do not modify the original design or behavior sections — they are historical records.
+
+Add a section to the report:
+
+```markdown
+## Drift
+
+| Element / Scenario | Causing Spec | Summary |
+|--------------------|--------------|---------|
+| ...                | ...          | ...     |
+```
+
+If no drift is detected, omit this section.
+
+### 7. Discuss with the user
 
 Walk through the findings. For missing or partially covered items, discuss whether they are:
 - Oversights that need to be fixed
+- Drift caused by other specs (already logged)
 - Intentional deviations that should be reflected back in the spec
 - Out of scope for the current iteration
 
-If the spec needs to be updated to reflect implementation decisions, offer to update `design.md` or `behaviors.md` accordingly.
+For drift items, confirm with the user whether the Drift Log entries are accurate. For items that are not drift but genuine gaps, discuss next steps. Do not modify the original design or behavior sections of completed specs.

@@ -40,6 +40,20 @@ Each application has a multi-stage `Dockerfile` in its own directory:
 
 - **Backend (Java/Spring Boot)**: Build stage compiles with Maven/Gradle, runtime stage uses a minimal JRE image.
 - **Frontend (TypeScript/Next.js)**: Build stage installs dependencies and compiles, runtime stage serves the built application with a minimal Node.js image. **IMPORTANT**: The backend is not available during `next build` in the Docker build stage. Pages that fetch data from the backend must not be statically pre-rendered at build time, or they will cache an error state. Use `dynamic = 'force-dynamic'` or equivalent mechanisms to ensure these pages are rendered at request time.
+  - **IMPORTANT**: Next.js evaluates `next.config.ts` (including `rewrites()`) at **build time**, not at runtime. Environment variables like `BACKEND_URL` that are only set via `environment:` in `docker-compose.yml` are not available during `docker build`. The rewrite rules get baked into the build artifact with the fallback value (typically `localhost:8080`), which points to the container itself — not the backend service. To fix this, the frontend `Dockerfile` must declare `BACKEND_URL` as a build argument and set it as an environment variable before `RUN pnpm build`:
+    ```dockerfile
+    ARG BACKEND_URL=http://backend:8080
+    ENV BACKEND_URL=${BACKEND_URL}
+    RUN pnpm build
+    ```
+    The `docker-compose.yml` should pass the value via `build.args`:
+    ```yaml
+    frontend:
+      build:
+        context: ./frontend
+        args:
+          BACKEND_URL: http://backend:8080
+    ```
 
 Both Dockerfiles should:
 
@@ -101,9 +115,10 @@ services:
       - db
 
   frontend:
-    build: ./frontend
-    environment:
-      - BACKEND_URL=http://backend:8080
+    build:
+      context: ./frontend
+      args:
+        BACKEND_URL: http://backend:8080
     ports:
       - "${FRONTEND_PORT:-4001}:3000"
     depends_on:

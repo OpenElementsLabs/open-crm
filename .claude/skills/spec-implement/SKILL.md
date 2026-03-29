@@ -17,7 +17,9 @@ Before starting, read `../../conventions/spec-driven-development.md` for the ful
 
 ### 1. Load the spec
 
-Ask the user which spec to use, or detect it from context. Read both `design.md` and `behaviors.md` from the spec folder.
+Ask the user which spec to use, or detect it from context. If no spec is specified, check `specs/INDEX.md` for specs with status `open` or `in progress` — these are candidates for implementation.
+
+Read both `design.md` and `behaviors.md` from the spec folder.
 
 Also read any relevant existing code that the implementation will modify or extend. Understand the current state of the codebase before planning changes.
 
@@ -37,10 +39,13 @@ A typical ordering is:
 3. API endpoints / controllers
 4. Integration with external services
 5. Frontend / UI components (apply Open Elements Brand Guidelines and Frontend Design skill)
-6. Unit tests for core logic
-7. **Backend tests for all backend behavioral scenarios** — Every scenario in `behaviors.md` that describes backend behavior (API responses, data persistence, business logic, validation) must have a corresponding test (unit or integration). Map each given-when-then scenario to at least one test case.
-8. **Frontend tests for all frontend behavioral scenarios** — Every scenario in `behaviors.md` that describes UI behavior (user interactions, form submissions, dialog flows, navigation, error displays, loading states) must have a corresponding frontend test (component test, integration test, or e2e test). This includes CRUD dialogs, form validation visible to the user, conditional UI elements, and any behavior the user can see or trigger. Frontend behaviors are not covered by backend tests — they require their own dedicated tests.
-9. Edge case and error handling tests (both backend and frontend)
+6. **DTO conversion tests** — Plain JUnit 5 unit tests for every `fromEntity` or mapping method. No Spring context needed.
+7. **Repository tests** — `@DataJpaTest` tests for every repository with custom query methods. Test queries, pagination, and DB constraints.
+8. **Service tests** — `@SpringBootTest` integration tests for every service class. Cover all public methods, happy paths, validation errors, and cross-entity logic.
+9. **Controller tests** — `@SpringBootTest` + `MockMvc` tests for every controller. Cover HTTP status codes, request/response serialization, and validation.
+10. **Backend behavioral scenario tests** — Every scenario in `behaviors.md` that describes backend behavior (API responses, data persistence, business logic, validation) must have a corresponding test. Map each given-when-then scenario to at least one test case. Many behavioral scenarios will already be covered by the layer tests above (steps 6–9) — verify coverage and add additional tests only for scenarios not yet covered.
+11. **Frontend tests for all frontend behavioral scenarios** — Every scenario in `behaviors.md` that describes UI behavior (user interactions, form submissions, dialog flows, navigation, error displays, loading states) must have a corresponding frontend test (component test, integration test, or e2e test). This includes CRUD dialogs, form validation visible to the user, conditional UI elements, and any behavior the user can see or trigger. Frontend behaviors are not covered by backend tests — they require their own dedicated tests.
+12. Edge case and error handling tests (both backend and frontend)
 10. **Update project documentation** — This step is mandatory, not optional. After all code and tests are complete, update the following files to reflect the changes made by this spec:
     - `.claude/conventions/project-specific/project-features.md` — Add or update feature descriptions
     - `.claude/conventions/project-specific/project-tech.md` — Add any new technologies, libraries, or services introduced

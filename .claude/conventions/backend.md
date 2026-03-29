@@ -47,6 +47,39 @@ When building libraries that target backend applications, provide support for Sp
 - Use encryption at rest and in transit for personal data.
 - When integrating third-party services, verify that they are GDPR-compliant and document data processing agreements.
 
+## Testing
+
+Every backend layer must have its own tests. Tests at a higher layer do not replace tests at a lower layer — controller tests do not substitute for missing service or repository tests.
+
+### Layer-specific test requirements
+
+**DTO conversion tests (plain unit tests)**
+- Every `fromEntity` or mapping method on a DTO must be tested.
+- No Spring context needed — use plain JUnit 5 with direct object construction.
+- When entity fields are not accessible via public setters (e.g., `id`, `createdAt`), use reflection in test code. This is acceptable for tests and avoids weakening entity encapsulation.
+
+**Repository tests (`@DataJpaTest`)**
+- Every repository interface with custom query methods must have a test class.
+- Use `@DataJpaTest` — it auto-configures an embedded H2 database and rolls back after each test. No `@ActiveProfiles` annotation needed.
+- Use `TestEntityManager` (`persistAndFlush` + `clear()`) to force real database roundtrips instead of hitting the first-level cache.
+- Test custom query methods, pagination, and database constraints (NOT NULL, unique).
+
+**Service tests (`@SpringBootTest`)**
+- Every service class must have a test class that covers all public methods.
+- Use `@SpringBootTest` with `@ActiveProfiles("test")` and a real H2 database — do not mock repositories.
+- Clean up test data in `@BeforeEach` by deleting via repositories in foreign-key order. Do not use `@Transactional` on service tests — this hides transaction boundary bugs in service methods that are themselves `@Transactional`.
+- Test happy paths, validation errors, cross-entity business logic, and edge cases.
+
+**Controller tests (`@SpringBootTest` + `MockMvc`)**
+- Every controller must have a test class that verifies HTTP status codes, request/response serialization, and validation.
+- Use `@SpringBootTest` with `@AutoConfigureMockMvc` and `@ActiveProfiles("test")`.
+
+### General test rules
+
+- Do not mock repositories or other internal dependencies when the real implementation is fast and available. Mocks add complexity without proportional value in small codebases and miss integration bugs.
+- Use H2 for all automated tests. In the future, Testcontainers with PostgreSQL will replace H2 (see Data Access section).
+- Test classes live in the same package structure as the code they test.
+
 ## Observability
 
 - Every backend should expose **metrics** in Prometheus format for monitoring and alerting.

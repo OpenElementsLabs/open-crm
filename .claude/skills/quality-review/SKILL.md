@@ -55,6 +55,7 @@ Check each changed file against the applicable conventions. Focus on these areas
 
 **Testing:**
 - Do new features and bug fixes have corresponding tests?
+- **Layer coverage (backend):** Are there tests at every layer touched by the change? DTO conversion methods need plain unit tests. Repositories with custom queries need `@DataJpaTest` tests. Services need `@SpringBootTest` integration tests. Controllers need `MockMvc` tests. Controller tests alone are not sufficient — every layer must be tested independently.
 - Are tests deterministic and clearly named?
 - Do tests cover edge cases and error scenarios?
 - Are assertions specific with clear failure messages?
