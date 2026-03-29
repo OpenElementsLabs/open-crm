@@ -31,4 +31,5 @@
 | 027 | Brevo reimport protect     | Only overwrite Brevo-managed fields on contact re-import, preserve user-editable fields           | — | open   |
 | 028 | Record count display       | Show total filtered record count in company and contact list pagination ("42 Firmen · Seite 1 von 3") | — | open   |
 | 029 | Contact table columns      | Merge firstName/lastName into single Name column, add Email column to contact list table            | — | open   |
+| 030 | Remove contact sorting     | Remove sorting dropdown from contact list, fixed lastName ascending default                        | — | open   |
 
