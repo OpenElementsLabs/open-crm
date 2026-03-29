@@ -8,9 +8,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -73,6 +78,40 @@ public class CompanyController {
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
         return companyService.list(name, includeDeleted, brevo, pageable);
+    }
+
+    /**
+     * Exports companies as CSV with selected columns.
+     *
+     * @param name           partial name filter
+     * @param includeDeleted whether to include soft-deleted companies
+     * @param brevo          filter by Brevo origin
+     * @param columns        list of columns to include
+     * @param response       the HTTP response to write CSV to
+     */
+    @GetMapping(value = "/export", produces = "text/csv")
+    @Operation(summary = "Export companies as CSV")
+    @ApiResponse(responseCode = "200", description = "CSV file downloaded")
+    public void exportCsv(
+            @Parameter(description = "Partial company name filter") @RequestParam(required = false) final String name,
+            @Parameter(description = "Whether to include soft-deleted companies") @RequestParam(defaultValue = "false") final boolean includeDeleted,
+            @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+            @Parameter(description = "Columns to include in the CSV") @RequestParam final List<CompanyExportColumn> columns,
+            final HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"companies.csv\"");
+
+        final List<CompanyDto> companies = companyService.listAll(name, includeDeleted, brevo);
+        final String[] headers = columns.stream().map(CompanyExportColumn::getHeader).toArray(String[]::new);
+
+        final var writer = response.getWriter();
+        writer.write('\uFEFF'); // UTF-8 BOM
+        try (final CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setHeader(headers).build())) {
+            for (final CompanyDto company : companies) {
+                final Object[] values = columns.stream().map(col -> col.extract(company)).toArray();
+                printer.printRecord(values);
+            }
+        }
     }
 
     /**

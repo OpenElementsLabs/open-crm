@@ -3,11 +3,13 @@ package com.openelements.crm.company;
 import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.contact.ContactRepository;
+import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -164,6 +166,40 @@ public class CompanyService {
         }
 
         return companyRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    /**
+     * Lists all companies matching the given filters without pagination.
+     *
+     * @param name           partial name filter (case-insensitive)
+     * @param includeDeleted whether to include soft-deleted companies
+     * @param brevo          filter by Brevo origin
+     * @return list of all matching company DTOs
+     */
+    @Transactional(readOnly = true)
+    public List<CompanyDto> listAll(final String name,
+                                    final boolean includeDeleted,
+                                    final Boolean brevo) {
+        Specification<CompanyEntity> spec = Specification.where(null);
+
+        if (!includeDeleted) {
+            spec = spec.and((root, query, cb) -> cb.isFalse(root.get("deleted")));
+        }
+        if (name != null && !name.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+        if (brevo != null) {
+            if (brevo) {
+                spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("brevoCompanyId")));
+            } else {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoCompanyId")));
+            }
+        }
+
+        return companyRepository.findAll(spec, Sort.by("name")).stream()
+                .map(this::toDto)
+                .toList();
     }
 
     private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(

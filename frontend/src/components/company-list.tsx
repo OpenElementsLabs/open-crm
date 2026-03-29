@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,7 +24,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl, createCompanyComment } from "@/lib/api";
+import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl } from "@/lib/api";
+import { CsvExportDialog } from "@/components/csv-export-dialog";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -43,6 +44,12 @@ export function CompanyList() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [commentTarget, setCommentTarget] = useState<CompanyDto | null>(null);
   const [commentSending, setCommentSending] = useState(false);
+  const [csvOpen, setCsvOpen] = useState(false);
+
+  const companyColumns = Object.entries(t.csvExport.companyColumns).map(([key, label]) => ({
+    key: key.replace(/([A-Z])/g, "_$1").toUpperCase(),
+    label,
+  }));
 
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
@@ -113,6 +120,14 @@ export function CompanyList() {
           >
             <Printer className="mr-2 h-4 w-4" />
             {t.print.button}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!data || data.totalElements === 0}
+            onClick={() => setCsvOpen(true)}
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            {t.csvExport.button}
           </Button>
           <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
             <Link href="/companies/new">
@@ -335,6 +350,23 @@ export function CompanyList() {
         sendingLabel={S.comments.sending}
         errorTitle={S.comments.errorTitle}
         errorMessage={S.comments.errorGeneric}
+      />
+
+      <CsvExportDialog
+        open={csvOpen}
+        onOpenChange={setCsvOpen}
+        columns={companyColumns}
+        onDownload={(columns) => {
+          const url = getCompanyExportUrl(
+            {
+              name: nameFilter || undefined,
+              includeDeleted,
+              brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+            },
+            columns,
+          );
+          window.open(url, "_blank");
+        }}
       />
     </div>
   );

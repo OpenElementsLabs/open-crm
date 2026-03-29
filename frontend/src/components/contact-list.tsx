@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,7 +24,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment } from "@/lib/api";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl } from "@/lib/api";
+import { CsvExportDialog } from "@/components/csv-export-dialog";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -46,6 +47,12 @@ export function ContactList() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [commentTarget, setCommentTarget] = useState<ContactDto | null>(null);
   const [commentSending, setCommentSending] = useState(false);
+  const [csvOpen, setCsvOpen] = useState(false);
+
+  const contactColumns = Object.entries(t.csvExport.contactColumns).map(([key, label]) => ({
+    key: key.replace(/([A-Z])/g, "_$1").toUpperCase(),
+    label,
+  }));
 
   useEffect(() => {
     getCompaniesForSelect()
@@ -111,6 +118,14 @@ export function ContactList() {
           >
             <Printer className="mr-2 h-4 w-4" />
             {t.print.button}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!data || data.totalElements === 0}
+            onClick={() => setCsvOpen(true)}
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            {t.csvExport.button}
           </Button>
           <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
             <Link href="/contacts/new">
@@ -340,6 +355,24 @@ export function ContactList() {
         sendingLabel={t.companies.comments.sending}
         errorTitle={t.companies.comments.errorTitle}
         errorMessage={t.companies.comments.errorGeneric}
+      />
+
+      <CsvExportDialog
+        open={csvOpen}
+        onOpenChange={setCsvOpen}
+        columns={contactColumns}
+        onDownload={(columns) => {
+          const url = getContactExportUrl(
+            {
+              search: searchFilter || undefined,
+              companyId: companyIdFilter || undefined,
+              language: languageFilter || undefined,
+              brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+            },
+            columns,
+          );
+          window.open(url, "_blank");
+        }}
       />
     </div>
   );

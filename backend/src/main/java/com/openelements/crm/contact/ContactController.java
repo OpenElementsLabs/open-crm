@@ -8,9 +8,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -76,6 +81,42 @@ public class ContactController {
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
         return contactService.list(search, companyId, language, brevo, pageable);
+    }
+
+    /**
+     * Exports contacts as CSV with selected columns.
+     *
+     * @param search    multi-word search filter
+     * @param companyId exact company ID filter
+     * @param language  exact language filter
+     * @param brevo     filter by Brevo origin
+     * @param columns   list of columns to include
+     * @param response  the HTTP response to write CSV to
+     */
+    @GetMapping(value = "/export", produces = "text/csv")
+    @Operation(summary = "Export contacts as CSV")
+    @ApiResponse(responseCode = "200", description = "CSV file downloaded")
+    public void exportCsv(
+            @Parameter(description = "Multi-word search filter") @RequestParam(required = false) final String search,
+            @Parameter(description = "Filter by company ID") @RequestParam(required = false) final UUID companyId,
+            @Parameter(description = "Filter by language code") @RequestParam(required = false) final String language,
+            @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+            @Parameter(description = "Columns to include in the CSV") @RequestParam final List<ContactExportColumn> columns,
+            final HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"contacts.csv\"");
+
+        final List<ContactDto> contacts = contactService.listAll(search, companyId, language, brevo);
+        final String[] headers = columns.stream().map(ContactExportColumn::getHeader).toArray(String[]::new);
+
+        final var writer = response.getWriter();
+        writer.write('\uFEFF'); // UTF-8 BOM
+        try (final CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setHeader(headers).build())) {
+            for (final ContactDto contact : contacts) {
+                final Object[] values = columns.stream().map(col -> col.extract(contact)).toArray();
+                printer.printRecord(values);
+            }
+        }
     }
 
     /**

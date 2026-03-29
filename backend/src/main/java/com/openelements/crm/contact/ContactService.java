@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -183,6 +184,62 @@ public class ContactService {
         }
 
         return contactRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    /**
+     * Lists all contacts matching the given filters without pagination.
+     *
+     * @param search    multi-word search across firstName, lastName, email, and company name
+     * @param companyId exact company ID filter
+     * @param language  exact language filter
+     * @param brevo     filter by Brevo origin
+     * @return list of all matching contact DTOs
+     */
+    @Transactional(readOnly = true)
+    public List<ContactDto> listAll(final String search,
+                                    final UUID companyId,
+                                    final String language,
+                                    final Boolean brevo) {
+        Specification<ContactEntity> spec = Specification.where(null);
+
+        if (search != null && !search.isBlank()) {
+            final String[] words = search.trim().split("\\s+");
+            for (final String word : words) {
+                final String pattern = "%" + word.toLowerCase() + "%";
+                spec = spec.and((root, query, cb) -> {
+                    final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
+                    return cb.or(
+                        cb.like(cb.lower(root.get("firstName")), pattern),
+                        cb.like(cb.lower(root.get("lastName")), pattern),
+                        cb.like(cb.lower(root.get("email")), pattern),
+                        cb.like(cb.lower(companyJoin.get("name")), pattern)
+                    );
+                });
+            }
+        }
+        if (companyId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("company").get("id"), companyId));
+        }
+        if (language != null && !language.isBlank()) {
+            if ("UNKNOWN".equalsIgnoreCase(language)) {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("language")));
+            } else {
+                final Language lang = Language.valueOf(language.toUpperCase());
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("language"), lang));
+            }
+        }
+        if (brevo != null) {
+            if (brevo) {
+                spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("brevoId")));
+            } else {
+                spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoId")));
+            }
+        }
+
+        return contactRepository.findAll(spec, Sort.by("lastName", "firstName")).stream()
+                .map(this::toDto)
+                .toList();
     }
 
     /**

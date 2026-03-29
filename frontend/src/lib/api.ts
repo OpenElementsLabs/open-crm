@@ -254,6 +254,29 @@ export async function deleteContactPhoto(id: string): Promise<void> {
   }
 }
 
+export function getCompanyExportUrl(params: CompanyListParams, columns: string[]): string {
+  const searchParams = new URLSearchParams();
+  if (params.name) searchParams.set("name", params.name);
+  if (params.includeDeleted) searchParams.set("includeDeleted", "true");
+  if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  for (const col of columns) {
+    searchParams.append("columns", col);
+  }
+  return `${baseUrl()}/api/companies/export?${searchParams.toString()}`;
+}
+
+export function getContactExportUrl(params: ContactListParams, columns: string[]): string {
+  const searchParams = new URLSearchParams();
+  if (params.search) searchParams.set("search", params.search);
+  if (params.companyId) searchParams.set("companyId", params.companyId);
+  if (params.language) searchParams.set("language", params.language);
+  if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  for (const col of columns) {
+    searchParams.append("columns", col);
+  }
+  return `${baseUrl()}/api/contacts/export?${searchParams.toString()}`;
+}
+
 export async function getCompaniesForSelect(): Promise<CompanyDto[]> {
   const data = await getCompanies({ includeDeleted: false, size: 1000 });
   return data.content as CompanyDto[];
