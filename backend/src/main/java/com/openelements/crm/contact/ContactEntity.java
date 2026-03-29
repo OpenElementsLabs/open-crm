@@ -69,14 +69,8 @@ public class ContactEntity {
     @Column(name = "photo_content_type", length = 50)
     private String photoContentType;
 
-    @Column(name = "brevo_id")
-    private Long brevoId;
-
-    @Column(name = "synced_to_brevo", nullable = false)
-    private boolean syncedToBrevo = false;
-
-    @Column(name = "double_opt_in", nullable = false)
-    private boolean doubleOptIn = false;
+    @Column(name = "brevo_id", length = 50)
+    private String brevoId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "language", length = 5)
@@ -308,7 +302,7 @@ public class ContactEntity {
      *
      * @return the Brevo contact ID, or null if not imported from Brevo
      */
-    public Long getBrevoId() {
+    public String getBrevoId() {
         return brevoId;
     }
 
@@ -317,44 +311,8 @@ public class ContactEntity {
      *
      * @param brevoId the Brevo contact ID
      */
-    public void setBrevoId(final Long brevoId) {
+    public void setBrevoId(final String brevoId) {
         this.brevoId = brevoId;
-    }
-
-    /**
-     * Returns whether this contact is synced to Brevo.
-     *
-     * @return true if synced to Brevo
-     */
-    public boolean isSyncedToBrevo() {
-        return syncedToBrevo;
-    }
-
-    /**
-     * Sets the Brevo sync status. This should only be called by the Brevo synchronization service.
-     *
-     * @param syncedToBrevo the sync status
-     */
-    public void setSyncedToBrevo(final boolean syncedToBrevo) {
-        this.syncedToBrevo = syncedToBrevo;
-    }
-
-    /**
-     * Returns whether this contact has completed double opt-in via Brevo.
-     *
-     * @return true if double opt-in is confirmed
-     */
-    public boolean isDoubleOptIn() {
-        return doubleOptIn;
-    }
-
-    /**
-     * Sets the double opt-in status. This should only be called by the Brevo synchronization service.
-     *
-     * @param doubleOptIn the double opt-in status
-     */
-    public void setDoubleOptIn(final boolean doubleOptIn) {
-        this.doubleOptIn = doubleOptIn;
     }
 
     /**

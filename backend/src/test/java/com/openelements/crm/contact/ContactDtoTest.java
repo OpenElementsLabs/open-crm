@@ -63,8 +63,7 @@ class ContactDtoTest {
             entity.setLinkedInUrl("https://linkedin.com/in/janesmith");
             entity.setPhoneNumber("+49 123 456");
             entity.setBirthday(birthday);
-            entity.setSyncedToBrevo(true);
-            entity.setDoubleOptIn(true);
+            entity.setBrevoId("123");
             entity.setLanguage(Language.DE);
             setField(entity, "createdAt", createdAt);
             setField(entity, "updatedAt", updatedAt);
@@ -80,8 +79,7 @@ class ContactDtoTest {
             assertEquals("https://linkedin.com/in/janesmith", dto.linkedInUrl());
             assertEquals("+49 123 456", dto.phoneNumber());
             assertEquals(birthday, dto.birthday());
-            assertTrue(dto.syncedToBrevo());
-            assertTrue(dto.doubleOptIn());
+            assertTrue(dto.brevo());
             assertEquals(Language.DE, dto.language());
             assertEquals(7, dto.commentCount());
             assertEquals(createdAt, dto.createdAt());
@@ -118,6 +116,27 @@ class ContactDtoTest {
             assertNull(dto.companyId());
             assertNull(dto.companyName());
             assertFalse(dto.companyDeleted());
+        }
+
+        @Test
+        @DisplayName("Sets brevo to true when brevoId is set")
+        void setsBrevoTrueWhenBrevoIdIsSet() throws Exception {
+            ContactEntity entity = createEntity();
+            entity.setBrevoId("456");
+
+            ContactDto dto = ContactDto.fromEntity(entity, 0);
+
+            assertTrue(dto.brevo());
+        }
+
+        @Test
+        @DisplayName("Sets brevo to false when brevoId is null")
+        void setsBrevoFalseWhenBrevoIdIsNull() throws Exception {
+            ContactEntity entity = createEntity();
+
+            ContactDto dto = ContactDto.fromEntity(entity, 0);
+
+            assertFalse(dto.brevo());
         }
 
         @Test

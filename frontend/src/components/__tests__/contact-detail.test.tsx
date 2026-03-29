@@ -41,8 +41,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     commentCount: 2,
     hasPhoto: false,
     birthday: "1990-03-15",
-    syncedToBrevo: true,
-    doubleOptIn: false,
+    brevo: true,
     language: "DE",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -83,24 +82,18 @@ describe("ContactDetail", () => {
 
   it("should display Brevo fields as disabled checkboxes", () => {
     renderWithProviders(
-      <ContactDetail contact={makeContact({ syncedToBrevo: true, doubleOptIn: false })} />,
+      <ContactDetail contact={makeContact({ brevo: true })} />,
     );
 
     const checkboxes = screen.getAllByRole("checkbox");
-    expect(checkboxes).toHaveLength(2);
+    expect(checkboxes).toHaveLength(1);
 
-    // syncedToBrevo: checked and disabled
+    // brevo: checked and disabled
     const brevoCheckbox = checkboxes[0];
     expect(brevoCheckbox).toBeChecked();
     expect(brevoCheckbox).toBeDisabled();
 
-    // doubleOptIn: unchecked and disabled
-    const optInCheckbox = checkboxes[1];
-    expect(optInCheckbox).not.toBeChecked();
-    expect(optInCheckbox).toBeDisabled();
-
-    expect(screen.getByText(S.detail.syncedToBrevo)).toBeInTheDocument();
-    expect(screen.getByText(S.detail.doubleOptIn)).toBeInTheDocument();
+    expect(screen.getByText(S.detail.brevo)).toBeInTheDocument();
   });
 
   it("should show archived badge when company is soft-deleted", () => {

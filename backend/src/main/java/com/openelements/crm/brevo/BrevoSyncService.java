@@ -191,7 +191,7 @@ public class BrevoSyncService {
     private boolean syncContact(final BrevoContact brevoContact,
                                 final Map<Long, String> contactToCompanyBrevoId) {
         final Boolean isNew = transactionTemplate.execute(status -> {
-            Optional<ContactEntity> existing = contactRepository.findByBrevoId(brevoContact.id());
+            Optional<ContactEntity> existing = contactRepository.findByBrevoId(String.valueOf(brevoContact.id()));
             if (existing.isEmpty() && brevoContact.email() != null) {
                 existing = contactRepository.findByEmailIgnoreCase(brevoContact.email());
             }
@@ -221,15 +221,10 @@ public class BrevoSyncService {
             entity.setPhoneNumber(sms);
             entity.setPosition(jobTitle);
             entity.setLinkedInUrl(linkedIn);
-            entity.setBrevoId(brevoContact.id());
-            entity.setSyncedToBrevo(true);
+            entity.setBrevoId(String.valueOf(brevoContact.id()));
 
             // Language mapping
             entity.setLanguage(mapLanguage(attrs.get("SPRACHE")));
-
-            // Double opt-in
-            final Object doubleOptInVal = attrs.get("DOUBLE_OPT-IN");
-            entity.setDoubleOptIn(Boolean.TRUE.equals(doubleOptInVal));
 
             // Company resolution
             final CompanyEntity company = resolveCompany(

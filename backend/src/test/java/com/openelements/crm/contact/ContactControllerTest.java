@@ -116,8 +116,7 @@ class ContactControllerTest {
                     .andExpect(jsonPath("$.lastName").value("Ebbers"))
                     .andExpect(jsonPath("$.companyId").value(companyId))
                     .andExpect(jsonPath("$.companyName").value("Open Elements"))
-                    .andExpect(jsonPath("$.syncedToBrevo").value(false))
-                    .andExpect(jsonPath("$.doubleOptIn").value(false))
+                    .andExpect(jsonPath("$.brevo").value(false))
                     .andExpect(jsonPath("$.gender").value("MALE"))
                     .andExpect(jsonPath("$.language").value("DE"));
         }
@@ -260,7 +259,7 @@ class ContactControllerTest {
             //GIVEN
             final String contactId = createContact("Test", "User", null);
 
-            // The request DTO does not have syncedToBrevo/doubleOptIn fields,
+            // The request DTO does not have brevo fields,
             // so even if extra JSON fields are sent, they are ignored by Jackson
             final String json = """
                     {"firstName": "Test", "lastName": "User", "language": "DE"}
@@ -272,8 +271,7 @@ class ContactControllerTest {
 
             //THEN
             result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.syncedToBrevo").value(false))
-                    .andExpect(jsonPath("$.doubleOptIn").value(false));
+                    .andExpect(jsonPath("$.brevo").value(false));
         }
     }
 
