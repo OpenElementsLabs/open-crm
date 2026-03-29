@@ -5,6 +5,7 @@ import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -63,9 +64,13 @@ public class CompanyController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List companies", description = "Returns a paginated list of companies with optional filtering")
     public Page<CompanyDto> list(
+            @Parameter(description = "Partial company name filter (case-insensitive contains)")
             @RequestParam(required = false) final String name,
+            @Parameter(description = "Whether to include soft-deleted companies")
             @RequestParam(defaultValue = "false") final boolean includeDeleted,
+            @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
             @RequestParam(required = false) final Boolean brevo,
+            @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
         return companyService.list(name, includeDeleted, brevo, pageable);
     }
@@ -80,7 +85,7 @@ public class CompanyController {
     @Operation(summary = "Get company by ID")
     @ApiResponse(responseCode = "200", description = "Company found")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyDto getById(@PathVariable final UUID id) {
+    public CompanyDto getById(@Parameter(description = "The company ID") @PathVariable final UUID id) {
         return companyService.getById(id);
     }
 
@@ -111,7 +116,7 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Company updated")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyDto update(@PathVariable final UUID id,
+    public CompanyDto update(@Parameter(description = "The company ID") @PathVariable final UUID id,
                                   @Valid @RequestBody final CompanyUpdateDto request) {
         return companyService.update(id, request);
     }
@@ -127,7 +132,7 @@ public class CompanyController {
     @ApiResponse(responseCode = "204", description = "Company soft-deleted")
     @ApiResponse(responseCode = "404", description = "Company not found")
     @ApiResponse(responseCode = "409", description = "Company has associated contacts")
-    public void delete(@PathVariable final UUID id) {
+    public void delete(@Parameter(description = "The company ID") @PathVariable final UUID id) {
         companyService.delete(id);
     }
 
@@ -141,7 +146,7 @@ public class CompanyController {
     @Operation(summary = "Restore a soft-deleted company")
     @ApiResponse(responseCode = "200", description = "Company restored")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyDto restore(@PathVariable final UUID id) {
+    public CompanyDto restore(@Parameter(description = "The company ID") @PathVariable final UUID id) {
         return companyService.restore(id);
     }
 
@@ -156,8 +161,8 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Logo uploaded")
     @ApiResponse(responseCode = "400", description = "Invalid file format or size")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public void uploadLogo(@PathVariable final UUID id,
-                           @RequestParam("file") final MultipartFile file) {
+    public void uploadLogo(@Parameter(description = "The company ID") @PathVariable final UUID id,
+                           @Parameter(description = "The logo image file (JPEG, PNG, or SVG; max 2 MB)") @RequestParam("file") final MultipartFile file) {
         try {
             companyService.uploadLogo(id, file.getBytes(), file.getContentType());
         } catch (final java.io.IOException e) {
@@ -176,7 +181,7 @@ public class CompanyController {
     @Operation(summary = "Get company logo")
     @ApiResponse(responseCode = "200", description = "Logo found")
     @ApiResponse(responseCode = "404", description = "Company or logo not found")
-    public ResponseEntity<byte[]> getLogo(@PathVariable final UUID id) {
+    public ResponseEntity<byte[]> getLogo(@Parameter(description = "The company ID") @PathVariable final UUID id) {
         final ImageData imageData = companyService.getLogo(id);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(imageData.contentType()))
@@ -193,7 +198,7 @@ public class CompanyController {
     @Operation(summary = "Remove company logo")
     @ApiResponse(responseCode = "204", description = "Logo removed")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public void deleteLogo(@PathVariable final UUID id) {
+    public void deleteLogo(@Parameter(description = "The company ID") @PathVariable final UUID id) {
         companyService.deleteLogo(id);
     }
 
@@ -209,7 +214,8 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Comments found")
     @ApiResponse(responseCode = "404", description = "Company not found")
     public Page<CommentDto> listComments(
-            @PathVariable final UUID id,
+            @Parameter(description = "The company ID") @PathVariable final UUID id,
+            @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByCompany(id, pageable);
     }
@@ -227,7 +233,7 @@ public class CompanyController {
     @ApiResponse(responseCode = "201", description = "Comment created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    public CommentDto addComment(@PathVariable final UUID id,
+    public CommentDto addComment(@Parameter(description = "The company ID") @PathVariable final UUID id,
                                       @Valid @RequestBody final CommentCreateDto request) {
         return commentService.addToCompany(id, request);
     }

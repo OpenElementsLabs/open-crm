@@ -5,6 +5,7 @@ import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -64,10 +65,15 @@ public class ContactController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List contacts", description = "Returns a paginated list of contacts with optional filtering")
     public Page<ContactDto> list(
+            @Parameter(description = "Multi-word search across name, email, and company (case-insensitive contains)")
             @RequestParam(required = false) final String search,
+            @Parameter(description = "Filter by company ID (exact match)")
             @RequestParam(required = false) final UUID companyId,
+            @Parameter(description = "Filter by language code (DE, EN, or UNKNOWN for null)")
             @RequestParam(required = false) final String language,
+            @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
             @RequestParam(required = false) final Boolean brevo,
+            @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
         return contactService.list(search, companyId, language, brevo, pageable);
     }
@@ -82,7 +88,7 @@ public class ContactController {
     @Operation(summary = "Get contact by ID")
     @ApiResponse(responseCode = "200", description = "Contact found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public ContactDto getById(@PathVariable final UUID id) {
+    public ContactDto getById(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
         return contactService.getById(id);
     }
 
@@ -113,7 +119,7 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Contact updated")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public ContactDto update(@PathVariable final UUID id,
+    public ContactDto update(@Parameter(description = "The contact ID") @PathVariable final UUID id,
                                   @Valid @RequestBody final ContactUpdateDto request) {
         return contactService.update(id, request);
     }
@@ -128,7 +134,7 @@ public class ContactController {
     @Operation(summary = "Delete a contact", description = "Permanently deletes the contact and all associated comments")
     @ApiResponse(responseCode = "204", description = "Contact deleted")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public void delete(@PathVariable final UUID id) {
+    public void delete(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
         contactService.delete(id);
     }
 
@@ -143,8 +149,8 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Photo uploaded")
     @ApiResponse(responseCode = "400", description = "Invalid file format or size")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public void uploadPhoto(@PathVariable final UUID id,
-                            @RequestParam("file") final MultipartFile file) {
+    public void uploadPhoto(@Parameter(description = "The contact ID") @PathVariable final UUID id,
+                            @Parameter(description = "The photo image file (JPEG only; max 2 MB)") @RequestParam("file") final MultipartFile file) {
         try {
             contactService.uploadPhoto(id, file.getBytes(), file.getContentType());
         } catch (final java.io.IOException e) {
@@ -163,7 +169,7 @@ public class ContactController {
     @Operation(summary = "Get contact photo")
     @ApiResponse(responseCode = "200", description = "Photo found")
     @ApiResponse(responseCode = "404", description = "Contact or photo not found")
-    public ResponseEntity<byte[]> getPhoto(@PathVariable final UUID id) {
+    public ResponseEntity<byte[]> getPhoto(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
         final ImageData imageData = contactService.getPhoto(id);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(imageData.contentType()))
@@ -180,7 +186,7 @@ public class ContactController {
     @Operation(summary = "Remove contact photo")
     @ApiResponse(responseCode = "204", description = "Photo removed")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public void deletePhoto(@PathVariable final UUID id) {
+    public void deletePhoto(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
         contactService.deletePhoto(id);
     }
 
@@ -196,7 +202,8 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Comments found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public Page<CommentDto> listComments(
-            @PathVariable final UUID id,
+            @Parameter(description = "The contact ID") @PathVariable final UUID id,
+            @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByContact(id, pageable);
     }
@@ -214,7 +221,7 @@ public class ContactController {
     @ApiResponse(responseCode = "201", description = "Comment created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Contact not found")
-    public CommentDto addComment(@PathVariable final UUID id,
+    public CommentDto addComment(@Parameter(description = "The contact ID") @PathVariable final UUID id,
                                       @Valid @RequestBody final CommentCreateDto request) {
         return commentService.addToContact(id, request);
     }

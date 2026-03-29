@@ -1,6 +1,7 @@
 package com.openelements.crm.comment;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -49,7 +50,7 @@ public class CommentController {
     @ApiResponse(responseCode = "200", description = "Comment updated")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Comment not found")
-    public CommentDto update(@PathVariable final UUID id,
+    public CommentDto update(@Parameter(description = "The comment ID") @PathVariable final UUID id,
                                   @Valid @RequestBody final CommentUpdateDto request) {
         return commentService.update(id, request);
     }
@@ -64,7 +65,7 @@ public class CommentController {
     @Operation(summary = "Delete a comment")
     @ApiResponse(responseCode = "204", description = "Comment deleted")
     @ApiResponse(responseCode = "404", description = "Comment not found")
-    public void delete(@PathVariable final UUID id) {
+    public void delete(@Parameter(description = "The comment ID") @PathVariable final UUID id) {
         commentService.delete(id);
     }
 }
