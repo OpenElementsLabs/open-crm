@@ -1,4 +1,13 @@
 export const de = {
+  print: {
+    button: "Drucken",
+    loading: "Daten werden geladen...",
+    noFilters: "Keine Filter",
+    noRecords: "Keine Datensätze gefunden",
+    filterYes: "Ja",
+    filterNo: "Nein",
+    filterArchived: "Eingeschlossen",
+  },
   app: {
     title: "Open CRM",
     description: "Customer Relationship Management by Open Elements",

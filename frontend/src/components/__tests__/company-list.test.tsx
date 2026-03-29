@@ -440,6 +440,18 @@ describe("CompanyList", () => {
     });
   });
 
+  describe("print", () => {
+    it("should show print button", async () => {
+      mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        expect(screen.getByText(de.print.button)).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("restore", () => {
     it("should restore company when restore button clicked", async () => {
       mockGetCompanies.mockResolvedValue(

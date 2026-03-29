@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, User } from "lucide-react";
+import { Plus, Trash2, User, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -93,12 +93,29 @@ export function ContactList() {
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-heading text-2xl font-bold text-oe-dark">{S.title}</h1>
-        <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
-          <Link href="/contacts/new">
-            <Plus className="mr-2 h-4 w-4" />
-            {S.newContact}
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (searchFilter) params.set("search", searchFilter);
+              if (companyIdFilter && companyIdFilter !== "all") params.set("companyId", companyIdFilter);
+              if (languageFilter && languageFilter !== "all") params.set("language", languageFilter);
+              if (brevoFilter !== "all") params.set("brevo", brevoFilter);
+              const query = params.toString();
+              window.open(`/contacts/print${query ? `?${query}` : ""}`, "_blank");
+            }}
+          >
+            <Printer className="mr-2 h-4 w-4" />
+            {t.print.button}
+          </Button>
+          <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
+            <Link href="/contacts/new">
+              <Plus className="mr-2 h-4 w-4" />
+              {S.newContact}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
