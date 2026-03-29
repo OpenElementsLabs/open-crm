@@ -69,16 +69,14 @@ describe("CompanyDetail", () => {
     expect(screen.getByText("info@open-elements.com")).toBeInTheDocument();
     expect(screen.getByText("https://open-elements.com")).toBeInTheDocument();
     expect(screen.getByText(S.detail.address)).toBeInTheDocument();
-    expect(screen.getByText(/Musterstraße 42/)).toBeInTheDocument();
-    expect(screen.getByText(/12345 Berlin/)).toBeInTheDocument();
-    expect(screen.getByText("Germany")).toBeInTheDocument();
+    expect(screen.getByText(/Musterstraße 42[\s\S]*12345 Berlin[\s\S]*Germany/)).toBeInTheDocument();
   });
 
   it("should show address without house number", () => {
     renderWithProviders(
       <CompanyDetail company={{ ...testCompany, houseNumber: null }} />,
     );
-    expect(screen.getByText("Musterstraße")).toBeInTheDocument();
+    expect(screen.getByText(/Musterstraße[\s\S]*12345 Berlin/)).toBeInTheDocument();
   });
 
   it("should skip street line when street is null", () => {
@@ -102,8 +100,7 @@ describe("CompanyDetail", () => {
         }}
       />,
     );
-    expect(screen.getByText("Hamburg")).toBeInTheDocument();
-    expect(screen.getByText("Deutschland")).toBeInTheDocument();
+    expect(screen.getByText(/Hamburg[\s\S]*Deutschland/)).toBeInTheDocument();
   });
 
   it("should show address with only zip code", () => {

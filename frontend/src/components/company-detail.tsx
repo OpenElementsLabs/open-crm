@@ -9,24 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { CompanyComments } from "@/components/company-comments";
+import { DetailField } from "@/components/detail-field";
 import { deleteCompany, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
-
-function DetailField({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string | null;
-}) {
-  return (
-    <div>
-      <dt className="text-sm font-medium text-oe-gray-mid">{label}</dt>
-      <dd className="mt-1 text-sm text-oe-black">{value || "—"}</dd>
-    </div>
-  );
-}
 
 export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
   const t = useTranslations();
@@ -113,33 +99,25 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
         <CardContent>
           <dl className="grid gap-4 sm:grid-cols-2">
             <DetailField label={S.form.name} value={company.name} />
-            <DetailField label={S.detail.email} value={company.email} />
-            <DetailField label={S.detail.website} value={company.website} />
-            <div>
-              <dt className="text-sm font-medium text-oe-gray-mid">{S.detail.address}</dt>
-              <dd className="mt-1 text-sm text-oe-black">
-                {(() => {
-                  const lines: string[] = [];
-                  if (company.street) {
-                    lines.push(company.houseNumber ? `${company.street} ${company.houseNumber}` : company.street);
-                  }
-                  const line2Parts = [company.zipCode, company.city].filter(Boolean);
-                  if (line2Parts.length > 0) {
-                    lines.push(line2Parts.join(" "));
-                  }
-                  if (company.country) {
-                    lines.push(company.country);
-                  }
-                  if (lines.length === 0) return "—";
-                  return lines.map((line, i) => (
-                    <span key={i}>
-                      {i > 0 && <br />}
-                      {line}
-                    </span>
-                  ));
-                })()}
-              </dd>
-            </div>
+            <DetailField label={S.detail.email} value={company.email} copyable mailable />
+            <DetailField label={S.detail.website} value={company.website} copyable linkable />
+            {(() => {
+              const lines: string[] = [];
+              if (company.street) {
+                lines.push(company.houseNumber ? `${company.street} ${company.houseNumber}` : company.street);
+              }
+              const line2Parts = [company.zipCode, company.city].filter(Boolean);
+              if (line2Parts.length > 0) {
+                lines.push(line2Parts.join(" "));
+              }
+              if (company.country) {
+                lines.push(company.country);
+              }
+              const addressText = lines.length > 0 ? lines.join("\n") : null;
+              return (
+                <DetailField label={S.detail.address} value={addressText} copyable multiline />
+              );
+            })()}
           </dl>
         </CardContent>
       </Card>

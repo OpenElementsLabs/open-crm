@@ -9,24 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
+import { DetailField } from "@/components/detail-field";
 import { deleteContact, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { useTranslations, useLanguage } from "@/lib/i18n/language-context";
-
-function DetailField({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: string | null;
-}) {
-  return (
-    <div>
-      <dt className="text-sm font-medium text-oe-gray-mid">{label}</dt>
-      <dd className="mt-1 text-sm text-oe-black">{value || "—"}</dd>
-    </div>
-  );
-}
 
 function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations>): string | null {
   if (!gender) return null;
@@ -136,11 +122,11 @@ export function ContactDetail({ contact }: ContactDetailProps) {
         </CardHeader>
         <CardContent>
           <dl className="grid gap-4 sm:grid-cols-2">
-            <DetailField label={S.detail.email} value={contact.email} />
+            <DetailField label={S.detail.email} value={contact.email} copyable mailable />
             <DetailField label={S.detail.position} value={contact.position} />
             <DetailField label={S.detail.gender} value={genderLabel(contact.gender, t)} />
-            <DetailField label={S.detail.phone} value={contact.phoneNumber} />
-            <DetailField label={S.detail.linkedIn} value={contact.linkedInUrl} />
+            <DetailField label={S.detail.phone} value={contact.phoneNumber} copyable callable />
+            <DetailField label={S.detail.linkedIn} value={contact.linkedInUrl} copyable linkable />
             <DetailField label={S.detail.birthday} value={formatBirthday(contact.birthday, language)} />
             <DetailField label={S.detail.language} value={languageLabel(contact.language, t)} />
             <div>
