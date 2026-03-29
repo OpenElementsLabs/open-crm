@@ -46,4 +46,5 @@
 | 042 | Print Safari fix           | Fix table cell text wrapping in Safari print by applying classes at component level                | — | done   |
 | 043 | Always-visible actions     | Show detail field action icons always (light color), darken on hover, dark on touch devices        | — | done   |
 | 044 | Page serialization fix     | Enable VIA_DTO page serialization to fix PageImpl warning, update frontend Page type               | — | open   |
+| 045 | User model prep            | Hardcoded dummy user for comments and sidebar, prepare for future Authentik SSO                    | — | open   |
 

@@ -34,3 +34,14 @@ acceptable during import. A separate merge feature will allow cleaning these up 
 ## Wenn Kontakt nicht mehr in Bre3vo, dann auch Brevo-ID und Tag beoi uns entfernen
 
 Der Kontakt bleibt bei uns bestehen aber die verbisnugn wird entfernt und der Kontakt kann bei uns editiert werden.
+
+## Comment Author-Feld: Limitierungen des String-Ansatzes
+
+Das `author`-Feld in Kommentaren ist ein einfacher String, der beim Erstellen mit dem Benutzernamen befüllt wird. Dieser Ansatz hat mehrere Einschränkungen, die bei der Authentik-Integration adressiert werden sollten:
+
+- **Keine Synchronisation:** Wenn ein Benutzer seinen Namen in Authentik ändert, bleiben alte Kommentare mit dem alten Namen stehen
+- **Keine Referenzintegrität:** Kein Fremdschlüssel zu einer User-Tabelle — Kommentare können keinem Benutzer zugeordnet werden
+- **GDPR/DSGVO:** Personenbezogene Daten (Name) werden ohne Löschkonzept in Kommentaren gespeichert. Bei einem Löschantrag müssten alle Kommentare durchsucht und der Autorenname anonymisiert werden
+- **Kein Profilbild:** Kommentare zeigen nur den Namen, kein Benutzerbild
+
+**Context:** Bewusste Entscheidung für die erste Iteration (Spec 045). Soll bei der echten Authentik-Anbindung durch eine robustere Lösung (z.B. User-ID als Referenz mit separater Auflösung) ersetzt werden.
