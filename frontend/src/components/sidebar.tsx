@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Building2, CircleUser, HeartPulse, LogOut, Menu, RefreshCw, Users } from "lucide-react";
+import { Building2, CircleUser, HeartPulse, LayoutDashboard, LogOut, Menu, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
@@ -59,10 +59,24 @@ function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
 function SidebarHeader() {
   const t = useTranslations();
   return (
-    <div className="flex h-16 items-center border-b border-oe-white/10 px-6">
-      <Link href="/companies" className="font-heading text-lg font-bold text-oe-white">
-        {t.app.title}
+    <div className="border-b border-oe-white/10 px-6 py-4">
+      <Link href="/companies" className="flex items-center gap-3">
+        <LayoutDashboard className="h-6 w-6 text-oe-green" />
+        <span className="font-heading text-lg font-bold text-oe-white">{t.app.title}</span>
       </Link>
+      <a
+        href="https://open-elements.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity"
+      >
+        <span className="text-xs text-oe-gray-light">{t.app.developedBy}</span>
+        <img
+          src="/oe-logo-landscape-dark.svg"
+          alt="Open Elements"
+          className="h-4"
+        />
+      </a>
     </div>
   );
 }

@@ -11,6 +11,7 @@ export const de = {
   app: {
     title: "Open CRM",
     description: "Customer Relationship Management by Open Elements",
+    developedBy: "Developed by",
   },
   nav: {
     health: "Server-Health",

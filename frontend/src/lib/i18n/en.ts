@@ -13,6 +13,7 @@ export const en: Translations = {
   app: {
     title: "Open CRM",
     description: "Customer Relationship Management by Open Elements",
+    developedBy: "Developed by",
   },
   nav: {
     health: "Server Health",
