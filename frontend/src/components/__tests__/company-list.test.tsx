@@ -119,6 +119,24 @@ describe("CompanyList", () => {
       });
     });
 
+    it("should show record count in pagination", async () => {
+      mockGetCompanies.mockResolvedValue({
+        content: [makeCompany()],
+        totalElements: 42,
+        totalPages: 3,
+        number: 0,
+        size: 20,
+        first: true,
+        last: false,
+      });
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/42 Firmen/)).toBeInTheDocument();
+      });
+    });
+
     it("should navigate to next page when clicking next", async () => {
       mockGetCompanies.mockResolvedValue({
         content: [makeCompany()],

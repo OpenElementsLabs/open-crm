@@ -99,6 +99,8 @@ export const de = {
       previous: "Zurück",
       next: "Weiter",
       page: "Seite {current} von {total}",
+      totalOne: "{count} Firma",
+      totalOther: "{count} Firmen",
     },
   },
   contacts: {
@@ -109,6 +111,8 @@ export const de = {
     columns: {
       firstName: "Vorname",
       lastName: "Nachname",
+      name: "Name",
+      email: "E-Mail",
       company: "Firma",
       comments: "Kommentare",
       actions: "Aktionen",
@@ -190,6 +194,8 @@ export const de = {
       previous: "Zurück",
       next: "Weiter",
       page: "Seite {current} von {total}",
+      totalOne: "{count} Kontakt",
+      totalOther: "{count} Kontakte",
     },
     sort: {
       label: "Sortierung",

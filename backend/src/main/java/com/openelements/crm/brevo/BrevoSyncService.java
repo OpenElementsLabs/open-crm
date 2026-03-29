@@ -215,21 +215,23 @@ public class BrevoSyncService {
             final String linkedIn = getStringAttribute(attrs, "LINKEDIN");
             final String firmaManuell = getStringAttribute(attrs, "FIRMA_MANUELL");
 
+            // Always set Brevo-managed fields
             entity.setFirstName(firstName != null ? firstName : "");
             entity.setLastName(lastName != null ? lastName : "");
             entity.setEmail(email != null ? email : brevoContact.email());
-            entity.setPhoneNumber(sms);
-            entity.setPosition(jobTitle);
-            entity.setLinkedInUrl(linkedIn);
             entity.setBrevoId(String.valueOf(brevoContact.id()));
-
-            // Language mapping
             entity.setLanguage(mapLanguage(attrs.get("SPRACHE")));
 
-            // Company resolution
-            final CompanyEntity company = resolveCompany(
-                    brevoContact.id(), contactToCompanyBrevoId, firmaManuell);
-            entity.setCompany(company);
+            // Only set user-editable fields on first import
+            if (created) {
+                entity.setPhoneNumber(sms);
+                entity.setPosition(jobTitle);
+                entity.setLinkedInUrl(linkedIn);
+
+                final CompanyEntity company = resolveCompany(
+                        brevoContact.id(), contactToCompanyBrevoId, firmaManuell);
+                entity.setCompany(company);
+            }
 
             contactRepository.saveAndFlush(entity);
             return created;

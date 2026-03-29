@@ -235,7 +235,7 @@ export function CompanyList() {
           {/* Pagination */}
           <div className="mt-4 flex items-center justify-between">
             <p className="text-sm text-oe-gray-mid">
-              {S.pagination.page
+              {(data.totalElements === 1 ? S.pagination.totalOne : S.pagination.totalOther).replace("{count}", String(data.totalElements))} · {S.pagination.page
                 .replace("{current}", String(data.number + 1))
                 .replace("{total}", String(data.totalPages))}
             </p>
