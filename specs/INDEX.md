@@ -30,4 +30,5 @@
 | 026 | Brevo fields readonly      | Prevent editing of firstName, lastName, email, language on Brevo contacts (400 + disabled UI)     | — | done   |
 | 027 | Brevo reimport protect     | Only overwrite Brevo-managed fields on contact re-import, preserve user-editable fields           | — | open   |
 | 028 | Record count display       | Show total filtered record count in company and contact list pagination ("42 Firmen · Seite 1 von 3") | — | open   |
+| 029 | Contact table columns      | Merge firstName/lastName into single Name column, add Email column to contact list table            | — | open   |
 
