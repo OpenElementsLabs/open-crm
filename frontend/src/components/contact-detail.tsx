@@ -167,7 +167,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
           </dl>
 
           <div className="mt-6 flex gap-6">
-            <CheckboxField label={S.detail.syncedToBrevo} checked={contact.syncedToBrevo} />
+            <CheckboxField label={S.detail.brevo} checked={contact.brevo} />
           </div>
         </CardContent>
       </Card>

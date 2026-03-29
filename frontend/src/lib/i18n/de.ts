@@ -129,7 +129,7 @@ export const de = {
       company: "Firma",
       showCompany: "zur Firma",
       archivedBadge: "Archiviert",
-      syncedToBrevo: "Mit Brevo synchronisiert",
+      brevo: "Mit Brevo synchronisiert",
       commentsTitle: "Kommentare",
       commentsPlaceholder: "Kommentar hinzufügen",
     },

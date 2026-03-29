@@ -227,7 +227,7 @@ class BrevoSyncServiceTest {
             final BrevoSyncResultDto result = brevoSyncService.syncAll();
 
             assertEquals(1, result.contactsImported());
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             assertEquals("John", contact.getFirstName());
             assertEquals("Doe", contact.getLastName());
             assertEquals("john@test.com", contact.getEmail());
@@ -235,7 +235,7 @@ class BrevoSyncServiceTest {
             assertEquals("CTO", contact.getPosition());
             assertEquals("https://li", contact.getLinkedInUrl());
             assertEquals(Language.DE, contact.getLanguage());
-            assertTrue(contact.isSyncedToBrevo());
+            assertNotNull(contact.getBrevoId());
             final CompanyEntity company = getCompanyForContact(contact);
             assertNotNull(company);
             assertEquals("aaa111", company.getBrevoCompanyId());
@@ -247,7 +247,7 @@ class BrevoSyncServiceTest {
             final ContactEntity existing = new ContactEntity();
             existing.setFirstName("Old");
             existing.setLastName("Name");
-            existing.setBrevoId(200L);
+            existing.setBrevoId("200");
             contactRepository.saveAndFlush(existing);
 
             when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
@@ -261,7 +261,7 @@ class BrevoSyncServiceTest {
 
             assertEquals(0, result.contactsImported());
             assertEquals(1, result.contactsUpdated());
-            final ContactEntity updated = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
             assertEquals("New", updated.getFirstName());
         }
 
@@ -284,8 +284,8 @@ class BrevoSyncServiceTest {
             brevoSyncService.syncAll();
 
             assertEquals(1, contactRepository.count());
-            final ContactEntity matched = contactRepository.findByBrevoId(200L).orElseThrow();
-            assertEquals(200L, matched.getBrevoId());
+            final ContactEntity matched = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("200", matched.getBrevoId());
         }
 
         @Test
@@ -307,7 +307,7 @@ class BrevoSyncServiceTest {
             brevoSyncService.syncAll();
 
             assertEquals(1, contactRepository.count());
-            final ContactEntity matched = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity matched = contactRepository.findByBrevoId("200").orElseThrow();
             assertNotNull(matched.getBrevoId());
         }
 
@@ -324,7 +324,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             assertEquals(Language.EN, contact.getLanguage());
         }
 
@@ -341,7 +341,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             assertNull(contact.getLanguage());
         }
 
@@ -357,13 +357,13 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             assertNull(contact.getLanguage());
         }
 
         @Test
-        @DisplayName("sets syncedToBrevo to true")
-        void setsSyncedToBrevoTrue() {
+        @DisplayName("sets brevoId on import")
+        void setsBrevoIdOnImport() {
             when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
             final Map<String, Object> attrs = new HashMap<>();
             attrs.put("VORNAME", "Jane");
@@ -373,8 +373,8 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
-            assertTrue(contact.isSyncedToBrevo());
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
+            assertNotNull(contact.getBrevoId());
         }
 
         @Test
@@ -398,7 +398,7 @@ class BrevoSyncServiceTest {
             assertEquals(2, contactRepository.count());
             final ContactEntity unchanged = contactRepository.findByEmailIgnoreCase("local@local.com").orElseThrow();
             assertNull(unchanged.getBrevoId());
-            assertFalse(unchanged.isSyncedToBrevo());
+            assertNull(unchanged.getBrevoId());
         }
     }
 
@@ -419,7 +419,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             final CompanyEntity linkedCompany = getCompanyForContact(contact);
             assertNotNull(linkedCompany);
             assertEquals("aaa111", linkedCompany.getBrevoCompanyId());
@@ -438,7 +438,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             final CompanyEntity createdCompany = getCompanyForContact(contact);
             assertNotNull(createdCompany);
             assertEquals("Startup XYZ", createdCompany.getName());
@@ -458,7 +458,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             final CompanyEntity priorityCompany = getCompanyForContact(contact);
             assertNotNull(priorityCompany);
             assertEquals("CRM Company", priorityCompany.getName());
@@ -482,7 +482,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             final CompanyEntity matchedCompany = getCompanyForContact(contact);
             assertNotNull(matchedCompany);
             assertEquals("Existing Corp", matchedCompany.getName());
@@ -502,7 +502,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             assertNull(contact.getCompany());
         }
 
@@ -518,7 +518,7 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId(200L).orElseThrow();
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
             assertNull(contact.getCompany());
         }
     }
@@ -622,7 +622,7 @@ class BrevoSyncServiceTest {
             final ContactEntity existingContact = new ContactEntity();
             existingContact.setFirstName("Existing");
             existingContact.setLastName("Contact");
-            existingContact.setBrevoId(300L);
+            existingContact.setBrevoId("300");
             contactRepository.saveAndFlush(existingContact);
 
             // Mock: 3 companies (1 existing update + 2 new)

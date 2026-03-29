@@ -33,7 +33,7 @@ public interface ContactRepository extends JpaRepository<ContactEntity, UUID>,
      * @param brevoId the Brevo contact ID
      * @return the contact, or empty if not found
      */
-    Optional<ContactEntity> findByBrevoId(Long brevoId);
+    Optional<ContactEntity> findByBrevoId(String brevoId);
 
     /**
      * Finds a contact by email (case-insensitive exact match).

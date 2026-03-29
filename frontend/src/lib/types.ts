@@ -56,7 +56,7 @@ export interface ContactDto {
   readonly commentCount: number;
   readonly hasPhoto: boolean;
   readonly birthday: string | null;
-  readonly syncedToBrevo: boolean;
+  readonly brevo: boolean;
   readonly language: "DE" | "EN" | null;
   readonly createdAt: string;
   readonly updatedAt: string;
