@@ -28,4 +28,5 @@
 | 024 | Brevo origin filter        | Three-way filter (All/From Brevo/Not from Brevo) on company and contact list tables               | — | done   |
 | 025 | Brevo detail badge         | Show "Brevo" tag below name in company/contact detail views, remove synced checkbox               | — | done   |
 | 026 | Brevo fields readonly      | Prevent editing of firstName, lastName, email, language on Brevo contacts (400 + disabled UI)     | — | done   |
+| 027 | Brevo reimport protect     | Only overwrite Brevo-managed fields on contact re-import, preserve user-editable fields           | — | open   |
 
