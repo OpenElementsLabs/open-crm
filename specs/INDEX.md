@@ -51,4 +51,5 @@
 | 047 | OIDC infrastructure        | mock-oauth2-server for local dev, OIDC env vars for Authentik in production                           | —            | done   |
 | 048 | Frontend OIDC auth         | Auth.js v5 login, session management, token forwarding, sidebar user display, logout                  | —            | done   |
 | 049 | Backend OIDC auth          | Spring Security Resource Server, JWT validation, UserService from token, Swagger authorize            | —            | done   |
+| 050 | Tags backend               | Tag entity with CRUD API, many-to-many to companies/contacts, join tables, cascade delete             | —            | open   |
 
