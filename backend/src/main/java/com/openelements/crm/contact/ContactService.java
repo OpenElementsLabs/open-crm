@@ -148,6 +148,7 @@ public class ContactService {
                                       final boolean noCompany,
                                       final String language,
                                       final Boolean brevo,
+                                      final List<UUID> tagIds,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         if (companyId != null && noCompany) {
@@ -192,6 +193,18 @@ public class ContactService {
             } else {
                 spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoId")));
             }
+        }
+        if (tagIds != null && !tagIds.isEmpty()) {
+            for (final UUID tagId : tagIds) {
+                spec = spec.and((root, query, cb) -> {
+                    final var tagsJoin = root.join("tags");
+                    return cb.equal(tagsJoin.get("id"), tagId);
+                });
+            }
+            spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
+                return cb.conjunction();
+            });
         }
 
         return contactRepository.findAll(spec, pageable).map(this::toDto);

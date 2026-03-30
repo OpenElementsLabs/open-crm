@@ -11,7 +11,7 @@ const S = de.contacts;
 const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, replace: vi.fn() }),
   usePathname: () => "/contacts",
   useSearchParams: () => new URLSearchParams(),
 }));
@@ -28,6 +28,7 @@ vi.mock("@/lib/api", () => ({
   getCompaniesForSelect: (...args: unknown[]) => mockGetCompaniesForSelect(...args),
   getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
   createContactComment: (...args: unknown[]) => mockCreateContactComment(...args),
+  getTags: vi.fn().mockResolvedValue({ content: [], page: { size: 20, number: 0, totalElements: 0, totalPages: 0 } }),
 }));
 
 function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {

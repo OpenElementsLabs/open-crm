@@ -77,9 +77,11 @@ public class CompanyController {
             @RequestParam(defaultValue = "false") final boolean includeDeleted,
             @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
             @RequestParam(required = false) final Boolean brevo,
+            @Parameter(description = "Filter by tag IDs (AND semantics)")
+            @RequestParam(required = false) final List<UUID> tagIds,
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return companyService.list(name, includeDeleted, brevo, pageable);
+        return companyService.list(name, includeDeleted, brevo, tagIds, pageable);
     }
 
     /**

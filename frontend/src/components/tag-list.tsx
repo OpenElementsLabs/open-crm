@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Pencil, Plus, Tag, Trash2 } from "lucide-react";
+import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,7 +32,7 @@ export function TagList() {
   const fetchTags = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getTags({ page, size: 20, name: debouncedSearch || undefined });
+      const result = await getTags({ page, size: 20, name: debouncedSearch || undefined, includeCounts: true });
       setData(result);
     } finally {
       setLoading(false);
@@ -106,6 +106,8 @@ export function TagList() {
                   <th className="px-4 py-3 text-left font-medium text-oe-gray w-16">{t.tags.columns.color}</th>
                   <th className="px-4 py-3 text-left font-medium text-oe-gray">{t.tags.columns.name}</th>
                   <th className="px-4 py-3 text-left font-medium text-oe-gray hidden md:table-cell">{t.tags.columns.description}</th>
+                  <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.companies}</th>
+                  <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.contacts}</th>
                   <th className="px-4 py-3 text-right font-medium text-oe-gray w-24">{t.tags.columns.actions}</th>
                 </tr>
               </thead>
@@ -121,6 +123,22 @@ export function TagList() {
                     <td className="px-4 py-3 font-medium text-oe-dark">{tag.name}</td>
                     <td className="px-4 py-3 text-oe-gray hidden md:table-cell truncate max-w-xs">
                       {tag.description ?? ""}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-oe-dark">{tag.companyCount ?? 0}</span>
+                      {(tag.companyCount ?? 0) > 0 && (
+                        <Link href={`/companies?tagIds=${tag.id}`} className="ml-1 inline-block align-middle text-oe-gray hover:text-oe-green">
+                          <ArrowUpRight className="h-4 w-4" />
+                        </Link>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-oe-dark">{tag.contactCount ?? 0}</span>
+                      {(tag.contactCount ?? 0) > 0 && (
+                        <Link href={`/contacts?tagIds=${tag.id}`} className="ml-1 inline-block align-middle text-oe-gray hover:text-oe-green">
+                          <ArrowUpRight className="h-4 w-4" />
+                        </Link>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">

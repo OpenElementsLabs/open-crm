@@ -244,7 +244,7 @@ class CompanyServiceTest {
             final CompanyDto toDelete = createCompany("To Delete");
             companyService.delete(toDelete.id());
 
-            final var page = companyService.list(null, false, null, PageRequest.of(0, 20));
+            final var page = companyService.list(null, false, null, null, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -256,7 +256,7 @@ class CompanyServiceTest {
             final CompanyDto toDelete = createCompany("Deleted");
             companyService.delete(toDelete.id());
 
-            final var page = companyService.list(null, true, null, PageRequest.of(0, 20));
+            final var page = companyService.list(null, true, null, null, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -267,7 +267,7 @@ class CompanyServiceTest {
             createCompany("Open Elements");
             createCompany("Acme Corp");
 
-            final var page = companyService.list("open", false, null, PageRequest.of(0, 20));
+            final var page = companyService.list("open", false, null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Open Elements", page.getContent().get(0).name());
@@ -282,7 +282,7 @@ class CompanyServiceTest {
             brevoEntity.setBrevoCompanyId("brevo-123");
             companyRepository.saveAndFlush(brevoEntity);
 
-            final var page = companyService.list(null, false, true, PageRequest.of(0, 20));
+            final var page = companyService.list(null, false, true, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Brevo Corp", page.getContent().get(0).name());
@@ -297,7 +297,7 @@ class CompanyServiceTest {
             brevoEntity.setBrevoCompanyId("brevo-123");
             companyRepository.saveAndFlush(brevoEntity);
 
-            final var page = companyService.list(null, false, false, PageRequest.of(0, 20));
+            final var page = companyService.list(null, false, false, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Normal Corp", page.getContent().get(0).name());

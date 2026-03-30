@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +38,10 @@ public class TagController {
     @Operation(summary = "List all tags", description = "Returns a paginated list of tags sorted by name")
     @ApiResponse(responseCode = "200", description = "Tags retrieved successfully")
     public Page<TagDto> list(
+            @Parameter(description = "Whether to include company/contact counts per tag")
+            @RequestParam(defaultValue = "false") final boolean includeCounts,
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return tagService.findAll(pageable);
+        return tagService.findAll(pageable, includeCounts);
     }
 
     @GetMapping("/{id}")

@@ -82,9 +82,11 @@ public class ContactController {
             @RequestParam(defaultValue = "false") final boolean noCompany,
             @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
             @RequestParam(required = false) final Boolean brevo,
+            @Parameter(description = "Filter by tag IDs (AND semantics)")
+            @RequestParam(required = false) final List<UUID> tagIds,
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
-        return contactService.list(search, companyId, noCompany, language, brevo, pageable);
+        return contactService.list(search, companyId, noCompany, language, brevo, tagIds, pageable);
     }
 
     /**

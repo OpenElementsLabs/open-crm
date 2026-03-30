@@ -26,6 +26,7 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -41,6 +42,10 @@ export function ContactList() {
   const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
   const [languageFilter, setLanguageFilter] = useState("");
   const [brevoFilter, setBrevoFilter] = useState("all");
+  const [tagIds, setTagIds] = useState<string[]>(() => {
+    const param = searchParams.get("tagIds");
+    return param ? param.split(",") : [];
+  });
 
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ContactDto | null>(null);
@@ -71,6 +76,7 @@ export function ContactList() {
         noCompany: companyIdFilter === "none" ? true : undefined,
         language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+        tagIds: tagIds.length > 0 ? tagIds : undefined,
       });
       setData(result);
     } catch {
@@ -78,7 +84,7 @@ export function ContactList() {
     } finally {
       setLoading(false);
     }
-  }, [page, searchFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [page, searchFilter, companyIdFilter, languageFilter, brevoFilter, tagIds]);
 
   useEffect(() => {
     fetchContacts();
@@ -86,7 +92,7 @@ export function ContactList() {
 
   useEffect(() => {
     setPage(0);
-  }, [searchFilter, companyIdFilter, languageFilter, brevoFilter]);
+  }, [searchFilter, companyIdFilter, languageFilter, brevoFilter, tagIds]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -184,6 +190,22 @@ export function ContactList() {
             <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
           </SelectContent>
         </Select>
+        <div className="sm:max-w-[250px]">
+          <TagMultiSelect
+            selectedIds={tagIds}
+            onChange={(ids) => {
+              setTagIds(ids);
+              const params = new URLSearchParams(window.location.search);
+              if (ids.length > 0) {
+                params.set("tagIds", ids.join(","));
+              } else {
+                params.delete("tagIds");
+              }
+              const query = params.toString();
+              router.replace(`/contacts${query ? `?${query}` : ""}`, { scroll: false });
+            }}
+          />
+        </div>
       </div>
 
       {/* Loading */}

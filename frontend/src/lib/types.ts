@@ -99,6 +99,8 @@ export interface TagDto {
   readonly color: string;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly companyCount: number | null;
+  readonly contactCount: number | null;
 }
 
 export interface TagCreateDto {

@@ -29,8 +29,14 @@ public class TagService {
         this.contactRepository = contactRepository;
     }
 
-    public Page<TagDto> findAll(final Pageable pageable) {
-        return tagRepository.findAll(pageable).map(TagDto::fromEntity);
+    public Page<TagDto> findAll(final Pageable pageable, final boolean includeCounts) {
+        final Page<TagEntity> page = tagRepository.findAll(pageable);
+        if (includeCounts) {
+            return page.map(entity -> TagDto.fromEntity(entity,
+                    tagRepository.countActiveCompaniesByTagId(entity.getId()),
+                    tagRepository.countContactsByTagId(entity.getId())));
+        }
+        return page.map(TagDto::fromEntity);
     }
 
     public TagDto findById(final UUID id) {

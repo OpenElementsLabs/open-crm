@@ -10,8 +10,9 @@ const S = de.companies;
 const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, replace: vi.fn() }),
   usePathname: () => "/companies",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const mockGetCompanies = vi.fn();
@@ -26,6 +27,7 @@ vi.mock("@/lib/api", () => ({
   restoreCompany: (...args: unknown[]) => mockRestoreCompany(...args),
   getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
   createCompanyComment: (...args: unknown[]) => mockCreateCompanyComment(...args),
+  getTags: vi.fn().mockResolvedValue({ content: [], page: { size: 20, number: 0, totalElements: 0, totalPages: 0 } }),
 }));
 
 function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {

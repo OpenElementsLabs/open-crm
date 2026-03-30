@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -33,12 +34,17 @@ export function CompanyList() {
   const t = useTranslations();
   const S = t.companies;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<Page<CompanyDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [nameFilter, setNameFilter] = useState("");
   const [brevoFilter, setBrevoFilter] = useState("all");
   const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [tagIds, setTagIds] = useState<string[]>(() => {
+    const param = searchParams.get("tagIds");
+    return param ? param.split(",") : [];
+  });
 
   const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -60,6 +66,7 @@ export function CompanyList() {
         name: nameFilter || undefined,
         includeDeleted,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+        tagIds: tagIds.length > 0 ? tagIds : undefined,
       });
       setData(result);
     } catch {
@@ -67,7 +74,7 @@ export function CompanyList() {
     } finally {
       setLoading(false);
     }
-  }, [page, nameFilter, brevoFilter, includeDeleted]);
+  }, [page, nameFilter, brevoFilter, includeDeleted, tagIds]);
 
   useEffect(() => {
     fetchCompanies();
@@ -75,7 +82,7 @@ export function CompanyList() {
 
   useEffect(() => {
     setPage(0);
-  }, [nameFilter, brevoFilter, includeDeleted]);
+  }, [nameFilter, brevoFilter, includeDeleted, tagIds]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -156,6 +163,22 @@ export function CompanyList() {
             <SelectItem value="false">{t.brevoFilter.notFromBrevo}</SelectItem>
           </SelectContent>
         </Select>
+        <div className="sm:max-w-[250px]">
+          <TagMultiSelect
+            selectedIds={tagIds}
+            onChange={(ids) => {
+              setTagIds(ids);
+              const params = new URLSearchParams(window.location.search);
+              if (ids.length > 0) {
+                params.set("tagIds", ids.join(","));
+              } else {
+                params.delete("tagIds");
+              }
+              const query = params.toString();
+              router.replace(`/companies${query ? `?${query}` : ""}`, { scroll: false });
+            }}
+          />
+        </div>
         <Button
           variant="outline"
           size="sm"

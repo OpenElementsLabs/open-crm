@@ -46,6 +46,7 @@ export interface CompanyListParams {
   readonly name?: string;
   readonly includeDeleted?: boolean;
   readonly brevo?: boolean;
+  readonly tagIds?: readonly string[];
 }
 
 export async function getCompanies(params: CompanyListParams = {}): Promise<Page<CompanyDto>> {
@@ -55,6 +56,11 @@ export async function getCompanies(params: CompanyListParams = {}): Promise<Page
   if (params.name) searchParams.set("name", params.name);
   if (params.includeDeleted) searchParams.set("includeDeleted", "true");
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
 
   const query = searchParams.toString();
   const url = `${baseUrl()}/api/companies${query ? `?${query}` : ""}`;
@@ -172,6 +178,7 @@ export interface ContactListParams {
   readonly noCompany?: boolean;
   readonly language?: string;
   readonly brevo?: boolean;
+  readonly tagIds?: readonly string[];
 }
 
 export async function getContacts(params: ContactListParams = {}): Promise<Page<ContactDto>> {
@@ -183,6 +190,11 @@ export async function getContacts(params: ContactListParams = {}): Promise<Page<
   if (params.noCompany) searchParams.set("noCompany", "true");
   if (params.language) searchParams.set("language", params.language);
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
 
   const query = searchParams.toString();
   const url = `${baseUrl()}/api/contacts${query ? `?${query}` : ""}`;
@@ -431,6 +443,7 @@ export interface TagListParams {
   readonly page?: number;
   readonly size?: number;
   readonly name?: string;
+  readonly includeCounts?: boolean;
 }
 
 export async function getTags(params: TagListParams = {}): Promise<Page<TagDto>> {
@@ -438,6 +451,7 @@ export async function getTags(params: TagListParams = {}): Promise<Page<TagDto>>
   if (params.page !== undefined) searchParams.set("page", String(params.page));
   if (params.size !== undefined) searchParams.set("size", String(params.size));
   if (params.name) searchParams.set("name", params.name);
+  if (params.includeCounts) searchParams.set("includeCounts", "true");
   searchParams.set("sort", "name,asc");
 
   const url = `${baseUrl()}/api/tags?${searchParams.toString()}`;
