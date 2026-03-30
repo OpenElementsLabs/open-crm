@@ -15,14 +15,14 @@ afterEach(() => {
 });
 
 describe("Sidebar", () => {
-  it("should render navigation entries for Firmen and Server-Health", () => {
+  it("should render navigation entries for Firmen and Admin", () => {
     const { container } = renderWithProviders(<Sidebar />);
 
     const links = container.querySelectorAll("a");
     const linkTexts = Array.from(links).map((link) => link.textContent);
 
     expect(linkTexts).toContain(de.nav.companies);
-    expect(linkTexts).toContain(de.nav.health);
+    expect(linkTexts).toContain(de.nav.admin);
   });
 
   it("should render app title", () => {
@@ -51,14 +51,14 @@ describe("Sidebar", () => {
     expect(companyLink).toHaveAttribute("href", "/companies");
   });
 
-  it("should link Server-Health to /health", () => {
+  it("should link Admin to /admin", () => {
     const { container } = renderWithProviders(<Sidebar />);
 
-    const healthLink = Array.from(container.querySelectorAll("a")).find(
-      (link) => link.textContent?.includes(de.nav.health),
+    const adminLink = Array.from(container.querySelectorAll("a")).find(
+      (link) => link.textContent?.includes(de.nav.admin),
     );
 
-    expect(healthLink).toHaveAttribute("href", "/health");
+    expect(adminLink).toHaveAttribute("href", "/admin");
   });
 
   it("should render Kontakte navigation entry", () => {

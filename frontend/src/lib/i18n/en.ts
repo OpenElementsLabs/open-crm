@@ -16,11 +16,13 @@ export const en: Translations = {
     developedBy: "Developed by",
   },
   nav: {
-    health: "Server Health",
     companies: "Companies",
     contacts: "Contacts",
     tags: "Tags",
-    brevoSync: "Brevo Import",
+    admin: "Admin",
+  },
+  admin: {
+    title: "Administration",
   },
   health: {
     title: "System Status",

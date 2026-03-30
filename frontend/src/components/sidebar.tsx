@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Building2, CircleUser, HeartPulse, LayoutDashboard, LogOut, Menu, RefreshCw, Tag, Users } from "lucide-react";
+import { Building2, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
@@ -17,43 +17,51 @@ interface NavItem {
   readonly icon: React.ReactNode;
 }
 
-function useNavItems(): readonly NavItem[] {
+function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
   const t = useTranslations();
-  return [
+  const pathname = usePathname();
+
+  const mainItems: NavItem[] = [
     { label: t.nav.companies, href: "/companies", icon: <Building2 className="h-5 w-5" /> },
     { label: t.nav.contacts, href: "/contacts", icon: <Users className="h-5 w-5" /> },
     { label: t.nav.tags, href: "/tags", icon: <Tag className="h-5 w-5" /> },
-    { label: t.nav.brevoSync, href: "/brevo-sync", icon: <RefreshCw className="h-5 w-5" /> },
-    { label: t.nav.health, href: "/health", icon: <HeartPulse className="h-5 w-5" /> },
   ];
-}
 
-function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
-  const pathname = usePathname();
-  const navItems = useNavItems();
+  const adminItem: NavItem = {
+    label: t.nav.admin,
+    href: "/admin",
+    icon: <Settings className="h-5 w-5" />,
+  };
+
+  function renderItem(item: NavItem) {
+    const isActive = pathname.startsWith(item.href);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={onNavigate}
+        className={cn(
+          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+          isActive
+            ? "bg-oe-green/20 text-oe-green"
+            : "text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white",
+        )}
+      >
+        {item.icon}
+        {item.label}
+      </Link>
+    );
+  }
 
   return (
-    <nav className="flex flex-col gap-1 px-3 py-4">
-      {navItems.map((item) => {
-        const isActive = pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-oe-green/20 text-oe-green"
-                : "text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white",
-            )}
-          >
-            {item.icon}
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="flex flex-1 flex-col">
+      <nav className="flex flex-col gap-1 px-3 py-4">
+        {mainItems.map(renderItem)}
+      </nav>
+      <div className="mt-auto px-3 pb-2">
+        {renderItem(adminItem)}
+      </div>
+    </div>
   );
 }
 
@@ -128,7 +136,7 @@ export function Sidebar() {
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-oe-dark">
         <SidebarHeader />
         <NavLinks />
-        <div className="mt-auto">
+        <div>
           <div className="border-t border-oe-white/10 px-6 py-4">
             <LanguageSwitch />
           </div>
@@ -149,7 +157,7 @@ export function Sidebar() {
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SidebarHeader />
             <NavLinks onNavigate={() => setOpen(false)} />
-            <div className="mt-auto">
+            <div>
               <div className="border-t border-oe-white/10 px-6 py-4">
                 <LanguageSwitch />
               </div>

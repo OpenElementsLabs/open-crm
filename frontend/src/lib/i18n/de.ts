@@ -14,11 +14,13 @@ export const de = {
     developedBy: "Entwickelt von",
   },
   nav: {
-    health: "Server-Health",
     companies: "Firmen",
     contacts: "Kontakte",
     tags: "Tags",
-    brevoSync: "Brevo Import",
+    admin: "Admin",
+  },
+  admin: {
+    title: "Administration",
   },
   health: {
     title: "Systemstatus",
