@@ -3,6 +3,7 @@ package com.openelements.crm.company;
 import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.contact.ContactRepository;
+import com.openelements.crm.tag.TagService;
 import java.util.List;
 import java.util.Set;
 import java.util.Objects;
@@ -26,20 +27,16 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
     private final CommentRepository commentRepository;
+    private final TagService tagService;
 
-    /**
-     * Creates a new CompanyService.
-     *
-     * @param companyRepository the company repository
-     * @param contactRepository the contact repository
-     * @param commentRepository the comment repository
-     */
     public CompanyService(final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
-                          final CommentRepository commentRepository) {
+                          final CommentRepository commentRepository,
+                          final TagService tagService) {
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
+        this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
     }
 
     /**
@@ -60,6 +57,9 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         entity.setPhoneNumber(request.phoneNumber());
+        if (request.tagIds() != null) {
+            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+        }
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
         return CompanyDto.fromEntity(saved, 0, 0);
     }
@@ -99,6 +99,9 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         entity.setPhoneNumber(request.phoneNumber());
+        if (request.tagIds() != null) {
+            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+        }
         final CompanyEntity saved = companyRepository.saveAndFlush(entity);
         return toDto(saved);
     }

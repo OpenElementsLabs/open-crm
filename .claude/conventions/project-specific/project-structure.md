@@ -16,6 +16,7 @@ open-crm/
 │   │   ├── brevo/                  — Brevo integration (sync service, controller, DTOs, records)
 │   │   ├── health/                 — Health check endpoint
 │   │   ├── settings/               — Settings storage (Brevo API key)
+│   │   ├── tag/                    — Tag domain (entity, repository, service, controller, DTOs)
 │   │   └── user/                   — User model (UserInfo record, UserService with JWT extraction)
 │   ├── src/main/resources/
 │   │   ├── application.yml         — Application configuration

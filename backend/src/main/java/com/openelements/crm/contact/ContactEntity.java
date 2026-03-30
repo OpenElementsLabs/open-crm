@@ -2,6 +2,7 @@ package com.openelements.crm.contact;
 
 import com.openelements.crm.ImageData;
 import com.openelements.crm.company.CompanyEntity;
+import com.openelements.crm.tag.TagEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,11 +13,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -75,6 +82,15 @@ public class ContactEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "language", length = 5)
     private Language language;
+
+    @ManyToMany
+    @JoinTable(
+            name = "contact_tags",
+            joinColumns = @JoinColumn(name = "contact_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<TagEntity> tags = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -331,6 +347,14 @@ public class ContactEntity {
      */
     public void setLanguage(final Language language) {
         this.language = language;
+    }
+
+    public Set<TagEntity> getTags() {
+        return tags;
+    }
+
+    public void setTags(final Set<TagEntity> tags) {
+        this.tags = tags;
     }
 
     /**

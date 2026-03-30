@@ -1,29 +1,11 @@
 package com.openelements.crm.company;
 
+import com.openelements.crm.tag.TagEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
-/**
- * DTO representing a company.
- *
- * @param id          the company ID
- * @param name        the company name
- * @param email       the global email address
- * @param website     the website URL
- * @param street      the street of the address
- * @param houseNumber the house number of the address
- * @param zipCode     the zip code of the address
- * @param city        the city of the address
- * @param country     the country of the address
- * @param deleted      whether the company is soft-deleted
- * @param hasLogo      whether the company has an uploaded logo
- * @param brevo        whether the company was imported from Brevo
- * @param contactCount the number of associated contacts
- * @param commentCount the number of comments on this company
- * @param createdAt    the creation timestamp
- * @param updatedAt    the last update timestamp
- */
 @Schema(description = "Company")
 public record CompanyDto(
         @Schema(description = "Company ID", requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
@@ -41,21 +23,17 @@ public record CompanyDto(
         @Schema(description = "Whether the company was imported from Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean brevo,
         @Schema(description = "Number of associated contacts", requiredMode = Schema.RequiredMode.REQUIRED) long contactCount,
         @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
+        @Schema(description = "Assigned tag IDs") List<UUID> tagIds,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) {
 
-    /**
-     * Creates a DTO from a company entity with counts.
-     *
-     * @param entity       the company entity
-     * @param contactCount the number of associated contacts
-     * @param commentCount the number of comments
-     * @return the DTO
-     */
     public static CompanyDto fromEntity(final CompanyEntity entity,
                                         final long contactCount,
                                         final long commentCount) {
+        final List<UUID> tagIds = entity.getTags().stream()
+                .map(TagEntity::getId)
+                .toList();
         return new CompanyDto(
                 entity.getId(),
                 entity.getName(),
@@ -72,6 +50,7 @@ public record CompanyDto(
                 entity.getBrevoCompanyId() != null,
                 contactCount,
                 commentCount,
+                tagIds,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

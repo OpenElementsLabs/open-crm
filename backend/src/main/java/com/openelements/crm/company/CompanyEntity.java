@@ -1,6 +1,7 @@
 package com.openelements.crm.company;
 
 import com.openelements.crm.ImageData;
+import com.openelements.crm.tag.TagEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,9 +9,16 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -63,6 +71,15 @@ public class CompanyEntity {
 
     @Column(name = "brevo_company_id", length = 50)
     private String brevoCompanyId;
+
+    @ManyToMany
+    @JoinTable(
+            name = "company_tags",
+            joinColumns = @JoinColumn(name = "company_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<TagEntity> tags = new HashSet<>();
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
@@ -304,6 +321,14 @@ public class CompanyEntity {
      */
     public void setBrevoCompanyId(final String brevoCompanyId) {
         this.brevoCompanyId = brevoCompanyId;
+    }
+
+    public Set<TagEntity> getTags() {
+        return tags;
+    }
+
+    public void setTags(final Set<TagEntity> tags) {
+        this.tags = tags;
     }
 
     /**

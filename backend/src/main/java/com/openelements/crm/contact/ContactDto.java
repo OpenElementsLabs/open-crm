@@ -1,32 +1,12 @@
 package com.openelements.crm.contact;
 
+import com.openelements.crm.tag.TagEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
-/**
- * Response DTO representing a contact.
- *
- * @param id            the contact ID
- * @param firstName     the first name
- * @param lastName      the last name
- * @param email         the email address
- * @param position      the job position
- * @param gender        the gender
- * @param linkedInUrl   the LinkedIn profile URL
- * @param phoneNumber   the phone number
- * @param companyId     the company ID
- * @param companyName    the company name (resolved)
- * @param companyDeleted whether the associated company is soft-deleted
- * @param commentCount   the number of comments on this contact
- * @param hasPhoto       whether the contact has an uploaded photo
- * @param birthday       the birthday (optional)
- * @param brevo          whether the contact was imported from Brevo
- * @param language      the preferred language
- * @param createdAt     the creation timestamp
- * @param updatedAt     the last update timestamp
- */
 @Schema(description = "Contact response")
 public record ContactDto(
         @Schema(description = "Contact ID", requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
@@ -45,21 +25,18 @@ public record ContactDto(
         @Schema(description = "Birthday") LocalDate birthday,
         @Schema(description = "Whether the contact was imported from Brevo", requiredMode = Schema.RequiredMode.REQUIRED) boolean brevo,
         @Schema(description = "Preferred language (null if unknown)") Language language,
+        @Schema(description = "Assigned tag IDs") List<UUID> tagIds,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) {
 
-    /**
-     * Creates a response DTO from a contact entity with comment count.
-     *
-     * @param entity       the contact entity
-     * @param commentCount the number of comments
-     * @return the response DTO
-     */
     public static ContactDto fromEntity(final ContactEntity entity, final long commentCount) {
         final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
         final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
         final boolean companyDeleted = entity.getCompany() != null && entity.getCompany().isDeleted();
+        final List<UUID> tagIds = entity.getTags().stream()
+                .map(TagEntity::getId)
+                .toList();
         return new ContactDto(
                 entity.getId(),
                 entity.getFirstName(),
@@ -77,6 +54,7 @@ public record ContactDto(
                 entity.getBirthday(),
                 entity.getBrevoId() != null,
                 entity.getLanguage(),
+                tagIds,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

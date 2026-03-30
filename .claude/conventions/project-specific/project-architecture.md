@@ -83,9 +83,19 @@ erDiagram
         VARCHAR key
         VARCHAR value
     }
+    TAGS {
+        UUID id PK
+        VARCHAR name UK
+        TEXT description
+        VARCHAR color
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
     COMPANIES ||--o{ CONTACTS : "has"
     COMPANIES ||--o{ COMMENTS : "has"
     CONTACTS ||--o{ COMMENTS : "has"
+    COMPANIES }o--o{ TAGS : "tagged"
+    CONTACTS }o--o{ TAGS : "tagged"
 ```
 
 ## Key Architectural Decisions

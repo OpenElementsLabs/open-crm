@@ -4,6 +4,7 @@ import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
+import com.openelements.crm.tag.TagService;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
@@ -29,20 +30,16 @@ public class ContactService {
     private final ContactRepository contactRepository;
     private final CompanyRepository companyRepository;
     private final CommentRepository commentRepository;
+    private final TagService tagService;
 
-    /**
-     * Creates a new ContactService.
-     *
-     * @param contactRepository the contact repository
-     * @param companyRepository the company repository
-     * @param commentRepository the comment repository
-     */
     public ContactService(final ContactRepository contactRepository,
                           final CompanyRepository companyRepository,
-                          final CommentRepository commentRepository) {
+                          final CommentRepository commentRepository,
+                          final TagService tagService) {
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
+        this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
     }
 
     /**
@@ -58,6 +55,9 @@ public class ContactService {
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday());
+        if (request.tagIds() != null) {
+            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+        }
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
         return ContactDto.fromEntity(saved, 0);
     }
@@ -112,6 +112,9 @@ public class ContactService {
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday());
+        if (request.tagIds() != null) {
+            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+        }
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
         return toDto(saved);
     }

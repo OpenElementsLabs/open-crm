@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -58,6 +59,9 @@ public record ContactUpdateDto(
         Language language,
 
         @Schema(description = "Birthday", example = "1990-03-15")
-        LocalDate birthday
+        LocalDate birthday,
+
+        @Schema(description = "Tag IDs to assign (null = no change, empty = remove all)")
+        List<UUID> tagIds
 ) {
 }

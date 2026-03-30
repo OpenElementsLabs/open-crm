@@ -3,6 +3,8 @@ package com.openelements.crm.company;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * DTO for updating an existing company.
@@ -53,6 +55,9 @@ public record CompanyUpdateDto(
 
         @Size(max = 255)
         @Schema(description = "Phone number", example = "+49 30 12345678")
-        String phoneNumber
+        String phoneNumber,
+
+        @Schema(description = "Tag IDs to assign (null = no change, empty = remove all)")
+        List<UUID> tagIds
 ) {
 }
