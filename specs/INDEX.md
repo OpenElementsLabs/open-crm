@@ -56,4 +56,5 @@
 | 052 | Tag count & filter         | Company/contact counts in tag list with navigation, tag multi-select filter in list views             | —            | done   |
 | 053 | Tag filter fixes           | Compact TagMultiSelect layout, pass tag filter to print view and CSV export                           | —            | done   |
 | 054 | Admin view                 | Merge Brevo Import and Server Health into single Admin page, reposition nav item                      | —            | done   |
+| 055 | Brevo unlink               | Remove brevoId/brevoCompanyId when entries no longer exist in Brevo, with unlinked counts in result   | —            | open   |
 
