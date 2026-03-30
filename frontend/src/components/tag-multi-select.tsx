@@ -21,6 +21,12 @@ interface TagMultiSelectProps {
   readonly onChange: (ids: string[]) => void;
 }
 
+interface TagOption {
+  readonly value: string;
+  readonly label: string;
+  readonly color: string;
+}
+
 function isValidHex(color: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(color);
 }
@@ -44,24 +50,31 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
       .catch(() => {});
   }, []);
 
-  const selectedTags = allTags.filter((tag) => selectedIds.includes(tag.id));
+  const tagOptions: TagOption[] = allTags.map((tag) => ({
+    value: tag.id,
+    label: tag.name,
+    color: tag.color,
+  }));
+
+  const selectedOptions = tagOptions.filter((opt) => selectedIds.includes(opt.value));
+  const selectedValues = selectedOptions;
 
   return (
     <Combobox
       multiple
-      value={[...selectedIds]}
-      onValueChange={(ids: string[]) => onChange(ids)}
+      value={selectedValues}
+      onValueChange={(options: TagOption[]) => onChange(options.map((o) => o.value))}
     >
       <ComboboxChips ref={anchorRef}>
-        {selectedTags.map((tag) => {
-          const bgColor = isValidHex(tag.color) ? tag.color : "#6B7280";
-          const textColor = isValidHex(tag.color) ? getContrastColor(tag.color) : "#FFFFFF";
+        {selectedOptions.map((opt) => {
+          const bgColor = isValidHex(opt.color) ? opt.color : "#6B7280";
+          const textColor = isValidHex(opt.color) ? getContrastColor(opt.color) : "#FFFFFF";
           return (
             <ComboboxChip
-              key={tag.id}
+              key={opt.value}
               style={{ backgroundColor: bgColor, color: textColor }}
             >
-              {tag.name}
+              {opt.label}
             </ComboboxChip>
           );
         })}
@@ -70,13 +83,13 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
       <ComboboxContent anchor={anchorRef}>
         <ComboboxEmpty>{t.tags.empty}</ComboboxEmpty>
         <ComboboxList>
-          {allTags.map((tag) => (
-            <ComboboxItem key={tag.id} value={tag.id}>
+          {tagOptions.map((opt) => (
+            <ComboboxItem key={opt.value} value={opt}>
               <span
                 className="inline-block h-4 w-4 rounded-full shrink-0"
-                style={{ backgroundColor: isValidHex(tag.color) ? tag.color : "#6B7280" }}
+                style={{ backgroundColor: isValidHex(opt.color) ? opt.color : "#6B7280" }}
               />
-              {tag.name}
+              {opt.label}
             </ComboboxItem>
           ))}
         </ComboboxList>
