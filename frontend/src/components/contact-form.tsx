@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { createContact, updateContact, getCompaniesForSelect, uploadContactPhoto, deleteContactPhoto, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto, ContactCreateDto, CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -41,6 +42,8 @@ export function ContactForm({ contact }: ContactFormProps) {
   const [companyId, setCompanyId] = useState(contact?.companyId ?? "");
   const [language, setLanguage] = useState(contact?.language ?? "");
   const [birthday, setBirthday] = useState(contact?.birthday ?? "");
+  const [tagIds, setTagIds] = useState<string[]>([...(contact?.tagIds ?? [])]);
+  const [tagIdsChanged, setTagIdsChanged] = useState(false);
 
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
 
@@ -118,6 +121,7 @@ export function ContactForm({ contact }: ContactFormProps) {
       companyId: companyId && companyId !== "none" ? companyId : null,
       language: language && language !== "unknown" ? (language as "DE" | "EN") : null,
       birthday: birthday || null,
+      ...(tagIdsChanged ? { tagIds } : {}),
     };
 
     setSubmitting(true);
@@ -287,6 +291,14 @@ export function ContactForm({ contact }: ContactFormProps) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t.tags.label}</Label>
+            <TagMultiSelect
+              selectedIds={tagIds}
+              onChange={(ids) => { setTagIds(ids); setTagIdsChanged(true); }}
+            />
           </div>
 
           {/* Photo upload */}

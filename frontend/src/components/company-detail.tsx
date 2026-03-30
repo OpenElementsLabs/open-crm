@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { CompanyComments } from "@/components/company-comments";
 import { DetailField } from "@/components/detail-field";
+import { TagChips } from "@/components/tag-chips";
 import { deleteCompany, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -122,6 +123,8 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
           </dl>
         </CardContent>
       </Card>
+
+      <TagChips tagIds={company.tagIds} />
 
       <Separator className="my-8" />
 

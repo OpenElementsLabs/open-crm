@@ -25,6 +25,7 @@ function makeComment(overrides: Partial<CommentDto> = {}): CommentDto {
     contactId: null,
     createdAt: "2026-03-27T15:30:00Z",
     updatedAt: "2026-03-27T15:30:00Z",
+    tagIds: [],
     ...overrides,
   };
 }

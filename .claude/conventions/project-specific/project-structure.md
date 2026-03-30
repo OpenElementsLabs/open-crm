@@ -42,6 +42,10 @@ open-crm/
 │   │   ├── ui/                     — shadcn/ui primitives (button, card, table, dialog, etc.)
 │   │   ├── sidebar.tsx             — Navigation sidebar with branding and authenticated user section
 │   │   ├── session-provider.tsx    — Auth.js SessionProvider wrapper
+│   │   ├── tag-list.tsx            — Tag list with search, pagination, delete
+│   │   ├── tag-form.tsx            — Tag create/edit form with color picker
+│   │   ├── tag-chips.tsx           — Colored tag chips for detail views
+│   │   ├── tag-multi-select.tsx    — Multi-select dropdown for tag assignment in forms
 │   │   ├── detail-field.tsx        — Shared detail field with action icons (copy, link, mail, tel)
 │   │   ├── company-list.tsx        — Company list with filters, print, CSV export
 │   │   ├── company-detail.tsx      — Company detail view with merged address block

@@ -26,6 +26,7 @@ vi.mock("@/lib/api", () => ({
   uploadCompanyLogo: (...args: unknown[]) => mockUploadCompanyLogo(...args),
   deleteCompanyLogo: (...args: unknown[]) => mockDeleteCompanyLogo(...args),
   getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
+  getTags: vi.fn().mockResolvedValue({ content: [], page: { size: 20, number: 0, totalElements: 0, totalPages: 0 } }),
 }));
 
 const existingCompany: CompanyDto = {
@@ -46,6 +47,7 @@ const existingCompany: CompanyDto = {
   commentCount: 0,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
+    tagIds: [],
 };
 
 afterEach(() => {

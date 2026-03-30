@@ -28,6 +28,7 @@ vi.mock("@/lib/api", () => ({
   uploadContactPhoto: (...args: unknown[]) => mockUploadContactPhoto(...args),
   deleteContactPhoto: (...args: unknown[]) => mockDeleteContactPhoto(...args),
   getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
+  getTags: vi.fn().mockResolvedValue({ content: [], page: { size: 20, number: 0, totalElements: 0, totalPages: 0 } }),
 }));
 
 const testCompanies: CompanyDto[] = [
@@ -49,6 +50,7 @@ const testCompanies: CompanyDto[] = [
     commentCount: 0,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
+    tagIds: [],
   },
 ];
 
@@ -71,6 +73,7 @@ const existingContact: ContactDto = {
   language: "DE",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
+    tagIds: [],
 };
 
 afterEach(() => {

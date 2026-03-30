@@ -5,6 +5,8 @@ import type {
   ContactCreateDto,
   CommentDto,
   CommentCreateDto,
+  TagDto,
+  TagCreateDto,
   BrevoSettingsDto,
   BrevoSyncResultDto,
   Page,
@@ -421,4 +423,87 @@ export async function startBrevoSync(): Promise<BrevoSyncResultDto> {
   }
 
   return response.json();
+}
+
+// Tags
+
+export interface TagListParams {
+  readonly page?: number;
+  readonly size?: number;
+  readonly name?: string;
+}
+
+export async function getTags(params: TagListParams = {}): Promise<Page<TagDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+  if (params.name) searchParams.set("name", params.name);
+  searchParams.set("sort", "name,asc");
+
+  const url = `${baseUrl()}/api/tags?${searchParams.toString()}`;
+  const response = await apiFetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch tags: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getTag(id: string): Promise<TagDto> {
+  const url = `${baseUrl()}/api/tags/${id}`;
+  const response = await apiFetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch tag: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createTag(data: TagCreateDto): Promise<TagDto> {
+  const url = `${baseUrl()}/api/tags`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 409) {
+    throw new Error("CONFLICT");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to create tag: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateTag(id: string, data: TagCreateDto): Promise<TagDto> {
+  const url = `${baseUrl()}/api/tags/${id}`;
+  const response = await apiFetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 409) {
+    throw new Error("CONFLICT");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to update tag: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteTag(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/tags/${id}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete tag: ${response.status}`);
+  }
 }

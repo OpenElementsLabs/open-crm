@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
+import { TagChips } from "@/components/tag-chips";
 import { DetailField } from "@/components/detail-field";
 import { deleteContact, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
@@ -157,6 +158,8 @@ export function ContactDetail({ contact }: ContactDetailProps) {
           </dl>
         </CardContent>
       </Card>
+
+      <TagChips tagIds={contact.tagIds} />
 
       <Separator className="my-8" />
 

@@ -14,6 +14,7 @@ export interface CompanyDto {
   readonly hasLogo: boolean;
   readonly contactCount: number;
   readonly commentCount: number;
+  readonly tagIds: readonly string[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -28,6 +29,7 @@ export interface CompanyCreateDto {
   readonly city?: string | null;
   readonly country?: string | null;
   readonly phoneNumber?: string | null;
+  readonly tagIds?: readonly string[] | null;
 }
 
 export interface CommentDto {
@@ -61,6 +63,7 @@ export interface ContactDto {
   readonly birthday: string | null;
   readonly brevo: boolean;
   readonly language: "DE" | "EN" | null;
+  readonly tagIds: readonly string[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -76,6 +79,7 @@ export interface ContactCreateDto {
   readonly companyId?: string | null;
   readonly language?: "DE" | "EN" | null;
   readonly birthday?: string | null;
+  readonly tagIds?: readonly string[] | null;
 }
 
 export interface Page<T> {
@@ -86,6 +90,21 @@ export interface Page<T> {
     readonly totalElements: number;
     readonly totalPages: number;
   };
+}
+
+export interface TagDto {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string | null;
+  readonly color: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface TagCreateDto {
+  readonly name: string;
+  readonly description?: string | null;
+  readonly color: string;
 }
 
 export interface BrevoSettingsDto {

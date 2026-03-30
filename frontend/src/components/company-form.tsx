@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { createCompany, updateCompany, uploadCompanyLogo, deleteCompanyLogo, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto, CompanyCreateDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -33,6 +34,8 @@ export function CompanyForm({ company }: CompanyFormProps) {
   const [city, setCity] = useState(company?.city ?? "");
   const [country, setCountry] = useState(company?.country ?? "");
   const [phoneNumber, setPhoneNumber] = useState(company?.phoneNumber ?? "");
+  const [tagIds, setTagIds] = useState<string[]>([...(company?.tagIds ?? [])]);
+  const [tagIdsChanged, setTagIdsChanged] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -91,6 +94,7 @@ export function CompanyForm({ company }: CompanyFormProps) {
       city: city.trim() || null,
       country: country.trim() || null,
       phoneNumber: phoneNumber.trim() || null,
+      ...(tagIdsChanged ? { tagIds } : {}),
     };
 
     setSubmitting(true);
@@ -220,6 +224,14 @@ export function CompanyForm({ company }: CompanyFormProps) {
                 placeholder={S.countryPlaceholder}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t.tags.label}</Label>
+            <TagMultiSelect
+              selectedIds={tagIds}
+              onChange={(ids) => { setTagIds(ids); setTagIdsChanged(true); }}
+            />
           </div>
 
           {/* Logo upload */}

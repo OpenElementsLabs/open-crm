@@ -43,6 +43,7 @@ const testCompany: CompanyDto = {
   commentCount: 5,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
+    tagIds: [],
 };
 
 beforeEach(() => {
