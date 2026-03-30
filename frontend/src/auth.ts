@@ -18,6 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer: oidcIssuer,
       clientId: process.env.OIDC_CLIENT_ID,
       clientSecret: process.env.OIDC_CLIENT_SECRET,
+      authorization: { params: { scope: "openid profile email offline_access" } },
     },
   ],
   session: { strategy: "jwt" },
@@ -88,7 +89,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
           t.error = undefined;
           return token;
-        } catch {
+        } catch (error) {
+          console.error("Token refresh failed:", error);
           t.error = "RefreshTokenError";
           return token;
         }
