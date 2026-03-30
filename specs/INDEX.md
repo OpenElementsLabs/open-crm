@@ -58,5 +58,5 @@
 | 054 | Admin view                 | Merge Brevo Import and Server Health into single Admin page, reposition nav item                      | —            | done   |
 | 055 | Brevo unlink               | Remove brevoId/brevoCompanyId when entries no longer exist in Brevo, with unlinked counts in result   | —            | done   |
 | 056 | Table cell actions         | Inline copy, mailto, open-in-tab, and navigation actions in company and contact table cells           | —            | done   |
-| 057 | shadcn tag combobox        | Replace custom TagMultiSelect with shadcn/ui Combobox, colored chips, integrated search               | —            | open   |
+| 057 | shadcn tag combobox        | Replace custom TagMultiSelect with shadcn/ui Combobox, colored chips, integrated search               | —            | done   |
 

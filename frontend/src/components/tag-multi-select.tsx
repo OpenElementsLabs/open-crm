@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import { getTags } from "@/lib/api";
 import { useTranslations } from "@/lib/i18n/language-context";
 import type { TagDto } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  Combobox,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 
 interface TagMultiSelectProps {
   readonly selectedIds: readonly string[];
@@ -18,10 +25,18 @@ function isValidHex(color: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(color);
 }
 
+function getContrastColor(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? "#1A1A1A" : "#FFFFFF";
+}
+
 export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
   const t = useTranslations();
   const [allTags, setAllTags] = useState<TagDto[]>([]);
-  const [open, setOpen] = useState(false);
+  const anchorRef = useComboboxAnchor();
 
   useEffect(() => {
     getTags({ size: 1000 })
@@ -29,62 +44,43 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
       .catch(() => {});
   }, []);
 
-  function toggle(id: string) {
-    if (selectedIds.includes(id)) {
-      onChange(selectedIds.filter((sid) => sid !== id));
-    } else {
-      onChange([...selectedIds, id]);
-    }
-  }
-
-  const count = selectedIds.length;
+  const selectedTags = allTags.filter((tag) => selectedIds.includes(tag.id));
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between h-10"
-        >
-          <span className={count === 0 ? "text-muted-foreground" : ""}>
-            {count === 0
-              ? `${t.tags.label}...`
-              : t.tags.selected.replace("{count}", String(count))}
-          </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full min-w-[200px] p-0" align="start">
-        <div className="max-h-60 overflow-y-auto p-1">
-          {allTags.length === 0 ? (
-            <p className="px-3 py-2 text-sm text-muted-foreground">{t.tags.empty}</p>
-          ) : (
-            allTags.map((tag) => {
-              const isSelected = selectedIds.includes(tag.id);
-              return (
-                <button
-                  key={tag.id}
-                  type="button"
-                  className={cn(
-                    "flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm hover:bg-accent transition-colors",
-                    isSelected && "bg-accent/50",
-                  )}
-                  onClick={() => toggle(tag.id)}
-                >
-                  <span
-                    className="inline-block h-4 w-4 rounded-full shrink-0"
-                    style={{ backgroundColor: isValidHex(tag.color) ? tag.color : "#6B7280" }}
-                  />
-                  <span className="flex-1 text-left">{tag.name}</span>
-                  {isSelected && <Check className="h-4 w-4 text-oe-green" />}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+    <Combobox
+      multiple
+      value={[...selectedIds]}
+      onValueChange={(ids: string[]) => onChange(ids)}
+    >
+      <ComboboxChips ref={anchorRef}>
+        {selectedTags.map((tag) => {
+          const bgColor = isValidHex(tag.color) ? tag.color : "#6B7280";
+          const textColor = isValidHex(tag.color) ? getContrastColor(tag.color) : "#FFFFFF";
+          return (
+            <ComboboxChip
+              key={tag.id}
+              style={{ backgroundColor: bgColor, color: textColor }}
+            >
+              {tag.name}
+            </ComboboxChip>
+          );
+        })}
+        <ComboboxChipsInput placeholder={`${t.tags.label}...`} />
+      </ComboboxChips>
+      <ComboboxContent anchor={anchorRef}>
+        <ComboboxEmpty>{t.tags.empty}</ComboboxEmpty>
+        <ComboboxList>
+          {allTags.map((tag) => (
+            <ComboboxItem key={tag.id} value={tag.id}>
+              <span
+                className="inline-block h-4 w-4 rounded-full shrink-0"
+                style={{ backgroundColor: isValidHex(tag.color) ? tag.color : "#6B7280" }}
+              />
+              {tag.name}
+            </ComboboxItem>
+          ))}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   );
 }
