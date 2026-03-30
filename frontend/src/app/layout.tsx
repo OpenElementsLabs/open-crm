@@ -30,7 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SessionProvider>
           <LanguageProvider>
             <Sidebar />
-            <main className="md:ml-64 min-h-screen bg-oe-white">
+            <main className="md:ml-64 h-screen overflow-y-auto bg-oe-white">
               <div className="p-6 md:p-8">{children}</div>
             </main>
           </LanguageProvider>
