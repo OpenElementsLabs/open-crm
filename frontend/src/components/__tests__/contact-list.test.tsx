@@ -157,7 +157,7 @@ describe("ContactList", () => {
       const rows = screen.getAllByRole("row");
       const dataRow = rows[1]; // first data row
       const cells = dataRow.querySelectorAll("td");
-      expect(cells[3].textContent).toBe("");
+      expect(cells[3].textContent).toBe("—");
     });
 
     it("should show loading skeleton while fetching", () => {

@@ -1,5 +1,6 @@
 package com.openelements.crm.company;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,6 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, UUID>,
      * @return the company, or empty if not found
      */
     Optional<CompanyEntity> findByNameIgnoreCase(String name);
+
+    List<CompanyEntity> findAllByBrevoCompanyIdIsNotNull();
 }

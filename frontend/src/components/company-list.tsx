@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, FileDown } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,6 +29,44 @@ import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+
+const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
+
+function WebsiteCell({ value }: { readonly value: string | null }) {
+  const [copied, setCopied] = useState(false);
+  if (!value) return <TableCell className="text-oe-gray-mid">—</TableCell>;
+  return (
+    <TableCell className="text-oe-gray-mid">
+      <span className="inline-flex items-center gap-1">
+        <span>{value}</span>
+        <span className="inline-flex gap-0.5 shrink-0">
+          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); window.open(value.startsWith("http") ? value : `https://${value}`, "_blank"); }}>
+            <ExternalLink className={ACTION_ICON} />
+          </button>
+        </span>
+      </span>
+    </TableCell>
+  );
+}
+
+function ContactCountCell({ count, companyId }: { readonly count: number; readonly companyId: string }) {
+  const router = useRouter();
+  return (
+    <TableCell>
+      <span className="inline-flex items-center gap-1">
+        <span>{count}</span>
+        {count > 0 && (
+          <button onClick={(e) => { e.stopPropagation(); router.push(`/contacts?companyId=${companyId}`); }}>
+            <ExternalLink className={ACTION_ICON} />
+          </button>
+        )}
+      </span>
+    </TableCell>
+  );
+}
 
 export function CompanyList() {
   const t = useTranslations();
@@ -247,10 +285,8 @@ export function CompanyList() {
                       )}
                     </TableCell>
                     <TableCell className="font-medium">{company.name}</TableCell>
-                    <TableCell className="text-oe-gray-mid">
-                      {company.website ?? "—"}
-                    </TableCell>
-                    <TableCell>{company.contactCount}</TableCell>
+                    <WebsiteCell value={company.website} />
+                    <ContactCountCell count={company.contactCount} companyId={company.id} />
                     <TableCell>{company.commentCount}</TableCell>
                     <TableCell className="text-right">
                       <Button
