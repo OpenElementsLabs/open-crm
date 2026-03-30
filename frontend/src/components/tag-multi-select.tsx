@@ -10,7 +10,6 @@ import {
   ComboboxChip,
   ComboboxChipsInput,
   ComboboxContent,
-  ComboboxEmpty,
   ComboboxItem,
   ComboboxList,
   useComboboxAnchor,
@@ -81,18 +80,21 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
         <ComboboxChipsInput placeholder={`${t.tags.label}...`} />
       </ComboboxChips>
       <ComboboxContent anchor={anchorRef}>
-        <ComboboxEmpty>{t.tags.empty}</ComboboxEmpty>
-        <ComboboxList>
-          {tagOptions.map((opt) => (
-            <ComboboxItem key={opt.value} value={opt}>
-              <span
-                className="inline-block h-4 w-4 rounded-full shrink-0"
-                style={{ backgroundColor: isValidHex(opt.color) ? opt.color : "#6B7280" }}
-              />
-              {opt.label}
-            </ComboboxItem>
-          ))}
-        </ComboboxList>
+        {tagOptions.length === 0 ? (
+          <p className="py-2 text-center text-sm text-muted-foreground">{t.tags.empty}</p>
+        ) : (
+          <ComboboxList>
+            {tagOptions.map((opt) => (
+              <ComboboxItem key={opt.value} value={opt}>
+                <span
+                  className="inline-block h-4 w-4 rounded-full shrink-0"
+                  style={{ backgroundColor: isValidHex(opt.color) ? opt.color : "#6B7280" }}
+                />
+                {opt.label}
+              </ComboboxItem>
+            ))}
+          </ComboboxList>
+        )}
       </ComboboxContent>
     </Combobox>
   );
