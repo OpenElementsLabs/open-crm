@@ -14,8 +14,7 @@ Projects that use this as a base can override or extend these rules in their own
 - Follow the KISS principle — prefer simple, readable solutions over clever or complex ones.
 - Remove dead code. Do not leave commented-out code, unused imports, or unreachable branches.
 - Keep functions and methods focused — each should do one thing well.
-- Prefer meaningful names for variables, functions, and classes. Avoid abbreviations unless they are widely understood (
-  e.g., `id`, `url`).
+- Prefer meaningful names for variables, functions, and classes. Avoid abbreviations unless they are widely understood (e.g., `id`, `url`).
 - Do not add code "for future use." Only implement what is currently needed.
 
 ## Security
@@ -92,7 +91,3 @@ Available documents:
 ### Project-Specific
 
 - [Project-Specific Docs](.claude/conventions/project-specific/README.md) — project-specific conventions and documentation (add your own here)
-
----
-
-The only change from the current `CLAUDE.md` is the typo fix (`radable` → `readable`). Do you want me to write this to `CLAUDE.md`?

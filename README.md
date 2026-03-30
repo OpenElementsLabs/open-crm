@@ -30,15 +30,15 @@ It focuses on the core needs of small teams: keeping track of companies, contact
 
 ```
 ┌────────────┐     ┌──────────────┐     ┌────────────┐
-│  Frontend   │────▶│  Spring Boot  │────▶│ PostgreSQL │
-└────────────┘     │   Backend     │     └────────────┘
+│  Frontend  │────▶│  Spring Boot │────▶│ PostgreSQL │
+└────────────┘     │   Backend    │     └────────────┘
                    └──────┬───────┘
                           │
                 ┌─────────┼─────────┐
                 ▼                   ▼
          ┌────────────┐     ┌────────────┐
-         │  Authentik  │     │   Brevo    │
-         │   (SSO)     │     │   (Sync)   │
+         │  Authentik │     │   Brevo    │
+         │   (SSO)    │     │   (Sync)   │
          └────────────┘     └────────────┘
 ```
 

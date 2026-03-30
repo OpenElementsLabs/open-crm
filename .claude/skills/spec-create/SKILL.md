@@ -53,7 +53,7 @@ Present the drafted issues to the user for review and adjustment. **Do not creat
 
 Determine the next sequential ID by reading `specs/INDEX.md`. If the file does not exist yet, create it with the table header (see spec-driven development doc) and start at `001`. Otherwise, increment from the highest existing ID.
 
-Create the spec folder under `specs/` using a descriptive kebab-case name (e.g., `user-auth-flow`). The sequential ID is tracked only in `INDEX.md`, not in the folder name.
+Create the spec folder under `specs/` using the ID as prefix followed by a descriptive kebab-case name (e.g., `001-user-auth-flow`, `002-csv-export-api`). The ID prefix must match the sequential ID in `INDEX.md`.
 
 ### 4. Write `design.md` — Interactive planning
 
@@ -100,7 +100,7 @@ Review the scenarios with the user. Ask explicitly: "Are there edge cases or err
 
 After both files are written:
 
-1. **Update `specs/INDEX.md`** — Add a new row with the spec's ID, name, GitHub issue reference (or `—`), and status `open`.
+1. **Update `specs/INDEX.md`** — Add a new row with the spec's ID, spec-folder name, name, areas, description, GitHub issue reference (or `—`), and status `open`.
 2. Provide a short summary:
    - Link to the created spec folder
    - Count of behavioral scenarios
