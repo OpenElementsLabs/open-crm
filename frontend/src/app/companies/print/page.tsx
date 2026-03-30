@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getCompanies, getCompanyLogoUrl } from "@/lib/api";
+import { getCompanies, getCompanyLogoUrl, getTag } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -34,10 +34,13 @@ function CompanyPrintContent() {
   const [allRecords, setAllRecords] = useState<CompanyDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tagNames, setTagNames] = useState<string[]>([]);
 
   const nameFilter = searchParams.get("name") ?? "";
   const brevoFilter = searchParams.get("brevo") ?? "";
   const includeDeleted = searchParams.get("includeDeleted") === "true";
+  const tagIdsParam = searchParams.get("tagIds") ?? "";
+  const tagIds = tagIdsParam ? tagIdsParam.split(",") : [];
 
   useEffect(() => {
     const sidebar = document.querySelector("aside");
@@ -63,6 +66,7 @@ function CompanyPrintContent() {
             name: nameFilter || undefined,
             includeDeleted,
             brevo: brevoFilter === "" ? undefined : brevoFilter === "true",
+            tagIds: tagIds.length > 0 ? tagIds : undefined,
           });
           records.push(...result.content);
           isLast = result.page.number >= result.page.totalPages - 1;
@@ -76,7 +80,13 @@ function CompanyPrintContent() {
       }
     }
     loadAll();
-  }, [nameFilter, brevoFilter, includeDeleted]);
+  }, [nameFilter, brevoFilter, includeDeleted, tagIds.join(",")]);
+
+  useEffect(() => {
+    if (tagIds.length === 0) return;
+    Promise.all(tagIds.map((id) => getTag(id).catch(() => null)))
+      .then((results) => setTagNames(results.filter((r) => r !== null).map((r) => r!.name)));
+  }, [tagIds.join(",")]);
 
   useEffect(() => {
     if (!loading && !error) {
@@ -90,6 +100,7 @@ function CompanyPrintContent() {
   if (brevoFilter === "true") filterParts.push(`Brevo: ${P.filterYes}`);
   if (brevoFilter === "false") filterParts.push(`Brevo: ${P.filterNo}`);
   if (includeDeleted) filterParts.push(`${S.showArchived}: ${P.filterArchived}`);
+  if (tagNames.length > 0) filterParts.push(`Tags: ${tagNames.join(", ")}`);
   const filterSummary = filterParts.length > 0 ? filterParts.join(" \u00B7 ") : P.noFilters;
 
   if (loading) {

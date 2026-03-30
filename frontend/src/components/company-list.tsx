@@ -121,6 +121,7 @@ export function CompanyList() {
               if (nameFilter) params.set("name", nameFilter);
               if (brevoFilter !== "all") params.set("brevo", brevoFilter);
               if (includeDeleted) params.set("includeDeleted", "true");
+              if (tagIds.length > 0) params.set("tagIds", tagIds.join(","));
               const query = params.toString();
               window.open(`/companies/print${query ? `?${query}` : ""}`, "_blank");
             }}
@@ -385,6 +386,7 @@ export function CompanyList() {
               name: nameFilter || undefined,
               includeDeleted,
               brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+              tagIds: tagIds.length > 0 ? tagIds : undefined,
             },
             columns,
           );

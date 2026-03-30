@@ -100,12 +100,13 @@ public class CompanyController {
             @Parameter(description = "Partial company name filter") @RequestParam(required = false) final String name,
             @Parameter(description = "Whether to include soft-deleted companies") @RequestParam(defaultValue = "false") final boolean includeDeleted,
             @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+            @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
             @Parameter(description = "Columns to include in the CSV") @RequestParam final List<CompanyExportColumn> columns,
             final HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"companies.csv\"");
 
-        final List<CompanyDto> companies = companyService.listAll(name, includeDeleted, brevo);
+        final List<CompanyDto> companies = companyService.listAll(name, includeDeleted, brevo, tagIds);
         final String[] headers = columns.stream().map(CompanyExportColumn::getHeader).toArray(String[]::new);
 
         final var writer = response.getWriter();

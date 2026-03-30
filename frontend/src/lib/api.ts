@@ -293,6 +293,11 @@ export function getCompanyExportUrl(params: CompanyListParams, columns: string[]
   if (params.name) searchParams.set("name", params.name);
   if (params.includeDeleted) searchParams.set("includeDeleted", "true");
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
   for (const col of columns) {
     searchParams.append("columns", col);
   }
@@ -306,6 +311,11 @@ export function getContactExportUrl(params: ContactListParams, columns: string[]
   if (params.noCompany) searchParams.set("noCompany", "true");
   if (params.language) searchParams.set("language", params.language);
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
   for (const col of columns) {
     searchParams.append("columns", col);
   }

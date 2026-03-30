@@ -123,6 +123,7 @@ export function ContactList() {
               }
               if (languageFilter && languageFilter !== "all") params.set("language", languageFilter);
               if (brevoFilter !== "all") params.set("brevo", brevoFilter);
+              if (tagIds.length > 0) params.set("tagIds", tagIds.join(","));
               const query = params.toString();
               window.open(`/contacts/print${query ? `?${query}` : ""}`, "_blank");
             }}
@@ -397,6 +398,7 @@ export function ContactList() {
               noCompany: companyIdFilter === "none" ? true : undefined,
               language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
               brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+              tagIds: tagIds.length > 0 ? tagIds : undefined,
             },
             columns,
           );

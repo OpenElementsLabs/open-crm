@@ -108,12 +108,13 @@ public class ContactController {
             @Parameter(description = "Filter by language code") @RequestParam(required = false) final String language,
             @Parameter(description = "Filter for contacts without a company") @RequestParam(defaultValue = "false") final boolean noCompany,
             @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+            @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
             @Parameter(description = "Columns to include in the CSV") @RequestParam final List<ContactExportColumn> columns,
             final HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"contacts.csv\"");
 
-        final List<ContactDto> contacts = contactService.listAll(search, companyId, noCompany, language, brevo);
+        final List<ContactDto> contacts = contactService.listAll(search, companyId, noCompany, language, brevo, tagIds);
         final String[] headers = columns.stream().map(ContactExportColumn::getHeader).toArray(String[]::new);
 
         final var writer = response.getWriter();

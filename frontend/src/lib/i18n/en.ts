@@ -330,6 +330,7 @@ export const en: Translations = {
       next: "Next",
     },
     label: "Tags",
+    selected: "{count} tags selected",
   },
   brevoFilter: {
     label: "Brevo",

@@ -197,7 +197,8 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public List<CompanyDto> listAll(final String name,
                                     final boolean includeDeleted,
-                                    final Boolean brevo) {
+                                    final Boolean brevo,
+                                    final List<UUID> tagIds) {
         Specification<CompanyEntity> spec = Specification.where(null);
 
         if (!includeDeleted) {
@@ -213,6 +214,18 @@ public class CompanyService {
             } else {
                 spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoCompanyId")));
             }
+        }
+        if (tagIds != null && !tagIds.isEmpty()) {
+            for (final UUID tagId : tagIds) {
+                spec = spec.and((root, query, cb) -> {
+                    final var tagsJoin = root.join("tags");
+                    return cb.equal(tagsJoin.get("id"), tagId);
+                });
+            }
+            spec = spec.and((root, query, cb) -> {
+                query.distinct(true);
+                return cb.conjunction();
+            });
         }
 
         return companyRepository.findAll(spec, Sort.by("name")).stream()

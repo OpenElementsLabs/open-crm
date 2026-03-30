@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getContacts, getContactPhotoUrl } from "@/lib/api";
+import { getContacts, getContactPhotoUrl, getTag } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -34,12 +34,15 @@ function ContactPrintContent() {
   const [allRecords, setAllRecords] = useState<ContactDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tagNames, setTagNames] = useState<string[]>([]);
 
   const searchFilter = searchParams.get("search") ?? "";
   const companyIdFilter = searchParams.get("companyId") ?? "";
   const noCompanyFilter = searchParams.get("noCompany") === "true";
   const languageFilter = searchParams.get("language") ?? "";
   const brevoFilter = searchParams.get("brevo") ?? "";
+  const tagIdsParam = searchParams.get("tagIds") ?? "";
+  const tagIds = tagIdsParam ? tagIdsParam.split(",") : [];
 
   useEffect(() => {
     const sidebar = document.querySelector("aside");
@@ -67,6 +70,7 @@ function ContactPrintContent() {
             noCompany: noCompanyFilter || undefined,
             language: languageFilter || undefined,
             brevo: brevoFilter === "" ? undefined : brevoFilter === "true",
+            tagIds: tagIds.length > 0 ? tagIds : undefined,
           });
           records.push(...result.content);
           isLast = result.page.number >= result.page.totalPages - 1;
@@ -80,7 +84,13 @@ function ContactPrintContent() {
       }
     }
     loadAll();
-  }, [searchFilter, companyIdFilter, noCompanyFilter, languageFilter, brevoFilter]);
+  }, [searchFilter, companyIdFilter, noCompanyFilter, languageFilter, brevoFilter, tagIds.join(",")]);
+
+  useEffect(() => {
+    if (tagIds.length === 0) return;
+    Promise.all(tagIds.map((id) => getTag(id).catch(() => null)))
+      .then((results) => setTagNames(results.filter((r) => r !== null).map((r) => r!.name)));
+  }, [tagIds.join(",")]);
 
   useEffect(() => {
     if (!loading && !error) {
@@ -96,6 +106,7 @@ function ContactPrintContent() {
   if (languageFilter) filterParts.push(`${S.filter.language}: ${languageFilter}`);
   if (brevoFilter === "true") filterParts.push(`Brevo: ${P.filterYes}`);
   if (brevoFilter === "false") filterParts.push(`Brevo: ${P.filterNo}`);
+  if (tagNames.length > 0) filterParts.push(`Tags: ${tagNames.join(", ")}`);
   const filterSummary = filterParts.length > 0 ? filterParts.join(" \u00B7 ") : P.noFilters;
 
   if (loading) {

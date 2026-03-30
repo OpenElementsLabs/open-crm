@@ -328,6 +328,7 @@ export const de = {
       next: "Weiter",
     },
     label: "Tags",
+    selected: "{count} Tags ausgewählt",
   },
   brevoFilter: {
     label: "Brevo",

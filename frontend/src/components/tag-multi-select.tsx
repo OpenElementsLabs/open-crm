@@ -6,7 +6,7 @@ import { useTranslations } from "@/lib/i18n/language-context";
 import type { TagDto } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TagMultiSelectProps {
@@ -37,11 +37,7 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
     }
   }
 
-  function removeTag(id: string) {
-    onChange(selectedIds.filter((sid) => sid !== id));
-  }
-
-  const selectedTags = allTags.filter((tag) => selectedIds.includes(tag.id));
+  const count = selectedIds.length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,33 +46,13 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between h-auto min-h-10"
+          className="w-full justify-between h-10"
         >
-          <div className="flex flex-wrap gap-1">
-            {selectedTags.length === 0 ? (
-              <span className="text-muted-foreground">{t.tags.label}...</span>
-            ) : (
-              selectedTags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                  style={{
-                    backgroundColor: isValidHex(tag.color) ? tag.color : "#6B7280",
-                    color: isValidHex(tag.color) ? getContrastColor(tag.color) : "#FFF",
-                  }}
-                >
-                  {tag.name}
-                  <button
-                    type="button"
-                    className="ml-0.5 opacity-70 hover:opacity-100"
-                    onClick={(e) => { e.stopPropagation(); removeTag(tag.id); }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))
-            )}
-          </div>
+          <span className={count === 0 ? "text-muted-foreground" : ""}>
+            {count === 0
+              ? `${t.tags.label}...`
+              : t.tags.selected.replace("{count}", String(count))}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -111,12 +87,4 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
       </PopoverContent>
     </Popover>
   );
-}
-
-function getContrastColor(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? "#1A1A1A" : "#FFFFFF";
 }
