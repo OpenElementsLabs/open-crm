@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,6 +29,49 @@ import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+
+const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
+
+function EmailCell({ value }: { readonly value: string | null }) {
+  const [copied, setCopied] = useState(false);
+  if (!value) return <TableCell className="text-oe-gray-mid">—</TableCell>;
+  return (
+    <TableCell className="text-oe-gray-mid">
+      <span className="inline-flex items-center gap-1">
+        <span>{value}</span>
+        <span className="inline-flex gap-0.5 shrink-0">
+          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${value}`; }}>
+            <Mail className={ACTION_ICON} />
+          </button>
+        </span>
+      </span>
+    </TableCell>
+  );
+}
+
+function CompanyNameCell({ name, companyId }: { readonly name: string | null; readonly companyId: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const router = useRouter();
+  if (!name || !companyId) return <TableCell className="text-oe-gray-mid">—</TableCell>;
+  return (
+    <TableCell className="text-oe-gray-mid">
+      <span className="inline-flex items-center gap-1">
+        <span>{name}</span>
+        <span className="inline-flex gap-0.5 shrink-0">
+          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(name); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); router.push(`/companies/${companyId}`); }}>
+            <ExternalLink className={ACTION_ICON} />
+          </button>
+        </span>
+      </span>
+    </TableCell>
+  );
+}
 
 export function ContactList() {
   const t = useTranslations();
@@ -267,12 +310,8 @@ export function ContactList() {
                     <TableCell className="font-medium">
                       {`${contact.firstName} ${contact.lastName}`.trim()}
                     </TableCell>
-                    <TableCell className="text-oe-gray-mid">
-                      {contact.email ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-oe-gray-mid">
-                      {contact.companyName ?? ""}
-                    </TableCell>
+                    <EmailCell value={contact.email} />
+                    <CompanyNameCell name={contact.companyName} companyId={contact.companyId} />
                     <TableCell>{contact.commentCount}</TableCell>
                     <TableCell className="text-right">
                       <Button
