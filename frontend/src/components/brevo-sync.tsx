@@ -212,13 +212,15 @@ export function BrevoSync() {
 
                 {syncResult && (
                   <div className="flex flex-col gap-4">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                       <ResultCell label={S.sync.companiesImported} value={syncResult.companiesImported} />
                       <ResultCell label={S.sync.companiesUpdated} value={syncResult.companiesUpdated} />
                       <ResultCell label={S.sync.companiesFailed} value={syncResult.companiesFailed} error />
+                      <ResultCell label={S.sync.companiesUnlinked} value={syncResult.companiesUnlinked} />
                       <ResultCell label={S.sync.contactsImported} value={syncResult.contactsImported} />
                       <ResultCell label={S.sync.contactsUpdated} value={syncResult.contactsUpdated} />
                       <ResultCell label={S.sync.contactsFailed} value={syncResult.contactsFailed} error />
+                      <ResultCell label={S.sync.contactsUnlinked} value={syncResult.contactsUnlinked} />
                     </div>
 
                     {syncResult.errors.length > 0 ? (

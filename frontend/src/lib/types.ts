@@ -117,8 +117,10 @@ export interface BrevoSyncResultDto {
   readonly companiesImported: number;
   readonly companiesUpdated: number;
   readonly companiesFailed: number;
+  readonly companiesUnlinked: number;
   readonly contactsImported: number;
   readonly contactsUpdated: number;
   readonly contactsFailed: number;
+  readonly contactsUnlinked: number;
   readonly errors: readonly string[];
 }

@@ -7,10 +7,12 @@ import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.Language;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,9 +83,11 @@ public class BrevoSyncService {
         // Phase 1: Companies
         LOG.info("Starting Brevo company sync");
         final List<BrevoCompany> brevoCompanies = brevoApiClient.fetchAllCompanies();
+        final Set<String> seenCompanyIds = new HashSet<>();
         final Map<Long, String> contactToCompanyBrevoId = new HashMap<>();
 
         for (final BrevoCompany brevoCompany : brevoCompanies) {
+            seenCompanyIds.add(brevoCompany.id());
             LOG.debug("Fetched Brevo company: id={}, name={}", brevoCompany.id(), brevoCompany.name());
             try {
                 final boolean isNew = syncCompany(brevoCompany);
@@ -111,8 +115,10 @@ public class BrevoSyncService {
         // Phase 2: Contacts
         LOG.info("Starting Brevo contact sync");
         final List<BrevoContact> brevoContacts = brevoApiClient.fetchAllContacts();
+        final Set<String> seenContactIds = new HashSet<>();
 
         for (final BrevoContact brevoContact : brevoContacts) {
+            seenContactIds.add(String.valueOf(brevoContact.id()));
             try {
                 final String firstName = getStringAttribute(brevoContact.attributes(), "VORNAME");
                 final String lastName = getStringAttribute(brevoContact.attributes(), "NACHNAME");
@@ -144,9 +150,40 @@ public class BrevoSyncService {
         LOG.info("Contact sync complete: {} imported, {} updated, {} failed",
                 contactsImported, contactsUpdated, contactsFailed);
 
+        // Phase 3: Unlink entries no longer in Brevo
+        LOG.info("Starting Brevo unlink phase");
+        int companiesUnlinked = 0;
+        int contactsUnlinked = 0;
+
+        for (final CompanyEntity company : companyRepository.findAllByBrevoCompanyIdIsNotNull()) {
+            if (!seenCompanyIds.contains(company.getBrevoCompanyId())) {
+                transactionTemplate.executeWithoutResult(status -> {
+                    company.setBrevoCompanyId(null);
+                    companyRepository.save(company);
+                });
+                companiesUnlinked++;
+                LOG.info("Unlinked company '{}' (former Brevo ID removed)", company.getName());
+            }
+        }
+
+        for (final ContactEntity contact : contactRepository.findAllByBrevoIdIsNotNull()) {
+            if (!seenContactIds.contains(contact.getBrevoId())) {
+                transactionTemplate.executeWithoutResult(status -> {
+                    contact.setBrevoId(null);
+                    contactRepository.save(contact);
+                });
+                contactsUnlinked++;
+                LOG.info("Unlinked contact '{} {}' (former Brevo ID removed)",
+                        contact.getFirstName(), contact.getLastName());
+            }
+        }
+
+        LOG.info("Unlink phase complete: {} companies, {} contacts unlinked",
+                companiesUnlinked, contactsUnlinked);
+
         return new BrevoSyncResultDto(
-                companiesImported, companiesUpdated, companiesFailed,
-                contactsImported, contactsUpdated, contactsFailed,
+                companiesImported, companiesUpdated, companiesFailed, companiesUnlinked,
+                contactsImported, contactsUpdated, contactsFailed, contactsUnlinked,
                 errors);
     }
 
