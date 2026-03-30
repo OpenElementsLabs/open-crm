@@ -154,6 +154,68 @@ After deployment:
 - Frontend: `https://crm.example.com`
 - Backend / Swagger UI: `https://crm-backend.example.com/swagger-ui.html`
 
+## Authentication
+
+Open CRM uses OpenID Connect (OIDC) for authentication. Locally, a [mock-oauth2-server](https://github.com/navikt/mock-oauth2-server) runs automatically via Docker Compose. For production, you connect a real [Authentik](https://goauthentik.io/) instance.
+
+### Local Development (default)
+
+No configuration needed — `docker compose up` starts the mock-oauth2-server automatically. The default `.env` values point to the local mock server. The mock server shows an interactive login form where you can enter any username and claims.
+
+### Configure Authentik for Production
+
+#### 1. Create an OAuth2/OpenID Provider in Authentik
+
+1. In Authentik, go to **Applications → Providers → Create**
+2. Select **OAuth2/OpenID Provider**
+3. Configure:
+   - **Name:** `Open CRM`
+   - **Authorization flow:** Select your default authorization flow
+   - **Client type:** Confidential
+   - **Client ID:** Note this value (e.g., `open-crm`)
+   - **Client Secret:** Note this value
+   - **Redirect URIs:** `https://crm.example.com/api/auth/callback/oidc`
+   - **Scopes:** `openid`, `profile`, `email`
+4. Save the provider
+
+#### 2. Create an Application in Authentik
+
+1. Go to **Applications → Applications → Create**
+2. Configure:
+   - **Name:** `Open CRM`
+   - **Slug:** `open-crm`
+   - **Provider:** Select the provider created above
+3. Save the application
+
+#### 3. Set Environment Variables
+
+Set these variables in your deployment environment (e.g., Coolify):
+
+```env
+# Frontend OIDC configuration
+OIDC_ISSUER_URI=https://auth.example.com/application/o/open-crm/
+OIDC_CLIENT_ID=open-crm
+OIDC_CLIENT_SECRET=your-client-secret-from-authentik
+AUTH_SECRET=generate-a-random-secret-here
+AUTH_URL=https://crm.example.com
+
+# Backend JWT validation
+OIDC_JWK_SET_URI=https://auth.example.com/application/o/open-crm/jwks/
+```
+
+- `OIDC_ISSUER_URI` — The Authentik OpenID issuer URL for your application
+- `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` — From the Authentik provider configuration
+- `AUTH_SECRET` — A random string for encrypting session cookies (generate with `openssl rand -base64 32`)
+- `AUTH_URL` — The public URL of your frontend
+- `OIDC_JWK_SET_URI` — The JWKS endpoint for JWT signature validation (usually `{issuer}/jwks/`)
+
+#### 4. Verify
+
+After deploying with the new variables:
+1. Open the frontend URL — you should be redirected to the Authentik login page
+2. Log in with an Authentik user
+3. You should be redirected back to the CRM with your name displayed in the sidebar
+
 ## License
 
 See [LICENSE](LICENSE) for details.
