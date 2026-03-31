@@ -66,6 +66,6 @@
 | 062 | Task backend               | Task entity with action, due date, status, company/contact XOR, tags, CRUD REST API                   | —            | done   |
 | 063 | Contact title              | Optional title field (Dr., Prof.) prepended to contact name in all views, CSV, and search             | —            | done   |
 | 064 | Task frontend              | Task list, detail, create/edit views with sidebar nav, status/tag filters, company/contact selector   | —            | done   |
-| 065 | User entity                | Auto-created user on first OIDC login, avatar upload, sidebar display, replaces UserInfo              | —            | open   |
+| 065 | User entity                | Auto-created user on first OIDC login, avatar upload, sidebar display, replaces UserInfo              | —            | done   |
 | 066 | Task from detail           | Create Task button in company/contact detail views and list tables with entity pre-selection          | —            | open   |
 

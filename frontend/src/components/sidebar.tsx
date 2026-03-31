@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Building2, CheckSquare, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from "lucide-react";
+import { getCurrentUser, getUserAvatarUrl, uploadUserAvatar } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
@@ -94,22 +95,58 @@ function SidebarHeader() {
 function UserSection() {
   const t = useTranslations();
   const { data: session } = useSession();
+  const [hasAvatar, setHasAvatar] = useState(false);
+  const [avatarKey, setAvatarKey] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userName = session?.user?.name ?? "User";
-  const userImage = session?.user?.image;
+
+  useEffect(() => {
+    getCurrentUser()
+      .then((user) => setHasAvatar(user.hasAvatar))
+      .catch(() => {});
+  }, []);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const updated = await uploadUserAvatar(file);
+      setHasAvatar(updated.hasAvatar);
+      setAvatarKey((k) => k + 1);
+    } catch {
+      // ignore
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   return (
     <div className="border-t border-oe-white/10 px-6 py-4">
       <div className="flex items-center gap-3">
-        {userImage ? (
-          <img
-            src={userImage}
-            alt={userName}
-            className="h-8 w-8 rounded-full object-cover"
-          />
-        ) : (
-          <CircleUser className="h-8 w-8 text-oe-gray-light" />
-        )}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="shrink-0"
+          title={t.sidebar.uploadAvatar}
+        >
+          {hasAvatar ? (
+            <img
+              key={avatarKey}
+              src={getUserAvatarUrl()}
+              alt={userName}
+              className="h-8 w-8 rounded-full object-cover"
+            />
+          ) : (
+            <CircleUser className="h-8 w-8 text-oe-gray-light" />
+          )}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png"
+          onChange={handleAvatarUpload}
+          className="hidden"
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-oe-white truncate">{userName}</p>
         </div>

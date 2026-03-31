@@ -60,7 +60,7 @@ public class CommentService {
                         "Company not found: " + companyId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(userService.getCurrentUser().name());
+        entity.setAuthor(userService.getCurrentUser().getName());
         entity.setCompany(company);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);
@@ -82,7 +82,7 @@ public class CommentService {
                         "Contact not found: " + contactId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(userService.getCurrentUser().name());
+        entity.setAuthor(userService.getCurrentUser().getName());
         entity.setContact(contact);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         return CommentDto.fromEntity(saved);
