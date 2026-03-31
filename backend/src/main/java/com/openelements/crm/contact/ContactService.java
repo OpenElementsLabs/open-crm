@@ -5,6 +5,7 @@ import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.tag.TagService;
+import com.openelements.crm.task.TaskRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
@@ -30,15 +31,18 @@ public class ContactService {
     private final ContactRepository contactRepository;
     private final CompanyRepository companyRepository;
     private final CommentRepository commentRepository;
+    private final TaskRepository taskRepository;
     private final TagService tagService;
 
     public ContactService(final ContactRepository contactRepository,
                           final CompanyRepository companyRepository,
                           final CommentRepository commentRepository,
+                          final TaskRepository taskRepository,
                           final TagService tagService) {
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
+        this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
     }
 
@@ -128,6 +132,7 @@ public class ContactService {
     public void delete(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final ContactEntity entity = findOrThrow(id);
+        taskRepository.deleteByContactId(id);
         commentRepository.deleteByContactId(id);
         contactRepository.delete(entity);
     }

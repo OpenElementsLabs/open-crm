@@ -2,6 +2,7 @@ package com.openelements.crm.tag;
 
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactRepository;
+import com.openelements.crm.task.TaskRepository;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,13 +21,16 @@ public class TagService {
     private final TagRepository tagRepository;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final TaskRepository taskRepository;
 
     public TagService(final TagRepository tagRepository,
                       final CompanyRepository companyRepository,
-                      final ContactRepository contactRepository) {
+                      final ContactRepository contactRepository,
+                      final TaskRepository taskRepository) {
         this.tagRepository = tagRepository;
         this.companyRepository = companyRepository;
         this.contactRepository = contactRepository;
+        this.taskRepository = taskRepository;
     }
 
     public Page<TagDto> findAll(final Pageable pageable, final boolean includeCounts) {
@@ -85,6 +89,12 @@ public class TagService {
                 .forEach(c -> {
                     c.getTags().remove(tag);
                     contactRepository.save(c);
+                });
+        taskRepository.findAll().stream()
+                .filter(t -> t.getTags().contains(tag))
+                .forEach(t -> {
+                    t.getTags().remove(tag);
+                    taskRepository.save(t);
                 });
         tagRepository.delete(tag);
     }
