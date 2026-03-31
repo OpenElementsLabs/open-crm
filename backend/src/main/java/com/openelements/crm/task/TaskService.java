@@ -1,5 +1,6 @@
 package com.openelements.crm.task;
 
+import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
@@ -26,15 +27,18 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final CommentRepository commentRepository;
     private final TagService tagService;
 
     public TaskService(final TaskRepository taskRepository,
                        final CompanyRepository companyRepository,
                        final ContactRepository contactRepository,
+                       final CommentRepository commentRepository,
                        final TagService tagService) {
         this.taskRepository = taskRepository;
         this.companyRepository = companyRepository;
         this.contactRepository = contactRepository;
+        this.commentRepository = commentRepository;
         this.tagService = tagService;
     }
 
@@ -70,14 +74,14 @@ public class TaskService {
         }
 
         final TaskEntity saved = taskRepository.saveAndFlush(entity);
-        return TaskDto.fromEntity(saved);
+        return toDto(saved);
     }
 
     @Transactional(readOnly = true)
     public TaskDto getById(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final TaskEntity entity = findOrThrow(id);
-        return TaskDto.fromEntity(entity);
+        return toDto(entity);
     }
 
     public TaskDto update(final UUID id, final TaskUpdateDto request) {
@@ -91,19 +95,20 @@ public class TaskService {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
         final TaskEntity saved = taskRepository.saveAndFlush(entity);
-        return TaskDto.fromEntity(saved);
+        return toDto(saved);
     }
 
     public void delete(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final TaskEntity entity = findOrThrow(id);
+        commentRepository.deleteByTaskId(id);
         taskRepository.delete(entity);
     }
 
     @Transactional(readOnly = true)
     public Page<TaskDto> list(final TaskStatus status, final List<UUID> tagIds, final Pageable pageable) {
         final Specification<TaskEntity> spec = buildSpec(status, tagIds);
-        return taskRepository.findAll(spec, pageable).map(TaskDto::fromEntity);
+        return taskRepository.findAll(spec, pageable).map(this::toDto);
     }
 
     private Specification<TaskEntity> buildSpec(final TaskStatus status, final List<UUID> tagIds) {
@@ -122,6 +127,11 @@ public class TaskService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    private TaskDto toDto(final TaskEntity entity) {
+        final long commentCount = commentRepository.countByTaskId(entity.getId());
+        return TaskDto.fromEntity(entity, commentCount);
     }
 
     private TaskEntity findOrThrow(final UUID id) {

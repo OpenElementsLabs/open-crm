@@ -4,6 +4,8 @@ import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
+import com.openelements.crm.task.TaskEntity;
+import com.openelements.crm.task.TaskRepository;
 import com.openelements.crm.user.UserService;
 import java.util.Objects;
 import java.util.UUID;
@@ -24,6 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final TaskRepository taskRepository;
     private final UserService userService;
 
     /**
@@ -32,15 +35,18 @@ public class CommentService {
      * @param commentRepository the comment repository
      * @param companyRepository the company repository
      * @param contactRepository the contact repository
+     * @param taskRepository    the task repository
      * @param userService       the user service
      */
     public CommentService(final CommentRepository commentRepository,
                           final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
+                          final TaskRepository taskRepository,
                           final UserService userService) {
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.userService = Objects.requireNonNull(userService, "userService must not be null");
     }
 
@@ -151,6 +157,46 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact not found: " + contactId);
         }
         return commentRepository.findByContactId(contactId, pageable).map(CommentDto::fromEntity);
+    }
+
+    /**
+     * Adds a comment to a task.
+     *
+     * @param taskId  the task ID
+     * @param request the comment create request
+     * @return the created comment response
+     * @throws ResponseStatusException with 404 if task not found
+     */
+    public CommentDto addToTask(final UUID taskId, final CommentCreateDto request) {
+        Objects.requireNonNull(taskId, "taskId must not be null");
+        Objects.requireNonNull(request, "request must not be null");
+        final TaskEntity task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Task not found: " + taskId));
+        final CommentEntity entity = new CommentEntity();
+        entity.setText(request.text());
+        entity.setAuthor(userService.getCurrentUser().getName());
+        entity.setTask(task);
+        final CommentEntity saved = commentRepository.saveAndFlush(entity);
+        return CommentDto.fromEntity(saved);
+    }
+
+    /**
+     * Lists comments for a task, paginated.
+     *
+     * @param taskId   the task ID
+     * @param pageable pagination parameters
+     * @return a page of comment responses
+     * @throws ResponseStatusException with 404 if task not found
+     */
+    @Transactional(readOnly = true)
+    public Page<CommentDto> listByTask(final UUID taskId, final Pageable pageable) {
+        Objects.requireNonNull(taskId, "taskId must not be null");
+        Objects.requireNonNull(pageable, "pageable must not be null");
+        if (!taskRepository.existsById(taskId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found: " + taskId);
+        }
+        return commentRepository.findByTaskId(taskId, pageable).map(CommentDto::fromEntity);
     }
 
     private CommentEntity findOrThrow(final UUID id) {

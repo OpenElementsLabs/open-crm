@@ -610,6 +610,41 @@ export async function updateTask(id: string, data: TaskUpdateDto): Promise<TaskD
   return response.json();
 }
 
+// Task Comment API
+
+export async function getTaskComments(
+  taskId: string,
+  page: number = 0,
+): Promise<Page<CommentDto>> {
+  const url = `${baseUrl()}/api/tasks/${taskId}/comments?page=${page}&size=20&sort=createdAt,desc`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch task comments: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createTaskComment(
+  taskId: string,
+  data: CommentCreateDto,
+): Promise<CommentDto> {
+  const url = `${baseUrl()}/api/tasks/${taskId}/comments`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create task comment: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function deleteTask(id: string): Promise<void> {
   const url = `${baseUrl()}/api/tasks/${id}`;
   const response = await apiFetch(url, { method: "DELETE" });

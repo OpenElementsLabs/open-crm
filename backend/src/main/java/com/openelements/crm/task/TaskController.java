@@ -1,5 +1,8 @@
 package com.openelements.crm.task;
 
+import com.openelements.crm.comment.CommentCreateDto;
+import com.openelements.crm.comment.CommentDto;
+import com.openelements.crm.comment.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,9 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskController {
 
     private final TaskService taskService;
+    private final CommentService commentService;
 
-    public TaskController(final TaskService taskService) {
+    public TaskController(final TaskService taskService, final CommentService commentService) {
         this.taskService = taskService;
+        this.commentService = commentService;
     }
 
     @PostMapping
@@ -69,5 +75,22 @@ public class TaskController {
             @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
             @PageableDefault(size = 20, sort = "dueDate") final Pageable pageable) {
         return taskService.list(status, tagIds, pageable);
+    }
+
+    @GetMapping("/{id}/comments")
+    @Operation(summary = "List comments for a task")
+    public Page<CommentDto> listComments(
+            @Parameter(description = "Task ID") @PathVariable final UUID id,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
+        return commentService.listByTask(id, pageable);
+    }
+
+    @PostMapping("/{id}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Add a comment to a task")
+    public CommentDto addComment(
+            @Parameter(description = "Task ID") @PathVariable final UUID id,
+            @Valid @RequestBody final CommentCreateDto request) {
+        return commentService.addToTask(id, request);
     }
 }

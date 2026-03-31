@@ -290,6 +290,25 @@ export const en: Translations = {
       dueDateRequired: "Due date is required",
       entityRequired: "Please select a company or contact",
     },
+    comments: {
+      title: "Comments",
+      empty: "No comments yet",
+      add: "Add Comment",
+      addTitle: "Add Comment",
+      placeholder: "Write a comment...",
+      send: "Send",
+      loadMore: "Load more",
+      sending: "Sending...",
+      errorTitle: "Error",
+      errorGeneric: "The comment could not be saved. Please try again.",
+      deleteDialog: {
+        title: "Delete Comment",
+        description:
+          "Do you really want to delete this comment? This action cannot be undone.",
+        confirm: "Delete",
+        cancel: "Cancel",
+      },
+    },
   },
   brevo: {
     title: "Brevo Import",

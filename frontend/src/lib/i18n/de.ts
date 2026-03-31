@@ -288,6 +288,25 @@ export const de = {
       dueDateRequired: "Fälligkeitsdatum ist erforderlich",
       entityRequired: "Bitte wählen Sie eine Firma oder einen Kontakt aus",
     },
+    comments: {
+      title: "Kommentare",
+      empty: "Noch keine Kommentare",
+      add: "Kommentar hinzufügen",
+      addTitle: "Kommentar hinzufügen",
+      placeholder: "Kommentar schreiben...",
+      send: "Senden",
+      loadMore: "Mehr laden",
+      sending: "Wird gesendet...",
+      errorTitle: "Fehler",
+      errorGeneric: "Der Kommentar konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      deleteDialog: {
+        title: "Kommentar löschen",
+        description:
+          "Möchten Sie diesen Kommentar wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        confirm: "Löschen",
+        cancel: "Abbrechen",
+      },
+    },
   },
   brevo: {
     title: "Brevo Import",

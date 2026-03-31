@@ -39,6 +39,7 @@ export interface CommentDto {
   readonly author: string;
   readonly companyId: string | null;
   readonly contactId: string | null;
+  readonly taskId: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -127,6 +128,7 @@ export interface TaskDto {
   readonly contactId: string | null;
   readonly contactName: string | null;
   readonly tagIds: readonly string[];
+  readonly commentCount: number;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
