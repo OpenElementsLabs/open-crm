@@ -64,4 +64,5 @@
 | 060 | Delete comments            | Delete button with confirmation dialog on company and contact comments, immediate count update         | —            | done   |
 | 061 | Remove comment column      | Remove comment count column from company and contact list tables and CSV export                        | —            | done   |
 | 062 | Task backend               | Task entity with action, due date, status, company/contact XOR, tags, CRUD REST API                   | —            | done   |
+| 063 | Contact title              | Optional title field (Dr., Prof.) prepended to contact name in all views, CSV, and search             | —            | open   |
 
