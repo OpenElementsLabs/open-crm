@@ -5,6 +5,13 @@ import Link from "next/link";
 import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getTags, deleteTag } from "@/lib/api";
@@ -16,6 +23,14 @@ export function TagList() {
   const [data, setData] = useState<Page<TagDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(() => {
+    if (typeof window === "undefined") return 20;
+    const stored = localStorage.getItem("pageSize.tags");
+    const parsed = Number(stored);
+    if ([10, 20, 50, 100, 200].includes(parsed)) return parsed;
+    localStorage.setItem("pageSize.tags", "20");
+    return 20;
+  });
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<TagDto | null>(null);
@@ -32,12 +47,12 @@ export function TagList() {
   const fetchTags = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getTags({ page, size: 20, name: debouncedSearch || undefined, includeCounts: true });
+      const result = await getTags({ page, size: pageSize, name: debouncedSearch || undefined, includeCounts: true });
       setData(result);
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch]);
+  }, [page, pageSize, debouncedSearch]);
 
   useEffect(() => {
     fetchTags();
@@ -57,8 +72,8 @@ export function TagList() {
 
   const totalElements = data?.page.totalElements ?? 0;
   const totalPages = data?.page.totalPages ?? 0;
-  const start = totalElements > 0 ? page * 20 + 1 : 0;
-  const end = Math.min((page + 1) * 20, totalElements);
+  const start = totalElements > 0 ? page * pageSize + 1 : 0;
+  const end = Math.min((page + 1) * pageSize, totalElements);
 
   return (
     <div>
@@ -165,9 +180,23 @@ export function TagList() {
 
           {totalPages > 1 && (
             <div className="mt-4 flex items-center justify-between">
-              <span className="text-sm text-oe-gray">
-                {t.tags.pagination.showing} {start}–{end} {t.tags.pagination.of} {totalElements} {t.tags.pagination.tags}
-              </span>
+              <div className="flex items-center gap-3">
+                <Select value={String(pageSize)} onValueChange={(v) => { const n = Number(v); setPageSize(n); localStorage.setItem("pageSize.tags", v); setPage(0); }}>
+                  <SelectTrigger className="w-[80px] h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 50, 100, 200].map((s) => (
+                      <SelectItem key={s} value={String(s)}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-oe-gray">{t.tags.pagination.perPage}</span>
+                <span className="text-sm text-oe-gray">·</span>
+                <span className="text-sm text-oe-gray">
+                  {t.tags.pagination.showing} {start}–{end} {t.tags.pagination.of} {totalElements} {t.tags.pagination.tags}
+                </span>
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

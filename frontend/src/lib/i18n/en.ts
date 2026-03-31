@@ -123,6 +123,7 @@ export const en: Translations = {
       page: "Page {current} of {total}",
       totalOne: "{count} Company",
       totalOther: "{count} Companies",
+      perPage: "per page",
     },
   },
   contacts: {
@@ -222,6 +223,7 @@ export const en: Translations = {
       page: "Page {current} of {total}",
       totalOne: "{count} Contact",
       totalOther: "{count} Contacts",
+      perPage: "per page",
     },
   },
   brevo: {
@@ -338,6 +340,7 @@ export const en: Translations = {
       tags: "tags",
       previous: "Previous",
       next: "Next",
+      perPage: "per page",
     },
     label: "Tags",
     selected: "{count} tags selected",

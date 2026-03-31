@@ -121,6 +121,7 @@ export const de = {
       page: "Seite {current} von {total}",
       totalOne: "{count} Firma",
       totalOther: "{count} Firmen",
+      perPage: "pro Seite",
     },
   },
   contacts: {
@@ -220,6 +221,7 @@ export const de = {
       page: "Seite {current} von {total}",
       totalOne: "{count} Kontakt",
       totalOther: "{count} Kontakte",
+      perPage: "pro Seite",
     },
   },
   brevo: {
@@ -336,6 +338,7 @@ export const de = {
       tags: "Tags",
       previous: "Zurück",
       next: "Weiter",
+      perPage: "pro Seite",
     },
     label: "Tags",
     selected: "{count} Tags ausgewählt",

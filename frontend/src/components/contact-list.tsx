@@ -81,6 +81,14 @@ export function ContactList() {
   const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(() => {
+    if (typeof window === "undefined") return 20;
+    const stored = localStorage.getItem("pageSize.contacts");
+    const parsed = Number(stored);
+    if ([10, 20, 50, 100, 200].includes(parsed)) return parsed;
+    localStorage.setItem("pageSize.contacts", "20");
+    return 20;
+  });
   const [searchFilter, setSearchFilter] = useState("");
   const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
   const [languageFilter, setLanguageFilter] = useState("");
@@ -113,7 +121,7 @@ export function ContactList() {
     try {
       const result = await getContacts({
         page,
-        size: 20,
+        size: pageSize,
         search: searchFilter || undefined,
         companyId: companyIdFilter && companyIdFilter !== "all" && companyIdFilter !== "none" ? companyIdFilter : undefined,
         noCompany: companyIdFilter === "none" ? true : undefined,
@@ -127,7 +135,7 @@ export function ContactList() {
     } finally {
       setLoading(false);
     }
-  }, [page, searchFilter, companyIdFilter, languageFilter, brevoFilter, tagIds]);
+  }, [page, pageSize, searchFilter, companyIdFilter, languageFilter, brevoFilter, tagIds]);
 
   useEffect(() => {
     fetchContacts();
@@ -357,11 +365,25 @@ export function ContactList() {
 
           {/* Pagination */}
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-oe-gray-mid">
-              {(data.page.totalElements === 1 ? S.pagination.totalOne : S.pagination.totalOther).replace("{count}", String(data.page.totalElements))} · {S.pagination.page
-                .replace("{current}", String(data.page.number + 1))
-                .replace("{total}", String(data.page.totalPages))}
-            </p>
+            <div className="flex items-center gap-3">
+              <Select value={String(pageSize)} onValueChange={(v) => { const n = Number(v); setPageSize(n); localStorage.setItem("pageSize.contacts", v); setPage(0); }}>
+                <SelectTrigger className="w-[80px] h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 50, 100, 200].map((s) => (
+                    <SelectItem key={s} value={String(s)}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-oe-gray-mid">{S.pagination.perPage}</span>
+              <span className="text-sm text-oe-gray-mid">·</span>
+              <span className="text-sm text-oe-gray-mid">
+                {(data.page.totalElements === 1 ? S.pagination.totalOne : S.pagination.totalOther).replace("{count}", String(data.page.totalElements))} · {S.pagination.page
+                  .replace("{current}", String(data.page.number + 1))
+                  .replace("{total}", String(data.page.totalPages))}
+              </span>
+            </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
