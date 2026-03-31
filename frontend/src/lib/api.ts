@@ -10,6 +10,7 @@ import type {
   TaskDto,
   TaskCreateDto,
   TaskUpdateDto,
+  UserDto,
   BrevoSettingsDto,
   BrevoSyncResultDto,
   Page,
@@ -638,4 +639,47 @@ export async function deleteTask(id: string): Promise<void> {
 export async function getContactsForSelect(): Promise<ContactDto[]> {
   const data = await getContacts({ size: 1000 });
   return data.content as ContactDto[];
+}
+
+// User API
+
+export async function getCurrentUser(): Promise<UserDto> {
+  const url = `${baseUrl()}/api/users/me`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch current user: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export function getUserAvatarUrl(): string {
+  return `${baseUrl()}/api/users/me/avatar`;
+}
+
+export async function uploadUserAvatar(file: File): Promise<UserDto> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const url = `${baseUrl()}/api/users/me/avatar`;
+  const response = await apiFetch(url, {
+    method: "PUT",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload avatar: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteUserAvatar(): Promise<void> {
+  const url = `${baseUrl()}/api/users/me/avatar`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete avatar: ${response.status}`);
+  }
 }

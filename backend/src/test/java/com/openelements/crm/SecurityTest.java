@@ -3,7 +3,8 @@ package com.openelements.crm;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactRepository;
-import com.openelements.crm.user.UserInfo;
+import com.openelements.crm.user.UserEntity;
+import com.openelements.crm.user.UserRepository;
 import com.openelements.crm.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,11 +48,15 @@ class SecurityTest {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @BeforeEach
     void setUp() {
         commentRepository.deleteAll();
         contactRepository.deleteAll();
         companyRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Nested
@@ -194,9 +199,9 @@ class SecurityTest {
         void returnsUserFromJwt() {
             TestSecurityUtil.setSecurityContext("Alice", "alice@example.com");
             try {
-                final UserInfo user = userService.getCurrentUser();
-                assertEquals("Alice", user.name());
-                assertEquals("alice@example.com", user.email());
+                final UserEntity user = userService.getCurrentUser();
+                assertEquals("Alice", user.getName());
+                assertEquals("alice@example.com", user.getEmail());
             } finally {
                 TestSecurityUtil.clearSecurityContext();
             }
@@ -207,8 +212,8 @@ class SecurityTest {
         void handlesMissingName() {
             TestSecurityUtil.setSecurityContext(null, "test@example.com");
             try {
-                final UserInfo user = userService.getCurrentUser();
-                assertEquals("Unknown", user.name());
+                final UserEntity user = userService.getCurrentUser();
+                assertEquals("Unknown", user.getName());
             } finally {
                 TestSecurityUtil.clearSecurityContext();
             }
@@ -219,8 +224,8 @@ class SecurityTest {
         void handlesMissingEmail() {
             TestSecurityUtil.setSecurityContext("Alice", null);
             try {
-                final UserInfo user = userService.getCurrentUser();
-                assertEquals("", user.email());
+                final UserEntity user = userService.getCurrentUser();
+                assertEquals("", user.getEmail());
             } finally {
                 TestSecurityUtil.clearSecurityContext();
             }

@@ -15,6 +15,10 @@ export const en: Translations = {
     description: "Customer Relationship Management by Open Elements",
     developedBy: "Developed by",
   },
+  sidebar: {
+    uploadAvatar: "Change avatar",
+    removeAvatar: "Remove avatar",
+  },
   nav: {
     companies: "Companies",
     contacts: "Contacts",

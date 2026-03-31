@@ -13,6 +13,10 @@ export const de = {
     description: "Customer Relationship Management by Open Elements",
     developedBy: "Entwickelt von",
   },
+  sidebar: {
+    uploadAvatar: "Avatar ändern",
+    removeAvatar: "Avatar entfernen",
+  },
   nav: {
     companies: "Firmen",
     contacts: "Kontakte",

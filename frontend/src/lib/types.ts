@@ -147,6 +147,15 @@ export interface TaskUpdateDto {
   readonly tagIds?: readonly string[] | null;
 }
 
+export interface UserDto {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly hasAvatar: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
 export interface BrevoSettingsDto {
   readonly apiKeyConfigured: boolean;
 }
