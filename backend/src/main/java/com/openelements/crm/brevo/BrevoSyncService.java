@@ -170,6 +170,7 @@ public class BrevoSyncService {
             if (!seenContactIds.contains(contact.getBrevoId())) {
                 transactionTemplate.executeWithoutResult(status -> {
                     contact.setBrevoId(null);
+                    contact.setReceivesNewsletter(false);
                     contactRepository.save(contact);
                 });
                 contactsUnlinked++;
@@ -258,6 +259,7 @@ public class BrevoSyncService {
             entity.setEmail(email != null ? email : brevoContact.email());
             entity.setBrevoId(String.valueOf(brevoContact.id()));
             entity.setLanguage(mapLanguage(attrs.get("SPRACHE")));
+            entity.setReceivesNewsletter(computeNewsletterStatus(attrs, brevoContact.emailBlacklisted()));
 
             // Only set user-editable fields on first import
             if (created) {
@@ -338,6 +340,24 @@ public class BrevoSyncService {
         }
         final String str = val.toString().trim();
         return str.isEmpty() ? null : str;
+    }
+
+    private boolean computeNewsletterStatus(final Map<String, Object> attrs, final boolean emailBlacklisted) {
+        if (emailBlacklisted) {
+            return false;
+        }
+        final Object doubleOptIn = attrs.get("DOUBLE_OPT-IN");
+        if (doubleOptIn == null) {
+            return false;
+        }
+        if (doubleOptIn instanceof Number num) {
+            return num.intValue() == 1;
+        }
+        try {
+            return Integer.parseInt(doubleOptIn.toString().trim()) == 1;
+        } catch (final NumberFormatException e) {
+            return false;
+        }
     }
 
     private boolean isBlank(final String value) {

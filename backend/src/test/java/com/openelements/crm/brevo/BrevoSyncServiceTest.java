@@ -73,7 +73,13 @@ class BrevoSyncServiceTest {
 
     private BrevoContact makeBrevoContact(final long id, final String email,
                                            final Map<String, Object> attributes) {
-        return new BrevoContact(id, email, attributes);
+        return new BrevoContact(id, email, attributes, false);
+    }
+
+    private BrevoContact makeBrevoContact(final long id, final String email,
+                                           final Map<String, Object> attributes,
+                                           final boolean emailBlacklisted) {
+        return new BrevoContact(id, email, attributes, emailBlacklisted);
     }
 
     /**

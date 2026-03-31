@@ -85,6 +85,9 @@ public class ContactEntity {
     @Column(name = "brevo_id", length = 50)
     private String brevoId;
 
+    @Column(name = "receives_newsletter", nullable = false)
+    private boolean receivesNewsletter = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "language", length = 5)
     private Language language;
@@ -343,6 +346,14 @@ public class ContactEntity {
      */
     public void setBrevoId(final String brevoId) {
         this.brevoId = brevoId;
+    }
+
+    public boolean isReceivesNewsletter() {
+        return receivesNewsletter;
+    }
+
+    public void setReceivesNewsletter(final boolean receivesNewsletter) {
+        this.receivesNewsletter = receivesNewsletter;
     }
 
     /**

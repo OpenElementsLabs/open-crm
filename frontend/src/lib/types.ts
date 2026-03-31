@@ -66,6 +66,7 @@ export interface ContactDto {
   readonly hasPhoto: boolean;
   readonly birthday: string | null;
   readonly brevo: boolean;
+  readonly receivesNewsletter: boolean;
   readonly language: "DE" | "EN" | null;
   readonly tagIds: readonly string[];
   readonly createdAt: string;
