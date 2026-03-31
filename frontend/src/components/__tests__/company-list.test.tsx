@@ -440,8 +440,7 @@ describe("CompanyList", () => {
         expect(headers[1].textContent).toBe(S.columns.name);
         expect(headers[2].textContent).toBe(S.columns.website);
         expect(headers[3].textContent).toBe(S.columns.contacts);
-        expect(headers[4].textContent).toBe(S.columns.comments);
-        expect(headers[5].textContent).toBe(S.columns.actions);
+        expect(headers[4].textContent).toBe(S.columns.actions);
       });
     });
   });

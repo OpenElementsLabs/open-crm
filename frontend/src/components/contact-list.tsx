@@ -293,7 +293,6 @@ export function ContactList() {
                   <TableHead>{S.columns.name}</TableHead>
                   <TableHead>{S.columns.email}</TableHead>
                   <TableHead>{S.columns.company}</TableHead>
-                  <TableHead>{S.columns.comments}</TableHead>
                   <TableHead className="w-[140px] text-right">{S.columns.actions}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -320,7 +319,6 @@ export function ContactList() {
                     </TableCell>
                     <EmailCell value={contact.email} />
                     <CompanyNameCell name={contact.companyName} companyId={contact.companyId} />
-                    <TableCell>{contact.commentCount}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

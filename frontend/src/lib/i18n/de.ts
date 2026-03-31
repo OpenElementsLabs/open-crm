@@ -38,7 +38,6 @@ export const de = {
       name: "Name",
       website: "Website",
       contacts: "Kontakte",
-      comments: "Kommentare",
       actions: "Aktionen",
     },
     detail: {
@@ -142,7 +141,6 @@ export const de = {
       name: "Name",
       email: "E-Mail",
       company: "Firma",
-      comments: "Kommentare",
       actions: "Aktionen",
     },
     detail: {
@@ -283,7 +281,6 @@ export const de = {
       country: "Land",
       phoneNumber: "Telefon",
       contactCount: "Kontakte",
-      commentCount: "Kommentare",
       brevo: "Brevo",
       createdAt: "Erstellt am",
       updatedAt: "Aktualisiert am",
@@ -299,7 +296,6 @@ export const de = {
       companyName: "Firma",
       birthday: "Geburtstag",
       language: "Sprache",
-      commentCount: "Kommentare",
       brevo: "Brevo",
       createdAt: "Erstellt am",
       updatedAt: "Aktualisiert am",
