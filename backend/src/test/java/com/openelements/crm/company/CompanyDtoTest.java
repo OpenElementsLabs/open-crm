@@ -116,6 +116,27 @@ class CompanyDtoTest {
         }
 
         @Test
+        @DisplayName("Maps description when present")
+        void mapsDescriptionWhenPresent() throws Exception {
+            CompanyEntity entity = createEntity();
+            entity.setDescription("A test company");
+
+            CompanyDto dto = CompanyDto.fromEntity(entity, 0, 0);
+
+            assertEquals("A test company", dto.description());
+        }
+
+        @Test
+        @DisplayName("Maps description as null when absent")
+        void mapsDescriptionNullWhenAbsent() throws Exception {
+            CompanyEntity entity = createEntity();
+
+            CompanyDto dto = CompanyDto.fromEntity(entity, 0, 0);
+
+            assertNull(dto.description());
+        }
+
+        @Test
         @DisplayName("Handles null optional fields")
         void handlesNullOptionalFields() throws Exception {
             CompanyEntity entity = createEntity();

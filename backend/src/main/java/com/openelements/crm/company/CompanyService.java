@@ -57,6 +57,7 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         entity.setPhoneNumber(request.phoneNumber());
+        entity.setDescription(request.description());
         if (request.tagIds() != null) {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
@@ -99,6 +100,7 @@ public class CompanyService {
         entity.setCity(request.city());
         entity.setCountry(request.country());
         entity.setPhoneNumber(request.phoneNumber());
+        entity.setDescription(request.description());
         if (request.tagIds() != null) {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }

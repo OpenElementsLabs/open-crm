@@ -140,6 +140,27 @@ class ContactDtoTest {
         }
 
         @Test
+        @DisplayName("Maps description when present")
+        void mapsDescriptionWhenPresent() throws Exception {
+            ContactEntity entity = createEntity();
+            entity.setDescription("Key contact for the project");
+
+            ContactDto dto = ContactDto.fromEntity(entity, 0);
+
+            assertEquals("Key contact for the project", dto.description());
+        }
+
+        @Test
+        @DisplayName("Maps description as null when absent")
+        void mapsDescriptionNullWhenAbsent() throws Exception {
+            ContactEntity entity = createEntity();
+
+            ContactDto dto = ContactDto.fromEntity(entity, 0);
+
+            assertNull(dto.description());
+        }
+
+        @Test
         @DisplayName("Sets hasPhoto to true when photo bytes are present")
         void setsHasPhotoTrueWhenPhotoBytesPresent() throws Exception {
             ContactEntity entity = createEntity();

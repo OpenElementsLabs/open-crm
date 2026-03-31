@@ -9,6 +9,7 @@ export interface CompanyDto {
   readonly city: string | null;
   readonly country: string | null;
   readonly phoneNumber: string | null;
+  readonly description: string | null;
   readonly deleted: boolean;
   readonly brevo: boolean;
   readonly hasLogo: boolean;
@@ -29,6 +30,7 @@ export interface CompanyCreateDto {
   readonly city?: string | null;
   readonly country?: string | null;
   readonly phoneNumber?: string | null;
+  readonly description?: string | null;
   readonly tagIds?: readonly string[] | null;
 }
 
@@ -55,6 +57,7 @@ export interface ContactDto {
   readonly gender: "MALE" | "FEMALE" | "DIVERSE" | null;
   readonly linkedInUrl: string | null;
   readonly phoneNumber: string | null;
+  readonly description: string | null;
   readonly companyId: string | null;
   readonly companyName: string | null;
   readonly companyDeleted: boolean;
@@ -79,6 +82,7 @@ export interface ContactCreateDto {
   readonly companyId?: string | null;
   readonly language?: "DE" | "EN" | null;
   readonly birthday?: string | null;
+  readonly description?: string | null;
   readonly tagIds?: readonly string[] | null;
 }
 

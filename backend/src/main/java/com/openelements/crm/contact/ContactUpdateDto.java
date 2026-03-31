@@ -20,6 +20,7 @@ import java.util.UUID;
  * @param companyId   the company ID (optional)
  * @param language    the preferred language (optional, null means unknown)
  * @param birthday    the birthday (optional)
+ * @param description the free-text description (optional)
  */
 @Schema(description = "Request body for updating an existing contact")
 public record ContactUpdateDto(
@@ -60,6 +61,9 @@ public record ContactUpdateDto(
 
         @Schema(description = "Birthday", example = "1990-03-15")
         LocalDate birthday,
+
+        @Schema(description = "Free-text description")
+        String description,
 
         @Schema(description = "Tag IDs to assign (null = no change, empty = remove all)")
         List<UUID> tagIds

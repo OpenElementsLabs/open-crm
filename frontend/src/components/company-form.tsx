@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Building2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagMultiSelect } from "@/components/tag-multi-select";
@@ -34,6 +35,7 @@ export function CompanyForm({ company }: CompanyFormProps) {
   const [city, setCity] = useState(company?.city ?? "");
   const [country, setCountry] = useState(company?.country ?? "");
   const [phoneNumber, setPhoneNumber] = useState(company?.phoneNumber ?? "");
+  const [description, setDescription] = useState(company?.description ?? "");
   const [tagIds, setTagIds] = useState<string[]>([...(company?.tagIds ?? [])]);
   const [tagIdsChanged, setTagIdsChanged] = useState(false);
 
@@ -94,6 +96,7 @@ export function CompanyForm({ company }: CompanyFormProps) {
       city: city.trim() || null,
       country: country.trim() || null,
       phoneNumber: phoneNumber.trim() || null,
+      description: description.trim() || null,
       ...(tagIdsChanged ? { tagIds } : {}),
     };
 
@@ -231,6 +234,17 @@ export function CompanyForm({ company }: CompanyFormProps) {
             <TagMultiSelect
               selectedIds={tagIds}
               onChange={(ids) => { setTagIds(ids); setTagIdsChanged(true); }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">{S.description}</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={S.descriptionPlaceholder}
+              rows={3}
             />
           </div>
 

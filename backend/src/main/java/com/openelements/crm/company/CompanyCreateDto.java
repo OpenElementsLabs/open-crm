@@ -17,6 +17,7 @@ import java.util.UUID;
  * @param zipCode     the zip code of the address
  * @param city        the city of the address
  * @param country     the country of the address
+ * @param description the free-text description (optional)
  */
 @Schema(description = "Request body for creating a new company")
 public record CompanyCreateDto(
@@ -56,6 +57,9 @@ public record CompanyCreateDto(
         @Size(max = 255)
         @Schema(description = "Phone number", example = "+49 30 12345678")
         String phoneNumber,
+
+        @Schema(description = "Free-text description")
+        String description,
 
         @Schema(description = "Tag IDs to assign")
         List<UUID> tagIds
