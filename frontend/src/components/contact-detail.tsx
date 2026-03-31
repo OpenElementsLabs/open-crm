@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2, User } from "lucide-react";
+import { CheckSquare, Pencil, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -101,6 +101,12 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <Link href={`/contacts/${contact.id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
               {S.detail.edit}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/tasks/new?contactId=${contact.id}`}>
+              <CheckSquare className="mr-2 h-4 w-4" />
+              {S.detail.createTask}
             </Link>
           </Button>
           <Button

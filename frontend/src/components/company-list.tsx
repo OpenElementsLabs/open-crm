@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -316,6 +316,17 @@ export function CompanyList() {
                         }}
                       >
                         <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={S.detail.createTask}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/tasks/new?companyId=${company.id}`);
+                        }}
+                      >
+                        <CheckSquare className="h-4 w-4 text-oe-blue" />
                       </Button>
                       {company.deleted ? (
                         <Button

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,16 +34,21 @@ export function TaskForm({ task }: TaskFormProps) {
   const t = useTranslations();
   const S = t.tasks;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isEdit = !!task;
+
+  const preCompanyId = searchParams.get("companyId");
+  const preContactId = searchParams.get("contactId");
+  const isPreSelected = !isEdit && !!(preCompanyId || preContactId);
 
   const [action, setAction] = useState(task?.action ?? "");
   const [dueDate, setDueDate] = useState(task?.dueDate ?? "");
   const [status, setStatus] = useState<TaskStatus>(task?.status ?? "OPEN");
   const [entityType, setEntityType] = useState<EntityType>(
-    task?.contactId ? "contact" : "company",
+    task?.contactId ? "contact" : preContactId && !preCompanyId ? "contact" : "company",
   );
-  const [companyId, setCompanyId] = useState(task?.companyId ?? "");
-  const [contactId, setContactId] = useState(task?.contactId ?? "");
+  const [companyId, setCompanyId] = useState(task?.companyId ?? preCompanyId ?? "");
+  const [contactId, setContactId] = useState(task?.contactId ?? (preCompanyId ? "" : preContactId ?? ""));
   const [tagIds, setTagIds] = useState<string[]>([...(task?.tagIds ?? [])]);
   const [tagIdsChanged, setTagIdsChanged] = useState(false);
 
@@ -175,7 +180,7 @@ export function TaskForm({ task }: TaskFormProps) {
                   value="company"
                   checked={entityType === "company"}
                   onChange={() => { setEntityType("company"); setContactId(""); }}
-                  disabled={isEdit}
+                  disabled={isEdit || isPreSelected}
                   className="accent-oe-green"
                 />
                 {S.fields.company}
@@ -187,7 +192,7 @@ export function TaskForm({ task }: TaskFormProps) {
                   value="contact"
                   checked={entityType === "contact"}
                   onChange={() => { setEntityType("contact"); setCompanyId(""); }}
-                  disabled={isEdit}
+                  disabled={isEdit || isPreSelected}
                   className="accent-oe-green"
                 />
                 {S.fields.contact}
@@ -202,7 +207,7 @@ export function TaskForm({ task }: TaskFormProps) {
               <Select
                 value={companyId || "none"}
                 onValueChange={setCompanyId}
-                disabled={isEdit}
+                disabled={isEdit || isPreSelected}
               >
                 <SelectTrigger id="company">
                   <SelectValue placeholder={S.fields.noCompany} />
@@ -225,7 +230,7 @@ export function TaskForm({ task }: TaskFormProps) {
               <Select
                 value={contactId || "none"}
                 onValueChange={setContactId}
-                disabled={isEdit}
+                disabled={isEdit || isPreSelected}
               >
                 <SelectTrigger id="contact">
                   <SelectValue placeholder={S.fields.noContact} />

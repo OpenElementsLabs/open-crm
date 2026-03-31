@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -341,6 +341,17 @@ export function ContactList() {
                         }}
                       >
                         <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={S.detail.createTask}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/tasks/new?contactId=${contact.id}`);
+                        }}
+                      >
+                        <CheckSquare className="h-4 w-4 text-oe-blue" />
                       </Button>
                       <Button
                         variant="ghost"
