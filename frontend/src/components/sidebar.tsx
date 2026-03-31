@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { Building2, CheckSquare, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from "lucide-react";
 import { getCurrentUser, getUserAvatarUrl, uploadUserAvatar } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -123,23 +124,27 @@ function UserSection() {
   return (
     <div className="border-t border-oe-white/10 px-6 py-4">
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="shrink-0"
-          title={t.sidebar.uploadAvatar}
-        >
-          {hasAvatar ? (
-            <img
-              key={avatarKey}
-              src={getUserAvatarUrl()}
-              alt={userName}
-              className="h-8 w-8 rounded-full object-cover"
-            />
-          ) : (
-            <CircleUser className="h-8 w-8 text-oe-gray-light" />
-          )}
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="shrink-0"
+            >
+              {hasAvatar ? (
+                <img
+                  key={avatarKey}
+                  src={getUserAvatarUrl()}
+                  alt={userName}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <CircleUser className="h-8 w-8 text-oe-gray-light" />
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{t.sidebar.uploadAvatar}</TooltipContent>
+        </Tooltip>
         <input
           ref={fileInputRef}
           type="file"
@@ -150,15 +155,19 @@ function UserSection() {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-oe-white truncate">{userName}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white"
-          onClick={() => { window.location.href = "/api/logout"; }}
-          title={t.user.logout}
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white"
+              onClick={() => { window.location.href = "/api/logout"; }}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t.user.logout}</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
@@ -185,12 +194,17 @@ export function Sidebar() {
       {/* Mobile header + hamburger */}
       <header className="flex md:hidden h-14 items-center border-b border-oe-gray-light bg-oe-dark px-4">
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-oe-white hover:bg-oe-white/10">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Menu</span>
-            </Button>
-          </SheetTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-oe-white hover:bg-oe-white/10">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">{t.sidebar.menu}</span>
+                </Button>
+              </SheetTrigger>
+            </TooltipTrigger>
+            <TooltipContent>{t.sidebar.menu}</TooltipContent>
+          </Tooltip>
           <SheetContent side="left" className="w-64 bg-oe-dark p-0 border-none flex flex-col">
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SidebarHeader />

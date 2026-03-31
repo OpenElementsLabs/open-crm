@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -295,64 +296,84 @@ export function CompanyList() {
                     <WebsiteCell value={company.website} />
                     <ContactCountCell count={company.contactCount} companyId={company.id} />
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={S.detail.edit}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/companies/${company.id}/edit`);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4 text-oe-blue" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={S.comments.addTitle}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCommentTarget(company);
-                        }}
-                      >
-                        <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={S.detail.createTask}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/tasks/new?companyId=${company.id}`);
-                        }}
-                      >
-                        <CheckSquare className="h-4 w-4 text-oe-blue" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/companies/${company.id}/edit`);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 text-oe-blue" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.detail.edit}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCommentTarget(company);
+                            }}
+                          >
+                            <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.comments.addTitle}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/tasks/new?companyId=${company.id}`);
+                            }}
+                          >
+                            <CheckSquare className="h-4 w-4 text-oe-blue" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.detail.createTask}</TooltipContent>
+                      </Tooltip>
                       {company.deleted ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={S.detail.restore}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRestore(company.id);
-                          }}
-                        >
-                          <RotateCcw className="h-4 w-4 text-oe-blue" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRestore(company.id);
+                              }}
+                            >
+                              <RotateCcw className="h-4 w-4 text-oe-blue" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{S.detail.restore}</TooltipContent>
+                        </Tooltip>
                       ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={S.detail.delete}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteError(null);
-                            setDeleteTarget(company);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-oe-red" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteError(null);
+                                setDeleteTarget(company);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-oe-red" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{S.detail.delete}</TooltipContent>
+                        </Tooltip>
                       )}
                     </TableCell>
                   </TableRow>

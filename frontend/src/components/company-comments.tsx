@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MessageSquarePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
@@ -146,14 +147,18 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
                   <p className="text-xs text-oe-gray-mid">
                     {comment.author} &middot; {formatDate(comment.createdAt, "de")}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
-                    className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2"
-                    title={S.deleteDialog.title}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
+                        className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{S.deleteDialog.title}</TooltipContent>
+                  </Tooltip>
                 </div>
                 <p className="mt-1 text-sm text-oe-black whitespace-pre-wrap break-words">
                   {comment.text}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -192,17 +193,21 @@ export function TaskList() {
                       </TableCell>
                       <TableCell>{formatDate(task.dueDate)}</TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={S.edit}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/tasks/${task.id}/edit`);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4 text-oe-blue" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/tasks/${task.id}/edit`);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4 text-oe-blue" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{S.edit}</TooltipContent>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   );
