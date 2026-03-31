@@ -51,3 +51,9 @@ Das `author`-Feld in Kommentaren ist ein einfacher String, der beim Erstellen mi
 - **Kein Profilbild:** Kommentare zeigen nur den Namen, kein Benutzerbild
 
 **Context:** Bewusste Entscheidung für die erste Iteration (Spec 045). Soll bei der echten Authentik-Anbindung durch eine robustere Lösung (z.B. User-ID als Referenz mit separater Auflösung) ersetzt werden.
+
+## Comment Author: Umstellung auf User-FK
+
+Das `author`-Feld (String) in Kommentaren soll durch einen Fremdschlüssel auf die neue User-Entity ersetzt werden. Damit werden Kommentare einem konkreten User zugeordnet, Namensänderungen automatisch reflektiert und GDPR-Löschanträge sauber umsetzbar.
+
+**Context:** Identifiziert während der Grill-Session für Spec 065 (User Entity). Voraussetzung: Spec 065 muss zuerst implementiert sein.
