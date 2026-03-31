@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { Building2, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from "lucide-react";
+import { Building2, CheckSquare, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
@@ -24,6 +24,7 @@ function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
   const mainItems: NavItem[] = [
     { label: t.nav.companies, href: "/companies", icon: <Building2 className="h-5 w-5" /> },
     { label: t.nav.contacts, href: "/contacts", icon: <Users className="h-5 w-5" /> },
+    { label: t.nav.tasks, href: "/tasks", icon: <CheckSquare className="h-5 w-5" /> },
     { label: t.nav.tags, href: "/tags", icon: <Tag className="h-5 w-5" /> },
   ];
 

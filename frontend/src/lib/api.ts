@@ -7,10 +7,15 @@ import type {
   CommentCreateDto,
   TagDto,
   TagCreateDto,
+  TaskDto,
+  TaskCreateDto,
+  TaskUpdateDto,
   BrevoSettingsDto,
   BrevoSyncResultDto,
   Page,
 } from "./types";
+
+import type { TaskStatus } from "./types";
 
 import { auth } from "@/auth";
 
@@ -542,4 +547,95 @@ export async function deleteTag(id: string): Promise<void> {
   if (!response.ok) {
     throw new Error(`Failed to delete tag: ${response.status}`);
   }
+}
+
+// Tasks
+
+export interface TaskListParams {
+  readonly page?: number;
+  readonly size?: number;
+  readonly status?: TaskStatus;
+  readonly tagIds?: readonly string[];
+}
+
+export async function getTasks(params: TaskListParams = {}): Promise<Page<TaskDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+  if (params.status) searchParams.set("status", params.status);
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
+
+  const query = searchParams.toString();
+  const url = `${baseUrl()}/api/tasks${query ? `?${query}` : ""}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch tasks: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getTask(id: string): Promise<TaskDto> {
+  const url = `${baseUrl()}/api/tasks/${id}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Task not found");
+    }
+    throw new Error(`Failed to fetch task: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createTask(data: TaskCreateDto): Promise<TaskDto> {
+  const url = `${baseUrl()}/api/tasks`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create task: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateTask(id: string, data: TaskUpdateDto): Promise<TaskDto> {
+  const url = `${baseUrl()}/api/tasks/${id}`;
+  const response = await apiFetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to update task: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/tasks/${id}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete task: ${response.status}`);
+  }
+}
+
+export async function getContactsForSelect(): Promise<ContactDto[]> {
+  const data = await getContacts({ size: 1000 });
+  return data.content as ContactDto[];
 }

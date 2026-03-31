@@ -115,6 +115,38 @@ export interface TagCreateDto {
   readonly color: string;
 }
 
+export type TaskStatus = "OPEN" | "IN_PROGRESS" | "DONE";
+
+export interface TaskDto {
+  readonly id: string;
+  readonly action: string;
+  readonly dueDate: string;
+  readonly status: TaskStatus;
+  readonly companyId: string | null;
+  readonly companyName: string | null;
+  readonly contactId: string | null;
+  readonly contactName: string | null;
+  readonly tagIds: readonly string[];
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface TaskCreateDto {
+  readonly action: string;
+  readonly dueDate: string;
+  readonly status?: TaskStatus;
+  readonly companyId?: string | null;
+  readonly contactId?: string | null;
+  readonly tagIds?: readonly string[] | null;
+}
+
+export interface TaskUpdateDto {
+  readonly action: string;
+  readonly dueDate: string;
+  readonly status: TaskStatus;
+  readonly tagIds?: readonly string[] | null;
+}
+
 export interface BrevoSettingsDto {
   readonly apiKeyConfigured: boolean;
 }
