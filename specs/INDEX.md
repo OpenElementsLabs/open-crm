@@ -72,3 +72,4 @@
 | 068 | Tooltips                   | shadcn/ui Tooltip on all icon-only action buttons across lists, details, comments, sidebar            | —            | done   |
 | 069 | Newsletter status          | Read-only receivesNewsletter boolean from Brevo DOUBLE_OPT-IN + emailBlacklisted, detail view tag    | —            | done   |
 | 070 | Company hard delete        | Remove soft-delete/archive, hard-delete with dialog: delete contacts too or keep them (unlink)        | —            | open   |
+| 071 | Task comments              | Add comments to tasks using shared CommentEntity, three-way XOR constraint, detail view UI            | —            | open   |
