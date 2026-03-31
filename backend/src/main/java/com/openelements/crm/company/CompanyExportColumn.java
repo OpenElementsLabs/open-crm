@@ -17,7 +17,6 @@ public enum CompanyExportColumn {
     COUNTRY("country", dto -> dto.country()),
     PHONE_NUMBER("phoneNumber", dto -> dto.phoneNumber()),
     CONTACT_COUNT("contactCount", dto -> String.valueOf(dto.contactCount())),
-    COMMENT_COUNT("commentCount", dto -> String.valueOf(dto.commentCount())),
     BREVO("brevo", dto -> String.valueOf(dto.brevo())),
     CREATED_AT("createdAt", dto -> dto.createdAt() != null ? dto.createdAt().toString() : null),
     UPDATED_AT("updatedAt", dto -> dto.updatedAt() != null ? dto.updatedAt().toString() : null);

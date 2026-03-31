@@ -40,7 +40,6 @@ export const en: Translations = {
       name: "Name",
       website: "Website",
       contacts: "Contacts",
-      comments: "Comments",
       actions: "Actions",
     },
     detail: {
@@ -144,7 +143,6 @@ export const en: Translations = {
       name: "Name",
       email: "Email",
       company: "Company",
-      comments: "Comments",
       actions: "Actions",
     },
     detail: {
@@ -285,7 +283,6 @@ export const en: Translations = {
       country: "Country",
       phoneNumber: "Phone Number",
       contactCount: "Contacts",
-      commentCount: "Comments",
       brevo: "Brevo",
       createdAt: "Created At",
       updatedAt: "Updated At",
@@ -301,7 +298,6 @@ export const en: Translations = {
       companyName: "Company",
       birthday: "Birthday",
       language: "Language",
-      commentCount: "Comments",
       brevo: "Brevo",
       createdAt: "Created At",
       updatedAt: "Updated At",

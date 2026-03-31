@@ -62,5 +62,5 @@
 | 058 | Entity description         | Optional free-text description field for companies and contacts, displayed in detail views             | —            | done   |
 | 059 | Page size selector         | User-selectable page size (10, 20, 50, 100, 200) for company, contact, and tag list tables            | —            | done   |
 | 060 | Delete comments            | Delete button with confirmation dialog on company and contact comments, immediate count update         | —            | done   |
-| 061 | Remove comment column      | Remove comment count column from company and contact list tables and CSV export                        | —            | open   |
+| 061 | Remove comment column      | Remove comment count column from company and contact list tables and CSV export                        | —            | done   |
 

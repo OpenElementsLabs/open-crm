@@ -17,7 +17,6 @@ public enum ContactExportColumn {
     COMPANY_NAME("companyName", dto -> dto.companyName()),
     BIRTHDAY("birthday", dto -> dto.birthday() != null ? dto.birthday().toString() : null),
     LANGUAGE("language", dto -> dto.language() != null ? dto.language().name() : null),
-    COMMENT_COUNT("commentCount", dto -> String.valueOf(dto.commentCount())),
     BREVO("brevo", dto -> String.valueOf(dto.brevo())),
     CREATED_AT("createdAt", dto -> dto.createdAt() != null ? dto.createdAt().toString() : null),
     UPDATED_AT("updatedAt", dto -> dto.updatedAt() != null ? dto.updatedAt().toString() : null);
