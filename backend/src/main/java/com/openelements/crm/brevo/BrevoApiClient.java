@@ -136,7 +136,8 @@ public class BrevoApiClient {
                 } else {
                     attributes = Collections.emptyMap();
                 }
-                result.add(new BrevoContact(id, email, attributes));
+                final boolean emailBlacklisted = contact.has("emailBlacklisted") && contact.get("emailBlacklisted").asBoolean(false);
+                result.add(new BrevoContact(id, email, attributes, emailBlacklisted));
             }
             if (contacts.size() < limit) {
                 break;

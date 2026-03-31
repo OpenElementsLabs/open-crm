@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckSquare, Pencil, Trash2, User } from "lucide-react";
+import { CheckSquare, Mail, Pencil, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -91,6 +91,12 @@ export function ContactDetail({ contact }: ContactDetailProps) {
               {contact.brevo && (
                 <span className="inline-block rounded border border-oe-gray-light bg-oe-gray-light/30 px-2 py-0.5 text-xs text-oe-gray-mid">
                   Brevo
+                </span>
+              )}
+              {contact.receivesNewsletter && (
+                <span className="inline-flex items-center gap-1 rounded border border-oe-green/30 bg-oe-green/10 px-2 py-0.5 text-xs text-oe-green">
+                  <Mail className="h-3 w-3" />
+                  Newsletter
                 </span>
               )}
             </div>
