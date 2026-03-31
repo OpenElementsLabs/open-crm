@@ -84,9 +84,6 @@ public class CompanyEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<TagEntity> tags = new HashSet<>();
 
-    @Column(name = "deleted", nullable = false)
-    private boolean deleted = false;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -343,24 +340,6 @@ public class CompanyEntity {
     }
 
     /**
-     * Returns whether this company is soft-deleted.
-     *
-     * @return true if deleted
-     */
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    /**
-     * Sets the soft-delete flag for this company.
-     *
-     * @param deleted the deleted flag
-     */
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    /**
      * Returns the creation timestamp.
      *
      * @return the creation timestamp
@@ -397,6 +376,6 @@ public class CompanyEntity {
 
     @Override
     public String toString() {
-        return "CompanyEntity[id=" + id + ", name=" + name + ", deleted=" + deleted + "]";
+        return "CompanyEntity[id=" + id + ", name=" + name + "]";
     }
 }

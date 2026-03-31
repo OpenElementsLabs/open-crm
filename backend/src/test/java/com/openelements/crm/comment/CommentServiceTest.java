@@ -97,15 +97,14 @@ class CommentServiceTest {
         }
 
         @Test
-        @DisplayName("should allow commenting on soft-deleted company")
-        void shouldAllowCommentingOnSoftDeletedCompany() {
+        @DisplayName("should throw 404 for hard-deleted company")
+        void shouldThrow404ForHardDeletedCompany() {
             final CompanyDto company = createCompany("Deleted Corp");
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
-            final CommentDto result = commentService.addToCompany(company.id(), new CommentCreateDto("Still commenting"));
-
-            assertNotNull(result.id());
-            assertEquals(company.id(), result.companyId());
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> commentService.addToCompany(company.id(), new CommentCreateDto("Still commenting")));
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
 

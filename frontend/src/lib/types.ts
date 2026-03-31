@@ -10,7 +10,6 @@ export interface CompanyDto {
   readonly country: string | null;
   readonly phoneNumber: string | null;
   readonly description: string | null;
-  readonly deleted: boolean;
   readonly brevo: boolean;
   readonly hasLogo: boolean;
   readonly contactCount: number;
@@ -61,7 +60,6 @@ export interface ContactDto {
   readonly description: string | null;
   readonly companyId: string | null;
   readonly companyName: string | null;
-  readonly companyDeleted: boolean;
   readonly commentCount: number;
   readonly hasPhoto: boolean;
   readonly birthday: string | null;

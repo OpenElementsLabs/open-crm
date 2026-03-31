@@ -376,10 +376,6 @@ public class ContactService {
             final CompanyEntity company = companyRepository.findById(companyId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "Company not found: " + companyId));
-            if (company.isDeleted()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Cannot reference a soft-deleted company: " + companyId);
-            }
             entity.setCompany(company);
         } else {
             entity.setCompany(null);

@@ -52,7 +52,6 @@ class CompanyRepositoryTest {
             // THEN
             assertThat(found).isPresent();
             assertThat(found.get().getName()).isEqualTo("Open Elements GmbH");
-            assertThat(found.get().isDeleted()).isFalse();
             assertThat(found.get().getCreatedAt()).isNotNull();
             assertThat(found.get().getUpdatedAt()).isNotNull();
         }

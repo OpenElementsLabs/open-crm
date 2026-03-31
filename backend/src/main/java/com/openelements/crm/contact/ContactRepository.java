@@ -13,6 +13,14 @@ public interface ContactRepository extends JpaRepository<ContactEntity, UUID>,
         JpaSpecificationExecutor<ContactEntity> {
 
     /**
+     * Finds all contacts associated with the given company.
+     *
+     * @param companyId the company ID
+     * @return list of contacts
+     */
+    List<ContactEntity> findByCompanyId(UUID companyId);
+
+    /**
      * Checks if any contacts reference the given company.
      *
      * @param companyId the company ID

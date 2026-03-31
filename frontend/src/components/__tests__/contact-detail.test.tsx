@@ -37,7 +37,6 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     phoneNumber: "+49 123 456",
     companyId: "company-1",
     companyName: "Open Elements",
-    companyDeleted: false,
     commentCount: 2,
     hasPhoto: false,
     birthday: "1990-03-15",
@@ -112,14 +111,6 @@ describe("ContactDetail", () => {
     );
 
     expect(screen.queryByText("Brevo")).not.toBeInTheDocument();
-  });
-
-  it("should show archived badge when company is soft-deleted", () => {
-    renderWithProviders(
-      <ContactDetail contact={makeContact({ companyDeleted: true })} />,
-    );
-
-    expect(screen.getByText(S.detail.archivedBadge)).toBeInTheDocument();
   });
 
   it("should display Unbekannt when language is null", () => {

@@ -87,7 +87,7 @@ class ContactDtoTest {
         }
 
         @Test
-        @DisplayName("Resolves company name and deleted status when company is set")
+        @DisplayName("Resolves company name when company is set")
         void resolvesCompanyFieldsWhenCompanySet() throws Exception {
             ContactEntity entity = createEntity();
             CompanyEntity company = createCompanyEntity();
@@ -95,7 +95,6 @@ class ContactDtoTest {
             UUID companyId = UUID.randomUUID();
             setField(company, "id", companyId);
             company.setName("Big Corp");
-            company.setDeleted(true);
 
             entity.setCompany(company);
 
@@ -103,11 +102,10 @@ class ContactDtoTest {
 
             assertEquals(companyId, dto.companyId());
             assertEquals("Big Corp", dto.companyName());
-            assertTrue(dto.companyDeleted());
         }
 
         @Test
-        @DisplayName("Sets company fields to null/false when no company is set")
+        @DisplayName("Sets company fields to null when no company is set")
         void setsCompanyFieldsNullWhenNoCompany() throws Exception {
             ContactEntity entity = createEntity();
 
@@ -115,7 +113,6 @@ class ContactDtoTest {
 
             assertNull(dto.companyId());
             assertNull(dto.companyName());
-            assertFalse(dto.companyDeleted());
         }
 
         @Test

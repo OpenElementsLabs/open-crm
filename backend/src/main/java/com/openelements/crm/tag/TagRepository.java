@@ -12,7 +12,7 @@ public interface TagRepository extends JpaRepository<TagEntity, UUID> {
 
     boolean existsByNameIgnoreCase(String name);
 
-    @Query("SELECT COUNT(c) FROM CompanyEntity c JOIN c.tags t WHERE t.id = :tagId AND c.deleted = false")
+    @Query("SELECT COUNT(c) FROM CompanyEntity c JOIN c.tags t WHERE t.id = :tagId")
     long countActiveCompaniesByTagId(@Param("tagId") UUID tagId);
 
     @Query("SELECT COUNT(c) FROM ContactEntity c JOIN c.tags t WHERE t.id = :tagId")

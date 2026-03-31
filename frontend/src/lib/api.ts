@@ -50,7 +50,6 @@ export interface CompanyListParams {
   readonly page?: number;
   readonly size?: number;
   readonly name?: string;
-  readonly includeDeleted?: boolean;
   readonly brevo?: boolean;
   readonly tagIds?: readonly string[];
 }
@@ -60,7 +59,6 @@ export async function getCompanies(params: CompanyListParams = {}): Promise<Page
   if (params.page !== undefined) searchParams.set("page", String(params.page));
   if (params.size !== undefined) searchParams.set("size", String(params.size));
   if (params.name) searchParams.set("name", params.name);
-  if (params.includeDeleted) searchParams.set("includeDeleted", "true");
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
   if (params.tagIds) {
     for (const id of params.tagIds) {
@@ -125,27 +123,13 @@ export async function updateCompany(id: string, data: CompanyCreateDto): Promise
   return response.json();
 }
 
-export async function deleteCompany(id: string): Promise<void> {
-  const url = `${baseUrl()}/api/companies/${id}`;
+export async function deleteCompany(id: string, deleteContacts: boolean = false): Promise<void> {
+  const url = `${baseUrl()}/api/companies/${id}${deleteContacts ? "?deleteContacts=true" : ""}`;
   const response = await apiFetch(url, { method: "DELETE" });
 
   if (!response.ok) {
-    if (response.status === 409) {
-      throw new Error("CONFLICT");
-    }
     throw new Error(`Failed to delete company: ${response.status}`);
   }
-}
-
-export async function restoreCompany(id: string): Promise<CompanyDto> {
-  const url = `${baseUrl()}/api/companies/${id}/restore`;
-  const response = await apiFetch(url, { method: "POST" });
-
-  if (!response.ok) {
-    throw new Error(`Failed to restore company: ${response.status}`);
-  }
-
-  return response.json();
 }
 
 // Company Logo API
@@ -297,7 +281,6 @@ export async function deleteContactPhoto(id: string): Promise<void> {
 export function getCompanyExportUrl(params: CompanyListParams, columns: string[]): string {
   const searchParams = new URLSearchParams();
   if (params.name) searchParams.set("name", params.name);
-  if (params.includeDeleted) searchParams.set("includeDeleted", "true");
   if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
   if (params.tagIds) {
     for (const id of params.tagIds) {
@@ -329,7 +312,7 @@ export function getContactExportUrl(params: ContactListParams, columns: string[]
 }
 
 export async function getCompaniesForSelect(): Promise<CompanyDto[]> {
-  const data = await getCompanies({ includeDeleted: false, size: 1000 });
+  const data = await getCompanies({ size: 1000 });
   return data.content as CompanyDto[];
 }
 
