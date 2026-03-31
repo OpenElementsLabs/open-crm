@@ -68,5 +68,5 @@
 | 064 | Task frontend              | Task list, detail, create/edit views with sidebar nav, status/tag filters, company/contact selector   | —            | done   |
 | 065 | User entity                | Auto-created user on first OIDC login, avatar upload, sidebar display, replaces UserInfo              | —            | done   |
 | 066 | Task from detail           | Create Task button in company/contact detail views and list tables with entity pre-selection          | —            | done   |
-| 067 | Tag task count             | Task count column in tag list (OPEN/IN_PROGRESS only) with link to filtered task list                | —            | open   |
+| 067 | Tag task count             | Task count column in tag list (OPEN/IN_PROGRESS only) with link to filtered task list                | —            | done   |
 

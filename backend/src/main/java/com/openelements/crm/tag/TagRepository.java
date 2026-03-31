@@ -17,4 +17,7 @@ public interface TagRepository extends JpaRepository<TagEntity, UUID> {
 
     @Query("SELECT COUNT(c) FROM ContactEntity c JOIN c.tags t WHERE t.id = :tagId")
     long countContactsByTagId(@Param("tagId") UUID tagId);
+
+    @Query("SELECT COUNT(t) FROM TaskEntity t JOIN t.tags tag WHERE tag.id = :tagId AND t.status <> com.openelements.crm.task.TaskStatus.DONE")
+    long countActiveTasksByTagId(@Param("tagId") UUID tagId);
 }

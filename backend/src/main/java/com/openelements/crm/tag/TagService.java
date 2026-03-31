@@ -38,7 +38,8 @@ public class TagService {
         if (includeCounts) {
             return page.map(entity -> TagDto.fromEntity(entity,
                     tagRepository.countActiveCompaniesByTagId(entity.getId()),
-                    tagRepository.countContactsByTagId(entity.getId())));
+                    tagRepository.countContactsByTagId(entity.getId()),
+                    tagRepository.countActiveTasksByTagId(entity.getId())));
         }
         return page.map(TagDto::fromEntity);
     }

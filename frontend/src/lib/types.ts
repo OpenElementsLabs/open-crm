@@ -107,6 +107,7 @@ export interface TagDto {
   readonly updatedAt: string;
   readonly companyCount: number | null;
   readonly contactCount: number | null;
+  readonly taskCount: number | null;
 }
 
 export interface TagCreateDto {

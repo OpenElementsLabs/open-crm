@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record TagDto(UUID id, String name, String description, String color,
                      Instant createdAt, Instant updatedAt,
-                     Long companyCount, Long contactCount) {
+                     Long companyCount, Long contactCount, Long taskCount) {
 
     public static TagDto fromEntity(final TagEntity entity) {
         return new TagDto(
@@ -16,11 +16,13 @@ public record TagDto(UUID id, String name, String description, String color,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 null,
+                null,
                 null
         );
     }
 
-    public static TagDto fromEntity(final TagEntity entity, final long companyCount, final long contactCount) {
+    public static TagDto fromEntity(final TagEntity entity, final long companyCount,
+                                     final long contactCount, final long taskCount) {
         return new TagDto(
                 entity.getId(),
                 entity.getName(),
@@ -29,7 +31,8 @@ public record TagDto(UUID id, String name, String description, String color,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 companyCount,
-                contactCount
+                contactCount,
+                taskCount
         );
     }
 }
