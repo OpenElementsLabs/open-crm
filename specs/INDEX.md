@@ -60,4 +60,5 @@
 | 056 | Table cell actions         | Inline copy, mailto, open-in-tab, and navigation actions in company and contact table cells           | —            | done   |
 | 057 | shadcn tag combobox        | Replace custom TagMultiSelect with shadcn/ui Combobox, colored chips, integrated search               | —            | done   |
 | 058 | Entity description         | Optional free-text description field for companies and contacts, displayed in detail views             | —            | open   |
+| 059 | Page size selector         | User-selectable page size (10, 20, 50, 100, 200) for company, contact, and tag list tables            | —            | open   |
 
