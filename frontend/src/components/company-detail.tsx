@@ -126,6 +126,13 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
 
       <TagChips tagIds={company.tagIds} />
 
+      {company.description && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
+          <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{company.description}</p>
+        </div>
+      )}
+
       <Separator className="my-8" />
 
       <CompanyComments companyId={company.id} totalCount={company.commentCount} />

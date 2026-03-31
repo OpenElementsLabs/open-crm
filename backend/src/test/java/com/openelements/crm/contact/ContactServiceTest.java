@@ -65,11 +65,11 @@ class ContactServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null));
     }
 
     private ContactDto createContact(final String firstName, final String lastName, final UUID companyId) {
-        return contactService.create(new ContactCreateDto(firstName, lastName, null, null, null, null, null, companyId, null, null, null));
+        return contactService.create(new ContactCreateDto(firstName, lastName, null, null, null, null, null, companyId, null, null, null, null));
     }
 
     @Nested
@@ -106,6 +106,23 @@ class ContactServiceTest {
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> createContact("Jane", "Doe", fakeId));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should create contact with description")
+        void shouldCreateWithDescription() {
+            final ContactDto result = contactService.create(
+                    new ContactCreateDto("Jane", "Doe", null, null, null, null, null, null, null, null, "A key contact", null));
+
+            assertEquals("A key contact", result.description());
+        }
+
+        @Test
+        @DisplayName("should create contact without description")
+        void shouldCreateWithoutDescription() {
+            final ContactDto result = createContact("Jane", "Doe", null);
+
+            assertNull(result.description());
         }
 
         @Test
@@ -159,7 +176,7 @@ class ContactServiceTest {
             final ContactDto updated = contactService.update(contact.id(),
                     new ContactUpdateDto("New", "Last", "new@test.com", "CTO",
                             Gender.FEMALE, "https://linkedin.com/in/new", "+49 999",
-                            company.id(), Language.EN, java.time.LocalDate.of(1990, 3, 15), null));
+                            company.id(), Language.EN, java.time.LocalDate.of(1990, 3, 15), null, null));
 
             assertEquals("New", updated.firstName());
             assertEquals("Last", updated.lastName());
@@ -174,6 +191,29 @@ class ContactServiceTest {
         }
 
         @Test
+        @DisplayName("should update description")
+        void shouldUpdateDescription() {
+            final ContactDto contact = createContact("Jane", "Doe", null);
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, null, null, "Updated desc", null));
+
+            assertEquals("Updated desc", updated.description());
+        }
+
+        @Test
+        @DisplayName("should clear description when set to null")
+        void shouldClearDescription() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto("Jane", "Doe", null, null, null, null, null, null, null, null, "Initial desc", null));
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, null, null, null, null));
+
+            assertNull(updated.description());
+        }
+
+        @Test
         @DisplayName("should reject reassignment to soft-deleted company")
         void shouldRejectReassignmentToSoftDeletedCompany() {
             final CompanyDto company = createCompany("To Delete");
@@ -183,7 +223,7 @@ class ContactServiceTest {
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(contact.id(),
                             new ContactUpdateDto("Jane", "Doe", null, null, null, null, null,
-                                    company.id(), null, null, null)));
+                                    company.id(), null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -194,7 +234,7 @@ class ContactServiceTest {
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(fakeId,
-                            new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, null, null, null)));
+                            new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -283,8 +323,8 @@ class ContactServiceTest {
         @Test
         @DisplayName("searches by email")
         void searchesByEmail() {
-            contactService.create(new ContactCreateDto("A", "A", "a@example.com", null, null, null, null, null, null, null, null));
-            contactService.create(new ContactCreateDto("B", "B", "b@example.com", null, null, null, null, null, null, null, null));
+            contactService.create(new ContactCreateDto("A", "A", "a@example.com", null, null, null, null, null, null, null, null, null));
+            contactService.create(new ContactCreateDto("B", "B", "b@example.com", null, null, null, null, null, null, null, null, null));
 
             final var page = contactService.list("a@example", null, false, null, null, null, PageRequest.of(0, 20));
 
@@ -346,8 +386,8 @@ class ContactServiceTest {
         @Test
         @DisplayName("should filter by language DE")
         void shouldFilterByLanguageDE() {
-            contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null, null));
-            contactService.create(new ContactCreateDto("EN", "Contact", null, null, null, null, null, null, Language.EN, null, null));
+            contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null, null, null));
+            contactService.create(new ContactCreateDto("EN", "Contact", null, null, null, null, null, null, Language.EN, null, null, null));
 
             final var page = contactService.list(null, null, false, "DE", null, null, PageRequest.of(0, 20));
 
@@ -358,7 +398,7 @@ class ContactServiceTest {
         @Test
         @DisplayName("should filter by language UNKNOWN for null-language contacts")
         void shouldFilterByLanguageUnknown() {
-            contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null, null));
+            contactService.create(new ContactCreateDto("DE", "Contact", null, null, null, null, null, null, Language.DE, null, null, null));
             createContact("No", "Lang", null);
 
             final var page = contactService.list(null, null, false, "UNKNOWN", null, null, PageRequest.of(0, 20));
@@ -414,7 +454,7 @@ class ContactServiceTest {
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(contact.id(),
-                            new ContactUpdateDto("Changed", "Last", null, null, null, null, null, null, null, null, null)));
+                            new ContactUpdateDto("Changed", "Last", null, null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -422,14 +462,14 @@ class ContactServiceTest {
         @DisplayName("update rejects changed email on Brevo contact")
         void updateRejectsChangedEmailOnBrevoContact() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto("Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null));
+                    new ContactCreateDto("Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(contact.id(),
-                            new ContactUpdateDto("Jane", "Doe", "new@test.com", null, null, null, null, null, null, null, null)));
+                            new ContactUpdateDto("Jane", "Doe", "new@test.com", null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -437,14 +477,14 @@ class ContactServiceTest {
         @DisplayName("update rejects changed language on Brevo contact")
         void updateRejectsChangedLanguageOnBrevoContact() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto("Jane", "Doe", null, null, null, null, null, null, Language.DE, null, null));
+                    new ContactCreateDto("Jane", "Doe", null, null, null, null, null, null, Language.DE, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(contact.id(),
-                            new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, Language.EN, null, null)));
+                            new ContactUpdateDto("Jane", "Doe", null, null, null, null, null, null, Language.EN, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -452,14 +492,14 @@ class ContactServiceTest {
         @DisplayName("update lists all violated fields")
         void updateListsAllViolatedFields() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto("Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null));
+                    new ContactCreateDto("Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(contact.id(),
-                            new ContactUpdateDto("Changed", "Doe", "new@test.com", null, null, null, null, null, null, null, null)));
+                            new ContactUpdateDto("Changed", "Doe", "new@test.com", null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
             assertNotNull(ex.getReason());
             assert ex.getReason().contains("firstName");
@@ -470,13 +510,13 @@ class ContactServiceTest {
         @DisplayName("update succeeds with unchanged protected fields on Brevo contact")
         void updateSucceedsWithUnchangedProtectedFieldsOnBrevoContact() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto("Jane", "Doe", "jane@test.com", "Dev", null, null, null, null, Language.DE, null, null));
+                    new ContactCreateDto("Jane", "Doe", "jane@test.com", "Dev", null, null, null, null, Language.DE, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto("Jane", "Doe", "jane@test.com", "Manager", null, null, null, null, Language.DE, null, null));
+                    new ContactUpdateDto("Jane", "Doe", "jane@test.com", "Manager", null, null, null, null, Language.DE, null, null, null));
 
             assertEquals("Manager", updated.position());
         }
@@ -487,7 +527,7 @@ class ContactServiceTest {
             final ContactDto contact = createContact("Original", "Last", null);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto("Changed", "Last", null, null, null, null, null, null, null, null, null));
+                    new ContactUpdateDto("Changed", "Last", null, null, null, null, null, null, null, null, null, null));
 
             assertEquals("Changed", updated.firstName());
         }
@@ -501,7 +541,7 @@ class ContactServiceTest {
             contactRepository.saveAndFlush(entity);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto("Jane", "Doe", null, "Manager", null, null, null, null, null, null, null));
+                    new ContactUpdateDto("Jane", "Doe", null, "Manager", null, null, null, null, null, null, null, null));
 
             assertEquals("Manager", updated.position());
         }

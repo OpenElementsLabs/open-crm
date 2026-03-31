@@ -803,6 +803,45 @@ class BrevoSyncServiceTest {
             assertEquals("CEO", updated.getPosition());
             assertEquals("200", updated.getBrevoId());
         }
+
+        @Test
+        @DisplayName("description is NOT overwritten on re-import")
+        void descriptionIsNotOverwrittenOnReimport() {
+            final ContactEntity existing = new ContactEntity();
+            existing.setFirstName("Anna");
+            existing.setLastName("Smith");
+            existing.setBrevoId("200");
+            existing.setDescription("Important partner contact");
+            contactRepository.saveAndFlush(existing);
+
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "Anna");
+            attrs.put("NACHNAME", "Smith");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "anna@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+            assertEquals("Important partner contact", updated.getDescription());
+        }
+
+        @Test
+        @DisplayName("new Brevo import creates entity without description")
+        void newBrevoImportCreatesEntityWithoutDescription() {
+            when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
+            final Map<String, Object> attrs = new HashMap<>();
+            attrs.put("VORNAME", "New");
+            attrs.put("NACHNAME", "Contact");
+            when(brevoApiClient.fetchAllContacts()).thenReturn(
+                    List.of(makeBrevoContact(200L, "new@test.com", attrs)));
+
+            brevoSyncService.syncAll();
+
+            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
+            assertNull(contact.getDescription());
+        }
     }
 
     @Nested

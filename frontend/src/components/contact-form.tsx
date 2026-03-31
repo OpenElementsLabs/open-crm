@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { User, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -42,6 +43,7 @@ export function ContactForm({ contact }: ContactFormProps) {
   const [companyId, setCompanyId] = useState(contact?.companyId ?? "");
   const [language, setLanguage] = useState(contact?.language ?? "");
   const [birthday, setBirthday] = useState(contact?.birthday ?? "");
+  const [description, setDescription] = useState(contact?.description ?? "");
   const [tagIds, setTagIds] = useState<string[]>([...(contact?.tagIds ?? [])]);
   const [tagIdsChanged, setTagIdsChanged] = useState(false);
 
@@ -121,6 +123,7 @@ export function ContactForm({ contact }: ContactFormProps) {
       companyId: companyId && companyId !== "none" ? companyId : null,
       language: language && language !== "unknown" ? (language as "DE" | "EN") : null,
       birthday: birthday || null,
+      description: description.trim() || null,
       ...(tagIdsChanged ? { tagIds } : {}),
     };
 
@@ -298,6 +301,17 @@ export function ContactForm({ contact }: ContactFormProps) {
             <TagMultiSelect
               selectedIds={tagIds}
               onChange={(ids) => { setTagIds(ids); setTagIdsChanged(true); }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">{S.description}</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={S.descriptionPlaceholder}
+              rows={3}
             />
           </div>
 

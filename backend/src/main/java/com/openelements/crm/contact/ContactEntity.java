@@ -62,6 +62,9 @@ public class ContactEntity {
     @Column(name = "phone_number", length = 50)
     private String phoneNumber;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
@@ -355,6 +358,14 @@ public class ContactEntity {
 
     public void setTags(final Set<TagEntity> tags) {
         this.tags = tags;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     /**

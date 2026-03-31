@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -66,11 +67,11 @@ class CompanyServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null));
     }
 
     private void createContact(final String firstName, final String lastName, final UUID companyId) {
-        contactService.create(new ContactCreateDto(firstName, lastName, null, null, null, null, null, companyId, null, null, null));
+        contactService.create(new ContactCreateDto(firstName, lastName, null, null, null, null, null, companyId, null, null, null, null));
     }
 
     @Nested
@@ -97,6 +98,23 @@ class CompanyServiceTest {
             final CompanyDto fetched = companyService.getById(created.id());
             assertEquals(created.id(), fetched.id());
             assertEquals("Persisted Corp", fetched.name());
+        }
+
+        @Test
+        @DisplayName("should create company with description")
+        void shouldCreateWithDescription() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("Desc Corp", null, null, null, null, null, null, null, null, "A great company", null));
+
+            assertEquals("A great company", result.description());
+        }
+
+        @Test
+        @DisplayName("should create company without description")
+        void shouldCreateWithoutDescription() {
+            final CompanyDto result = createCompany("No Desc Corp");
+
+            assertNull(result.description());
         }
     }
 
@@ -139,7 +157,7 @@ class CompanyServiceTest {
 
             final CompanyDto updated = companyService.update(company.id(),
                     new CompanyUpdateDto("New Name", "new@test.com", "https://new.com",
-                            "New Street", "99", "54321", "Munich", "Austria", "+49 123", null));
+                            "New Street", "99", "54321", "Munich", "Austria", "+49 123", null, null));
 
             assertEquals("New Name", updated.name());
             assertEquals("new@test.com", updated.email());
@@ -152,12 +170,35 @@ class CompanyServiceTest {
         }
 
         @Test
+        @DisplayName("should update description")
+        void shouldUpdateDescription() {
+            final CompanyDto company = createCompany("Desc Co");
+
+            final CompanyDto updated = companyService.update(company.id(),
+                    new CompanyUpdateDto("Desc Co", null, null, null, null, null, null, null, null, "New description", null));
+
+            assertEquals("New description", updated.description());
+        }
+
+        @Test
+        @DisplayName("should clear description when set to null")
+        void shouldClearDescription() {
+            final CompanyDto company = companyService.create(
+                    new CompanyCreateDto("Desc Co", null, null, null, null, null, null, null, null, "Initial desc", null));
+
+            final CompanyDto updated = companyService.update(company.id(),
+                    new CompanyUpdateDto("Desc Co", null, null, null, null, null, null, null, null, null, null));
+
+            assertNull(updated.description());
+        }
+
+        @Test
         @DisplayName("should throw 404 for nonexistent ID")
         void shouldThrow404ForNonexistentId() {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> companyService.update(fakeId, new CompanyUpdateDto("Name", null, null, null, null, null, null, null, null, null)));
+                    () -> companyService.update(fakeId, new CompanyUpdateDto("Name", null, null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }

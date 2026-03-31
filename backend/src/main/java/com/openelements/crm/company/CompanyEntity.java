@@ -62,6 +62,9 @@ public class CompanyEntity {
     @Column(name = "phone_number", length = 255)
     private String phoneNumber;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "logo", length = ImageData.MAX_IMAGE_SIZE)
     private byte[] logo;
@@ -329,6 +332,14 @@ public class CompanyEntity {
 
     public void setTags(final Set<TagEntity> tags) {
         this.tags = tags;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description = description;
     }
 
     /**

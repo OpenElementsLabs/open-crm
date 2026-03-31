@@ -161,6 +161,13 @@ export function ContactDetail({ contact }: ContactDetailProps) {
 
       <TagChips tagIds={contact.tagIds} />
 
+      {contact.description && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
+          <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{contact.description}</p>
+        </div>
+      )}
+
       <Separator className="my-8" />
 
       <ContactComments contactId={contact.id} totalCount={contact.commentCount} />

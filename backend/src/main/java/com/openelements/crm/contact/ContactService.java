@@ -54,7 +54,7 @@ public class ContactService {
         applyFields(entity, request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),
-                request.birthday());
+                request.birthday(), request.description());
         if (request.tagIds() != null) {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
@@ -111,7 +111,7 @@ public class ContactService {
         applyFields(entity, request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),
-                request.birthday());
+                request.birthday(), request.description());
         if (request.tagIds() != null) {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
@@ -350,7 +350,8 @@ public class ContactService {
                               final String email, final String position,
                               final Gender gender, final String linkedInUrl,
                               final String phoneNumber, final UUID companyId,
-                              final Language language, final java.time.LocalDate birthday) {
+                              final Language language, final java.time.LocalDate birthday,
+                              final String description) {
         entity.setFirstName(firstName);
         entity.setLastName(lastName);
         entity.setEmail(email);
@@ -360,6 +361,7 @@ public class ContactService {
         entity.setPhoneNumber(phoneNumber);
         entity.setLanguage(language);
         entity.setBirthday(birthday);
+        entity.setDescription(description);
 
         if (companyId != null) {
             final CompanyEntity company = companyRepository.findById(companyId)
