@@ -71,4 +71,4 @@
 | 067 | Tag task count             | Task count column in tag list (OPEN/IN_PROGRESS only) with link to filtered task list                | —            | done   |
 | 068 | Tooltips                   | shadcn/ui Tooltip on all icon-only action buttons across lists, details, comments, sidebar            | —            | done   |
 | 069 | Newsletter status          | Read-only receivesNewsletter boolean from Brevo DOUBLE_OPT-IN + emailBlacklisted, detail view tag    | —            | open   |
-
+| 070 | Company hard delete        | Remove soft-delete/archive, hard-delete with dialog: delete contacts too or keep them (unlink)        | —            | open   |
