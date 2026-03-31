@@ -3,6 +3,7 @@ import { Montserrat, Lato } from "next/font/google";
 import { Sidebar } from "@/components/sidebar";
 import { SessionProvider } from "@/components/session-provider";
 import { LanguageProvider } from "@/lib/i18n/language-context";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -29,10 +30,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="antialiased">
         <SessionProvider>
           <LanguageProvider>
-            <Sidebar />
-            <main className="md:ml-64 h-screen overflow-y-auto bg-oe-white">
-              <div className="p-6 md:p-8">{children}</div>
-            </main>
+            <TooltipProvider>
+              <Sidebar />
+              <main className="md:ml-64 h-screen overflow-y-auto bg-oe-white">
+                <div className="p-6 md:p-8">{children}</div>
+              </main>
+            </TooltipProvider>
           </LanguageProvider>
         </SessionProvider>
       </body>

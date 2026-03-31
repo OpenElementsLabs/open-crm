@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -166,19 +167,29 @@ export function TagList() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Link href={`/tags/${tag.id}/edit`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-oe-gray hover:text-oe-dark">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-oe-gray hover:text-oe-red"
-                          onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link href={`/tags/${tag.id}/edit`}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-oe-gray hover:text-oe-dark">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent>{t.tags.actions.edit}</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-oe-gray hover:text-oe-red"
+                              onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>{t.tags.actions.delete}</TooltipContent>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>

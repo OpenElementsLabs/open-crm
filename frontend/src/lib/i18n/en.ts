@@ -18,6 +18,7 @@ export const en: Translations = {
   sidebar: {
     uploadAvatar: "Change avatar",
     removeAvatar: "Remove avatar",
+    menu: "Menu",
   },
   nav: {
     companies: "Companies",
@@ -394,6 +395,10 @@ export const en: Translations = {
       colorInvalid: "Invalid color format",
       save: "Save",
       cancel: "Cancel",
+    },
+    actions: {
+      edit: "Edit",
+      delete: "Delete",
     },
     deleteDialog: {
       title: "Delete Tag",

@@ -69,5 +69,5 @@
 | 065 | User entity                | Auto-created user on first OIDC login, avatar upload, sidebar display, replaces UserInfo              | —            | done   |
 | 066 | Task from detail           | Create Task button in company/contact detail views and list tables with entity pre-selection          | —            | done   |
 | 067 | Tag task count             | Task count column in tag list (OPEN/IN_PROGRESS only) with link to filtered task list                | —            | done   |
-| 068 | Tooltips                   | shadcn/ui Tooltip on all icon-only action buttons across lists, details, comments, sidebar            | —            | open   |
+| 068 | Tooltips                   | shadcn/ui Tooltip on all icon-only action buttons across lists, details, comments, sidebar            | —            | done   |
 

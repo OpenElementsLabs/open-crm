@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Check, ExternalLink, Mail, Phone } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface DetailFieldProps {
   readonly label: string;
@@ -68,48 +69,64 @@ export function DetailField({
         {hasActions && (
           <span className="inline-flex gap-0.5 shrink-0 mt-0.5">
             {copyable && (
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
-                title="Copy"
-              >
-                {copied ? (
-                  <Check className="h-3.5 w-3.5 text-oe-green" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5" />
-                )}
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
+                  >
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5 text-oe-green" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Copy</TooltipContent>
+              </Tooltip>
             )}
             {linkable && (
-              <button
-                type="button"
-                onClick={handleOpenUrl}
-                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
-                title="Open"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleOpenUrl}
+                    className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Open</TooltipContent>
+              </Tooltip>
             )}
             {mailable && (
-              <button
-                type="button"
-                onClick={handleMailto}
-                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
-                title="Email"
-              >
-                <Mail className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleMailto}
+                    className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
+                  >
+                    <Mail className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Email</TooltipContent>
+              </Tooltip>
             )}
             {callable && (
-              <button
-                type="button"
-                onClick={handleTel}
-                className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
-                title="Call"
-              >
-                <Phone className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleTel}
+                    className="text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Call</TooltipContent>
+              </Tooltip>
             )}
           </span>
         )}

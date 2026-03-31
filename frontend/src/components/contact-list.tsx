@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -320,51 +321,67 @@ export function ContactList() {
                     <EmailCell value={contact.email} />
                     <CompanyNameCell name={contact.companyName} companyId={contact.companyId} />
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={S.detail.edit}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/contacts/${contact.id}/edit`);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4 text-oe-blue" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={t.companies.comments.addTitle}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCommentTarget(contact);
-                        }}
-                      >
-                        <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={S.detail.createTask}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/tasks/new?contactId=${contact.id}`);
-                        }}
-                      >
-                        <CheckSquare className="h-4 w-4 text-oe-blue" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={S.detail.delete}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteError(null);
-                          setDeleteTarget(contact);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-oe-red" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/contacts/${contact.id}/edit`);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 text-oe-blue" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.detail.edit}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCommentTarget(contact);
+                            }}
+                          >
+                            <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t.companies.comments.addTitle}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/tasks/new?contactId=${contact.id}`);
+                            }}
+                          >
+                            <CheckSquare className="h-4 w-4 text-oe-blue" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.detail.createTask}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteError(null);
+                              setDeleteTarget(contact);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-oe-red" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.detail.delete}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}

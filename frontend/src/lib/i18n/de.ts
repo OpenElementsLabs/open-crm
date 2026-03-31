@@ -16,6 +16,7 @@ export const de = {
   sidebar: {
     uploadAvatar: "Avatar ändern",
     removeAvatar: "Avatar entfernen",
+    menu: "Menü",
   },
   nav: {
     companies: "Firmen",
@@ -392,6 +393,10 @@ export const de = {
       colorInvalid: "Ungültiges Farbformat",
       save: "Speichern",
       cancel: "Abbrechen",
+    },
+    actions: {
+      edit: "Bearbeiten",
+      delete: "Löschen",
     },
     deleteDialog: {
       title: "Tag löschen",
