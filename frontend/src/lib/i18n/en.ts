@@ -113,6 +113,13 @@ export const en: Translations = {
       sending: "Sending...",
       errorTitle: "Error",
       errorGeneric: "The comment could not be saved. Please try again.",
+      deleteDialog: {
+        title: "Delete Comment",
+        description:
+          "Do you really want to delete this comment? This action cannot be undone.",
+        confirm: "Delete",
+        cancel: "Cancel",
+      },
     },
     filter: {
       name: "Filter by name",

@@ -111,6 +111,13 @@ export const de = {
       sending: "Wird gesendet...",
       errorTitle: "Fehler",
       errorGeneric: "Der Kommentar konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      deleteDialog: {
+        title: "Kommentar löschen",
+        description:
+          "Möchten Sie diesen Kommentar wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        confirm: "Löschen",
+        cancel: "Abbrechen",
+      },
     },
     filter: {
       name: "Nach Name filtern",

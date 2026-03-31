@@ -397,6 +397,18 @@ export async function createContactComment(
   return response.json();
 }
 
+export async function deleteComment(commentId: string): Promise<void> {
+  const url = `${baseUrl()}/api/comments/${commentId}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (response.status === 404) {
+    return; // Comment already deleted
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to delete comment: ${response.status}`);
+  }
+}
+
 // Brevo Sync API
 
 export async function getBrevoSettings(): Promise<BrevoSettingsDto> {

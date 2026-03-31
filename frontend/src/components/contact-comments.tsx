@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getContactComments, createContactComment } from "@/lib/api";
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { getContactComments, createContactComment, deleteComment } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -39,6 +40,8 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchComments = useCallback(async (pageNum: number, append: boolean) => {
     if (append) {
@@ -88,6 +91,19 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
     fetchComments(page + 1, true);
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteComment(deleteTarget);
+      setComments((prev) => prev.filter((c) => c.id !== deleteTarget));
+      setDisplayCount((prev) => (prev !== undefined && prev > 0 ? prev - 1 : prev));
+      setDeleteTarget(null);
+      setDeleteError(null);
+    } catch {
+      setDeleteError(S.deleteDialog.title);
+    }
+  };
+
   return (
     <Card className="border-oe-gray-light">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -123,9 +139,19 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
           <div className="space-y-4">
             {comments.map((comment) => (
               <div key={comment.id} className="border-b border-oe-gray-light pb-4 last:border-b-0">
-                <p className="text-xs text-oe-gray-mid">
-                  {comment.author} &middot; {formatDate(comment.createdAt, "de")}
-                </p>
+                <div className="flex items-start justify-between">
+                  <p className="text-xs text-oe-gray-mid">
+                    {comment.author} &middot; {formatDate(comment.createdAt, "de")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
+                    className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2"
+                    title={S.deleteDialog.title}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
                 <p className="mt-1 text-sm text-oe-black whitespace-pre-wrap break-words">
                   {comment.text}
                 </p>
@@ -159,6 +185,17 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
         sendingLabel={S.sending}
         errorTitle={S.errorTitle}
         errorMessage={S.errorGeneric}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteError(null); } }}
+        title={S.deleteDialog.title}
+        description={S.deleteDialog.description}
+        confirmLabel={S.deleteDialog.confirm}
+        cancelLabel={S.deleteDialog.cancel}
+        onConfirm={handleDelete}
+        error={deleteError}
       />
     </Card>
   );
