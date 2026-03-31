@@ -142,7 +142,7 @@ function ContactPrintContent() {
                     {contact.hasPhoto ? (
                       <img
                         src={getContactPhotoUrl(contact.id)}
-                        alt={`${contact.firstName} ${contact.lastName}`}
+                        alt={`${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`}
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (
@@ -150,7 +150,7 @@ function ContactPrintContent() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium whitespace-normal break-words">
-                    {`${contact.firstName} ${contact.lastName}`.trim()}
+                    {`${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`.trim()}
                   </TableCell>
                   <TableCell className="text-oe-gray-mid whitespace-normal break-words">
                     {contact.email ?? "\u2014"}

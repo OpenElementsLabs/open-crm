@@ -33,6 +33,7 @@ export function ContactForm({ contact }: ContactFormProps) {
   const isEdit = !!contact;
   const isBrevoEdit = isEdit && (contact?.brevo === true);
 
+  const [title, setTitle] = useState(contact?.title ?? "");
   const [firstName, setFirstName] = useState(contact?.firstName ?? "");
   const [lastName, setLastName] = useState(contact?.lastName ?? "");
   const [email, setEmail] = useState(contact?.email ?? "");
@@ -113,6 +114,7 @@ export function ContactForm({ contact }: ContactFormProps) {
     if (hasError) return;
 
     const data: ContactCreateDto = {
+      title: title.trim() || null,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.trim() || null,
@@ -163,7 +165,16 @@ export function ContactForm({ contact }: ContactFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 grid-cols-[1fr_2fr_2fr]">
+            <div>
+              <Label htmlFor="title">{S.title}</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={S.titlePlaceholder}
+              />
+            </div>
             <div>
               <Label htmlFor="firstName">{S.firstName} *</Label>
               <Input

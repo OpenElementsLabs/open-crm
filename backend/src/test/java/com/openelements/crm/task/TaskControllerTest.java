@@ -66,7 +66,7 @@ class TaskControllerTest {
     }
 
     private ContactDto createContact(final String firstName, final String lastName) {
-        return contactService.create(new ContactCreateDto(firstName, lastName, null, null, null, null, null, null, null, null, null, null));
+        return contactService.create(new ContactCreateDto(null, firstName, lastName, null, null, null, null, null, null, null, null, null, null));
     }
 
     @Nested

@@ -307,7 +307,7 @@ export function ContactList() {
                       {contact.hasPhoto ? (
                         <img
                           src={getContactPhotoUrl(contact.id)}
-                          alt={`${contact.firstName} ${contact.lastName}`}
+                          alt={`${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`}
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
@@ -315,7 +315,7 @@ export function ContactList() {
                       )}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {`${contact.firstName} ${contact.lastName}`.trim()}
+                      {`${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`.trim()}
                     </TableCell>
                     <EmailCell value={contact.email} />
                     <CompanyNameCell name={contact.companyName} companyId={contact.companyId} />
@@ -416,7 +416,7 @@ export function ContactList() {
         title={S.deleteDialog.title}
         description={S.deleteDialog.description.replace(
           "{name}",
-          deleteTarget ? `${deleteTarget.firstName} ${deleteTarget.lastName}` : "",
+          deleteTarget ? `${deleteTarget.title ? deleteTarget.title + " " : ""}${deleteTarget.firstName} ${deleteTarget.lastName}` : "",
         )}
         confirmLabel={S.deleteDialog.confirm}
         cancelLabel={S.deleteDialog.cancel}

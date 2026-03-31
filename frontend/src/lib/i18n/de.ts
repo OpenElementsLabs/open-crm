@@ -169,6 +169,8 @@ export const de = {
     form: {
       createTitle: "Neuen Kontakt erstellen",
       editTitle: "Kontakt bearbeiten",
+      title: "Titel",
+      titlePlaceholder: "z.B. Dr.",
       firstName: "Vorname",
       firstNamePlaceholder: "Vorname eingeben",
       firstNameRequired: "Vorname ist erforderlich",
@@ -286,6 +288,7 @@ export const de = {
       updatedAt: "Aktualisiert am",
     },
     contactColumns: {
+      title: "Titel",
       firstName: "Vorname",
       lastName: "Nachname",
       email: "E-Mail",

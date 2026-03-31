@@ -71,7 +71,7 @@ class CompanyServiceTest {
     }
 
     private void createContact(final String firstName, final String lastName, final UUID companyId) {
-        contactService.create(new ContactCreateDto(firstName, lastName, null, null, null, null, null, companyId, null, null, null, null));
+        contactService.create(new ContactCreateDto(null, firstName, lastName, null, null, null, null, null, companyId, null, null, null, null));
     }
 
     @Nested

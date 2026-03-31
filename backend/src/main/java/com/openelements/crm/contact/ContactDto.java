@@ -10,6 +10,7 @@ import java.util.UUID;
 @Schema(description = "Contact response")
 public record ContactDto(
         @Schema(description = "Contact ID", requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
+        @Schema(description = "Title (e.g. Dr., Prof.)") String title,
         @Schema(description = "First name", requiredMode = Schema.RequiredMode.REQUIRED) String firstName,
         @Schema(description = "Last name", requiredMode = Schema.RequiredMode.REQUIRED) String lastName,
         @Schema(description = "Email address") String email,
@@ -40,6 +41,7 @@ public record ContactDto(
                 .toList();
         return new ContactDto(
                 entity.getId(),
+                entity.getTitle(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),

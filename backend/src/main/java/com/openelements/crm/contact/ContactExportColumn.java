@@ -7,6 +7,7 @@ import java.util.function.Function;
  */
 public enum ContactExportColumn {
 
+    TITLE("title", dto -> dto.title()),
     FIRST_NAME("firstName", dto -> dto.firstName()),
     LAST_NAME("lastName", dto -> dto.lastName()),
     EMAIL("email", dto -> dto.email()),

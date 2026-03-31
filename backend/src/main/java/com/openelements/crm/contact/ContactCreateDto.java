@@ -24,6 +24,10 @@ import java.util.UUID;
  */
 @Schema(description = "Request body for creating a new contact")
 public record ContactCreateDto(
+        @Size(max = 255)
+        @Schema(description = "Title (e.g. Dr., Prof.)", example = "Dr.")
+        String title,
+
         @NotBlank(message = "First name must not be blank")
         @Size(max = 255)
         @Schema(description = "First name", example = "Hendrik", requiredMode = Schema.RequiredMode.REQUIRED)

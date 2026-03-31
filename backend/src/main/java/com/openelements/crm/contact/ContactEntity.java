@@ -40,6 +40,9 @@ public class ContactEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    @Column(name = "title", length = 255)
+    private String title;
+
     @Column(name = "first_name", nullable = false, length = 255)
     private String firstName;
 
@@ -116,6 +119,14 @@ public class ContactEntity {
      */
     public UUID getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(final String title) {
+        this.title = title;
     }
 
     /**

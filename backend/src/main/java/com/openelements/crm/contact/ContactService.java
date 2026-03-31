@@ -55,7 +55,7 @@ public class ContactService {
     public ContactDto create(final ContactCreateDto request) {
         Objects.requireNonNull(request, "request must not be null");
         final ContactEntity entity = new ContactEntity();
-        applyFields(entity, request.firstName(), request.lastName(), request.email(),
+        applyFields(entity, request.title(), request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday(), request.description());
@@ -112,7 +112,7 @@ public class ContactService {
                     + " are managed by Brevo and cannot be modified");
             }
         }
-        applyFields(entity, request.firstName(), request.lastName(), request.email(),
+        applyFields(entity, request.title(), request.firstName(), request.lastName(), request.email(),
                 request.position(), request.gender(), request.linkedInUrl(),
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday(), request.description());
@@ -169,6 +169,7 @@ public class ContactService {
                 spec = spec.and((root, query, cb) -> {
                     final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
                     return cb.or(
+                        cb.like(cb.lower(root.get("title")), pattern),
                         cb.like(cb.lower(root.get("firstName")), pattern),
                         cb.like(cb.lower(root.get("lastName")), pattern),
                         cb.like(cb.lower(root.get("email")), pattern),
@@ -244,6 +245,7 @@ public class ContactService {
                 spec = spec.and((root, query, cb) -> {
                     final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
                     return cb.or(
+                        cb.like(cb.lower(root.get("title")), pattern),
                         cb.like(cb.lower(root.get("firstName")), pattern),
                         cb.like(cb.lower(root.get("lastName")), pattern),
                         cb.like(cb.lower(root.get("email")), pattern),
@@ -351,12 +353,14 @@ public class ContactService {
     }
 
     private void applyFields(final ContactEntity entity,
+                              final String title,
                               final String firstName, final String lastName,
                               final String email, final String position,
                               final Gender gender, final String linkedInUrl,
                               final String phoneNumber, final UUID companyId,
                               final Language language, final java.time.LocalDate birthday,
                               final String description) {
+        entity.setTitle(title);
         entity.setFirstName(firstName);
         entity.setLastName(lastName);
         entity.setEmail(email);

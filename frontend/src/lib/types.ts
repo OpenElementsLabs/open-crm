@@ -50,6 +50,7 @@ export interface CommentCreateDto {
 
 export interface ContactDto {
   readonly id: string;
+  readonly title: string | null;
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string | null;
@@ -72,6 +73,7 @@ export interface ContactDto {
 }
 
 export interface ContactCreateDto {
+  readonly title?: string | null;
   readonly firstName: string;
   readonly lastName: string;
   readonly email?: string | null;

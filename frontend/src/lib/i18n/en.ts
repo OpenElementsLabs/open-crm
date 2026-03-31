@@ -171,6 +171,8 @@ export const en: Translations = {
     form: {
       createTitle: "Create New Contact",
       editTitle: "Edit Contact",
+      title: "Title",
+      titlePlaceholder: "e.g. Dr.",
       firstName: "First Name",
       firstNamePlaceholder: "Enter first name",
       firstNameRequired: "First name is required",
@@ -288,6 +290,7 @@ export const en: Translations = {
       updatedAt: "Updated At",
     },
     contactColumns: {
+      title: "Title",
       firstName: "First Name",
       lastName: "Last Name",
       email: "Email",

@@ -70,7 +70,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
     }
   };
 
-  const fullName = `${contact.firstName} ${contact.lastName}`;
+  const fullName = `${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`;
 
   return (
     <div>
