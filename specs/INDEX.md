@@ -75,3 +75,4 @@
 | 071 | Task comments              | Add comments to tasks using shared CommentEntity, three-way XOR constraint, detail view UI            | —            | done   |
 | 072 | Fix logout flow            | Fix session cookie deletion under HTTPS and document Authentik Logout URI configuration               | —            | done   |
 | 073 | Custom login page          | Branded sign-in page with OE design, error handling, and responsive dark-box layout                   | —            | done   |
+| 074 | Admin page rework          | Bearer Token card, unified card styling, remove duplicate headings, token validity display            | —            | open   |
