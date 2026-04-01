@@ -4,6 +4,7 @@ declare module "next-auth" {
   interface Session {
     accessToken?: string;
     idToken?: string;
+    expiresAt?: number;
   }
 }
 
@@ -103,6 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const t = token as Record<string, unknown>;
       session.accessToken = t.accessToken as string | undefined;
       session.idToken = t.idToken as string | undefined;
+      session.expiresAt = t.expiresAt as number | undefined;
       if (t.error === "RefreshTokenError") {
         session.accessToken = undefined;
       }

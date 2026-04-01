@@ -12,7 +12,7 @@ export function HealthStatus({ healthy }: HealthStatusProps) {
   const statusText = healthy ? t.health.statusUp : t.health.statusDown;
 
   return (
-    <Card className="w-full max-w-md border-oe-gray-light shadow-md">
+    <Card className="border-oe-gray-light">
       <CardHeader>
         <CardTitle className="font-heading text-lg text-oe-dark">{t.health.title}</CardTitle>
       </CardHeader>

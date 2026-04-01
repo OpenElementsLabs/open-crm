@@ -97,14 +97,11 @@ export function BrevoSync() {
   };
 
   return (
-    <div>
-      <h1 className="mb-6 font-heading text-2xl font-bold text-oe-dark">{S.title}</h1>
-
-      <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
         {/* Settings Card */}
-        <Card>
+        <Card className="border-oe-gray-light">
           <CardHeader>
-            <CardTitle className="text-oe-dark">{S.settings.title}</CardTitle>
+            <CardTitle className="font-heading text-lg text-oe-dark">{S.settings.title}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -181,9 +178,9 @@ export function BrevoSync() {
         </Card>
 
         {/* Sync Card */}
-        <Card>
+        <Card className="border-oe-gray-light">
           <CardHeader>
-            <CardTitle className="text-oe-dark">{S.sync.title}</CardTitle>
+            <CardTitle className="font-heading text-lg text-oe-dark">{S.sync.title}</CardTitle>
           </CardHeader>
           <CardContent>
             {!apiKeyConfigured ? (
@@ -256,7 +253,6 @@ export function BrevoSync() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

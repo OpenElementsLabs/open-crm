@@ -33,6 +33,16 @@ export const de = {
   },
   admin: {
     title: "Administration",
+    token: {
+      title: "Bearer Token",
+      show: "Anzeigen",
+      hide: "Verbergen",
+      copy: "Kopieren",
+      copied: "Kopiert",
+      validFor: "Gültig für",
+      expired: "Abgelaufen",
+      noToken: "Kein Token verfügbar",
+    },
   },
   health: {
     title: "Systemstatus",
