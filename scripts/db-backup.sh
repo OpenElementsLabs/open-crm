@@ -27,8 +27,13 @@ if [ -n "${S3_BUCKET}" ]; then
   S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX:-backups}/opencrm_${TIMESTAMP}.sql.gz"
   echo "[$(date)] Uploading to ${S3_PATH}..."
 
+  S3_ENDPOINT_ARG=""
+  if [ -n "${S3_ENDPOINT}" ]; then
+    S3_ENDPOINT_ARG="--endpoint-url ${S3_ENDPOINT}"
+  fi
+
   aws s3 cp "${BACKUP_FILE}" "${S3_PATH}" \
-    --endpoint-url "${S3_ENDPOINT}" \
+    ${S3_ENDPOINT_ARG} \
     --no-progress
 
   echo "[$(date)] Upload complete."
@@ -40,14 +45,14 @@ if [ -n "${S3_BUCKET}" ]; then
   CUTOFF_DATE=$(date -d "-${RETENTION_DAYS} days" +%Y%m%d 2>/dev/null || date -v-${RETENTION_DAYS}d +%Y%m%d)
 
   aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX:-backups}/" \
-    --endpoint-url "${S3_ENDPOINT}" \
+    ${S3_ENDPOINT_ARG} \
     | while read -r line; do
       FILE=$(echo "$line" | awk '{print $4}')
       FILE_DATE=$(echo "$FILE" | grep -o '[0-9]\{8\}' | head -1)
       if [ -n "$FILE_DATE" ] && [ "$FILE_DATE" -lt "$CUTOFF_DATE" ] 2>/dev/null; then
         echo "[$(date)] Deleting old backup: ${FILE}"
         aws s3 rm "s3://${S3_BUCKET}/${S3_PREFIX:-backups}/${FILE}" \
-          --endpoint-url "${S3_ENDPOINT}"
+          ${S3_ENDPOINT_ARG}
       fi
     done
 
