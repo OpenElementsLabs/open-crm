@@ -125,6 +125,71 @@ erDiagram
     TASKS }o--o{ TAGS : "tagged"
 ```
 
+## Authentication & Authorization (OIDC)
+
+The application uses OpenID Connect (OIDC) for authentication with a clear separation of concerns between frontend and backend.
+
+### OIDC Provider
+
+- **Production:** Authentik (self-hosted identity provider)
+- **Local development:** mock-oauth2-server (started automatically via Docker Compose override, no configuration needed)
+
+### Frontend Authentication (Auth.js v5)
+
+- **Provider:** Generic OIDC provider configured via environment variables (`OIDC_ISSUER_URI`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`)
+- **Session strategy:** JWT (stateless, no server-side session store)
+- **Scopes:** `openid profile email offline_access`
+- **Middleware:** Next.js middleware (`src/middleware.ts`) runs the Auth.js `authorized` callback on every route except `/api/auth/*` and `/api/logout`. Unauthenticated users are redirected to the OIDC login page.
+- **Token lifecycle:** On initial sign-in, access token, refresh token, and ID token are stored in the JWT session. Before each request, the token expiry is checked; expired tokens are refreshed automatically via the OIDC provider's token endpoint using the refresh token. Failed refreshes set a `RefreshTokenError` flag that clears the access token from the session.
+- **User info:** Name, email, and profile picture are extracted from the OIDC profile on sign-in and stored in the JWT session.
+
+### API Proxy (Token Injection)
+
+- The frontend never exposes the access token to the browser. All API calls from the frontend go through a server-side catch-all Route Handler (`app/api/[...path]/route.ts`).
+- The Route Handler reads the Auth.js session server-side, extracts the access token, and sets it as an `Authorization: Bearer` header before forwarding the request to the backend at `BACKEND_URL`.
+- Query parameters, request body, `Content-Type`, and `Accept` headers are forwarded transparently.
+
+### Backend Authentication (Spring Security)
+
+- **Configuration:** `SecurityConfig.java` sets up a `SecurityFilterChain` with OAuth2 Resource Server and JWT validation.
+- **JWT validation:** The backend validates JWT signatures against the OIDC provider's JWKS endpoint (`OIDC_JWK_SET_URI`). It does not communicate with the OIDC provider beyond fetching the JWK set.
+- **Public endpoints:** `/api/health/**`, `/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**` are accessible without authentication.
+- **All other endpoints** require a valid JWT Bearer token.
+- **CSRF:** Disabled (stateless API with Bearer token authentication).
+
+### Logout
+
+- The logout route (`/api/logout`) clears the Auth.js session cookie and redirects to the OIDC provider's `end_session_endpoint` (discovered via `.well-known/openid-configuration`) with the `id_token_hint` for provider-side session termination.
+
+### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Frontend as Next.js Frontend
+    participant OIDC as OIDC Provider<br/>(Authentik / mock-oauth2)
+    participant Backend as Spring Boot Backend
+
+    Browser->>Frontend: GET /companies
+    Frontend->>Frontend: Middleware checks session
+    Frontend-->>Browser: Redirect to OIDC login
+    Browser->>OIDC: Login (username/password)
+    OIDC-->>Browser: Redirect with auth code
+    Browser->>Frontend: Callback with auth code
+    Frontend->>OIDC: Exchange code for tokens
+    OIDC-->>Frontend: access_token, refresh_token, id_token
+    Frontend->>Frontend: Store tokens in JWT session cookie
+    Frontend-->>Browser: Redirect to /companies
+
+    Browser->>Frontend: GET /api/companies (via proxy)
+    Frontend->>Frontend: Read session, extract access_token
+    Frontend->>Backend: GET /api/companies + Authorization: Bearer <token>
+    Backend->>OIDC: Fetch JWKS (cached)
+    Backend->>Backend: Validate JWT signature
+    Backend-->>Frontend: 200 JSON response
+    Frontend-->>Browser: Forward response
+```
+
 ## Key Architectural Decisions
 
 - **Hard-delete for companies** — Companies are permanently deleted with a confirmation dialog. Contacts linked to a company block deletion (409 Conflict).
