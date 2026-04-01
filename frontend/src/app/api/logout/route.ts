@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth, oidcIssuer } from "@/auth";
 
-export async function GET() {
+const SESSION_COOKIE_PREFIXES = [
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+];
+
+export async function GET(req: NextRequest) {
   const session = await auth();
   const idToken = session?.idToken;
 
@@ -29,17 +34,28 @@ export async function GET() {
     }
   }
 
-  // Clear the Auth.js session cookie by redirecting through the signout endpoint
-  // Then redirect to the provider's end-session endpoint
   const response = NextResponse.redirect(endSessionUrl);
-  // Delete the Auth.js session cookie with matching attributes for both HTTP and HTTPS
+
+  // Delete all Auth.js session cookies, including chunked cookies (.0, .1, .2, ...)
+  // Auth.js splits large JWT sessions across multiple cookies when they exceed 4KB
   const cookieOptions = {
     path: "/",
     secure: true,
     httpOnly: true,
     sameSite: "lax" as const,
   };
-  response.cookies.delete({ name: "authjs.session-token", ...cookieOptions });
-  response.cookies.delete({ name: "__Secure-authjs.session-token", ...cookieOptions });
+
+  for (const prefix of SESSION_COOKIE_PREFIXES) {
+    // Delete the base cookie
+    response.cookies.delete({ name: prefix, ...cookieOptions });
+
+    // Delete any chunked cookies found in the request
+    for (const cookie of req.cookies.getAll()) {
+      if (cookie.name.startsWith(`${prefix}.`)) {
+        response.cookies.delete({ name: cookie.name, ...cookieOptions });
+      }
+    }
+  }
+
   return response;
 }
