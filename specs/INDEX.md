@@ -73,4 +73,4 @@
 | 069 | Newsletter status          | Read-only receivesNewsletter boolean from Brevo DOUBLE_OPT-IN + emailBlacklisted, detail view tag    | —            | done   |
 | 070 | Company hard delete        | Remove soft-delete/archive, hard-delete with dialog: delete contacts too or keep them (unlink)        | —            | done   |
 | 071 | Task comments              | Add comments to tasks using shared CommentEntity, three-way XOR constraint, detail view UI            | —            | done   |
-| 072 | Fix logout flow            | Fix session cookie deletion under HTTPS and document Authentik Logout URI configuration               | —            | open   |
+| 072 | Fix logout flow            | Fix session cookie deletion under HTTPS and document Authentik Logout URI configuration               | —            | done   |

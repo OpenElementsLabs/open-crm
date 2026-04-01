@@ -175,6 +175,7 @@ No configuration needed — `docker compose up` starts the mock-oauth2-server au
    - **Client ID:** Note this value (e.g., `open-crm`)
    - **Client Secret:** Note this value
    - **Redirect URIs:** `https://crm.example.com/api/auth/callback/oidc`
+   - **Logout URI:** `https://crm.example.com` (required for logout redirect back to the app)
    - **Scopes:** `openid`, `profile`, `email`, `offline_access`
 4. Save the provider
 

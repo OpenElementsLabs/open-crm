@@ -32,8 +32,14 @@ export async function GET() {
   // Clear the Auth.js session cookie by redirecting through the signout endpoint
   // Then redirect to the provider's end-session endpoint
   const response = NextResponse.redirect(endSessionUrl);
-  // Delete the Auth.js session cookie
-  response.cookies.delete("authjs.session-token");
-  response.cookies.delete("__Secure-authjs.session-token");
+  // Delete the Auth.js session cookie with matching attributes for both HTTP and HTTPS
+  const cookieOptions = {
+    path: "/",
+    secure: true,
+    httpOnly: true,
+    sameSite: "lax" as const,
+  };
+  response.cookies.delete({ name: "authjs.session-token", ...cookieOptions });
+  response.cookies.delete({ name: "__Secure-authjs.session-token", ...cookieOptions });
   return response;
 }
