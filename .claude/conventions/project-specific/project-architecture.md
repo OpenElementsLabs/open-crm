@@ -139,7 +139,8 @@ The application uses OpenID Connect (OIDC) for authentication with a clear separ
 - **Provider:** Generic OIDC provider configured via environment variables (`OIDC_ISSUER_URI`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`)
 - **Session strategy:** JWT (stateless, no server-side session store)
 - **Scopes:** `openid profile email offline_access`
-- **Middleware:** Next.js middleware (`src/middleware.ts`) runs the Auth.js `authorized` callback on every route except `/api/auth/*` and `/api/logout`. Unauthenticated users are redirected to the OIDC login page.
+- **Custom login page:** Auth.js is configured with `pages: { signIn: "/login" }` to use a branded login page instead of the default. The login page lives outside the `(app)` route group and has no sidebar.
+- **Middleware:** Next.js middleware (`src/middleware.ts`) runs the Auth.js `authorized` callback on every route except `/api/auth/*`, `/api/logout`, `/login`, `/_next/static`, `/_next/image`, and static assets (`.svg`, `.png`, `.jpg`, `.ico`). Unauthenticated users are redirected to `/login`.
 - **Token lifecycle:** On initial sign-in, access token, refresh token, and ID token are stored in the JWT session. Before each request, the token expiry is checked; expired tokens are refreshed automatically via the OIDC provider's token endpoint using the refresh token. Failed refreshes set a `RefreshTokenError` flag that clears the access token from the session.
 - **User info:** Name, email, and profile picture are extracted from the OIDC profile on sign-in and stored in the JWT session.
 
@@ -159,7 +160,7 @@ The application uses OpenID Connect (OIDC) for authentication with a clear separ
 
 ### Logout
 
-- The logout route (`/api/logout`) clears the Auth.js session cookie and redirects to the OIDC provider's `end_session_endpoint` (discovered via `.well-known/openid-configuration`) with the `id_token_hint` for provider-side session termination.
+- The logout route (`/api/logout`) clears all Auth.js session cookies — including chunked cookies (`.0`, `.1`, etc.) that Auth.js creates when JWT sessions exceed 4KB — and redirects to the OIDC provider's `end_session_endpoint` (discovered via `.well-known/openid-configuration`) with the `id_token_hint` for provider-side session termination. Cookie deletion attributes (`secure`, `httpOnly`, `path`, `sameSite`) are set dynamically based on whether `AUTH_URL` uses HTTPS or HTTP.
 
 ### Authentication Flow
 
@@ -172,7 +173,10 @@ sequenceDiagram
 
     Browser->>Frontend: GET /companies
     Frontend->>Frontend: Middleware checks session
-    Frontend-->>Browser: Redirect to OIDC login
+    Frontend-->>Browser: Redirect to /login
+    Browser->>Frontend: GET /login (branded login page)
+    Browser->>Frontend: Click "Log in"
+    Frontend->>OIDC: Redirect to authorization endpoint
     Browser->>OIDC: Login (username/password)
     OIDC-->>Browser: Redirect with auth code
     Browser->>Frontend: Callback with auth code

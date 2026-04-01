@@ -26,20 +26,24 @@ open-crm/
 │   ├── pom.xml                     — Maven build configuration
 │   └── Dockerfile                  — Multi-stage Docker build
 ├── frontend/                       — Next.js TypeScript frontend
-│   ├── src/auth.ts                 — Auth.js v5 OIDC configuration (provider, JWT, session callbacks)
-│   ├── src/middleware.ts            — Route protection (redirects unauthenticated users)
+│   ├── src/auth.ts                 — Auth.js v5 OIDC configuration (provider, JWT, session callbacks, custom login page)
+│   ├── src/middleware.ts            — Route protection (excludes /login, /api/auth, static assets)
 │   ├── src/app/                    — Next.js App Router pages
-│   │   ├── page.tsx                — Home page (redirects to companies)
-│   │   ├── layout.tsx              — Root layout (fonts, sidebar, language provider)
+│   │   ├── layout.tsx              — Root layout (fonts, SessionProvider, LanguageProvider — no sidebar)
 │   │   ├── globals.css             — Global styles, theme, print rules
-│   │   ├── admin/                  — Admin management page
-│   │   ├── companies/              — Company pages (list, detail, new, edit, print)
-│   │   ├── contacts/               — Contact pages (list, detail, new, edit, print)
-│   │   ├── tasks/                  — Task pages (list, detail, new, edit)
-│   │   ├── tags/                   — Tag pages (list, new, edit)
+│   │   ├── login/                  — Custom branded login page (no sidebar, standalone layout)
+│   │   │   └── page.tsx            — OE-branded sign-in with error display and i18n
+│   │   ├── (app)/                  — Route group for authenticated pages (with sidebar)
+│   │   │   ├── layout.tsx          — App layout (Sidebar, TooltipProvider, main content area)
+│   │   │   ├── page.tsx            — Home page (redirects to companies)
+│   │   │   ├── admin/              — Admin management page
+│   │   │   ├── companies/          — Company pages (list, detail, new, edit, print)
+│   │   │   ├── contacts/           — Contact pages (list, detail, new, edit, print)
+│   │   │   ├── tasks/              — Task pages (list, detail, new, edit)
+│   │   │   └── tags/               — Tag pages (list, new, edit)
 │   │   └── api/                    — API routes
 │   │       ├── auth/[...nextauth]/ — Auth.js route handlers
-│   │       ├── logout/             — Logout handler
+│   │       ├── logout/             — Logout handler (chunked cookie deletion, OIDC end-session)
 │   │       └── [...path]/          — API proxy with JWT token forwarding
 │   ├── src/components/             — React components
 │   │   ├── ui/                     — shadcn/ui primitives (button, card, table, dialog, tooltip, etc.)
@@ -100,7 +104,7 @@ open-crm/
 ## Key Entry Points
 
 - **Backend main:** `backend/src/main/java/com/openelements/crm/CrmApplication.java`
-- **Frontend main:** `frontend/src/app/layout.tsx` (root layout) and `frontend/src/app/page.tsx` (home)
+- **Frontend main:** `frontend/src/app/layout.tsx` (root layout), `frontend/src/app/(app)/layout.tsx` (app layout with sidebar), and `frontend/src/app/(app)/page.tsx` (home)
 - **API client:** `frontend/src/lib/api.ts`
 - **Database schema:** `backend/src/main/resources/db/migration/`
 
