@@ -25,6 +25,10 @@ open-crm/
 │   ├── src/test/                   — Tests (repository, service, DTO conversion tests)
 │   ├── pom.xml                     — Maven build configuration
 │   └── Dockerfile                  — Multi-stage Docker build
+├── scripts/                        — Operations scripts and backup infrastructure
+│   ├── db-backup.sh                — pg_dump + gzip + S3 upload with retention cleanup
+│   ├── db-restore.sh               — S3 download + database restore
+│   └── Dockerfile                  — Alpine container with postgresql-client and aws-cli
 ├── frontend/                       — Next.js TypeScript frontend
 │   ├── src/auth.ts                 — Auth.js v5 OIDC configuration (provider, JWT, session callbacks, custom login page)
 │   ├── src/middleware.ts            — Route protection (excludes /login, /api/auth, static assets)
@@ -36,7 +40,7 @@ open-crm/
 │   │   ├── (app)/                  — Route group for authenticated pages (with sidebar)
 │   │   │   ├── layout.tsx          — App layout (Sidebar, TooltipProvider, main content area)
 │   │   │   ├── page.tsx            — Home page (redirects to companies)
-│   │   │   ├── admin/              — Admin management page
+│   │   │   ├── admin/              — Admin management page (health, token, brevo settings/import)
 │   │   │   ├── companies/          — Company pages (list, detail, new, edit, print)
 │   │   │   ├── contacts/           — Contact pages (list, detail, new, edit, print)
 │   │   │   ├── tasks/              — Task pages (list, detail, new, edit)

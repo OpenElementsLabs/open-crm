@@ -2,10 +2,11 @@
 
 ## Components
 
-- **Frontend (Next.js)** — Server-side rendered React application using the App Router. All pages require OIDC authentication via Auth.js v5 (middleware redirects unauthenticated users). API calls are proxied through a catch-all Route Handler that injects the JWT access token as an Authorization Bearer header. Uses `BACKEND_URL` env var for server-side requests. Bilingual UI (DE/EN) with client-side language detection and switching.
+- **Frontend (Next.js)** — Server-side rendered React application using the App Router with route groups. The `(app)` route group contains all authenticated pages with the sidebar layout. The `/login` page is outside the route group with a standalone layout (no sidebar). All app pages require OIDC authentication via Auth.js v5 (middleware redirects unauthenticated users to `/login`). API calls are proxied through a catch-all Route Handler that injects the JWT access token as an Authorization Bearer header. Uses `BACKEND_URL` env var for server-side requests. Bilingual UI (DE/EN) with client-side language detection and switching.
 - **Backend (Spring Boot)** — RESTful JSON API handling business logic, validation, and data persistence. All API endpoints require JWT Bearer token authentication via Spring Security OAuth2 Resource Server (except health and Swagger UI which are public). User info is extracted from JWT claims. Organized by domain packages (company, contact, comment, task, tag, user, brevo, health, settings). Exposes OpenAPI documentation via Swagger UI with OIDC authorize button. CSV export endpoints generate files server-side using Apache Commons CSV.
 - **Database (PostgreSQL)** — Relational storage for all domain data. Schema managed by Flyway migrations (V1–V17). Uses UUID primary keys and timestamp tracking.
 - **Brevo** — External marketing platform. One-directional import of companies and contacts via Brevo API, triggered manually. API key stored in settings table. Newsletter subscription status synced during import.
+- **DB Backup (Alpine container)** — Dedicated Docker container running a cron job for automated daily PostgreSQL backups. Uses `pg_dump` to create compressed SQL dumps, uploads to S3-compatible object storage (Hetzner Object Storage), and automatically cleans up backups older than the configured retention period. Also provides a manual restore script.
 
 ## Communication
 
@@ -23,6 +24,8 @@ graph LR
     Frontend -->|REST API| Backend["Spring Boot Backend<br/>:8080"]
     Backend -->|JDBC/JPA| DB[("PostgreSQL<br/>:5432")]
     Backend -->|REST API| Brevo["Brevo<br/>(Import)"]
+    DBBackup["DB Backup<br/>(Alpine cron)"] -->|pg_dump| DB
+    DBBackup -->|S3 upload| S3["Hetzner<br/>Object Storage"]
     Frontend -->|OIDC| OIDC["OIDC Provider<br/>(Authentik / mock-oauth2)"]
     Frontend -->|Bearer Token| Backend
     Coolify["Coolify + Traefik"] -->|Reverse Proxy| Frontend
