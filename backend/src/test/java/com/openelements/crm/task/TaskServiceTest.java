@@ -167,16 +167,15 @@ class TaskServiceTest {
         }
 
         @Test
-        @DisplayName("should create task for soft-deleted company")
-        void shouldCreateForSoftDeletedCompany() {
+        @DisplayName("should throw 404 for deleted company")
+        void shouldThrow404ForDeletedCompany() {
             final CompanyDto company = createCompany("Archived");
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
-            final TaskDto result = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
-
-            assertNotNull(result.id());
-            assertEquals(company.id(), result.companyId());
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> taskService.create(new TaskCreateDto(
+                            "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null)));
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
 
@@ -386,15 +385,15 @@ class TaskServiceTest {
         }
 
         @Test
-        @DisplayName("should include tasks of soft-deleted companies")
-        void shouldIncludeTasksOfSoftDeletedCompanies() {
+        @DisplayName("should cascade-delete tasks when company is hard-deleted")
+        void shouldCascadeDeleteTasksWhenCompanyHardDeleted() {
             final CompanyDto company = createCompany("Corp");
             taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
             final var page = taskService.list(null, null, PageRequest.of(0, 20));
 
-            assertEquals(1, page.getTotalElements());
+            assertEquals(0, page.getTotalElements());
         }
     }
 
@@ -416,15 +415,15 @@ class TaskServiceTest {
         }
 
         @Test
-        @DisplayName("company soft-delete preserves tasks")
-        void companySoftDeletePreservesTasks() {
+        @DisplayName("company hard-delete cascades tasks")
+        void companyHardDeleteCascadesTasks() {
             final CompanyDto company = createCompany("Corp");
             taskService.create(new TaskCreateDto("T1", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
             taskService.create(new TaskCreateDto("T2", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
 
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
-            assertEquals(2, taskRepository.count());
+            assertEquals(0, taskRepository.count());
         }
 
         @Test

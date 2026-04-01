@@ -78,7 +78,6 @@ class HealthControllerTest {
                     .andExpect(jsonPath("$.paths./api/health").exists())
                     .andExpect(jsonPath("$.paths./api/companies").exists())
                     .andExpect(jsonPath("$.paths./api/companies/{id}").exists())
-                    .andExpect(jsonPath("$.paths./api/companies/{id}/restore").exists())
                     .andExpect(jsonPath("$.paths./api/companies/{id}/comments").exists())
                     .andExpect(jsonPath("$.paths./api/contacts").exists())
                     .andExpect(jsonPath("$.paths./api/contacts/{id}").exists())
@@ -147,7 +146,6 @@ class HealthControllerTest {
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("id")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("name")))
-                    .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("deleted")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("brevo")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("createdAt")))
                     .andExpect(jsonPath("$.components.schemas.CompanyDto.required", hasItem("updatedAt")));

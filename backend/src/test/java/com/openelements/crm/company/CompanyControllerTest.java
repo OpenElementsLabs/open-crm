@@ -114,7 +114,6 @@ class CompanyControllerTest {
                     .andExpect(jsonPath("$.name").value("Open Elements GmbH"))
                     .andExpect(jsonPath("$.email").value("info@open-elements.com"))
                     .andExpect(jsonPath("$.city").value("Berlin"))
-                    .andExpect(jsonPath("$.deleted").value(false))
                     .andExpect(jsonPath("$.brevo").value(false))
                     .andExpect(jsonPath("$.createdAt").exists())
                     .andExpect(jsonPath("$.updatedAt").exists());
@@ -137,8 +136,7 @@ class CompanyControllerTest {
             result.andExpect(status().isCreated())
                     .andExpect(jsonPath("$.name").value("Minimal Corp"))
                     .andExpect(jsonPath("$.email").isEmpty())
-                    .andExpect(jsonPath("$.website").isEmpty())
-                    .andExpect(jsonPath("$.deleted").value(false));
+                    .andExpect(jsonPath("$.website").isEmpty());
         }
 
         @Test
@@ -209,8 +207,8 @@ class CompanyControllerTest {
         }
 
         @Test
-        @DisplayName("should return soft-deleted company with deleted=true")
-        void shouldReturnSoftDeletedCompany() throws Exception {
+        @DisplayName("should return 404 for hard-deleted company")
+        void shouldReturn404ForHardDeletedCompany() throws Exception {
             //GIVEN
             final String id = createCompany("Deleted Corp");
             mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
@@ -219,8 +217,7 @@ class CompanyControllerTest {
             final var result = mockMvc.perform(get("/api/companies/" + id).with(testJwt()));
 
             //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.deleted").value(true));
+            result.andExpect(status().isNotFound());
         }
     }
 
@@ -289,8 +286,8 @@ class CompanyControllerTest {
     class DeleteCompany {
 
         @Test
-        @DisplayName("should soft-delete company without contacts")
-        void shouldSoftDelete() throws Exception {
+        @DisplayName("should hard-delete company without contacts")
+        void shouldHardDelete() throws Exception {
             //GIVEN
             final String id = createCompany("To Delete");
 
@@ -301,12 +298,33 @@ class CompanyControllerTest {
             result.andExpect(status().isNoContent());
 
             mockMvc.perform(get("/api/companies/" + id).with(testJwt()))
-                    .andExpect(jsonPath("$.deleted").value(true));
+                    .andExpect(status().isNotFound());
         }
 
         @Test
-        @DisplayName("should fail with 409 when contacts exist")
-        void shouldFailWithContacts() throws Exception {
+        @DisplayName("should delete company and contacts when deleteContacts=true")
+        void shouldDeleteWithContacts() throws Exception {
+            //GIVEN
+            final String companyId = createCompany("Has Contacts");
+            final String contactJson = """
+                    {"firstName": "John", "lastName": "Doe", "language": "EN", "companyId": "%s"}
+                    """.formatted(companyId);
+            mockMvc.perform(post("/api/contacts")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(contactJson).with(testJwt()));
+
+            //WHEN
+            final var result = mockMvc.perform(delete("/api/companies/" + companyId + "?deleteContacts=true").with(testJwt()));
+
+            //THEN
+            result.andExpect(status().isNoContent());
+            mockMvc.perform(get("/api/companies/" + companyId).with(testJwt()))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should delete company only and unlink contacts when deleteContacts=false")
+        void shouldDeleteCompanyOnlyAndUnlinkContacts() throws Exception {
             //GIVEN
             final String companyId = createCompany("Has Contacts");
             final String contactJson = """
@@ -320,7 +338,9 @@ class CompanyControllerTest {
             final var result = mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
 
             //THEN
-            result.andExpect(status().isConflict());
+            result.andExpect(status().isNoContent());
+            mockMvc.perform(get("/api/companies/" + companyId).with(testJwt()))
+                    .andExpect(status().isNotFound());
         }
 
         @Test
@@ -331,53 +351,6 @@ class CompanyControllerTest {
 
             //WHEN
             final var result = mockMvc.perform(delete("/api/companies/00000000-0000-0000-0000-000000000001").with(testJwt()));
-
-            //THEN
-            result.andExpect(status().isNotFound());
-        }
-    }
-
-    @Nested
-    @DisplayName("POST /api/companies/{id}/restore")
-    class RestoreCompany {
-
-        @Test
-        @DisplayName("should restore soft-deleted company")
-        void shouldRestore() throws Exception {
-            //GIVEN
-            final String id = createCompany("Restore Me");
-            mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
-
-            //WHEN
-            final var result = mockMvc.perform(post("/api/companies/" + id + "/restore").with(testJwt()));
-
-            //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.deleted").value(false));
-        }
-
-        @Test
-        @DisplayName("should be idempotent for non-deleted company")
-        void shouldBeIdempotent() throws Exception {
-            //GIVEN
-            final String id = createCompany("Not Deleted");
-
-            //WHEN
-            final var result = mockMvc.perform(post("/api/companies/" + id + "/restore").with(testJwt()));
-
-            //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.deleted").value(false));
-        }
-
-        @Test
-        @DisplayName("should return 404 for non-existent ID")
-        void shouldReturn404() throws Exception {
-            //GIVEN
-            //  no company exists
-
-            //WHEN
-            final var result = mockMvc.perform(post("/api/companies/00000000-0000-0000-0000-000000000001/restore").with(testJwt()));
 
             //THEN
             result.andExpect(status().isNotFound());
@@ -421,41 +394,6 @@ class CompanyControllerTest {
             result.andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(10)))
                     .andExpect(jsonPath("$.page.totalElements").value(25));
-        }
-
-        @Test
-        @DisplayName("should exclude soft-deleted by default")
-        void shouldExcludeSoftDeleted() throws Exception {
-            //GIVEN
-            createCompany("Active 1");
-            createCompany("Active 2");
-            final String deletedId = createCompany("To Delete");
-            mockMvc.perform(delete("/api/companies/" + deletedId).with(testJwt()));
-
-            //WHEN
-            final var result = mockMvc.perform(get("/api/companies").with(testJwt()));
-
-            //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.page.totalElements").value(2));
-        }
-
-        @Test
-        @DisplayName("should include soft-deleted with filter")
-        void shouldIncludeSoftDeletedWithFilter() throws Exception {
-            //GIVEN
-            createCompany("Active");
-            final String deletedId = createCompany("Deleted");
-            mockMvc.perform(delete("/api/companies/" + deletedId).with(testJwt()));
-
-            //WHEN
-            final var result = mockMvc.perform(get("/api/companies?includeDeleted=true").with(testJwt()));
-
-            //THEN
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.page.totalElements").value(2));
         }
 
         @Test
@@ -727,10 +665,10 @@ class CompanyControllerTest {
         }
 
         @Test
-        @DisplayName("should preserve logo when company is soft-deleted and restored")
-        void shouldPreserveLogoOnSoftDeleteAndRestore() throws Exception {
+        @DisplayName("should delete logo when company is hard-deleted")
+        void shouldDeleteLogoOnHardDelete() throws Exception {
             //GIVEN
-            final String id = createCompany("SoftDelete Logo Corp");
+            final String id = createCompany("HardDelete Logo Corp");
             final byte[] imageBytes = new byte[]{10, 20, 30};
             final MockMultipartFile file = new MockMultipartFile(
                     "file", "logo.png", "image/png", imageBytes);
@@ -738,15 +676,10 @@ class CompanyControllerTest {
 
             //WHEN
             mockMvc.perform(delete("/api/companies/" + id).with(testJwt()));
-            mockMvc.perform(post("/api/companies/" + id + "/restore").with(testJwt()));
 
             //THEN
-            mockMvc.perform(get("/api/companies/" + id + "/logo").with(testJwt()))
-                    .andExpect(status().isOk())
-                    .andExpect(content().bytes(imageBytes));
-
             mockMvc.perform(get("/api/companies/" + id).with(testJwt()))
-                    .andExpect(jsonPath("$.hasLogo").value(true));
+                    .andExpect(status().isNotFound());
         }
     }
 }

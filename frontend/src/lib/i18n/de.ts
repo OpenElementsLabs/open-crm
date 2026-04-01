@@ -36,8 +36,6 @@ export const de = {
   companies: {
     title: "Firmen",
     newCompany: "Neue Firma",
-    showArchived: "Archivierte Firmen anzeigen",
-    hideArchived: "Archivierte Firmen ausblenden",
     empty: "Keine Firmen vorhanden. Erstellen Sie die erste Firma.",
     notFound: "Firma nicht gefunden.",
     columns: {
@@ -50,7 +48,6 @@ export const de = {
       title: "Firmendetails",
       edit: "Bearbeiten",
       delete: "Löschen",
-      restore: "Wiederherstellen",
       createTask: "Aufgabe erstellen",
       showEmployees: "Alle Mitarbeiter",
       email: "E-Mail",
@@ -99,12 +96,11 @@ export const de = {
     },
     deleteDialog: {
       title: "Firma löschen",
-      description: "Möchten Sie die Firma '{name}' wirklich löschen?",
-      confirm: "Löschen",
+      descriptionAll: "Firma '{name}' und ALLE zugehörigen Kontakte löschen? Alle Aufgaben, Kommentare und Tag-Zuordnungen werden unwiderruflich gelöscht.",
+      descriptionOnly: "Nur die Firma '{name}' löschen? Kontakte bleiben erhalten, aber die Firmenzuordnung wird entfernt. Aufgaben, Kommentare und Tags der Firma werden gelöscht.",
+      deleteAll: "Firma und Kontakte löschen",
+      deleteOnly: "Nur Firma löschen",
       cancel: "Abbrechen",
-      errorConflict:
-        "Die Firma kann nicht gelöscht werden, da noch Kontakte zugeordnet sind.",
-      errorTitle: "Fehler beim Löschen",
     },
     comments: {
       title: "Kommentare",
@@ -169,7 +165,6 @@ export const de = {
       birthday: "Geburtstag",
       company: "Firma",
       showCompany: "zur Firma",
-      archivedBadge: "Archiviert",
       description: "Beschreibung",
       commentsTitle: "Kommentare",
       commentsPlaceholder: "Kommentar hinzufügen",
@@ -218,7 +213,7 @@ export const de = {
     deleteDialog: {
       title: "Kontakt löschen",
       description:
-        "Möchten Sie den Kontakt '{name}' wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden. Alle zugehörigen Kommentare werden ebenfalls gelöscht.",
+        "Möchten Sie '{name}' wirklich löschen? Alle Kommentare und Aufgaben werden unwiderruflich gelöscht.",
       confirm: "Endgültig löschen",
       cancel: "Abbrechen",
     },
@@ -292,6 +287,25 @@ export const de = {
       actionRequired: "Aktion ist erforderlich",
       dueDateRequired: "Fälligkeitsdatum ist erforderlich",
       entityRequired: "Bitte wählen Sie eine Firma oder einen Kontakt aus",
+    },
+    comments: {
+      title: "Kommentare",
+      empty: "Noch keine Kommentare",
+      add: "Kommentar hinzufügen",
+      addTitle: "Kommentar hinzufügen",
+      placeholder: "Kommentar schreiben...",
+      send: "Senden",
+      loadMore: "Mehr laden",
+      sending: "Wird gesendet...",
+      errorTitle: "Fehler",
+      errorGeneric: "Der Kommentar konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      deleteDialog: {
+        title: "Kommentar löschen",
+        description:
+          "Möchten Sie diesen Kommentar wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        confirm: "Löschen",
+        cancel: "Abbrechen",
+      },
     },
   },
   brevo: {

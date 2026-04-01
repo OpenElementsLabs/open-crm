@@ -18,11 +18,12 @@ public record TaskDto(
         @Schema(description = "Contact ID") UUID contactId,
         @Schema(description = "Contact name") String contactName,
         @Schema(description = "Assigned tag IDs") List<UUID> tagIds,
+        @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) {
 
-    public static TaskDto fromEntity(final TaskEntity entity) {
+    public static TaskDto fromEntity(final TaskEntity entity, final long commentCount) {
         final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
         final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
         final UUID contactId = entity.getContact() != null ? entity.getContact().getId() : null;
@@ -42,6 +43,7 @@ public record TaskDto(
                 contactId,
                 contactName,
                 tagIds,
+                commentCount,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

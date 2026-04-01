@@ -65,7 +65,6 @@ const existingContact: ContactDto = {
   phoneNumber: "+49 123 456",
   companyId: "company-1",
   companyName: "Open Elements",
-  companyDeleted: false,
   commentCount: 0,
   hasPhoto: false,
   birthday: "1990-03-15",

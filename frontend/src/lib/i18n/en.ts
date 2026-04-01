@@ -38,8 +38,6 @@ export const en: Translations = {
   companies: {
     title: "Companies",
     newCompany: "New Company",
-    showArchived: "Show Archived",
-    hideArchived: "Hide Archived",
     empty: "No companies found. Create your first company.",
     notFound: "Company not found.",
     columns: {
@@ -52,7 +50,6 @@ export const en: Translations = {
       title: "Company Details",
       edit: "Edit",
       delete: "Delete",
-      restore: "Restore",
       createTask: "Create Task",
       showEmployees: "show employees",
       email: "Email",
@@ -101,12 +98,11 @@ export const en: Translations = {
     },
     deleteDialog: {
       title: "Delete Company",
-      description: "Do you really want to delete the company '{name}'?",
-      confirm: "Delete",
+      descriptionAll: "Delete the company '{name}' and ALL associated contacts? All tasks, comments, and tag associations will be permanently deleted.",
+      descriptionOnly: "Delete only the company '{name}'? Contacts will be kept but their company association will be removed. Company tasks, comments, and tags will be deleted.",
+      deleteAll: "Delete company and contacts",
+      deleteOnly: "Delete company only",
       cancel: "Cancel",
-      errorConflict:
-        "The company cannot be deleted because it still has associated contacts.",
-      errorTitle: "Error Deleting",
     },
     comments: {
       title: "Comments",
@@ -171,7 +167,6 @@ export const en: Translations = {
       birthday: "Birthday",
       company: "Company",
       showCompany: "show company",
-      archivedBadge: "Archived",
       description: "Description",
       commentsTitle: "Comments",
       commentsPlaceholder: "Add Comment",
@@ -220,7 +215,7 @@ export const en: Translations = {
     deleteDialog: {
       title: "Delete Contact",
       description:
-        "Do you really want to delete the contact '{name}'? This action cannot be undone. All associated comments will also be deleted.",
+        "Do you really want to delete '{name}'? All comments and tasks will be permanently deleted.",
       confirm: "Delete permanently",
       cancel: "Cancel",
     },
@@ -294,6 +289,25 @@ export const en: Translations = {
       actionRequired: "Action is required",
       dueDateRequired: "Due date is required",
       entityRequired: "Please select a company or contact",
+    },
+    comments: {
+      title: "Comments",
+      empty: "No comments yet",
+      add: "Add Comment",
+      addTitle: "Add Comment",
+      placeholder: "Write a comment...",
+      send: "Send",
+      loadMore: "Load more",
+      sending: "Sending...",
+      errorTitle: "Error",
+      errorGeneric: "The comment could not be saved. Please try again.",
+      deleteDialog: {
+        title: "Delete Comment",
+        description:
+          "Do you really want to delete this comment? This action cannot be undone.",
+        confirm: "Delete",
+        cancel: "Cancel",
+      },
     },
   },
   brevo: {

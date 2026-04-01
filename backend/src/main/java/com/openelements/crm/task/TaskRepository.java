@@ -17,4 +17,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, UUID>, JpaSpec
     long countByContactId(UUID contactId);
 
     void deleteByContactId(UUID contactId);
+
+    void deleteByCompanyId(UUID companyId);
 }

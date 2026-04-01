@@ -36,7 +36,7 @@ const testCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   phoneNumber: "+49 30 12345678",
-  deleted: false,
+  description: null,
   brevo: false,
   hasLogo: false,
   contactCount: 3,
@@ -187,7 +187,7 @@ describe("CompanyDetail", () => {
     });
   });
 
-  it("should open delete dialog and redirect on confirm", async () => {
+  it("should open delete dialog and delete all on confirm", async () => {
     mockDeleteCompany.mockResolvedValue(undefined);
 
     renderWithProviders(<CompanyDetail company={testCompany} />);
@@ -197,23 +197,19 @@ describe("CompanyDetail", () => {
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(S.deleteDialog.description.replace("{name}", "Open Elements GmbH")),
-      ).toBeInTheDocument();
+      expect(screen.getByText(S.deleteDialog.deleteAll)).toBeInTheDocument();
     });
 
-    // Click the dialog confirm button (last "Löschen" button)
-    const allDeleteButtons = screen.getAllByText(S.deleteDialog.confirm);
-    fireEvent.click(allDeleteButtons[allDeleteButtons.length - 1]);
+    fireEvent.click(screen.getByText(S.deleteDialog.deleteAll));
 
     await waitFor(() => {
-      expect(mockDeleteCompany).toHaveBeenCalledWith("test-id");
+      expect(mockDeleteCompany).toHaveBeenCalledWith("test-id", true);
       expect(mockPush).toHaveBeenCalledWith("/companies");
     });
   });
 
-  it("should show error dialog on 409 conflict", async () => {
-    mockDeleteCompany.mockRejectedValue(new Error("CONFLICT"));
+  it("should delete company only when delete only button clicked", async () => {
+    mockDeleteCompany.mockResolvedValue(undefined);
 
     renderWithProviders(<CompanyDetail company={testCompany} />);
 
@@ -222,16 +218,14 @@ describe("CompanyDetail", () => {
     fireEvent.click(deleteButtons[0]);
 
     await waitFor(() => {
-      const confirmButtons = screen.getAllByText(S.deleteDialog.confirm);
-      expect(confirmButtons.length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText(S.deleteDialog.deleteOnly)).toBeInTheDocument();
     });
 
-    // Click the dialog confirm button
-    const allConfirmButtons = screen.getAllByText(S.deleteDialog.confirm);
-    fireEvent.click(allConfirmButtons[allConfirmButtons.length - 1]);
+    fireEvent.click(screen.getByText(S.deleteDialog.deleteOnly));
 
     await waitFor(() => {
-      expect(screen.getByText(S.deleteDialog.errorConflict)).toBeInTheDocument();
+      expect(mockDeleteCompany).toHaveBeenCalledWith("test-id", false);
+      expect(mockPush).toHaveBeenCalledWith("/companies");
     });
   });
 

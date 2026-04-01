@@ -10,7 +10,6 @@ export interface CompanyDto {
   readonly country: string | null;
   readonly phoneNumber: string | null;
   readonly description: string | null;
-  readonly deleted: boolean;
   readonly brevo: boolean;
   readonly hasLogo: boolean;
   readonly contactCount: number;
@@ -40,6 +39,7 @@ export interface CommentDto {
   readonly author: string;
   readonly companyId: string | null;
   readonly contactId: string | null;
+  readonly taskId: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -61,7 +61,6 @@ export interface ContactDto {
   readonly description: string | null;
   readonly companyId: string | null;
   readonly companyName: string | null;
-  readonly companyDeleted: boolean;
   readonly commentCount: number;
   readonly hasPhoto: boolean;
   readonly birthday: string | null;
@@ -129,6 +128,7 @@ export interface TaskDto {
   readonly contactId: string | null;
   readonly contactName: string | null;
   readonly tagIds: readonly string[];
+  readonly commentCount: number;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

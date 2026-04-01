@@ -43,7 +43,6 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     phoneNumber: "+49 123 456",
     companyId: "company-1",
     companyName: "Open Elements",
-    companyDeleted: false,
     commentCount: 0,
     hasPhoto: false,
     birthday: null,

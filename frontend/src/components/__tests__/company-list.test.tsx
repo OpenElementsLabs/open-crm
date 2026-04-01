@@ -17,14 +17,12 @@ vi.mock("next/navigation", () => ({
 
 const mockGetCompanies = vi.fn();
 const mockDeleteCompany = vi.fn();
-const mockRestoreCompany = vi.fn();
 const mockGetCompanyLogoUrl = vi.fn().mockReturnValue("/api/companies/test-id/logo");
 const mockCreateCompanyComment = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCompanies: (...args: unknown[]) => mockGetCompanies(...args),
   deleteCompany: (...args: unknown[]) => mockDeleteCompany(...args),
-  restoreCompany: (...args: unknown[]) => mockRestoreCompany(...args),
   getCompanyLogoUrl: (...args: unknown[]) => mockGetCompanyLogoUrl(...args),
   createCompanyComment: (...args: unknown[]) => mockCreateCompanyComment(...args),
   getTags: vi.fn().mockResolvedValue({ content: [], page: { size: 20, number: 0, totalElements: 0, totalPages: 0 } }),
@@ -42,7 +40,6 @@ function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
     city: null,
     country: null,
     phoneNumber: null,
-    deleted: false,
     brevo: false,
     hasLogo: false,
     contactCount: 0,
@@ -50,6 +47,7 @@ function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
     tagIds: [],
+    description: null,
     ...overrides,
   };
 }
@@ -207,64 +205,6 @@ describe("CompanyList", () => {
 
   });
 
-  describe("archived companies", () => {
-    it("should exclude soft-deleted by default", async () => {
-      mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
-
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(mockGetCompanies).toHaveBeenCalledWith(
-          expect.objectContaining({ includeDeleted: false }),
-        );
-      });
-    });
-
-    it("should include soft-deleted when toggle clicked", async () => {
-      mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
-
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(screen.getByText(S.showArchived)).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByText(S.showArchived));
-
-      await waitFor(() => {
-        expect(mockGetCompanies).toHaveBeenCalledWith(
-          expect.objectContaining({ includeDeleted: true }),
-        );
-      });
-    });
-
-    it("should show archived companies with muted style", async () => {
-      mockGetCompanies.mockResolvedValue(
-        makePage([makeCompany({ id: "deleted-1", name: "Deleted Co", deleted: true })]),
-      );
-
-      const { container } = renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        const row = container.querySelector("tr.opacity-50");
-        expect(row).toBeInTheDocument();
-      });
-    });
-
-    it("should show restore button for archived companies", async () => {
-      mockGetCompanies.mockResolvedValue(
-        makePage([makeCompany({ id: "deleted-1", name: "Deleted Co", deleted: true })]),
-      );
-
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        const restoreButton = screen.getByTitle(S.detail.restore);
-        expect(restoreButton).toBeInTheDocument();
-      });
-    });
-  });
-
   describe("navigation", () => {
     it("should navigate to detail when clicking a row", async () => {
       mockGetCompanies.mockResolvedValue(
@@ -297,7 +237,7 @@ describe("CompanyList", () => {
   });
 
   describe("delete", () => {
-    it("should open confirmation dialog when delete button clicked", async () => {
+    it("should open delete dialog when delete button clicked", async () => {
       mockGetCompanies.mockResolvedValue(
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
@@ -311,13 +251,11 @@ describe("CompanyList", () => {
       fireEvent.click(screen.getByTitle(S.detail.delete));
 
       await waitFor(() => {
-        expect(
-          screen.getByText(S.deleteDialog.description.replace("{name}", "Test Corp")),
-        ).toBeInTheDocument();
+        expect(screen.getByText(S.deleteDialog.title)).toBeInTheDocument();
       });
     });
 
-    it("should delete company and refresh list on confirm", async () => {
+    it("should delete company with contacts when delete all clicked", async () => {
       mockGetCompanies.mockResolvedValue(
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
@@ -332,13 +270,38 @@ describe("CompanyList", () => {
       fireEvent.click(screen.getByTitle(S.detail.delete));
 
       await waitFor(() => {
-        expect(screen.getByText(S.deleteDialog.confirm)).toBeInTheDocument();
+        expect(screen.getByText(S.deleteDialog.deleteAll)).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText(S.deleteDialog.confirm));
+      fireEvent.click(screen.getByText(S.deleteDialog.deleteAll));
 
       await waitFor(() => {
-        expect(mockDeleteCompany).toHaveBeenCalledWith("1");
+        expect(mockDeleteCompany).toHaveBeenCalledWith("1", true);
+      });
+    });
+
+    it("should delete company only when delete only clicked", async () => {
+      mockGetCompanies.mockResolvedValue(
+        makePage([makeCompany({ id: "1", name: "Test Corp" })]),
+      );
+      mockDeleteCompany.mockResolvedValue(undefined);
+
+      renderWithProviders(<CompanyList />);
+
+      await waitFor(() => {
+        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTitle(S.detail.delete));
+
+      await waitFor(() => {
+        expect(screen.getByText(S.deleteDialog.deleteOnly)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(S.deleteDialog.deleteOnly));
+
+      await waitFor(() => {
+        expect(mockDeleteCompany).toHaveBeenCalledWith("1", false);
       });
     });
 
@@ -362,31 +325,6 @@ describe("CompanyList", () => {
       fireEvent.click(screen.getByText(S.deleteDialog.cancel));
 
       expect(mockDeleteCompany).not.toHaveBeenCalled();
-    });
-
-    it("should show error dialog on 409 conflict", async () => {
-      mockGetCompanies.mockResolvedValue(
-        makePage([makeCompany({ id: "1", name: "Test Corp" })]),
-      );
-      mockDeleteCompany.mockRejectedValue(new Error("CONFLICT"));
-
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTitle(S.detail.delete));
-
-      await waitFor(() => {
-        expect(screen.getByText(S.deleteDialog.confirm)).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByText(S.deleteDialog.confirm));
-
-      await waitFor(() => {
-        expect(screen.getByText(S.deleteDialog.errorConflict)).toBeInTheDocument();
-      });
     });
   });
 
@@ -467,27 +405,6 @@ describe("CompanyList", () => {
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe("restore", () => {
-    it("should restore company when restore button clicked", async () => {
-      mockGetCompanies.mockResolvedValue(
-        makePage([makeCompany({ id: "deleted-1", deleted: true })]),
-      );
-      mockRestoreCompany.mockResolvedValue(makeCompany({ id: "deleted-1", deleted: false }));
-
-      renderWithProviders(<CompanyList />);
-
-      await waitFor(() => {
-        expect(screen.getByTitle(S.detail.restore)).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTitle(S.detail.restore));
-
-      await waitFor(() => {
-        expect(mockRestoreCompany).toHaveBeenCalledWith("deleted-1");
       });
     });
   });

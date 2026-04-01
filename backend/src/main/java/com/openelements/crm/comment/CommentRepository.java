@@ -36,6 +36,13 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
     void deleteByContactId(UUID contactId);
 
     /**
+     * Deletes all comments attached to the given company.
+     *
+     * @param companyId the company ID
+     */
+    void deleteByCompanyId(UUID companyId);
+
+    /**
      * Counts all comments attached to the given company.
      *
      * @param companyId the company ID
@@ -50,4 +57,28 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
      * @return the number of comments
      */
     long countByContactId(UUID contactId);
+
+    /**
+     * Finds all comments attached to the given task, paginated.
+     *
+     * @param taskId   the task ID
+     * @param pageable pagination parameters
+     * @return a page of comments
+     */
+    Page<CommentEntity> findByTaskId(UUID taskId, Pageable pageable);
+
+    /**
+     * Deletes all comments attached to the given task.
+     *
+     * @param taskId the task ID
+     */
+    void deleteByTaskId(UUID taskId);
+
+    /**
+     * Counts all comments attached to the given task.
+     *
+     * @param taskId the task ID
+     * @return the number of comments
+     */
+    long countByTaskId(UUID taskId);
 }

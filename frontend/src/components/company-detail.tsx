@@ -7,7 +7,7 @@ import { CheckSquare, Pencil, Trash2, Users, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CompanyComments } from "@/components/company-comments";
 import { DetailField } from "@/components/detail-field";
 import { TagChips } from "@/components/tag-chips";
@@ -20,18 +20,22 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
   const S = t.companies;
   const router = useRouter();
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const handleDelete = async () => {
+  const handleDeleteAll = async () => {
     try {
-      await deleteCompany(company.id);
+      await deleteCompany(company.id, true);
       router.push("/companies");
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message === "CONFLICT") {
-        setDeleteError(S.deleteDialog.errorConflict);
-      } else {
-        setDeleteError(S.deleteDialog.errorConflict);
-      }
+    } catch {
+      console.error("Failed to delete company");
+    }
+  };
+
+  const handleDeleteCompanyOnly = async () => {
+    try {
+      await deleteCompany(company.id, false);
+      router.push("/companies");
+    } catch {
+      console.error("Failed to delete company");
     }
   };
 
@@ -60,19 +64,12 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
           </div>
         </div>
         <div className="flex gap-2">
-          {company.deleted ? (
-            <Button variant="outline" disabled className="opacity-50">
+          <Button asChild variant="outline">
+            <Link href={`/contacts?companyId=${company.id}`}>
               <Users className="mr-2 h-4 w-4" />
               {S.detail.showEmployees} ({company.contactCount})
-            </Button>
-          ) : (
-            <Button asChild variant="outline">
-              <Link href={`/contacts?companyId=${company.id}`}>
-                <Users className="mr-2 h-4 w-4" />
-                {S.detail.showEmployees} ({company.contactCount})
-              </Link>
-            </Button>
-          )}
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link href={`/companies/${company.id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
@@ -88,10 +85,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
           <Button
             variant="outline"
             className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
-            onClick={() => {
-              setDeleteError(null);
-              setDeleteOpen(true);
-            }}
+            onClick={() => setDeleteOpen(true)}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             {S.detail.delete}
@@ -143,16 +137,18 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
 
       <CompanyComments companyId={company.id} totalCount={company.commentCount} />
 
-      <DeleteConfirmDialog
+      <CompanyDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
+        companyName={company.name}
+        onDeleteAll={handleDeleteAll}
+        onDeleteCompanyOnly={handleDeleteCompanyOnly}
         title={S.deleteDialog.title}
-        description={S.deleteDialog.description.replace("{name}", company.name)}
-        confirmLabel={S.deleteDialog.confirm}
+        descriptionAll={S.deleteDialog.descriptionAll}
+        descriptionOnly={S.deleteDialog.descriptionOnly}
+        deleteAllLabel={S.deleteDialog.deleteAll}
+        deleteOnlyLabel={S.deleteDialog.deleteOnly}
         cancelLabel={S.deleteDialog.cancel}
-        onConfirm={handleDelete}
-        error={deleteError}
-        errorTitle={S.deleteDialog.errorTitle}
       />
     </div>
   );

@@ -62,10 +62,10 @@ public class CompanyController {
     /**
      * Lists companies with pagination, filtering, and sorting.
      *
-     * @param name           partial name filter (case-insensitive)
-     * @param includeDeleted whether to include soft-deleted companies
-     * @param brevo          filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
-     * @param pageable       pagination and sorting parameters
+     * @param name     partial name filter (case-insensitive)
+     * @param brevo    filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
+     * @param tagIds   filter by tag IDs (AND semantics)
+     * @param pageable pagination and sorting parameters
      * @return a page of company responses
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,32 +73,29 @@ public class CompanyController {
     public Page<CompanyDto> list(
             @Parameter(description = "Partial company name filter (case-insensitive contains)")
             @RequestParam(required = false) final String name,
-            @Parameter(description = "Whether to include soft-deleted companies")
-            @RequestParam(defaultValue = "false") final boolean includeDeleted,
             @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
             @RequestParam(required = false) final Boolean brevo,
             @Parameter(description = "Filter by tag IDs (AND semantics)")
             @RequestParam(required = false) final List<UUID> tagIds,
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return companyService.list(name, includeDeleted, brevo, tagIds, pageable);
+        return companyService.list(name, brevo, tagIds, pageable);
     }
 
     /**
      * Exports companies as CSV with selected columns.
      *
-     * @param name           partial name filter
-     * @param includeDeleted whether to include soft-deleted companies
-     * @param brevo          filter by Brevo origin
-     * @param columns        list of columns to include
-     * @param response       the HTTP response to write CSV to
+     * @param name     partial name filter
+     * @param brevo    filter by Brevo origin
+     * @param tagIds   filter by tag IDs
+     * @param columns  list of columns to include
+     * @param response the HTTP response to write CSV to
      */
     @GetMapping(value = "/export", produces = "text/csv")
     @Operation(summary = "Export companies as CSV")
     @ApiResponse(responseCode = "200", description = "CSV file downloaded")
     public void exportCsv(
             @Parameter(description = "Partial company name filter") @RequestParam(required = false) final String name,
-            @Parameter(description = "Whether to include soft-deleted companies") @RequestParam(defaultValue = "false") final boolean includeDeleted,
             @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
             @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
             @Parameter(description = "Columns to include in the CSV") @RequestParam final List<CompanyExportColumn> columns,
@@ -106,7 +103,7 @@ public class CompanyController {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"companies.csv\"");
 
-        final List<CompanyDto> companies = companyService.listAll(name, includeDeleted, brevo, tagIds);
+        final List<CompanyDto> companies = companyService.listAll(name, brevo, tagIds);
         final String[] headers = columns.stream().map(CompanyExportColumn::getHeader).toArray(String[]::new);
 
         final var writer = response.getWriter();
@@ -166,32 +163,20 @@ public class CompanyController {
     }
 
     /**
-     * Soft-deletes a company. Fails if the company still has associated contacts.
+     * Hard-deletes a company. Optionally deletes all associated contacts.
      *
-     * @param id the company ID
+     * @param id             the company ID
+     * @param deleteContacts whether to also delete all associated contacts
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Soft-delete a company")
-    @ApiResponse(responseCode = "204", description = "Company soft-deleted")
+    @Operation(summary = "Delete a company")
+    @ApiResponse(responseCode = "204", description = "Company deleted")
     @ApiResponse(responseCode = "404", description = "Company not found")
-    @ApiResponse(responseCode = "409", description = "Company has associated contacts")
-    public void delete(@Parameter(description = "The company ID") @PathVariable final UUID id) {
-        companyService.delete(id);
-    }
-
-    /**
-     * Restores a soft-deleted company.
-     *
-     * @param id the company ID
-     * @return the restored company response
-     */
-    @PostMapping(value = "/{id}/restore", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Restore a soft-deleted company")
-    @ApiResponse(responseCode = "200", description = "Company restored")
-    @ApiResponse(responseCode = "404", description = "Company not found")
-    public CompanyDto restore(@Parameter(description = "The company ID") @PathVariable final UUID id) {
-        return companyService.restore(id);
+    public void delete(@Parameter(description = "The company ID") @PathVariable final UUID id,
+                       @Parameter(description = "Whether to also delete all associated contacts")
+                       @RequestParam(defaultValue = "false") final boolean deleteContacts) {
+        companyService.delete(id, deleteContacts);
     }
 
     /**

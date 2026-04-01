@@ -21,7 +21,6 @@ public record ContactDto(
         @Schema(description = "Free-text description") String description,
         @Schema(description = "Company ID") UUID companyId,
         @Schema(description = "Company name") String companyName,
-        @Schema(description = "Whether the associated company is archived", requiredMode = Schema.RequiredMode.REQUIRED) boolean companyDeleted,
         @Schema(description = "Number of comments", requiredMode = Schema.RequiredMode.REQUIRED) long commentCount,
         @Schema(description = "Whether the contact has an uploaded photo", requiredMode = Schema.RequiredMode.REQUIRED) boolean hasPhoto,
         @Schema(description = "Birthday") LocalDate birthday,
@@ -36,7 +35,6 @@ public record ContactDto(
     public static ContactDto fromEntity(final ContactEntity entity, final long commentCount) {
         final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
         final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
-        final boolean companyDeleted = entity.getCompany() != null && entity.getCompany().isDeleted();
         final List<UUID> tagIds = entity.getTags().stream()
                 .map(TagEntity::getId)
                 .toList();
@@ -53,7 +51,6 @@ public record ContactDto(
                 entity.getDescription(),
                 companyId,
                 companyName,
-                companyDeleted,
                 commentCount,
                 entity.getPhoto() != null,
                 entity.getBirthday(),

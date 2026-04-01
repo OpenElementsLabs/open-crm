@@ -38,7 +38,6 @@ function CompanyPrintContent() {
 
   const nameFilter = searchParams.get("name") ?? "";
   const brevoFilter = searchParams.get("brevo") ?? "";
-  const includeDeleted = searchParams.get("includeDeleted") === "true";
   const tagIdsParam = searchParams.get("tagIds") ?? "";
   const tagIds = tagIdsParam ? tagIdsParam.split(",") : [];
 
@@ -64,7 +63,6 @@ function CompanyPrintContent() {
             page,
             size: 250,
             name: nameFilter || undefined,
-            includeDeleted,
             brevo: brevoFilter === "" ? undefined : brevoFilter === "true",
             tagIds: tagIds.length > 0 ? tagIds : undefined,
           });
@@ -80,7 +78,7 @@ function CompanyPrintContent() {
       }
     }
     loadAll();
-  }, [nameFilter, brevoFilter, includeDeleted, tagIds.join(",")]);
+  }, [nameFilter, brevoFilter, tagIds.join(",")]);
 
   useEffect(() => {
     if (tagIds.length === 0) return;
@@ -99,7 +97,6 @@ function CompanyPrintContent() {
   if (nameFilter) filterParts.push(`${S.columns.name}: ${nameFilter}`);
   if (brevoFilter === "true") filterParts.push(`Brevo: ${P.filterYes}`);
   if (brevoFilter === "false") filterParts.push(`Brevo: ${P.filterNo}`);
-  if (includeDeleted) filterParts.push(`${S.showArchived}: ${P.filterArchived}`);
   if (tagNames.length > 0) filterParts.push(`Tags: ${tagNames.join(", ")}`);
   const filterSummary = filterParts.length > 0 ? filterParts.join(" \u00B7 ") : P.noFilters;
 
@@ -131,7 +128,7 @@ function CompanyPrintContent() {
             </TableHeader>
             <TableBody>
               {allRecords.map((company) => (
-                <TableRow key={company.id} className={company.deleted ? "opacity-50" : ""}>
+                <TableRow key={company.id}>
                   <TableCell>
                     {company.hasLogo ? (
                       <img

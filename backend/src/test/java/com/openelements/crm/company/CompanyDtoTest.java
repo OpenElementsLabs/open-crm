@@ -51,7 +51,6 @@ class CompanyDtoTest {
             entity.setZipCode("12345");
             entity.setCity("Springfield");
             entity.setCountry("US");
-            entity.setDeleted(true);
             setField(entity, "createdAt", createdAt);
             setField(entity, "updatedAt", updatedAt);
 
@@ -66,7 +65,6 @@ class CompanyDtoTest {
             assertEquals("12345", dto.zipCode());
             assertEquals("Springfield", dto.city());
             assertEquals("US", dto.country());
-            assertTrue(dto.deleted());
             assertEquals(5, dto.contactCount());
             assertEquals(3, dto.commentCount());
             assertEquals(createdAt, dto.createdAt());
@@ -150,7 +148,6 @@ class CompanyDtoTest {
             assertNull(dto.zipCode());
             assertNull(dto.city());
             assertNull(dto.country());
-            assertFalse(dto.deleted());
         }
     }
 }

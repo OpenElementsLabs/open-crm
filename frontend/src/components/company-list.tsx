@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Trash2, RotateCcw, Archive, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -23,9 +23,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanies, deleteCompany, restoreCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl } from "@/lib/api";
+import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { CompanyDto, Page } from "@/lib/types";
@@ -87,14 +87,12 @@ export function CompanyList() {
   });
   const [nameFilter, setNameFilter] = useState("");
   const [brevoFilter, setBrevoFilter] = useState("all");
-  const [includeDeleted, setIncludeDeleted] = useState(false);
   const [tagIds, setTagIds] = useState<string[]>(() => {
     const param = searchParams.get("tagIds");
     return param ? param.split(",") : [];
   });
 
   const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [commentTarget, setCommentTarget] = useState<CompanyDto | null>(null);
   const [commentSending, setCommentSending] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
@@ -111,7 +109,6 @@ export function CompanyList() {
         page,
         size: pageSize,
         name: nameFilter || undefined,
-        includeDeleted,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
         tagIds: tagIds.length > 0 ? tagIds : undefined,
       });
@@ -121,7 +118,7 @@ export function CompanyList() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, nameFilter, brevoFilter, includeDeleted, tagIds]);
+  }, [page, pageSize, nameFilter, brevoFilter, tagIds]);
 
   useEffect(() => {
     fetchCompanies();
@@ -129,30 +126,27 @@ export function CompanyList() {
 
   useEffect(() => {
     setPage(0);
-  }, [nameFilter, brevoFilter, includeDeleted, tagIds]);
+  }, [nameFilter, brevoFilter, tagIds]);
 
-  const handleDelete = async () => {
+  const handleDeleteAll = async () => {
     if (!deleteTarget) return;
     try {
-      await deleteCompany(deleteTarget.id);
+      await deleteCompany(deleteTarget.id, true);
       setDeleteTarget(null);
-      setDeleteError(null);
       fetchCompanies();
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message === "CONFLICT") {
-        setDeleteError(S.deleteDialog.errorConflict);
-      } else {
-        setDeleteError(S.deleteDialog.errorConflict);
-      }
+    } catch {
+      console.error("Failed to delete company");
     }
   };
 
-  const handleRestore = async (id: string) => {
+  const handleDeleteCompanyOnly = async () => {
+    if (!deleteTarget) return;
     try {
-      await restoreCompany(id);
+      await deleteCompany(deleteTarget.id, false);
+      setDeleteTarget(null);
       fetchCompanies();
     } catch {
-      console.error("Failed to restore company");
+      console.error("Failed to delete company");
     }
   };
 
@@ -167,7 +161,6 @@ export function CompanyList() {
               const params = new URLSearchParams();
               if (nameFilter) params.set("name", nameFilter);
               if (brevoFilter !== "all") params.set("brevo", brevoFilter);
-              if (includeDeleted) params.set("includeDeleted", "true");
               if (tagIds.length > 0) params.set("tagIds", tagIds.join(","));
               const query = params.toString();
               window.open(`/companies/print${query ? `?${query}` : ""}`, "_blank");
@@ -227,15 +220,6 @@ export function CompanyList() {
             }}
           />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIncludeDeleted(!includeDeleted)}
-          className={includeDeleted ? "border-oe-blue text-oe-blue" : ""}
-        >
-          <Archive className="mr-2 h-4 w-4" />
-          {includeDeleted ? S.hideArchived : S.showArchived}
-        </Button>
       </div>
 
       {/* Loading */}
@@ -278,7 +262,7 @@ export function CompanyList() {
                 {data.content.map((company) => (
                   <TableRow
                     key={company.id}
-                    className={`cursor-pointer ${company.deleted ? "opacity-50" : ""}`}
+                    className="cursor-pointer"
                     onClick={() => router.push(`/companies/${company.id}`)}
                   >
                     <TableCell>
@@ -341,40 +325,21 @@ export function CompanyList() {
                         </TooltipTrigger>
                         <TooltipContent>{S.detail.createTask}</TooltipContent>
                       </Tooltip>
-                      {company.deleted ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRestore(company.id);
-                              }}
-                            >
-                              <RotateCcw className="h-4 w-4 text-oe-blue" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{S.detail.restore}</TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteError(null);
-                                setDeleteTarget(company);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-oe-red" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>{S.detail.delete}</TooltipContent>
-                        </Tooltip>
-                      )}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(company);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-oe-red" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{S.detail.delete}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -426,21 +391,22 @@ export function CompanyList() {
       )}
 
       {/* Delete dialog */}
-      <DeleteConfirmDialog
+      <CompanyDeleteDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => {
           if (!open) {
             setDeleteTarget(null);
-            setDeleteError(null);
           }
         }}
+        companyName={deleteTarget?.name ?? ""}
+        onDeleteAll={handleDeleteAll}
+        onDeleteCompanyOnly={handleDeleteCompanyOnly}
         title={S.deleteDialog.title}
-        description={S.deleteDialog.description.replace("{name}", deleteTarget?.name ?? "")}
-        confirmLabel={S.deleteDialog.confirm}
+        descriptionAll={S.deleteDialog.descriptionAll}
+        descriptionOnly={S.deleteDialog.descriptionOnly}
+        deleteAllLabel={S.deleteDialog.deleteAll}
+        deleteOnlyLabel={S.deleteDialog.deleteOnly}
         cancelLabel={S.deleteDialog.cancel}
-        onConfirm={handleDelete}
-        error={deleteError}
-        errorTitle={S.deleteDialog.errorTitle}
       />
 
       <AddCommentDialog
@@ -472,7 +438,6 @@ export function CompanyList() {
           const url = getCompanyExportUrl(
             {
               name: nameFilter || undefined,
-              includeDeleted,
               brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
               tagIds: tagIds.length > 0 ? tagIds : undefined,
             },

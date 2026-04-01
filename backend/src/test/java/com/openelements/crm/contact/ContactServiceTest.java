@@ -126,10 +126,10 @@ class ContactServiceTest {
         }
 
         @Test
-        @DisplayName("should throw 400 for soft-deleted company")
-        void shouldThrow400ForSoftDeletedCompany() {
+        @DisplayName("should throw 400 for deleted company")
+        void shouldThrow400ForDeletedCompany() {
             final CompanyDto company = createCompany("Deleted Co");
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> createContact("Jane", "Doe", company.id()));
@@ -214,11 +214,11 @@ class ContactServiceTest {
         }
 
         @Test
-        @DisplayName("should reject reassignment to soft-deleted company")
-        void shouldRejectReassignmentToSoftDeletedCompany() {
+        @DisplayName("should reject reassignment to deleted company")
+        void shouldRejectReassignmentToDeletedCompany() {
             final CompanyDto company = createCompany("To Delete");
             final ContactDto contact = createContact("Jane", "Doe", null);
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.update(contact.id(),

@@ -59,7 +59,7 @@ class TaskDtoTest {
             setField(entity, "createdAt", createdAt);
             setField(entity, "updatedAt", updatedAt);
 
-            TaskDto dto = TaskDto.fromEntity(entity);
+            TaskDto dto = TaskDto.fromEntity(entity, 0L);
 
             assertEquals(id, dto.id());
             assertEquals("Call back client", dto.action());
@@ -79,7 +79,7 @@ class TaskDtoTest {
             company.setName("Acme Corp");
             entity.setCompany(company);
 
-            TaskDto dto = TaskDto.fromEntity(entity);
+            TaskDto dto = TaskDto.fromEntity(entity, 0L);
 
             assertEquals(companyId, dto.companyId());
             assertEquals("Acme Corp", dto.companyName());
@@ -98,7 +98,7 @@ class TaskDtoTest {
             contact.setLastName("Doe");
             entity.setContact(contact);
 
-            TaskDto dto = TaskDto.fromEntity(entity);
+            TaskDto dto = TaskDto.fromEntity(entity, 0L);
 
             assertNull(dto.companyId());
             assertNull(dto.companyName());
@@ -111,7 +111,7 @@ class TaskDtoTest {
         void mapsEmptyTagList() throws Exception {
             TaskEntity entity = createEntity();
 
-            TaskDto dto = TaskDto.fromEntity(entity);
+            TaskDto dto = TaskDto.fromEntity(entity, 0L);
 
             assertNotNull(dto.tagIds());
             assertTrue(dto.tagIds().isEmpty());

@@ -87,7 +87,6 @@ class CompanyServiceTest {
             assertEquals("Test Corp", result.name());
             assertEquals(0, result.contactCount());
             assertEquals(0, result.commentCount());
-            assertFalse(result.deleted());
         }
 
         @Test
@@ -208,59 +207,40 @@ class CompanyServiceTest {
     class Delete {
 
         @Test
-        @DisplayName("should soft-delete company without contacts")
-        void shouldSoftDeleteCompanyWithoutContacts() {
+        @DisplayName("should hard-delete company without contacts")
+        void shouldHardDeleteCompanyWithoutContacts() {
             final CompanyDto company = createCompany("To Delete");
 
-            companyService.delete(company.id());
+            companyService.delete(company.id(), false);
 
-            final CompanyDto result = companyService.getById(company.id());
-            assertTrue(result.deleted());
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.getById(company.id()));
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
         @Test
-        @DisplayName("should throw 409 when company has contacts")
-        void shouldThrow409WhenCompanyHasContacts() {
+        @DisplayName("should delete company and its contacts when deleteContacts is true")
+        void shouldDeleteCompanyAndContacts() {
             final CompanyDto company = createCompany("Has Contacts");
             createContact("John", "Doe", company.id());
 
-            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.delete(company.id()));
-            assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
-        }
+            companyService.delete(company.id(), true);
 
-        @Test
-        @DisplayName("should throw 404 for nonexistent ID")
-        void shouldThrow404ForNonexistentId() {
-            final UUID fakeId = UUID.randomUUID();
-
-            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.delete(fakeId));
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.getById(company.id()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        }
-    }
-
-    @Nested
-    @DisplayName("restore")
-    class Restore {
-
-        @Test
-        @DisplayName("should restore soft-deleted company")
-        void shouldRestoreSoftDeletedCompany() {
-            final CompanyDto company = createCompany("Restore Me");
-            companyService.delete(company.id());
-
-            final CompanyDto restored = companyService.restore(company.id());
-
-            assertFalse(restored.deleted());
+            assertEquals(0, contactRepository.count());
         }
 
         @Test
-        @DisplayName("should be idempotent for non-deleted company")
-        void shouldBeIdempotentForNonDeletedCompany() {
-            final CompanyDto company = createCompany("Not Deleted");
+        @DisplayName("should delete company only and unlink contacts when deleteContacts is false")
+        void shouldDeleteCompanyOnlyAndUnlinkContacts() {
+            final CompanyDto company = createCompany("Company Only");
+            createContact("Jane", "Doe", company.id());
 
-            final CompanyDto result = companyService.restore(company.id());
+            companyService.delete(company.id(), false);
 
-            assertFalse(result.deleted());
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.getById(company.id()));
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+            assertEquals(1, contactRepository.count());
         }
 
         @Test
@@ -268,7 +248,7 @@ class CompanyServiceTest {
         void shouldThrow404ForNonexistentId() {
             final UUID fakeId = UUID.randomUUID();
 
-            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.restore(fakeId));
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.delete(fakeId, false));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -278,26 +258,12 @@ class CompanyServiceTest {
     class List {
 
         @Test
-        @DisplayName("should exclude soft-deleted by default")
-        void shouldExcludeSoftDeletedByDefault() {
+        @DisplayName("should list all companies")
+        void shouldListAllCompanies() {
             createCompany("Active 1");
             createCompany("Active 2");
-            final CompanyDto toDelete = createCompany("To Delete");
-            companyService.delete(toDelete.id());
 
-            final var page = companyService.list(null, false, null, null, PageRequest.of(0, 20));
-
-            assertEquals(2, page.getTotalElements());
-        }
-
-        @Test
-        @DisplayName("should include soft-deleted when includeDeleted is true")
-        void shouldIncludeSoftDeletedWhenIncludeDeletedIsTrue() {
-            createCompany("Active");
-            final CompanyDto toDelete = createCompany("Deleted");
-            companyService.delete(toDelete.id());
-
-            final var page = companyService.list(null, true, null, null, PageRequest.of(0, 20));
+            final var page = companyService.list(null, null, null, PageRequest.of(0, 20));
 
             assertEquals(2, page.getTotalElements());
         }
@@ -308,7 +274,7 @@ class CompanyServiceTest {
             createCompany("Open Elements");
             createCompany("Acme Corp");
 
-            final var page = companyService.list("open", false, null, null, PageRequest.of(0, 20));
+            final var page = companyService.list("open", null, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Open Elements", page.getContent().get(0).name());
@@ -323,7 +289,7 @@ class CompanyServiceTest {
             brevoEntity.setBrevoCompanyId("brevo-123");
             companyRepository.saveAndFlush(brevoEntity);
 
-            final var page = companyService.list(null, false, true, null, PageRequest.of(0, 20));
+            final var page = companyService.list(null, true, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Brevo Corp", page.getContent().get(0).name());
@@ -338,7 +304,7 @@ class CompanyServiceTest {
             brevoEntity.setBrevoCompanyId("brevo-123");
             companyRepository.saveAndFlush(brevoEntity);
 
-            final var page = companyService.list(null, false, false, null, PageRequest.of(0, 20));
+            final var page = companyService.list(null, false, null, PageRequest.of(0, 20));
 
             assertEquals(1, page.getTotalElements());
             assertEquals("Normal Corp", page.getContent().get(0).name());

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { DetailField } from "@/components/detail-field";
 import { TagChips } from "@/components/tag-chips";
+import { TaskComments } from "@/components/task-comments";
 import { deleteTask } from "@/lib/api";
 import type { TaskDto, TaskStatus } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
@@ -99,6 +100,10 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
       <div className="mt-4">
         <h3 className="text-sm font-medium text-oe-gray-mid">{S.fields.action}</h3>
         <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{task.action}</p>
+      </div>
+
+      <div className="mt-6">
+        <TaskComments taskId={task.id} totalCount={task.commentCount} />
       </div>
 
       <DeleteConfirmDialog

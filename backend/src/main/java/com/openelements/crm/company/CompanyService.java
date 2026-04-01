@@ -2,8 +2,10 @@ package com.openelements.crm.company;
 
 import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
+import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.tag.TagService;
+import com.openelements.crm.task.TaskRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.Objects;
@@ -18,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Service handling company business logic including CRUD operations, soft-delete, and restore.
+ * Service handling company business logic including CRUD operations and hard-delete.
  */
 @Service
 @Transactional
@@ -27,15 +29,18 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
     private final CommentRepository commentRepository;
+    private final TaskRepository taskRepository;
     private final TagService tagService;
 
     public CompanyService(final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
                           final CommentRepository commentRepository,
+                          final TaskRepository taskRepository,
                           final TagService tagService) {
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
+        this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
     }
 
@@ -109,58 +114,51 @@ public class CompanyService {
     }
 
     /**
-     * Soft-deletes a company. Fails with 409 if the company still has contacts.
+     * Hard-deletes a company. Optionally deletes all associated contacts as well.
      *
-     * @param id the company ID
-     * @throws ResponseStatusException with 404 if not found, 409 if contacts exist
-     */
-    public void delete(final UUID id) {
-        Objects.requireNonNull(id, "id must not be null");
-        final CompanyEntity entity = findOrThrow(id);
-        if (contactRepository.existsByCompanyId(id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Cannot delete company: it still has associated contacts. Remove or reassign them first.");
-        }
-        entity.setDeleted(true);
-        companyRepository.saveAndFlush(entity);
-    }
-
-    /**
-     * Restores a soft-deleted company. Idempotent — restoring a non-deleted company is a no-op.
-     *
-     * @param id the company ID
-     * @return the restored company response
+     * @param id             the company ID
+     * @param deleteContacts if true, delete all contacts belonging to this company
      * @throws ResponseStatusException with 404 if not found
      */
-    public CompanyDto restore(final UUID id) {
+    public void delete(final UUID id, final boolean deleteContacts) {
         Objects.requireNonNull(id, "id must not be null");
         final CompanyEntity entity = findOrThrow(id);
-        entity.setDeleted(false);
-        final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        return toDto(saved);
+        if (deleteContacts) {
+            final List<ContactEntity> contacts = contactRepository.findByCompanyId(id);
+            for (final ContactEntity contact : contacts) {
+                taskRepository.deleteByContactId(contact.getId());
+                commentRepository.deleteByContactId(contact.getId());
+                contactRepository.delete(contact);
+            }
+        } else {
+            final List<ContactEntity> contacts = contactRepository.findByCompanyId(id);
+            for (final ContactEntity contact : contacts) {
+                contact.setCompany(null);
+                contactRepository.save(contact);
+            }
+        }
+        taskRepository.deleteByCompanyId(id);
+        commentRepository.deleteByCompanyId(id);
+        companyRepository.delete(entity);
     }
 
     /**
      * Lists companies with pagination, filtering, and sorting.
      *
-     * @param name           partial name filter (case-insensitive)
-     * @param includeDeleted whether to include soft-deleted companies
-     * @param brevo          filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
-     * @param pageable       pagination and sorting parameters
+     * @param name     partial name filter (case-insensitive)
+     * @param brevo    filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
+     * @param tagIds   filter by tag IDs (AND semantics)
+     * @param pageable pagination and sorting parameters
      * @return a page of company responses
      */
     @Transactional(readOnly = true)
     public Page<CompanyDto> list(final String name,
-                                      final boolean includeDeleted,
                                       final Boolean brevo,
                                       final List<UUID> tagIds,
                                       final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         Specification<CompanyEntity> spec = Specification.where(null);
 
-        if (!includeDeleted) {
-            spec = spec.and((root, query, cb) -> cb.isFalse(root.get("deleted")));
-        }
         if (name != null && !name.isBlank()) {
             spec = spec.and((root, query, cb) ->
                     cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
@@ -191,21 +189,17 @@ public class CompanyService {
     /**
      * Lists all companies matching the given filters without pagination.
      *
-     * @param name           partial name filter (case-insensitive)
-     * @param includeDeleted whether to include soft-deleted companies
-     * @param brevo          filter by Brevo origin
+     * @param name   partial name filter (case-insensitive)
+     * @param brevo  filter by Brevo origin
+     * @param tagIds filter by tag IDs (AND semantics)
      * @return list of all matching company DTOs
      */
     @Transactional(readOnly = true)
     public List<CompanyDto> listAll(final String name,
-                                    final boolean includeDeleted,
                                     final Boolean brevo,
                                     final List<UUID> tagIds) {
         Specification<CompanyEntity> spec = Specification.where(null);
 
-        if (!includeDeleted) {
-            spec = spec.and((root, query, cb) -> cb.isFalse(root.get("deleted")));
-        }
         if (name != null && !name.isBlank()) {
             spec = spec.and((root, query, cb) ->
                     cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));

@@ -2,6 +2,7 @@ package com.openelements.crm.comment;
 
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.contact.ContactEntity;
+import com.openelements.crm.task.TaskEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,9 +19,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
- * JPA entity representing a comment attached to either a company or a contact.
+ * JPA entity representing a comment attached to a company, a contact, or a task.
  *
- * <p>A comment belongs to exactly one entity: either a company or a contact, never both.
+ * <p>A comment belongs to exactly one entity: a company, a contact, or a task.
  * This invariant is enforced by a CHECK constraint at the database level.</p>
  */
 @Entity
@@ -45,6 +46,10 @@ public class CommentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contact_id")
     private ContactEntity contact;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id")
+    private TaskEntity task;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -139,6 +144,24 @@ public class CommentEntity {
      */
     public void setContact(final ContactEntity contact) {
         this.contact = contact;
+    }
+
+    /**
+     * Returns the task this comment is attached to.
+     *
+     * @return the task entity, or null if attached to a company or contact
+     */
+    public TaskEntity getTask() {
+        return task;
+    }
+
+    /**
+     * Sets the task this comment is attached to.
+     *
+     * @param task the task entity
+     */
+    public void setTask(final TaskEntity task) {
+        this.task = task;
     }
 
     /**

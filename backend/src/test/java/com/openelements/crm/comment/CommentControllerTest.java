@@ -191,8 +191,8 @@ class CommentControllerTest {
         }
 
         @Test
-        @DisplayName("should allow comment on soft-deleted company")
-        void shouldAllowOnSoftDeletedCompany() throws Exception {
+        @DisplayName("should return 404 for comment on deleted company")
+        void shouldReturn404ForDeletedCompany() throws Exception {
             //GIVEN
             final String companyId = createCompany("Deleted Co");
             mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
@@ -205,7 +205,7 @@ class CommentControllerTest {
                     .contentType(MediaType.APPLICATION_JSON).content(json).with(testJwt()));
 
             //THEN
-            result.andExpect(status().isCreated());
+            result.andExpect(status().isNotFound());
         }
     }
 
@@ -351,8 +351,8 @@ class CommentControllerTest {
         }
 
         @Test
-        @DisplayName("company soft-delete should preserve comments")
-        void companySoftDeleteShouldPreserveComments() throws Exception {
+        @DisplayName("company hard-delete should cascade-delete comments")
+        void companyHardDeleteShouldCascadeDeleteComments() throws Exception {
             //GIVEN
             final String companyId = createCompany("Test Co");
             addCommentToCompany(companyId, "Comment 1");
@@ -364,13 +364,12 @@ class CommentControllerTest {
 
             //THEN
             mockMvc.perform(get("/api/companies/" + companyId + "/comments").with(testJwt()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)));
+                    .andExpect(status().isNotFound());
         }
 
         @Test
-        @DisplayName("contact cannot reference soft-deleted company")
-        void contactCannotReferenceSoftDeletedCompany() throws Exception {
+        @DisplayName("contact cannot reference deleted company")
+        void contactCannotReferenceDeletedCompany() throws Exception {
             //GIVEN
             final String companyId = createCompany("Deleted Co");
             mockMvc.perform(delete("/api/companies/" + companyId).with(testJwt()));
@@ -387,8 +386,8 @@ class CommentControllerTest {
         }
 
         @Test
-        @DisplayName("contact cannot be moved to soft-deleted company")
-        void contactCannotBeMovedToSoftDeletedCompany() throws Exception {
+        @DisplayName("contact cannot be moved to deleted company")
+        void contactCannotBeMovedToDeletedCompany() throws Exception {
             //GIVEN
             final String companyA = createCompany("Active Co");
             final String companyB = createCompany("To Delete");
