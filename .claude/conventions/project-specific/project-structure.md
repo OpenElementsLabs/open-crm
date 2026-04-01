@@ -13,14 +13,15 @@ open-crm/
 │   │   ├── company/                — Company domain (controller, service, repository, DTOs, entity, export enum)
 │   │   ├── contact/                — Contact domain (controller, service, repository, DTOs, entity, enums, export enum)
 │   │   ├── comment/                — Comment domain (controller, service, repository, DTOs, entity)
-│   │   ├── brevo/                  — Brevo integration (sync service, controller, DTOs, records)
-│   │   ├── health/                 — Health check endpoint
-│   │   ├── settings/               — Settings storage (Brevo API key)
+│   │   ├── task/                   — Task domain (controller, service, repository, DTOs, entity, status enum)
 │   │   ├── tag/                    — Tag domain (entity, repository, service, controller, DTOs)
-│   │   └── user/                   — User model (UserInfo record, UserService with JWT extraction)
+│   │   ├── user/                   — User domain (entity, repository, service, controller, DTO)
+│   │   ├── brevo/                  — Brevo integration (sync service, API client, controller, DTOs, records)
+│   │   ├── health/                 — Health check endpoint
+│   │   └── settings/               — Settings storage (key-value pairs, e.g. Brevo API key)
 │   ├── src/main/resources/
 │   │   ├── application.yml         — Application configuration
-│   │   └── db/migration/           — Flyway SQL migrations (V1–V11)
+│   │   └── db/migration/           — Flyway SQL migrations (V1–V17)
 │   ├── src/test/                   — Tests (repository, service, DTO conversion tests)
 │   ├── pom.xml                     — Maven build configuration
 │   └── Dockerfile                  — Multi-stage Docker build
@@ -31,35 +32,45 @@ open-crm/
 │   │   ├── page.tsx                — Home page (redirects to companies)
 │   │   ├── layout.tsx              — Root layout (fonts, sidebar, language provider)
 │   │   ├── globals.css             — Global styles, theme, print rules
-│   │   ├── health/                 — Health status page
-│   │   ├── brevo-sync/             — Brevo import page
+│   │   ├── admin/                  — Admin management page
 │   │   ├── companies/              — Company pages (list, detail, new, edit, print)
 │   │   ├── contacts/               — Contact pages (list, detail, new, edit, print)
+│   │   ├── tasks/                  — Task pages (list, detail, new, edit)
+│   │   ├── tags/                   — Tag pages (list, new, edit)
 │   │   └── api/                    — API routes
 │   │       ├── auth/[...nextauth]/ — Auth.js route handlers
+│   │       ├── logout/             — Logout handler
 │   │       └── [...path]/          — API proxy with JWT token forwarding
 │   ├── src/components/             — React components
-│   │   ├── ui/                     — shadcn/ui primitives (button, card, table, dialog, etc.)
+│   │   ├── ui/                     — shadcn/ui primitives (button, card, table, dialog, tooltip, etc.)
 │   │   ├── sidebar.tsx             — Navigation sidebar with branding and authenticated user section
 │   │   ├── session-provider.tsx    — Auth.js SessionProvider wrapper
+│   │   ├── company-list.tsx        — Company list with filters, print, CSV export
+│   │   ├── company-detail.tsx      — Company detail view with merged address block
+│   │   ├── company-form.tsx        — Company create/edit form
+│   │   ├── company-comments.tsx    — Company comments section
+│   │   ├── contact-list.tsx        — Contact list with unified search and filters
+│   │   ├── contact-detail.tsx      — Contact detail view
+│   │   ├── contact-form.tsx        — Contact create/edit form
+│   │   ├── contact-comments.tsx    — Contact comments section
+│   │   ├── task-list.tsx           — Task list with filters and pagination
+│   │   ├── task-detail.tsx         — Task detail view
+│   │   ├── task-form.tsx           — Task create/edit form
 │   │   ├── tag-list.tsx            — Tag list with search, pagination, delete
 │   │   ├── tag-form.tsx            — Tag create/edit form with color picker
 │   │   ├── tag-chips.tsx           — Colored tag chips for detail views
 │   │   ├── tag-multi-select.tsx    — Multi-select dropdown for tag assignment in forms
 │   │   ├── detail-field.tsx        — Shared detail field with action icons (copy, link, mail, tel)
-│   │   ├── company-list.tsx        — Company list with filters, print, CSV export
-│   │   ├── company-detail.tsx      — Company detail view with merged address block
-│   │   ├── company-form.tsx        — Company create/edit form
-│   │   ├── contact-list.tsx        — Contact list with unified search and filters
-│   │   ├── contact-detail.tsx      — Contact detail view
-│   │   ├── contact-form.tsx        — Contact create/edit form
 │   │   ├── csv-export-dialog.tsx   — CSV column selection dialog
 │   │   ├── add-comment-dialog.tsx  — Comment creation modal
+│   │   ├── delete-confirm-dialog.tsx — Hard-delete confirmation dialog
+│   │   ├── brevo-sync.tsx          — Brevo import UI
+│   │   ├── health-status.tsx       — Backend health indicator
+│   │   ├── language-switch.tsx     — Language toggle (DE/EN)
 │   │   └── __tests__/              — Component tests
 │   ├── src/lib/                    — Shared utilities
 │   │   ├── api.ts                  — Backend API client functions
 │   │   ├── types.ts                — TypeScript type definitions (DTOs, Page)
-│   │   ├── constants.ts            — Shared constants
 │   │   ├── utils.ts                — General utilities (cn helper)
 │   │   └── i18n/                   — Internationalization
 │   │       ├── de.ts               — German translations
@@ -70,15 +81,17 @@ open-crm/
 │   ├── package.json                — Dependencies and scripts
 │   ├── Dockerfile                  — Multi-stage Docker build
 │   └── .nvmrc                      — Node.js version pinning (v22.19.0)
-├── specs/                          — Feature specifications (46 completed, see INDEX.md)
+├── specs/                          — Feature specifications (design docs, behavioral scenarios)
 │   ├── INDEX.md                    — Central spec index with IDs, names, and status
-│   └── <spec-name>/               — Individual spec folders (design.md, behaviors.md)
+│   └── <spec-name>/               — Individual spec folders (design.md, behaviors.md, steps.md)
 ├── .claude/                        — Claude Code configuration and conventions
 ├── .github/workflows/build.yml     — CI/CD pipeline (backend, frontend, Docker jobs)
 ├── docker-compose.yml              — Service definitions without port bindings (for Coolify)
 ├── docker-compose.override.yml     — Port bindings for local development (auto-merged)
+├── mock-oauth2-config.json         — Mock OIDC server configuration for local dev
 ├── .env.example                    — Environment variable template
 ├── DOCKER-COMPOSE-COOLIFY.md       — Deployment documentation for Coolify
+├── BREVO.md                        — Brevo integration documentation
 ├── TODO.md                         — Deferred work items
 ├── .editorconfig                   — Editor formatting rules
 └── README.md                       — Project documentation
@@ -93,4 +106,4 @@ open-crm/
 
 ## Naming Conventions
 
-Each backend domain follows a consistent package structure: `Controller`, `Service`, `Repository`, `Entity`, `Dto`, `CreateDto`, `UpdateDto`. Export functionality adds `ExportColumn` enums. Shared types like `ImageData` and `UserInfo` live in the root `crm` package or dedicated sub-packages.
+Each backend domain follows a consistent package structure: `Controller`, `Service`, `Repository`, `Entity`, `Dto`, `CreateDto`, `UpdateDto`. Export functionality adds `ExportColumn` enums. Shared types like `ImageData` live in the root `crm` package.

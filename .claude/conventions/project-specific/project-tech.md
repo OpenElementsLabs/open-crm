@@ -46,10 +46,10 @@
 
 ### Frontend
 
-- Radix UI (accessible component primitives via shadcn/ui)
+- Radix UI + Base UI (accessible component primitives via shadcn/ui)
 - Lucide React (icon library)
 - class-variance-authority + clsx + tailwind-merge (styling utilities)
-- react-day-picker + date-fns (date picker for birthday field)
+- react-day-picker + date-fns (date picker for birthday/due date fields)
 - next-auth 5 / Auth.js v5 (OIDC authentication, JWT session management, token refresh)
 
 ### Frontend Testing

@@ -3,15 +3,15 @@
 ## Components
 
 - **Frontend (Next.js)** — Server-side rendered React application using the App Router. All pages require OIDC authentication via Auth.js v5 (middleware redirects unauthenticated users). API calls are proxied through a catch-all Route Handler that injects the JWT access token as an Authorization Bearer header. Uses `BACKEND_URL` env var for server-side requests. Bilingual UI (DE/EN) with client-side language detection and switching.
-- **Backend (Spring Boot)** — RESTful JSON API handling business logic, validation, and data persistence. All API endpoints require JWT Bearer token authentication via Spring Security OAuth2 Resource Server (except health and Swagger UI which are public). User info is extracted from JWT claims. Organized by domain packages (company, contact, comment, brevo, health, settings, user). Exposes OpenAPI documentation via Swagger UI with OIDC authorize button. CSV export endpoints generate files server-side using Apache Commons CSV.
-- **Database (PostgreSQL)** — Relational storage for all domain data. Schema managed by Flyway migrations (V1–V11). Uses UUID primary keys, soft-delete pattern for companies, and timestamp tracking.
-- **Brevo** — External marketing platform. One-directional import of companies and contacts via Brevo API, triggered manually. API key stored in settings table.
+- **Backend (Spring Boot)** — RESTful JSON API handling business logic, validation, and data persistence. All API endpoints require JWT Bearer token authentication via Spring Security OAuth2 Resource Server (except health and Swagger UI which are public). User info is extracted from JWT claims. Organized by domain packages (company, contact, comment, task, tag, user, brevo, health, settings). Exposes OpenAPI documentation via Swagger UI with OIDC authorize button. CSV export endpoints generate files server-side using Apache Commons CSV.
+- **Database (PostgreSQL)** — Relational storage for all domain data. Schema managed by Flyway migrations (V1–V17). Uses UUID primary keys and timestamp tracking.
+- **Brevo** — External marketing platform. One-directional import of companies and contacts via Brevo API, triggered manually. API key stored in settings table. Newsletter subscription status synced during import.
 
 ## Communication
 
 - **Frontend → Backend:** HTTP REST (JSON). All API calls go through a server-side Route Handler (`app/api/[...path]/route.ts`) that reads the Auth.js session, injects the JWT access token as an `Authorization: Bearer` header, and forwards the request to the backend at `BACKEND_URL`.
 - **Backend → Database:** JDBC via Spring Data JPA. Hibernate validates schema against entity mappings (`ddl-auto: validate`).
-- **Backend → Brevo:** HTTP REST via Brevo Java SDK. Import-only (CRM reads from Brevo, never writes back).
+- **Backend → Brevo:** HTTP REST via `BrevoApiClient`. Import-only (CRM reads from Brevo, never writes back).
 - **Schema management:** Flyway runs migrations on startup from `classpath:db/migration`.
 - **Page serialization:** `@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)` for stable paginated JSON responses with nested `page` metadata object.
 
@@ -39,6 +39,7 @@ erDiagram
         VARCHAR email
         VARCHAR website
         VARCHAR phone_number
+        TEXT description
         VARCHAR street
         VARCHAR house_number
         VARCHAR zip_code
@@ -47,12 +48,12 @@ erDiagram
         BYTEA logo
         VARCHAR logo_content_type
         VARCHAR brevo_company_id
-        BOOLEAN deleted
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
     }
     CONTACTS {
         UUID id PK
+        VARCHAR title
         VARCHAR first_name
         VARCHAR last_name
         VARCHAR email
@@ -60,12 +61,24 @@ erDiagram
         VARCHAR gender
         VARCHAR linkedin_url
         VARCHAR phone_number
+        TEXT description
         UUID company_id FK
         VARCHAR brevo_id
         VARCHAR language
         DATE birthday
+        BOOLEAN receives_newsletter
         BYTEA photo
         VARCHAR photo_content_type
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    TASKS {
+        UUID id PK
+        TEXT action
+        DATE due_date
+        VARCHAR status
+        UUID company_id FK
+        UUID contact_id FK
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
     }
@@ -78,11 +91,6 @@ erDiagram
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
     }
-    SETTINGS {
-        UUID id PK
-        VARCHAR key
-        VARCHAR value
-    }
     TAGS {
         UUID id PK
         VARCHAR name UK
@@ -91,21 +99,40 @@ erDiagram
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
     }
+    USERS {
+        UUID id PK
+        VARCHAR sub UK
+        VARCHAR name
+        VARCHAR email
+        BYTEA avatar
+        VARCHAR avatar_content_type
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+    SETTINGS {
+        VARCHAR key PK
+        TEXT value
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
     COMPANIES ||--o{ CONTACTS : "has"
     COMPANIES ||--o{ COMMENTS : "has"
+    COMPANIES ||--o{ TASKS : "has"
     CONTACTS ||--o{ COMMENTS : "has"
+    CONTACTS ||--o{ TASKS : "has"
     COMPANIES }o--o{ TAGS : "tagged"
     CONTACTS }o--o{ TAGS : "tagged"
+    TASKS }o--o{ TAGS : "tagged"
 ```
 
 ## Key Architectural Decisions
 
-- **Soft-delete for companies** — Companies are marked as `deleted=true` rather than physically removed, allowing restoration. Contacts block company deletion (409 Conflict).
+- **Hard-delete for companies** — Companies are permanently deleted with a confirmation dialog. Contacts linked to a company block deletion (409 Conflict).
 - **Comments are polymorphic** — A comment belongs to either a company or a contact (enforced by a CHECK constraint), never both. Author is a simple string field set from the authenticated user's name.
 - **Flyway for schema management** — Hibernate is set to `validate` only; all schema changes go through versioned SQL migrations.
 - **Separate DTOs per operation** — Each domain uses distinct `CreateDto`, `UpdateDto`, and `Dto` records to control API surface per operation.
-- **User model without database** — No user table exists. Frontend user info comes from the OIDC token via Auth.js session. Backend user info comes from the JWT token claims. Both frontend and backend resolve user info independently (no user API endpoint).
-- **Image storage in database** — Company logos and contact photos are stored as `bytea` columns in PostgreSQL alongside a `_content_type` column. Dedicated REST endpoints handle upload, retrieval, and deletion. DTOs expose `hasLogo`/`hasPhoto` boolean flags instead of binary data.
-- **Brevo import is one-directional** — The CRM imports from Brevo but never writes back. Brevo-managed fields on contacts are read-only. Re-import preserves user-editable fields.
+- **User entity for OIDC users** — Users are stored in the database with their OIDC subject (`sub`), name, email, and optional avatar. User info is synced from the OIDC token. Frontend user info comes from the Auth.js session; backend validates JWT tokens independently.
+- **Image storage in database** — Company logos, contact photos, and user avatars are stored as `bytea` columns in PostgreSQL alongside a `_content_type` column. Dedicated REST endpoints handle upload, retrieval, and deletion. DTOs expose `hasLogo`/`hasPhoto` boolean flags instead of binary data.
+- **Brevo import is one-directional** — The CRM imports from Brevo but never writes back. Brevo-managed fields on contacts are read-only. Re-import preserves user-editable fields. Newsletter status is synced during import.
 - **Docker Compose split for Coolify** — `docker-compose.yml` has no port bindings (for Coolify/Traefik deployment); `docker-compose.override.yml` adds host ports for local development. Docker Compose auto-merges the override file locally.
 - **Spec-driven development** — Features are planned in `specs/` with design documents, behavioral scenarios (given-when-then), and implementation steps before coding begins.
