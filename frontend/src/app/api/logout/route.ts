@@ -38,9 +38,11 @@ export async function GET(req: NextRequest) {
 
   // Delete all Auth.js session cookies, including chunked cookies (.0, .1, .2, ...)
   // Auth.js splits large JWT sessions across multiple cookies when they exceed 4KB
+  // Cookie attributes must match the original: secure=true only under HTTPS
+  const isSecure = baseUrl.startsWith("https://");
   const cookieOptions = {
     path: "/",
-    secure: true,
+    secure: isSecure,
     httpOnly: true,
     sameSite: "lax" as const,
   };

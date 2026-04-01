@@ -60,7 +60,6 @@ public class UserService {
                 });
     }
 
-    @Transactional(readOnly = true)
     public UserDto getCurrentUserDto() {
         return UserDto.fromEntity(getCurrentUser());
     }
@@ -82,7 +81,6 @@ public class UserService {
         return UserDto.fromEntity(userRepository.saveAndFlush(user));
     }
 
-    @Transactional(readOnly = true)
     public ImageData getAvatar() {
         final UserEntity user = getCurrentUser();
         if (user.getAvatar() == null) {
