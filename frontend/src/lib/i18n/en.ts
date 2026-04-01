@@ -15,6 +15,12 @@ export const en: Translations = {
     description: "Customer Relationship Management by Open Elements",
     developedBy: "Developed by",
   },
+  login: {
+    title: "Open CRM",
+    button: "Log in",
+    error: "Login failed. Please try again.",
+    developedBy: "Developed by",
+  },
   sidebar: {
     uploadAvatar: "Change avatar",
     removeAvatar: "Remove avatar",
