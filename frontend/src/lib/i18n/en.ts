@@ -35,6 +35,16 @@ export const en: Translations = {
   },
   admin: {
     title: "Administration",
+    token: {
+      title: "Bearer Token",
+      show: "Show",
+      hide: "Hide",
+      copy: "Copy",
+      copied: "Copied",
+      validFor: "Valid for",
+      expired: "Expired",
+      noToken: "No token available",
+    },
   },
   health: {
     title: "System Status",
