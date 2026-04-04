@@ -162,6 +162,25 @@ export interface BrevoSettingsDto {
   readonly apiKeyConfigured: boolean;
 }
 
+export interface WebhookDto {
+  readonly id: string;
+  readonly url: string;
+  readonly active: boolean;
+  readonly lastStatus: number | null;
+  readonly lastCalledAt: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface WebhookCreateDto {
+  readonly url: string;
+}
+
+export interface WebhookUpdateDto {
+  readonly url: string;
+  readonly active: boolean;
+}
+
 export interface BrevoSyncResultDto {
   readonly companiesImported: number;
   readonly companiesUpdated: number;

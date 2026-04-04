@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Building2, CheckSquare, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from "lucide-react";
+import { Building2, CheckSquare, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users, Webhook } from "lucide-react";
 import { getCurrentUser, getUserAvatarUrl, uploadUserAvatar } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -30,11 +30,10 @@ function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
     { label: t.nav.tags, href: "/tags", icon: <Tag className="h-5 w-5" /> },
   ];
 
-  const adminItem: NavItem = {
-    label: t.nav.admin,
-    href: "/admin",
-    icon: <Settings className="h-5 w-5" />,
-  };
+  const bottomItems: NavItem[] = [
+    { label: t.nav.admin, href: "/admin", icon: <Settings className="h-5 w-5" /> },
+    { label: t.nav.webhooks, href: "/webhooks", icon: <Webhook className="h-5 w-5" /> },
+  ];
 
   function renderItem(item: NavItem) {
     const isActive = pathname.startsWith(item.href);
@@ -61,8 +60,8 @@ function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
       <nav className="flex flex-col gap-1 px-3 py-4">
         {mainItems.map(renderItem)}
       </nav>
-      <div className="mt-auto px-3 pb-2">
-        {renderItem(adminItem)}
+      <div className="mt-auto flex flex-col gap-1 px-3 pb-2">
+        {bottomItems.map(renderItem)}
       </div>
     </div>
   );

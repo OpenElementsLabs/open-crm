@@ -45,7 +45,8 @@ open-crm/
 │   │   │   ├── companies/          — Company pages (list, detail, new, edit, print)
 │   │   │   ├── contacts/           — Contact pages (list, detail, new, edit, print)
 │   │   │   ├── tasks/              — Task pages (list, detail, new, edit)
-│   │   │   └── tags/               — Tag pages (list, new, edit)
+│   │   │   ├── tags/               — Tag pages (list, new, edit)
+│   │   │   └── webhooks/           — Webhook management page (list with inline actions)
 │   │   └── api/                    — API routes
 │   │       ├── auth/[...nextauth]/ — Auth.js route handlers
 │   │       ├── logout/             — Logout handler (chunked cookie deletion, OIDC end-session)
@@ -66,6 +67,7 @@ open-crm/
 │   │   ├── task-detail.tsx         — Task detail view
 │   │   ├── task-form.tsx           — Task create/edit form
 │   │   ├── tag-list.tsx            — Tag list with search, pagination, delete
+│   │   ├── webhook-list.tsx        — Webhook list with create dialog, toggle, ping, delete
 │   │   ├── tag-form.tsx            — Tag create/edit form with color picker
 │   │   ├── tag-chips.tsx           — Colored tag chips for detail views
 │   │   ├── tag-multi-select.tsx    — Multi-select dropdown for tag assignment in forms

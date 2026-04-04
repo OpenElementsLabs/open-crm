@@ -30,6 +30,7 @@ export const de = {
     tasks: "Aufgaben",
     tags: "Tags",
     admin: "Admin",
+    webhooks: "Webhooks",
   },
   admin: {
     title: "Administration",
@@ -454,5 +455,55 @@ export const de = {
   },
   user: {
     logout: "Abmelden",
+  },
+  webhooks: {
+    title: "Webhooks",
+    newWebhook: "Neuer Webhook",
+    empty: "Keine Webhooks vorhanden.",
+    createFirst: "Webhook erstellen",
+    columns: {
+      url: "URL",
+      active: "Aktiv",
+      lastStatus: "Letzter Status",
+      lastCalledAt: "Letzter Aufruf",
+      actions: "Aktionen",
+    },
+    status: {
+      ok: "OK",
+      timeout: "Timeout",
+      connectionError: "Verbindungsfehler",
+      badCall: "Fehlgeschlagen",
+      neverCalled: "—",
+    },
+    createDialog: {
+      title: "Neuen Webhook erstellen",
+      urlLabel: "URL",
+      urlPlaceholder: "https://example.com/webhook",
+      create: "Erstellen",
+      cancel: "Abbrechen",
+      urlRequired: "URL ist erforderlich",
+      error: "Webhook konnte nicht erstellt werden",
+    },
+    deleteDialog: {
+      title: "Webhook löschen",
+      description:
+        "Möchten Sie diesen Webhook wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      confirm: "Löschen",
+      cancel: "Abbrechen",
+      errorTitle: "Fehler",
+    },
+    actions: {
+      ping: "Ping senden",
+      delete: "Löschen",
+      activate: "Aktivieren",
+      deactivate: "Deaktivieren",
+    },
+    pagination: {
+      perPage: "pro Seite",
+      showing: "Zeige",
+      of: "von",
+      previous: "Zurück",
+      next: "Weiter",
+    },
   },
 } as const;

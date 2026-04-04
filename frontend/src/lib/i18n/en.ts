@@ -32,6 +32,7 @@ export const en: Translations = {
     tasks: "Tasks",
     tags: "Tags",
     admin: "Admin",
+    webhooks: "Webhooks",
   },
   admin: {
     title: "Administration",
@@ -456,5 +457,55 @@ export const en: Translations = {
   },
   user: {
     logout: "Logout",
+  },
+  webhooks: {
+    title: "Webhooks",
+    newWebhook: "New Webhook",
+    empty: "No webhooks found.",
+    createFirst: "Create Webhook",
+    columns: {
+      url: "URL",
+      active: "Active",
+      lastStatus: "Last Status",
+      lastCalledAt: "Last Called",
+      actions: "Actions",
+    },
+    status: {
+      ok: "OK",
+      timeout: "Timeout",
+      connectionError: "Connection Error",
+      badCall: "Bad Call",
+      neverCalled: "—",
+    },
+    createDialog: {
+      title: "Create New Webhook",
+      urlLabel: "URL",
+      urlPlaceholder: "https://example.com/webhook",
+      create: "Create",
+      cancel: "Cancel",
+      urlRequired: "URL is required",
+      error: "Failed to create webhook",
+    },
+    deleteDialog: {
+      title: "Delete Webhook",
+      description:
+        "Are you sure you want to delete this webhook? This action cannot be undone.",
+      confirm: "Delete",
+      cancel: "Cancel",
+      errorTitle: "Error",
+    },
+    actions: {
+      ping: "Send Ping",
+      delete: "Delete",
+      activate: "Activate",
+      deactivate: "Deactivate",
+    },
+    pagination: {
+      perPage: "per page",
+      showing: "Showing",
+      of: "of",
+      previous: "Previous",
+      next: "Next",
+    },
   },
 } as const;

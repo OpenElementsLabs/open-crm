@@ -11,6 +11,9 @@ import type {
   TaskCreateDto,
   TaskUpdateDto,
   UserDto,
+  WebhookDto,
+  WebhookCreateDto,
+  WebhookUpdateDto,
   BrevoSettingsDto,
   BrevoSyncResultDto,
   Page,
@@ -699,5 +702,85 @@ export async function deleteUserAvatar(): Promise<void> {
 
   if (!response.ok) {
     throw new Error(`Failed to delete avatar: ${response.status}`);
+  }
+}
+
+// --- Webhooks ---
+
+export interface WebhookListParams {
+  readonly page?: number;
+  readonly size?: number;
+}
+
+export async function getWebhooks(
+  params: WebhookListParams = {},
+): Promise<Page<WebhookDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+  searchParams.set("sort", "createdAt,desc");
+
+  const url = `${baseUrl()}/api/webhooks?${searchParams.toString()}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch webhooks: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createWebhook(
+  data: WebhookCreateDto,
+): Promise<WebhookDto> {
+  const url = `${baseUrl()}/api/webhooks`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create webhook: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateWebhook(
+  id: string,
+  data: WebhookUpdateDto,
+): Promise<WebhookDto> {
+  const url = `${baseUrl()}/api/webhooks/${id}`;
+  const response = await apiFetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to update webhook: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteWebhook(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/webhooks/${id}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete webhook: ${response.status}`);
+  }
+}
+
+export async function pingWebhook(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/webhooks/${id}/ping`;
+  const response = await apiFetch(url, { method: "POST" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to ping webhook: ${response.status}`);
   }
 }
