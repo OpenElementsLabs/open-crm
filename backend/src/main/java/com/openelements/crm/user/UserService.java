@@ -1,8 +1,11 @@
 package com.openelements.crm.user;
 
 import com.openelements.crm.ImageData;
+import com.openelements.crm.webhook.WebhookEvent;
+import com.openelements.crm.webhook.WebhookEventType;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +22,12 @@ public class UserService {
     private static final int MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public UserService(final UserRepository userRepository) {
+    public UserService(final UserRepository userRepository,
+                       final ApplicationEventPublisher eventPublisher) {
         this.userRepository = Objects.requireNonNull(userRepository, "userRepository must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     public UserEntity getCurrentUser() {
@@ -56,7 +62,9 @@ public class UserService {
                     entity.setSub(sub);
                     entity.setName(resolvedName);
                     entity.setEmail(resolvedEmail);
-                    return userRepository.saveAndFlush(entity);
+                    final UserEntity saved = userRepository.saveAndFlush(entity);
+                    eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.USER_CREATED, saved.getId(), UserDto.fromEntity(saved)));
+                    return saved;
                 });
     }
 

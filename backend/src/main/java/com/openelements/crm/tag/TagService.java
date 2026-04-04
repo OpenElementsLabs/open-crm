@@ -3,10 +3,14 @@ package com.openelements.crm.tag;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.task.TaskRepository;
+import com.openelements.crm.webhook.WebhookEvent;
+import com.openelements.crm.webhook.WebhookEventType;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,15 +26,18 @@ public class TagService {
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
     private final TaskRepository taskRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TagService(final TagRepository tagRepository,
                       final CompanyRepository companyRepository,
                       final ContactRepository contactRepository,
-                      final TaskRepository taskRepository) {
-        this.tagRepository = tagRepository;
-        this.companyRepository = companyRepository;
-        this.contactRepository = contactRepository;
-        this.taskRepository = taskRepository;
+                      final TaskRepository taskRepository,
+                      final ApplicationEventPublisher eventPublisher) {
+        this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
+        this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
+        this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     public Page<TagDto> findAll(final Pageable pageable, final boolean includeCounts) {
@@ -58,7 +65,9 @@ public class TagService {
         entity.setName(dto.name());
         entity.setDescription(dto.description());
         entity.setColor(dto.color());
-        return TagDto.fromEntity(tagRepository.saveAndFlush(entity));
+        final TagDto result = TagDto.fromEntity(tagRepository.saveAndFlush(entity));
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.TAG_CREATED, result.id(), result));
+        return result;
     }
 
     public TagDto update(final UUID id, final TagCreateDto dto) {
@@ -72,7 +81,9 @@ public class TagService {
         entity.setName(dto.name());
         entity.setDescription(dto.description());
         entity.setColor(dto.color());
-        return TagDto.fromEntity(tagRepository.saveAndFlush(entity));
+        final TagDto result = TagDto.fromEntity(tagRepository.saveAndFlush(entity));
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.TAG_UPDATED, result.id(), result));
+        return result;
     }
 
     public void delete(final UUID id) {
@@ -98,6 +109,7 @@ public class TagService {
                     taskRepository.save(t);
                 });
         tagRepository.delete(tag);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.TAG_DELETED, id, null));
     }
 
     public Set<TagEntity> resolveTagIds(final List<UUID> tagIds) {

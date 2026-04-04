@@ -6,12 +6,15 @@ import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.tag.TagService;
 import com.openelements.crm.task.TaskRepository;
+import com.openelements.crm.webhook.WebhookEvent;
+import com.openelements.crm.webhook.WebhookEventType;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,17 +36,20 @@ public class ContactService {
     private final CommentRepository commentRepository;
     private final TaskRepository taskRepository;
     private final TagService tagService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ContactService(final ContactRepository contactRepository,
                           final CompanyRepository companyRepository,
                           final CommentRepository commentRepository,
                           final TaskRepository taskRepository,
-                          final TagService tagService) {
+                          final TagService tagService,
+                          final ApplicationEventPublisher eventPublisher) {
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     /**
@@ -63,7 +69,9 @@ public class ContactService {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        return ContactDto.fromEntity(saved, 0);
+        final ContactDto dto = ContactDto.fromEntity(saved, 0);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.CONTACT_CREATED, saved.getId(), dto));
+        return dto;
     }
 
     /**
@@ -120,7 +128,9 @@ public class ContactService {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        return toDto(saved);
+        final ContactDto dto = toDto(saved);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.CONTACT_UPDATED, saved.getId(), dto));
+        return dto;
     }
 
     /**
@@ -135,6 +145,7 @@ public class ContactService {
         taskRepository.deleteByContactId(id);
         commentRepository.deleteByContactId(id);
         contactRepository.delete(entity);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.CONTACT_DELETED, id, null));
     }
 
     /**

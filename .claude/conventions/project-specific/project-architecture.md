@@ -24,6 +24,7 @@ graph LR
     Frontend -->|REST API| Backend["Spring Boot Backend<br/>:8080"]
     Backend -->|JDBC/JPA| DB[("PostgreSQL<br/>:5432")]
     Backend -->|REST API| Brevo["Brevo<br/>(Import)"]
+    Backend -->|HTTP POST| Webhooks["External<br/>Webhook URLs"]
     DBBackup["DB Backup<br/>(Alpine cron)"] -->|pg_dump| DB
     DBBackup -->|S3 upload| S3["Hetzner<br/>Object Storage"]
     Frontend -->|OIDC| OIDC["OIDC Provider<br/>(Authentik / mock-oauth2)"]
@@ -118,6 +119,13 @@ erDiagram
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
     }
+    WEBHOOKS {
+        UUID id PK
+        VARCHAR url
+        BOOLEAN active
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
     COMPANIES ||--o{ CONTACTS : "has"
     COMPANIES ||--o{ COMMENTS : "has"
     COMPANIES ||--o{ TASKS : "has"
@@ -207,4 +215,5 @@ sequenceDiagram
 - **Image storage in database** — Company logos, contact photos, and user avatars are stored as `bytea` columns in PostgreSQL alongside a `_content_type` column. Dedicated REST endpoints handle upload, retrieval, and deletion. DTOs expose `hasLogo`/`hasPhoto` boolean flags instead of binary data.
 - **Brevo import is one-directional** — The CRM imports from Brevo but never writes back. Brevo-managed fields on contacts are read-only. Re-import preserves user-editable fields. Newsletter status is synced during import.
 - **Docker Compose split for Coolify** — `docker-compose.yml` has no port bindings (for Coolify/Traefik deployment); `docker-compose.override.yml` adds host ports for local development. Docker Compose auto-merges the override file locally.
+- **Webhook event publishing** — Domain services publish `WebhookEvent` via Spring `ApplicationEventPublisher` after CRUD operations. A `WebhookEventListener` with `@TransactionalEventListener(AFTER_COMMIT)` + `@Async` fires HTTP POST calls to all active webhooks in parallel. Fire-and-forget with 10s timeout — failures are logged but never affect business operations. No user info in payloads (GDPR).
 - **Spec-driven development** — Features are planned in `specs/` with design documents, behavioral scenarios (given-when-then), and implementation steps before coding begins.

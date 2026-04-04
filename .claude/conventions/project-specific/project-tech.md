@@ -36,6 +36,9 @@
 - Spring Multipart (file upload with 2 MB max, configured in `application.yml`)
 - PostgreSQL JDBC driver (runtime)
 - Spring Security OAuth2 Resource Server (JWT token validation for OIDC authentication)
+- Spring ApplicationEventPublisher + @TransactionalEventListener (domain event publishing for webhooks)
+- Spring @EnableAsync + @Async (asynchronous webhook delivery)
+- Spring RestClient (HTTP POST calls for webhook firing, 10s timeout)
 - CycloneDX Maven Plugin 2.9.1 (SBOM generation)
 
 ### Backend Testing

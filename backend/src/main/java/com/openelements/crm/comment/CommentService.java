@@ -7,8 +7,11 @@ import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.task.TaskEntity;
 import com.openelements.crm.task.TaskRepository;
 import com.openelements.crm.user.UserService;
+import com.openelements.crm.webhook.WebhookEvent;
+import com.openelements.crm.webhook.WebhookEventType;
 import java.util.Objects;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,7 @@ public class CommentService {
     private final ContactRepository contactRepository;
     private final TaskRepository taskRepository;
     private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Creates a new CommentService.
@@ -37,17 +41,20 @@ public class CommentService {
      * @param contactRepository the contact repository
      * @param taskRepository    the task repository
      * @param userService       the user service
+     * @param eventPublisher    the event publisher
      */
     public CommentService(final CommentRepository commentRepository,
                           final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
                           final TaskRepository taskRepository,
-                          final UserService userService) {
+                          final UserService userService,
+                          final ApplicationEventPublisher eventPublisher) {
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.userService = Objects.requireNonNull(userService, "userService must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     /**
@@ -69,7 +76,9 @@ public class CommentService {
         entity.setAuthor(userService.getCurrentUser().getName());
         entity.setCompany(company);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentDto.fromEntity(saved);
+        final CommentDto dto = CommentDto.fromEntity(saved);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMMENT_CREATED, saved.getId(), dto));
+        return dto;
     }
 
     /**
@@ -91,7 +100,9 @@ public class CommentService {
         entity.setAuthor(userService.getCurrentUser().getName());
         entity.setContact(contact);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentDto.fromEntity(saved);
+        final CommentDto dto = CommentDto.fromEntity(saved);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMMENT_CREATED, saved.getId(), dto));
+        return dto;
     }
 
     /**
@@ -108,7 +119,9 @@ public class CommentService {
         final CommentEntity entity = findOrThrow(id);
         entity.setText(request.text());
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentDto.fromEntity(saved);
+        final CommentDto dto = CommentDto.fromEntity(saved);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMMENT_UPDATED, saved.getId(), dto));
+        return dto;
     }
 
     /**
@@ -121,6 +134,7 @@ public class CommentService {
         Objects.requireNonNull(id, "id must not be null");
         final CommentEntity entity = findOrThrow(id);
         commentRepository.delete(entity);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMMENT_DELETED, id, null));
     }
 
     /**
@@ -178,7 +192,9 @@ public class CommentService {
         entity.setAuthor(userService.getCurrentUser().getName());
         entity.setTask(task);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
-        return CommentDto.fromEntity(saved);
+        final CommentDto dto = CommentDto.fromEntity(saved);
+        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMMENT_CREATED, saved.getId(), dto));
+        return dto;
     }
 
     /**
