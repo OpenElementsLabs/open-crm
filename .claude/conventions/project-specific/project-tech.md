@@ -69,5 +69,7 @@
 - Docker & Docker Compose (multi-service orchestration)
 - Eclipse Temurin 21 (backend Docker base image)
 - Node.js 22 Alpine (frontend Docker base image, pinned via `.nvmrc` to v22.19.0)
+- Alpine 3.21 (backup container base image, with postgresql17-client and aws-cli)
+- Hetzner Object Storage (S3-compatible backup target)
 - GitHub Actions (CI/CD: build, test, Docker image verification)
 - Coolify (deployment platform, uses Traefik reverse proxy for FQDN-based routing and TLS)
