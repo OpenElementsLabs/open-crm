@@ -42,3 +42,9 @@ Eine Admin-Seite im Frontend, die den aktuellen Bearer Token (Access Token) des 
 Das `author`-Feld (String) in Kommentaren soll durch einen Fremdschlüssel auf die neue User-Entity ersetzt werden. Damit werden Kommentare einem konkreten User zugeordnet, Namensänderungen automatisch reflektiert und GDPR-Löschanträge sauber umsetzbar.
 
 **Context:** Identifiziert während der Grill-Session für Spec 065 (User Entity). Voraussetzung: Spec 065 muss zuerst implementiert sein.
+
+## Webhook Integration Tests
+
+Add integration tests for webhook firing that use an embedded HTTP server (e.g. MockWebServer or WireMock) to verify that webhook calls are actually sent with the correct payload, headers, and timing. Unit tests with mocked HTTP client are part of the initial implementation — these integration tests go beyond that.
+
+**Context:** Identified during the grill session for Spec 075 (Webhook Support). Prerequisite: Spec 075 must be implemented first.
