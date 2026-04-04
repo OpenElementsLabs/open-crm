@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test;
 class WebhookEventTypeTest {
 
     @Test
-    @DisplayName("should contain exactly 18 event types")
-    void shouldContainExactly18EventTypes() {
-        assertEquals(18, WebhookEventType.values().length);
+    @DisplayName("should contain exactly 19 event types")
+    void shouldContainExactly19EventTypes() {
+        assertEquals(19, WebhookEventType.values().length);
     }
 
     @Test
-    @DisplayName("should contain all expected event types")
+    @DisplayName("should contain all expected event types including PING")
     void shouldContainAllExpectedTypes() {
         final Set<String> expected = Set.of(
                 "COMPANY_CREATED", "COMPANY_UPDATED", "COMPANY_DELETED",
@@ -25,12 +25,9 @@ class WebhookEventTypeTest {
                 "COMMENT_CREATED", "COMMENT_UPDATED", "COMMENT_DELETED",
                 "TAG_CREATED", "TAG_UPDATED", "TAG_DELETED",
                 "TASK_CREATED", "TASK_UPDATED", "TASK_DELETED",
-                "USER_CREATED", "USER_UPDATED", "USER_DELETED"
+                "USER_CREATED", "USER_UPDATED", "USER_DELETED",
+                "PING"
         );
-
-        for (final WebhookEventType type : WebhookEventType.values()) {
-            assertNotNull(type.name());
-        }
 
         for (final String name : expected) {
             assertNotNull(WebhookEventType.valueOf(name), "Missing event type: " + name);

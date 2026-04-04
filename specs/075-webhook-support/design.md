@@ -240,3 +240,14 @@ No new Maven dependencies required.
 ## Open Questions
 
 None — all questions were resolved during the grill session.
+
+---
+
+## Drift Log
+
+### 2026-04-04 — Caused by spec `076-webhook-ping-status`
+
+- **Affected element:** WebhookEventListener async delivery architecture
+- **Original design:** `WebhookEventListener.handleEvent()` uses `@Async` + `@TransactionalEventListener(AFTER_COMMIT)` with `CompletableFuture.runAsync()` per webhook and `CompletableFuture.allOf().join()`. The listener directly calls `RestClient` in a private `sendWebhook()` method.
+- **Current state:** `handleEvent()` uses `@TransactionalEventListener(AFTER_COMMIT)` (no `@Async` on the method itself). A new `WebhookSender` component handles individual calls with `@Async` + `@Transactional`. The listener delegates to `WebhookSender.sendAndTrack()` per webhook. `CompletableFuture` is no longer used. The listener no longer depends on `RestClient`.
+- **Reason:** Spec 076 requires persisting the last HTTP status after each webhook call. This requires a Spring-managed transactional context per call, which `CompletableFuture.runAsync()` (ForkJoinPool) does not provide. The `WebhookSender` was introduced as a separate `@Async` + `@Transactional` bean to enable status tracking while maintaining parallel execution.

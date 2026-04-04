@@ -16,13 +16,13 @@ open-crm/
 │   │   ├── task/                   — Task domain (controller, service, repository, DTOs, entity, status enum)
 │   │   ├── tag/                    — Tag domain (entity, repository, service, controller, DTOs)
 │   │   ├── user/                   — User domain (entity, repository, service, controller, DTO)
-│   │   ├── webhook/                — Webhook domain (entity, repository, service, controller, DTOs, event listener, event types, config)
+│   │   ├── webhook/                — Webhook domain (entity, repository, service, controller, DTOs, event listener, sender, event types, config)
 │   │   ├── brevo/                  — Brevo integration (sync service, API client, controller, DTOs, records)
 │   │   ├── health/                 — Health check endpoint
 │   │   └── settings/               — Settings storage (key-value pairs, e.g. Brevo API key)
 │   ├── src/main/resources/
 │   │   ├── application.yml         — Application configuration
-│   │   └── db/migration/           — Flyway SQL migrations (V1–V20)
+│   │   └── db/migration/           — Flyway SQL migrations (V1–V21)
 │   ├── src/test/                   — Tests (repository, service, DTO conversion tests)
 │   ├── pom.xml                     — Maven build configuration
 │   └── Dockerfile                  — Multi-stage Docker build

@@ -99,6 +99,20 @@ public class WebhookController {
     }
 
     /**
+     * Triggers an asynchronous PING call to the specified webhook.
+     *
+     * @param id the webhook ID
+     */
+    @PostMapping("/{id}/ping")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Ping a webhook", description = "Sends an asynchronous PING to the webhook URL. Result visible via GET.")
+    @ApiResponse(responseCode = "202", description = "PING triggered")
+    @ApiResponse(responseCode = "404", description = "Webhook not found")
+    public void ping(@Parameter(description = "The webhook ID") @PathVariable final UUID id) {
+        webhookService.ping(id);
+    }
+
+    /**
      * Deletes a webhook.
      *
      * @param id the webhook ID

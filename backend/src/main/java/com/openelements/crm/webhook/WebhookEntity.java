@@ -38,6 +38,12 @@ public class WebhookEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "last_status")
+    private Integer lastStatus;
+
+    @Column(name = "last_called_at")
+    private Instant lastCalledAt;
+
     /**
      * Default constructor required by JPA.
      */
@@ -70,6 +76,22 @@ public class WebhookEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Integer getLastStatus() {
+        return lastStatus;
+    }
+
+    public void setLastStatus(final Integer lastStatus) {
+        this.lastStatus = lastStatus;
+    }
+
+    public Instant getLastCalledAt() {
+        return lastCalledAt;
+    }
+
+    public void setLastCalledAt(final Instant lastCalledAt) {
+        this.lastCalledAt = lastCalledAt;
     }
 
     @Override

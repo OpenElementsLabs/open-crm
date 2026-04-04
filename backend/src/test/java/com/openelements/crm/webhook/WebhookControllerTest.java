@@ -219,4 +219,59 @@ class WebhookControllerTest {
                     .andExpect(status().isNotFound());
         }
     }
+
+    @Nested
+    @DisplayName("POST /api/webhooks/{id}/ping")
+    class PingWebhook {
+
+        @Test
+        @DisplayName("should return 202 Accepted for active webhook")
+        void shouldReturn202ForActiveWebhook() throws Exception {
+            final String id = createWebhook("https://example.com/hook");
+
+            mockMvc.perform(post("/api/webhooks/" + id + "/ping").with(testJwt()))
+                    .andExpect(status().isAccepted());
+        }
+
+        @Test
+        @DisplayName("should return 202 Accepted for inactive webhook")
+        void shouldReturn202ForInactiveWebhook() throws Exception {
+            final String id = createWebhook("https://example.com/hook");
+
+            // Deactivate the webhook
+            mockMvc.perform(put("/api/webhooks/" + id)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "url": "https://example.com/hook", "active": false }
+                                    """)
+                            .with(testJwt()))
+                    .andExpect(status().isOk());
+
+            mockMvc.perform(post("/api/webhooks/" + id + "/ping").with(testJwt()))
+                    .andExpect(status().isAccepted());
+        }
+
+        @Test
+        @DisplayName("should return 404 for unknown ID")
+        void shouldReturn404ForUnknownId() throws Exception {
+            mockMvc.perform(post("/api/webhooks/00000000-0000-0000-0000-000000000000/ping").with(testJwt()))
+                    .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    @DisplayName("Status fields in DTO")
+    class StatusFields {
+
+        @Test
+        @DisplayName("new webhook should have null lastStatus and lastCalledAt")
+        void shouldHaveNullStatusForNewWebhook() throws Exception {
+            final String id = createWebhook("https://example.com/hook");
+
+            mockMvc.perform(get("/api/webhooks/" + id).with(testJwt()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.lastStatus").isEmpty())
+                    .andExpect(jsonPath("$.lastCalledAt").isEmpty());
+        }
+    }
 }

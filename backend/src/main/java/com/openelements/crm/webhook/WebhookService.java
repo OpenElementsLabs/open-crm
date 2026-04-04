@@ -1,5 +1,6 @@
 package com.openelements.crm.webhook;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -17,9 +18,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class WebhookService {
 
     private final WebhookRepository webhookRepository;
+    private final WebhookSender webhookSender;
 
-    public WebhookService(final WebhookRepository webhookRepository) {
+    public WebhookService(final WebhookRepository webhookRepository, final WebhookSender webhookSender) {
         this.webhookRepository = Objects.requireNonNull(webhookRepository, "webhookRepository must not be null");
+        this.webhookSender = Objects.requireNonNull(webhookSender, "webhookSender must not be null");
     }
 
     /**
@@ -89,6 +92,26 @@ public class WebhookService {
     public Page<WebhookDto> list(final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         return webhookRepository.findAll(pageable).map(WebhookDto::fromEntity);
+    }
+
+    /**
+     * Triggers an asynchronous PING call to the specified webhook.
+     * Works for both active and inactive webhooks.
+     *
+     * @param id the webhook ID
+     * @throws ResponseStatusException with 404 if not found
+     */
+    public void ping(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        final WebhookEntity entity = findOrThrow(id);
+        final WebhookEventPayload payload = new WebhookEventPayload(
+                UUID.randomUUID(),
+                WebhookEventType.PING,
+                Instant.now(),
+                null,
+                null
+        );
+        webhookSender.sendAndTrack(entity, payload);
     }
 
     private WebhookEntity findOrThrow(final UUID id) {
