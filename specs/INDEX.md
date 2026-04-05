@@ -81,3 +81,5 @@
 | 077 | Webhook frontend           | Webhook management page with table, create dialog, delete, active toggle, and PING                    | —            | done   |
 | 078 | API key auth               | Read-only API key authentication for external services with management UI                             | —            | done   |
 | 079 | Admin sub-menu             | Collapsible Admin sub-menu in sidebar, split Admin page into Status/Token/Brevo                       | —            | done   |
+| 080 | External links table       | Generic external_links table replacing brevoId/brevoCompanyId, migrate Brevo data, refactor all code  | —            | open   |
+| 081 | SevDesk integration        | Import companies and contacts from SevDesk with field mapping, readonly protection, admin page         | —            | open   |
