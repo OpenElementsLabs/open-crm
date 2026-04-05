@@ -219,6 +219,157 @@ After deploying with the new variables:
 2. Log in with an Authentik user
 3. You should be redirected back to the CRM with your name displayed in the sidebar
 
+## API Keys
+
+API keys allow external services to access the CRM REST API without an interactive OIDC login. Keys grant **read-only access** (GET endpoints only) — write operations (POST, PUT, DELETE) are rejected with 403 Forbidden.
+
+### Managing API Keys
+
+API keys can be managed via the frontend (sidebar: "API Keys") or the REST API:
+
+```bash
+# Create an API key (requires JWT auth — use the Bearer token from the Admin page)
+curl -X POST https://crm-backend.example.com/api/api-keys \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "CI Pipeline"}'
+```
+
+The response includes the raw key (`crm_...`) — **copy it immediately**, it is shown only once.
+
+```bash
+# List API keys
+curl https://crm-backend.example.com/api/api-keys \
+  -H "Authorization: Bearer <your-jwt-token>"
+
+# Delete an API key
+curl -X DELETE https://crm-backend.example.com/api/api-keys/<key-id> \
+  -H "Authorization: Bearer <your-jwt-token>"
+```
+
+### Using API Keys
+
+Pass the key in the `X-API-Key` header:
+
+```bash
+# List companies
+curl https://crm-backend.example.com/api/companies \
+  -H "X-API-Key: crm_your_key_here"
+
+# Get a specific contact
+curl https://crm-backend.example.com/api/contacts/<contact-id> \
+  -H "X-API-Key: crm_your_key_here"
+
+# Paginated contacts
+curl "https://crm-backend.example.com/api/contacts?page=0&size=10" \
+  -H "X-API-Key: crm_your_key_here"
+
+# This will be rejected (write access not allowed):
+curl -X POST https://crm-backend.example.com/api/companies \
+  -H "X-API-Key: crm_your_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Test"}'
+# -> 403 Forbidden: "API keys only grant read-only access"
+```
+
+## Webhooks
+
+Webhooks notify external services when data changes in the CRM. When a company, contact, task, tag, comment, or user is created, updated, or deleted, an HTTP POST is sent to all registered webhook URLs with a JSON payload describing the event.
+
+### Managing Webhooks
+
+Webhooks can be managed via the frontend (sidebar: "Webhooks") or the REST API:
+
+```bash
+# Create a webhook
+curl -X POST https://crm-backend.example.com/api/webhooks \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://your-service.example.com/webhook"}'
+
+# List webhooks (shows lastStatus and lastCalledAt)
+curl https://crm-backend.example.com/api/webhooks \
+  -H "Authorization: Bearer <your-jwt-token>"
+
+# Ping a webhook to test connectivity
+curl -X POST https://crm-backend.example.com/api/webhooks/<webhook-id>/ping \
+  -H "Authorization: Bearer <your-jwt-token>"
+
+# Delete a webhook
+curl -X DELETE https://crm-backend.example.com/api/webhooks/<webhook-id> \
+  -H "Authorization: Bearer <your-jwt-token>"
+```
+
+### Webhook Payload
+
+Every webhook call sends a JSON POST with this structure:
+
+```json
+{
+  "eventId": "a1b2c3d4-e5f6-...",
+  "eventType": "COMPANY_CREATED",
+  "timestamp": "2026-04-05T14:30:00Z",
+  "entityId": "550e8400-...",
+  "data": { "id": "550e8400-...", "name": "Acme Corp" }
+}
+```
+
+For delete events, `data` is `null`. The `eventId` (UUID) can be used for idempotency.
+
+**Event types:** `COMPANY_CREATED`, `COMPANY_UPDATED`, `COMPANY_DELETED`, `CONTACT_CREATED`, `CONTACT_UPDATED`, `CONTACT_DELETED`, `COMMENT_CREATED`, `COMMENT_UPDATED`, `COMMENT_DELETED`, `TAG_CREATED`, `TAG_UPDATED`, `TAG_DELETED`, `TASK_CREATED`, `TASK_UPDATED`, `TASK_DELETED`, `USER_CREATED`, `USER_UPDATED`, `USER_DELETED`, `PING`
+
+### Testing Webhooks Locally
+
+To test webhooks on your local machine, you need a tool that creates a temporary HTTP endpoint and shows incoming requests. Here are some options for Mac/Linux:
+
+**Option 1: Python one-liner (no install needed)**
+
+```bash
+# Start a simple HTTP server that logs all incoming requests
+python3 -c "
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import json
+
+class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length)
+        print('\n--- Webhook received ---')
+        print(json.dumps(json.loads(body), indent=2))
+        self.send_response(200)
+        self.end_headers()
+
+HTTPServer(('0.0.0.0', 9999), Handler).serve_forever()
+"
+```
+
+Then register `http://host.docker.internal:9999` as the webhook URL (if the CRM runs in Docker) or `http://localhost:9999` (if running standalone).
+
+**Option 2: netcat (quick & dirty)**
+
+```bash
+# Listen for a single webhook call and print the raw request
+while true; do nc -l 9999; done
+```
+
+**Option 3: webhook.site (no local setup)**
+
+Visit [webhook.site](https://webhook.site) to get a temporary public URL. Register that URL as a webhook and see incoming requests in the browser.
+
+### Webhook Status Tracking
+
+Each webhook tracks the result of its last call:
+
+| `lastStatus` | Meaning |
+|---------------|---------|
+| `null` | Never called |
+| `200` | OK |
+| `0` | Connection error |
+| `-1` | Timeout (10s limit) |
+| `4xx`/`5xx` | HTTP error |
+
+Use the PING endpoint or check `lastStatus` in the webhook list to verify connectivity.
+
 ## License
 
 See [LICENSE](LICENSE) for details.
