@@ -80,4 +80,4 @@
 | 076 | Webhook ping & status      | PING event for testing webhook endpoints, persist last HTTP status and timestamp on every call         | —            | done   |
 | 077 | Webhook frontend           | Webhook management page with table, create dialog, delete, active toggle, and PING                    | —            | done   |
 | 078 | API key auth               | Read-only API key authentication for external services with management UI                             | —            | done   |
-| 079 | Admin sub-menu             | Collapsible Admin sub-menu in sidebar, split Admin page into Status/Token/Brevo                       | —            | open   |
+| 079 | Admin sub-menu             | Collapsible Admin sub-menu in sidebar, split Admin page into Status/Token/Brevo                       | —            | done   |

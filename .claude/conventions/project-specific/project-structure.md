@@ -42,7 +42,10 @@ open-crm/
 │   │   ├── (app)/                  — Route group for authenticated pages (with sidebar)
 │   │   │   ├── layout.tsx          — App layout (Sidebar, TooltipProvider, main content area)
 │   │   │   ├── page.tsx            — Home page (redirects to companies)
-│   │   │   ├── admin/              — Admin management page (health, token, brevo settings/import)
+│   │   │   ├── admin/              — Admin pages (redirect to /admin/status)
+│   │   │   │   ├── status/         — Server Status page (health check)
+│   │   │   ���   ├── token/          — Bearer Token page (show/copy/validity)
+│   │   │   │   └─��� brevo/          — Brevo Integration page (settings + import)
 │   │   │   ├── companies/          — Company pages (list, detail, new, edit, print)
 │   │   │   ├── contacts/           — Contact pages (list, detail, new, edit, print)
 │   │   │   ├── tasks/              — Task pages (list, detail, new, edit)
@@ -71,6 +74,7 @@ open-crm/
 │   │   ├── tag-list.tsx            — Tag list with search, pagination, delete
 │   │   ├── webhook-list.tsx        — Webhook list with create dialog, toggle, ping, delete
 │   │   ├── api-key-list.tsx        — API key list with create/key-display/delete dialogs
+│   │   ├── bearer-token-card.tsx   — Bearer token display with show/hide, copy, validity countdown
 │   │   ├── tag-form.tsx            — Tag create/edit form with color picker
 │   │   ├── tag-chips.tsx           — Colored tag chips for detail views
 │   │   ├── tag-multi-select.tsx    — Multi-select dropdown for tag assignment in forms
