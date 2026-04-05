@@ -83,3 +83,4 @@
 | 079 | Admin sub-menu             | Collapsible Admin sub-menu in sidebar, split Admin page into Status/Token/Brevo                       | —            | done   |
 | 080 | External links table       | Generic external_links table replacing brevoId/brevoCompanyId, migrate Brevo data, refactor all code  | —            | open   |
 | 081 | SevDesk integration        | Import companies and contacts from SevDesk with field mapping, readonly protection, admin page         | —            | open   |
+| 082 | Company finance fields     | Bank, BIC, IBAN, VAT ID fields on companies with validation, Finanzen section, CSV export             | —            | open   |
