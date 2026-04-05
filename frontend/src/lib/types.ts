@@ -181,6 +181,27 @@ export interface WebhookUpdateDto {
   readonly active: boolean;
 }
 
+export interface ApiKeyDto {
+  readonly id: string;
+  readonly name: string;
+  readonly keyPrefix: string;
+  readonly createdBy: string;
+  readonly createdAt: string;
+}
+
+export interface ApiKeyCreateDto {
+  readonly name: string;
+}
+
+export interface ApiKeyCreatedDto {
+  readonly id: string;
+  readonly name: string;
+  readonly keyPrefix: string;
+  readonly key: string;
+  readonly createdBy: string;
+  readonly createdAt: string;
+}
+
 export interface BrevoSyncResultDto {
   readonly companiesImported: number;
   readonly companiesUpdated: number;

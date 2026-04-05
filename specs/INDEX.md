@@ -79,4 +79,4 @@
 | 075 | Webhook support            | Webhook entity with CRUD API, domain event model, async fire-and-forget HTTP POST to registered URLs  | —            | done   |
 | 076 | Webhook ping & status      | PING event for testing webhook endpoints, persist last HTTP status and timestamp on every call         | —            | done   |
 | 077 | Webhook frontend           | Webhook management page with table, create dialog, delete, active toggle, and PING                    | —            | done   |
-| 078 | API key auth               | Read-only API key authentication for external services with management UI                             | —            | open   |
+| 078 | API key auth               | Read-only API key authentication for external services with management UI                             | —            | done   |

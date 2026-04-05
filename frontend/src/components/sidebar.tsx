@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Building2, CheckSquare, CircleUser, LayoutDashboard, LogOut, Menu, Settings, Tag, Users, Webhook } from "lucide-react";
+import { Building2, CheckSquare, CircleUser, KeyRound, LayoutDashboard, LogOut, Menu, Settings, Tag, Users, Webhook } from "lucide-react";
 import { getCurrentUser, getUserAvatarUrl, uploadUserAvatar } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -33,6 +33,7 @@ function NavLinks({ onNavigate }: { readonly onNavigate?: () => void }) {
   const bottomItems: NavItem[] = [
     { label: t.nav.admin, href: "/admin", icon: <Settings className="h-5 w-5" /> },
     { label: t.nav.webhooks, href: "/webhooks", icon: <Webhook className="h-5 w-5" /> },
+    { label: t.nav.apiKeys, href: "/api-keys", icon: <KeyRound className="h-5 w-5" /> },
   ];
 
   function renderItem(item: NavItem) {

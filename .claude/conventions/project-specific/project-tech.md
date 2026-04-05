@@ -39,6 +39,9 @@
 - Spring ApplicationEventPublisher + @TransactionalEventListener (domain event publishing for webhooks)
 - Spring @EnableAsync + @Async (asynchronous webhook delivery)
 - Spring RestClient (HTTP POST calls for webhook firing, 10s timeout)
+- SHA-256 hashing via java.security.MessageDigest (API key storage)
+- java.security.SecureRandom (API key generation)
+- OncePerRequestFilter (API key authentication filter)
 - CycloneDX Maven Plugin 2.9.1 (SBOM generation)
 
 ### Backend Testing

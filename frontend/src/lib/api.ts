@@ -14,6 +14,9 @@ import type {
   WebhookDto,
   WebhookCreateDto,
   WebhookUpdateDto,
+  ApiKeyDto,
+  ApiKeyCreateDto,
+  ApiKeyCreatedDto,
   BrevoSettingsDto,
   BrevoSyncResultDto,
   Page,
@@ -782,5 +785,57 @@ export async function pingWebhook(id: string): Promise<void> {
 
   if (!response.ok) {
     throw new Error(`Failed to ping webhook: ${response.status}`);
+  }
+}
+
+// --- API Keys ---
+
+export interface ApiKeyListParams {
+  readonly page?: number;
+  readonly size?: number;
+}
+
+export async function getApiKeys(
+  params: ApiKeyListParams = {},
+): Promise<Page<ApiKeyDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+  searchParams.set("sort", "createdAt,desc");
+
+  const url = `${baseUrl()}/api/api-keys?${searchParams.toString()}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch API keys: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createApiKey(
+  data: ApiKeyCreateDto,
+): Promise<ApiKeyCreatedDto> {
+  const url = `${baseUrl()}/api/api-keys`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create API key: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteApiKey(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/api-keys/${id}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete API key: ${response.status}`);
   }
 }

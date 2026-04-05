@@ -16,13 +16,14 @@ open-crm/
 │   │   ├── task/                   — Task domain (controller, service, repository, DTOs, entity, status enum)
 │   │   ├── tag/                    — Tag domain (entity, repository, service, controller, DTOs)
 │   │   ├── user/                   — User domain (entity, repository, service, controller, DTO)
+│   │   ├── apikey/                 — API key domain (entity, repository, service, controller, DTOs, auth filter)
 │   │   ├── webhook/                — Webhook domain (entity, repository, service, controller, DTOs, event listener, sender, event types, config)
 │   │   ├── brevo/                  — Brevo integration (sync service, API client, controller, DTOs, records)
 │   │   ├── health/                 — Health check endpoint
 │   │   └── settings/               — Settings storage (key-value pairs, e.g. Brevo API key)
 │   ├── src/main/resources/
 │   │   ├── application.yml         — Application configuration
-│   │   └── db/migration/           — Flyway SQL migrations (V1–V21)
+│   │   └── db/migration/           — Flyway SQL migrations (V1–V22)
 │   ├── src/test/                   — Tests (repository, service, DTO conversion tests)
 │   ├── pom.xml                     — Maven build configuration
 │   └── Dockerfile                  — Multi-stage Docker build
@@ -46,7 +47,8 @@ open-crm/
 │   │   │   ├── contacts/           — Contact pages (list, detail, new, edit, print)
 │   │   │   ├── tasks/              — Task pages (list, detail, new, edit)
 │   │   │   ├── tags/               — Tag pages (list, new, edit)
-│   │   │   └── webhooks/           — Webhook management page (list with inline actions)
+│   │   │   ├── webhooks/           — Webhook management page (list with inline actions)
+│   │   │   └── api-keys/           — API key management page (list with create/delete dialogs)
 │   │   └── api/                    — API routes
 │   │       ├── auth/[...nextauth]/ — Auth.js route handlers
 │   │       ├── logout/             — Logout handler (chunked cookie deletion, OIDC end-session)
@@ -68,6 +70,7 @@ open-crm/
 │   │   ├── task-form.tsx           — Task create/edit form
 │   │   ├── tag-list.tsx            — Tag list with search, pagination, delete
 │   │   ├── webhook-list.tsx        — Webhook list with create dialog, toggle, ping, delete
+│   │   ├── api-key-list.tsx        — API key list with create/key-display/delete dialogs
 │   │   ├── tag-form.tsx            — Tag create/edit form with color picker
 │   │   ├── tag-chips.tsx           — Colored tag chips for detail views
 │   │   ├── tag-multi-select.tsx    — Multi-select dropdown for tag assignment in forms

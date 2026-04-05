@@ -21,6 +21,12 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT")
                                 .description("Paste a JWT access token obtained from the OIDC provider")
                         )
+                        .addSecuritySchemes("apiKey", new SecurityScheme()
+                                .type(SecurityScheme.Type.APIKEY)
+                                .in(SecurityScheme.In.HEADER)
+                                .name("X-API-Key")
+                                .description("API key for read-only access (GET endpoints only)")
+                        )
                 );
     }
 }
