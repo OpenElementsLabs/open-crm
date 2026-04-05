@@ -9,9 +9,9 @@
           "requestParam": "grant_type",
           "match": "authorization_code",
           "claims": {
-            "sub": "dev-user-1",
-            "name": "Hendrik Ebbers",
-            "email": "hendrik@open-elements.com"
+            "name": "John Doe",
+            "email": "john@open-elements.com",
+            "picture": "https://open-elements.com/team/hendrik.jpg"
           }
         }
       ]
