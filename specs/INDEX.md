@@ -84,3 +84,4 @@
 | 080 | External links table       | Generic external_links table replacing brevoId/brevoCompanyId, migrate Brevo data, refactor all code  | —            | open   |
 | 081 | SevDesk integration        | Import companies and contacts from SevDesk with field mapping, readonly protection, admin page         | —            | open   |
 | 082 | Company finance fields     | Bank, BIC, IBAN, VAT ID fields on companies with validation, Finanzen section, CSV export             | —            | open   |
+| 083 | Role support               | Extract OIDC roles claim into frontend session and backend authorities, tooltip in sidebar            | —            | open   |
