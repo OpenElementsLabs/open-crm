@@ -201,7 +201,16 @@ function UserSection() {
           className="hidden"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-oe-white truncate">{userName}</p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-sm font-medium text-oe-white truncate cursor-default">{userName}</p>
+            </TooltipTrigger>
+            <TooltipContent>
+              {session?.roles && session.roles.length > 0
+                ? session.roles.join(", ")
+                : t.user.noRoles}
+            </TooltipContent>
+          </Tooltip>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>

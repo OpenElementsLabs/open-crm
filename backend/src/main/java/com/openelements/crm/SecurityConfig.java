@@ -1,11 +1,17 @@
 package com.openelements.crm;
 
 import com.openelements.crm.apikey.ApiKeyAuthenticationFilter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -20,6 +26,24 @@ public class SecurityConfig {
     }
 
     @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        final JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
+
+        final JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
+        authConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            final Collection<GrantedAuthority> authorities = new ArrayList<>(scopeConverter.convert(jwt));
+            final List<String> roles = jwt.getClaimAsStringList("roles");
+            if (roles != null) {
+                roles.stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .forEach(authorities::add);
+            }
+            return authorities;
+        });
+        return authConverter;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
@@ -27,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .addFilterBefore(apiKeyAuthenticationFilter, BearerTokenAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable());
         return http.build();

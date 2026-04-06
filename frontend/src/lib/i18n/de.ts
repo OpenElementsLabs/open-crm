@@ -459,6 +459,7 @@ export const de = {
   },
   user: {
     logout: "Abmelden",
+    noRoles: "Keine Rollen zugewiesen",
   },
   webhooks: {
     title: "Webhooks",

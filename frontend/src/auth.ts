@@ -5,6 +5,7 @@ declare module "next-auth" {
     accessToken?: string;
     idToken?: string;
     expiresAt?: number;
+    roles: string[];
   }
 }
 
@@ -19,7 +20,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer: oidcIssuer,
       clientId: process.env.OIDC_CLIENT_ID,
       clientSecret: process.env.OIDC_CLIENT_SECRET,
-      authorization: { params: { scope: "openid profile email offline_access" } },
+      authorization: { params: { scope: "openid profile email offline_access roles" } },
     },
   ],
   pages: { signIn: "/login" },
@@ -45,6 +46,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           t.name = profile.name;
           t.email = profile.email;
           t.picture = profile.picture;
+          const profileRoles = (profile as Record<string, unknown>).roles;
+          t.roles = Array.isArray(profileRoles) ? profileRoles : [];
         }
         return token;
       }
@@ -105,6 +108,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.accessToken = t.accessToken as string | undefined;
       session.idToken = t.idToken as string | undefined;
       session.expiresAt = t.expiresAt as number | undefined;
+      session.roles = Array.isArray(t.roles) ? (t.roles as string[]) : [];
       if (t.error === "RefreshTokenError") {
         session.accessToken = undefined;
       }

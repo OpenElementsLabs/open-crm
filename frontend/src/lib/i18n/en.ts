@@ -461,6 +461,7 @@ export const en: Translations = {
   },
   user: {
     logout: "Logout",
+    noRoles: "No roles assigned",
   },
   webhooks: {
     title: "Webhooks",

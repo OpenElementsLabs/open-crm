@@ -1,10 +1,9 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Sidebar } from "@/components/sidebar";
 import { de } from "@/lib/i18n/de";
 import { en } from "@/lib/i18n/en";
 import { renderWithProviders } from "@/test/test-utils";
-
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   usePathname: () => "/companies",
@@ -13,6 +12,15 @@ vi.mock("next/navigation", () => ({
 afterEach(() => {
   cleanup();
 });
+
+function createSession(roles: string[]) {
+  return {
+    user: { name: "Alice", email: "alice@example.com", image: null },
+    expires: new Date(Date.now() + 86400000).toISOString(),
+    accessToken: "mock-token",
+    roles,
+  };
+}
 
 describe("Sidebar", () => {
   it("should render navigation entries for Firmen and Admin", () => {
@@ -96,5 +104,66 @@ describe("Sidebar", () => {
     const linkTexts = Array.from(links).map((link) => link.textContent);
 
     expect(linkTexts).toContain(de.nav.contacts);
+  });
+});
+
+describe("Sidebar — Role Tooltip", () => {
+  it("should show user name when session has user", () => {
+    const session = createSession(["CRM-ADMIN"]);
+    renderWithProviders(<Sidebar />, { session });
+
+    expect(screen.getByText("Alice")).toBeInTheDocument();
+  });
+
+  it("should show single role in tooltip on hover", async () => {
+    const session = createSession(["CRM-ADMIN"]);
+    renderWithProviders(<Sidebar />, { session });
+
+    const userName = screen.getByText("Alice");
+    fireEvent.pointerEnter(userName);
+    fireEvent.focus(userName);
+
+    await waitFor(() => {
+      expect(screen.getByText("CRM-ADMIN")).toBeInTheDocument();
+    });
+  });
+
+  it("should show multiple roles comma-separated in tooltip", async () => {
+    const session = createSession(["CRM-ADMIN", "CRM-READONLY"]);
+    renderWithProviders(<Sidebar />, { session });
+
+    const userName = screen.getByText("Alice");
+    fireEvent.pointerEnter(userName);
+    fireEvent.focus(userName);
+
+    await waitFor(() => {
+      expect(screen.getByText("CRM-ADMIN, CRM-READONLY")).toBeInTheDocument();
+    });
+  });
+
+  it("should show 'Keine Rollen zugewiesen' for empty roles in German", async () => {
+    const session = createSession([]);
+    renderWithProviders(<Sidebar />, { session, language: "de" });
+
+    const userName = screen.getByText("Alice");
+    fireEvent.pointerEnter(userName);
+    fireEvent.focus(userName);
+
+    await waitFor(() => {
+      expect(screen.getByText(de.user.noRoles)).toBeInTheDocument();
+    });
+  });
+
+  it("should show 'No roles assigned' for empty roles in English", async () => {
+    const session = createSession([]);
+    renderWithProviders(<Sidebar />, { session, language: "en" });
+
+    const userName = screen.getByText("Alice");
+    fireEvent.pointerEnter(userName);
+    fireEvent.focus(userName);
+
+    await waitFor(() => {
+      expect(screen.getByText(en.user.noRoles)).toBeInTheDocument();
+    });
   });
 });

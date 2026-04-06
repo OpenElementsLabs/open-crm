@@ -149,11 +149,12 @@ The application uses OpenID Connect (OIDC) for authentication with a clear separ
 
 - **Provider:** Generic OIDC provider configured via environment variables (`OIDC_ISSUER_URI`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`)
 - **Session strategy:** JWT (stateless, no server-side session store)
-- **Scopes:** `openid profile email offline_access`
+- **Scopes:** `openid profile email offline_access roles`
 - **Custom login page:** Auth.js is configured with `pages: { signIn: "/login" }` to use a branded login page instead of the default. The login page lives outside the `(app)` route group and has no sidebar.
 - **Middleware:** Next.js middleware (`src/middleware.ts`) runs the Auth.js `authorized` callback on every route except `/api/auth/*`, `/api/logout`, `/login`, `/_next/static`, `/_next/image`, and static assets (`.svg`, `.png`, `.jpg`, `.ico`). Unauthenticated users are redirected to `/login`.
 - **Token lifecycle:** On initial sign-in, access token, refresh token, and ID token are stored in the JWT session. Before each request, the token expiry is checked; expired tokens are refreshed automatically via the OIDC provider's token endpoint using the refresh token. Failed refreshes set a `RefreshTokenError` flag that clears the access token from the session.
 - **User info:** Name, email, and profile picture are extracted from the OIDC profile on sign-in and stored in the JWT session.
+- **Roles:** The `roles` claim (string array) is extracted from the OIDC profile and stored in the session as `session.roles`. Missing or non-array values default to `[]`. Roles are displayed in a tooltip on the user name in the sidebar.
 
 ### API Proxy (Token Injection)
 
@@ -165,6 +166,7 @@ The application uses OpenID Connect (OIDC) for authentication with a clear separ
 
 - **Configuration:** `SecurityConfig.java` sets up a `SecurityFilterChain` with OAuth2 Resource Server and JWT validation.
 - **JWT validation:** The backend validates JWT signatures against the OIDC provider's JWKS endpoint (`OIDC_JWK_SET_URI`). It does not communicate with the OIDC provider beyond fetching the JWK set.
+- **Role mapping:** A custom `JwtAuthenticationConverter` extracts the `roles` claim from the JWT and maps each role to a `SimpleGrantedAuthority` with `ROLE_` prefix (e.g., `roles: ["CRM-ADMIN"]` → authority `ROLE_CRM-ADMIN`). Default scope-based authorities are preserved. No authorization checks are enforced yet — role authorities are available for future use.
 - **Public endpoints:** `/api/health/**`, `/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**` are accessible without authentication.
 - **All other endpoints** require a valid JWT Bearer token.
 - **CSRF:** Disabled (stateless API with Bearer token authentication).

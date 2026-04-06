@@ -11,7 +11,8 @@
           "claims": {
             "name": "John Doe",
             "email": "john@open-elements.com",
-            "picture": "https://open-elements.com/team/hendrik.jpg"
+            "picture": "https://open-elements.com/team/hendrik.jpg",
+            "roles": ["CRM-ADMIN"]
           }
         }
       ]

@@ -35,7 +35,7 @@
 - Apache Commons CSV 1.12.0 (CSV export generation)
 - Spring Multipart (file upload with 2 MB max, configured in `application.yml`)
 - PostgreSQL JDBC driver (runtime)
-- Spring Security OAuth2 Resource Server (JWT token validation for OIDC authentication)
+- Spring Security OAuth2 Resource Server (JWT token validation for OIDC authentication, `JwtAuthenticationConverter` for mapping `roles` claim to `ROLE_` authorities)
 - Spring ApplicationEventPublisher + @TransactionalEventListener (domain event publishing for webhooks)
 - Spring @EnableAsync + @Async (asynchronous webhook delivery)
 - Spring RestClient (HTTP POST calls for webhook firing, 10s timeout)
