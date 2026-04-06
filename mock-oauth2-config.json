@@ -9,6 +9,7 @@
           "requestParam": "grant_type",
           "match": "authorization_code",
           "claims": {
+            "sub": "john-doe-001",
             "name": "John Doe",
             "email": "john@open-elements.com",
             "picture": "https://open-elements.com/team/hendrik.jpg",
