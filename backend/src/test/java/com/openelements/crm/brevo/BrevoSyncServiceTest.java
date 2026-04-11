@@ -6,6 +6,8 @@ import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.Language;
+import com.openelements.crm.contact.SocialLinkEntity;
+import com.openelements.crm.contact.SocialNetworkType;
 import com.openelements.crm.settings.SettingsService;
 import java.util.HashMap;
 import java.util.List;
@@ -233,18 +235,22 @@ class BrevoSyncServiceTest {
             final BrevoSyncResultDto result = brevoSyncService.syncAll();
 
             assertEquals(1, result.contactsImported());
-            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
-            assertEquals("John", contact.getFirstName());
-            assertEquals("Doe", contact.getLastName());
-            assertEquals("john@test.com", contact.getEmail());
-            assertEquals("+49123", contact.getPhoneNumber());
-            assertEquals("CTO", contact.getPosition());
-            assertEquals("https://li", contact.getLinkedInUrl());
-            assertEquals(Language.DE, contact.getLanguage());
-            assertNotNull(contact.getBrevoId());
-            final CompanyEntity company = getCompanyForContact(contact);
-            assertNotNull(company);
-            assertEquals("aaa111", company.getBrevoCompanyId());
+            transactionTemplate.executeWithoutResult(status -> {
+                final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
+                assertEquals("John", contact.getFirstName());
+                assertEquals("Doe", contact.getLastName());
+                assertEquals("john@test.com", contact.getEmail());
+                assertEquals("+49123", contact.getPhoneNumber());
+                assertEquals("CTO", contact.getPosition());
+                assertEquals(1, contact.getSocialLinks().size());
+                assertEquals(SocialNetworkType.LINKEDIN, contact.getSocialLinks().get(0).getNetworkType());
+                assertEquals("https://li", contact.getSocialLinks().get(0).getUrl());
+                assertEquals(Language.DE, contact.getLanguage());
+                assertNotNull(contact.getBrevoId());
+                final CompanyEntity company = getCompanyForContact(contact);
+                assertNotNull(company);
+                assertEquals("aaa111", company.getBrevoCompanyId());
+            });
         }
 
         @Test
@@ -664,13 +670,17 @@ class BrevoSyncServiceTest {
         }
 
         @Test
-        @DisplayName("linkedInUrl is NOT overwritten on re-import")
-        void linkedInUrlIsNotOverwrittenOnReimport() {
+        @DisplayName("LinkedIn social link is overwritten on re-import")
+        void linkedInSocialLinkIsOverwrittenOnReimport() {
             final ContactEntity existing = new ContactEntity();
             existing.setFirstName("Anna");
             existing.setLastName("Smith");
             existing.setBrevoId("200");
-            existing.setLinkedInUrl("https://linkedin.com/in/old");
+            final SocialLinkEntity oldLink = new SocialLinkEntity();
+            oldLink.setNetworkType(SocialNetworkType.LINKEDIN);
+            oldLink.setValue("https://linkedin.com/in/old");
+            oldLink.setUrl("https://linkedin.com/in/old");
+            existing.getSocialLinks().add(oldLink);
             contactRepository.saveAndFlush(existing);
 
             when(brevoApiClient.fetchAllCompanies()).thenReturn(List.of());
@@ -683,8 +693,12 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
-            assertEquals("https://linkedin.com/in/old", updated.getLinkedInUrl());
+            transactionTemplate.executeWithoutResult(status -> {
+                final ContactEntity updated = contactRepository.findByBrevoId("200").orElseThrow();
+                assertEquals(1, updated.getSocialLinks().size());
+                assertEquals(SocialNetworkType.LINKEDIN, updated.getSocialLinks().get(0).getNetworkType());
+                assertEquals("https://linkedin.com/in/new", updated.getSocialLinks().get(0).getUrl());
+            });
         }
 
         @Test
@@ -770,18 +784,22 @@ class BrevoSyncServiceTest {
 
             brevoSyncService.syncAll();
 
-            final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
-            assertEquals("Jane", contact.getFirstName());
-            assertEquals("Doe", contact.getLastName());
-            assertEquals("jane@test.com", contact.getEmail());
-            assertEquals("+49555", contact.getPhoneNumber());
-            assertEquals("Engineer", contact.getPosition());
-            assertEquals("https://linkedin.com/in/jane", contact.getLinkedInUrl());
-            assertEquals(Language.EN, contact.getLanguage());
-            assertEquals("200", contact.getBrevoId());
-            final CompanyEntity company = getCompanyForContact(contact);
-            assertNotNull(company);
-            assertEquals("ImportCo", company.getName());
+            transactionTemplate.executeWithoutResult(status -> {
+                final ContactEntity contact = contactRepository.findByBrevoId("200").orElseThrow();
+                assertEquals("Jane", contact.getFirstName());
+                assertEquals("Doe", contact.getLastName());
+                assertEquals("jane@test.com", contact.getEmail());
+                assertEquals("+49555", contact.getPhoneNumber());
+                assertEquals("Engineer", contact.getPosition());
+                assertEquals(1, contact.getSocialLinks().size());
+                assertEquals(SocialNetworkType.LINKEDIN, contact.getSocialLinks().get(0).getNetworkType());
+                assertEquals("https://linkedin.com/in/jane", contact.getSocialLinks().get(0).getUrl());
+                assertEquals(Language.EN, contact.getLanguage());
+                assertEquals("200", contact.getBrevoId());
+                final CompanyEntity company = getCompanyForContact(contact);
+                assertNotNull(company);
+                assertEquals("ImportCo", company.getName());
+            });
         }
 
         @Test

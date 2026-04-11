@@ -15,13 +15,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -59,8 +63,9 @@ public class ContactEntity {
     @Column(name = "gender", length = 20)
     private Gender gender;
 
-    @Column(name = "linkedin_url", length = 500)
-    private String linkedInUrl;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "contact_id", nullable = false)
+    private List<SocialLinkEntity> socialLinks = new ArrayList<>();
 
     @Column(name = "phone_number", length = 50)
     private String phoneNumber;
@@ -222,22 +227,12 @@ public class ContactEntity {
         this.gender = gender;
     }
 
-    /**
-     * Returns the LinkedIn profile URL of this contact.
-     *
-     * @return the LinkedIn URL, or null
-     */
-    public String getLinkedInUrl() {
-        return linkedInUrl;
+    public List<SocialLinkEntity> getSocialLinks() {
+        return socialLinks;
     }
 
-    /**
-     * Sets the LinkedIn profile URL of this contact.
-     *
-     * @param linkedInUrl the LinkedIn URL
-     */
-    public void setLinkedInUrl(final String linkedInUrl) {
-        this.linkedInUrl = linkedInUrl;
+    public void setSocialLinks(final List<SocialLinkEntity> socialLinks) {
+        this.socialLinks = socialLinks;
     }
 
     /**

@@ -15,7 +15,7 @@ import java.util.UUID;
  * @param email       the email address
  * @param position    the job position
  * @param gender      the gender (nullable — null means unknown)
- * @param linkedInUrl the LinkedIn profile URL
+ * @param socialLinks the social network links
  * @param phoneNumber the phone number
  * @param companyId   the company ID (optional)
  * @param language    the preferred language (optional, null means unknown)
@@ -49,9 +49,8 @@ public record ContactCreateDto(
         @Schema(description = "Gender (null if unknown)", example = "MALE")
         Gender gender,
 
-        @Size(max = 500)
-        @Schema(description = "LinkedIn profile URL", example = "https://linkedin.com/in/hendrik-ebbers")
-        String linkedInUrl,
+        @Schema(description = "Social network links")
+        List<SocialLinkCreateDto> socialLinks,
 
         @Size(max = 50)
         @Schema(description = "Phone number", example = "+49 123 456789")

@@ -5,6 +5,8 @@ import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.Language;
+import com.openelements.crm.contact.SocialLinkEntity;
+import com.openelements.crm.contact.SocialNetworkType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -265,11 +267,26 @@ public class BrevoSyncService {
             if (created) {
                 entity.setPhoneNumber(sms);
                 entity.setPosition(jobTitle);
-                entity.setLinkedInUrl(linkedIn);
+                if (linkedIn != null) {
+                    final SocialLinkEntity linkEntity = new SocialLinkEntity();
+                    linkEntity.setNetworkType(SocialNetworkType.LINKEDIN);
+                    linkEntity.setValue(linkedIn);
+                    linkEntity.setUrl(linkedIn);
+                    entity.getSocialLinks().add(linkEntity);
+                }
 
                 final CompanyEntity company = resolveCompany(
                         brevoContact.id(), contactToCompanyBrevoId, firmaManuell);
                 entity.setCompany(company);
+            } else {
+                entity.getSocialLinks().removeIf(link -> link.getNetworkType() == SocialNetworkType.LINKEDIN);
+                if (linkedIn != null) {
+                    final SocialLinkEntity linkEntity = new SocialLinkEntity();
+                    linkEntity.setNetworkType(SocialNetworkType.LINKEDIN);
+                    linkEntity.setValue(linkedIn);
+                    linkEntity.setUrl(linkedIn);
+                    entity.getSocialLinks().add(linkEntity);
+                }
             }
 
             contactRepository.saveAndFlush(entity);

@@ -139,7 +139,39 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <DetailField label={S.detail.position} value={contact.position} />
             <DetailField label={S.detail.gender} value={genderLabel(contact.gender, t)} />
             <DetailField label={S.detail.phone} value={contact.phoneNumber} copyable callable />
-            <DetailField label={S.detail.linkedIn} value={contact.linkedInUrl} copyable linkable />
+            {contact.socialLinks && contact.socialLinks.length > 0 && (() => {
+              const displayOrder = ["LINKEDIN", "GITHUB", "MASTODON", "BLUESKY", "DISCORD", "WEBSITE", "X", "YOUTUBE"];
+              const networkNames: Record<string, string> = {
+                GITHUB: S.form.networkGithub,
+                LINKEDIN: S.form.networkLinkedin,
+                X: S.form.networkX,
+                MASTODON: S.form.networkMastodon,
+                BLUESKY: S.form.networkBluesky,
+                DISCORD: S.form.networkDiscord,
+                YOUTUBE: S.form.networkYoutube,
+                WEBSITE: S.form.networkWebsite,
+              };
+              const grouped = displayOrder
+                .map(network => ({
+                  network,
+                  links: contact.socialLinks.filter(l => l.networkType === network),
+                }))
+                .filter(g => g.links.length > 0);
+
+              return grouped.flatMap(g =>
+                g.links.map((l, i) => (
+                  <DetailField
+                    key={`${g.network}-${i}`}
+                    label={i === 0 ? (networkNames[g.network] ?? g.network) : ""}
+                    value={l.url}
+                    copyable
+                    linkable
+                  >
+                    {l.value}
+                  </DetailField>
+                ))
+              );
+            })()}
             <DetailField label={S.detail.birthday} value={formatBirthday(contact.birthday, language)} />
             <DetailField label={S.detail.language} value={languageLabel(contact.language, t)} />
             <div>

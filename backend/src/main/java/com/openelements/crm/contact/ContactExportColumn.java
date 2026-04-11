@@ -13,7 +13,7 @@ public enum ContactExportColumn {
     EMAIL("email", dto -> dto.email()),
     POSITION("position", dto -> dto.position()),
     GENDER("gender", dto -> dto.gender() != null ? dto.gender().name() : null),
-    LINKED_IN_URL("linkedInUrl", dto -> dto.linkedInUrl()),
+    SOCIAL_LINKS("socialLinks", dto -> dto.socialLinks() != null ? dto.socialLinks().stream().map(SocialLinkDto::url).collect(java.util.stream.Collectors.joining(", ")) : ""),
     PHONE_NUMBER("phoneNumber", dto -> dto.phoneNumber()),
     COMPANY_NAME("companyName", dto -> dto.companyName()),
     BIRTHDAY("birthday", dto -> dto.birthday() != null ? dto.birthday().toString() : null),

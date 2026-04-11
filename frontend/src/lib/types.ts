@@ -56,6 +56,17 @@ export interface CommentCreateDto {
   readonly text: string;
 }
 
+export interface SocialLinkDto {
+  readonly networkType: string;
+  readonly value: string;
+  readonly url: string;
+}
+
+export interface SocialLinkCreateDto {
+  readonly networkType: string;
+  readonly value: string;
+}
+
 export interface ContactDto {
   readonly id: string;
   readonly title: string | null;
@@ -64,7 +75,7 @@ export interface ContactDto {
   readonly email: string | null;
   readonly position: string | null;
   readonly gender: "MALE" | "FEMALE" | "DIVERSE" | null;
-  readonly linkedInUrl: string | null;
+  readonly socialLinks: readonly SocialLinkDto[];
   readonly phoneNumber: string | null;
   readonly description: string | null;
   readonly companyId: string | null;
@@ -87,7 +98,7 @@ export interface ContactCreateDto {
   readonly email?: string | null;
   readonly position?: string | null;
   readonly gender?: "MALE" | "FEMALE" | "DIVERSE" | null;
-  readonly linkedInUrl?: string | null;
+  readonly socialLinks?: readonly SocialLinkCreateDto[] | null;
   readonly phoneNumber?: string | null;
   readonly companyId?: string | null;
   readonly language?: "DE" | "EN" | null;

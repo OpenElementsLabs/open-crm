@@ -62,7 +62,7 @@ public class ContactService {
         Objects.requireNonNull(request, "request must not be null");
         final ContactEntity entity = new ContactEntity();
         applyFields(entity, request.title(), request.firstName(), request.lastName(), request.email(),
-                request.position(), request.gender(), request.linkedInUrl(),
+                request.position(), request.gender(), request.socialLinks(),
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday(), request.description());
         if (request.tagIds() != null) {
@@ -114,6 +114,9 @@ public class ContactService {
             if (request.language() != entity.getLanguage()) {
                 violations.add("language");
             }
+            if (request.socialLinks() != null) {
+                violations.add("socialLinks");
+            }
             if (!violations.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The fields " + String.join(", ", violations)
@@ -121,7 +124,7 @@ public class ContactService {
             }
         }
         applyFields(entity, request.title(), request.firstName(), request.lastName(), request.email(),
-                request.position(), request.gender(), request.linkedInUrl(),
+                request.position(), request.gender(), request.socialLinks(),
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday(), request.description());
         if (request.tagIds() != null) {
@@ -179,12 +182,15 @@ public class ContactService {
                 final String pattern = "%" + word.toLowerCase() + "%";
                 spec = spec.and((root, query, cb) -> {
                     final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
+                    final Join<ContactEntity, SocialLinkEntity> socialLinksJoin = root.join("socialLinks", JoinType.LEFT);
+                    query.distinct(true);
                     return cb.or(
                         cb.like(cb.lower(root.get("title")), pattern),
                         cb.like(cb.lower(root.get("firstName")), pattern),
                         cb.like(cb.lower(root.get("lastName")), pattern),
                         cb.like(cb.lower(root.get("email")), pattern),
-                        cb.like(cb.lower(companyJoin.get("name")), pattern)
+                        cb.like(cb.lower(companyJoin.get("name")), pattern),
+                        cb.like(cb.lower(socialLinksJoin.get("value")), pattern)
                     );
                 });
             }
@@ -255,12 +261,15 @@ public class ContactService {
                 final String pattern = "%" + word.toLowerCase() + "%";
                 spec = spec.and((root, query, cb) -> {
                     final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
+                    final Join<ContactEntity, SocialLinkEntity> socialLinksJoin = root.join("socialLinks", JoinType.LEFT);
+                    query.distinct(true);
                     return cb.or(
                         cb.like(cb.lower(root.get("title")), pattern),
                         cb.like(cb.lower(root.get("firstName")), pattern),
                         cb.like(cb.lower(root.get("lastName")), pattern),
                         cb.like(cb.lower(root.get("email")), pattern),
-                        cb.like(cb.lower(companyJoin.get("name")), pattern)
+                        cb.like(cb.lower(companyJoin.get("name")), pattern),
+                        cb.like(cb.lower(socialLinksJoin.get("value")), pattern)
                     );
                 });
             }
@@ -367,7 +376,7 @@ public class ContactService {
                               final String title,
                               final String firstName, final String lastName,
                               final String email, final String position,
-                              final Gender gender, final String linkedInUrl,
+                              final Gender gender, final List<SocialLinkCreateDto> socialLinks,
                               final String phoneNumber, final UUID companyId,
                               final Language language, final java.time.LocalDate birthday,
                               final String description) {
@@ -377,7 +386,24 @@ public class ContactService {
         entity.setEmail(email);
         entity.setPosition(position);
         entity.setGender(gender);
-        entity.setLinkedInUrl(linkedInUrl);
+        if (socialLinks != null) {
+            entity.getSocialLinks().clear();
+            for (final SocialLinkCreateDto linkDto : socialLinks) {
+                final SocialNetworkType networkType;
+                try {
+                    networkType = SocialNetworkType.valueOf(linkDto.networkType());
+                } catch (final IllegalArgumentException e) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Invalid network type: " + linkDto.networkType());
+                }
+                final SocialNetworkType.ResolvedLink resolved = networkType.resolve(linkDto.value());
+                final SocialLinkEntity linkEntity = new SocialLinkEntity();
+                linkEntity.setNetworkType(networkType);
+                linkEntity.setValue(resolved.value());
+                linkEntity.setUrl(resolved.url());
+                entity.getSocialLinks().add(linkEntity);
+            }
+        }
         entity.setPhoneNumber(phoneNumber);
         entity.setLanguage(language);
         entity.setBirthday(birthday);

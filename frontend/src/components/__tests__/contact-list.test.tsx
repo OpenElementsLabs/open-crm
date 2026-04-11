@@ -39,7 +39,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     email: "max@example.com",
     position: "CEO",
     gender: "MALE",
-    linkedInUrl: "https://linkedin.com/in/max",
+    socialLinks: [],
     phoneNumber: "+49 123 456",
     companyId: "company-1",
     companyName: "Open Elements",

@@ -99,7 +99,7 @@ class ContactControllerTest {
                         "email": "hendrik@open-elements.com",
                         "position": "CEO",
                         "gender": "MALE",
-                        "linkedInUrl": "https://linkedin.com/in/hendrik-ebbers",
+                        "socialLinks": [{"networkType": "LINKEDIN", "value": "hendrik-ebbers"}],
                         "phoneNumber": "+49 123 456789",
                         "companyId": "%s",
                         "language": "DE"

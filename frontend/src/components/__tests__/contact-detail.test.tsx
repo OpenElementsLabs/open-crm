@@ -33,7 +33,7 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     email: "max@example.com",
     position: "CEO",
     gender: "MALE",
-    linkedInUrl: "https://linkedin.com/in/max",
+    socialLinks: [{networkType: "LINKEDIN", value: "max", url: "https://linkedin.com/in/max"}],
     phoneNumber: "+49 123 456",
     companyId: "company-1",
     companyName: "Open Elements",
@@ -75,7 +75,7 @@ describe("ContactDetail", () => {
     expect(screen.getByText("CEO")).toBeInTheDocument();
     expect(screen.getByText(S.form.male)).toBeInTheDocument();
     expect(screen.getByText("+49 123 456")).toBeInTheDocument();
-    expect(screen.getByText("https://linkedin.com/in/max")).toBeInTheDocument();
+    expect(screen.getByText("max")).toBeInTheDocument(); // LinkedIn social link value
     expect(screen.getByText(S.detail.languageDE)).toBeInTheDocument();
     expect(screen.getByText("Open Elements")).toBeInTheDocument();
   });
@@ -127,7 +127,7 @@ describe("ContactDetail", () => {
           position: null,
           gender: null,
           phoneNumber: null,
-          linkedInUrl: null,
+          socialLinks: [],
           companyId: null,
           companyName: null,
         })}
@@ -226,5 +226,49 @@ describe("ContactDetail", () => {
     expect(img).toBeNull();
     const svg = container.querySelector("svg");
     expect(svg).toBeInTheDocument();
+  });
+});
+
+describe("ContactDetail — Social Links", () => {
+  it("should show social links grouped by network", () => {
+    renderWithProviders(
+      <ContactDetail
+        contact={makeContact({
+          socialLinks: [
+            { networkType: "GITHUB", value: "hendrikebbers", url: "https://github.com/hendrikebbers" },
+            { networkType: "LINKEDIN", value: "hendrik", url: "https://linkedin.com/in/hendrik" },
+          ],
+        })}
+      />,
+    );
+
+    expect(screen.getByText("hendrikebbers")).toBeInTheDocument();
+    expect(screen.getByText("hendrik")).toBeInTheDocument();
+  });
+
+  it("should not show social links section when empty", () => {
+    renderWithProviders(
+      <ContactDetail contact={makeContact({ socialLinks: [] })} />,
+    );
+
+    // No network labels should appear
+    expect(screen.queryByText(S.form.networkGithub)).not.toBeInTheDocument();
+    expect(screen.queryByText(S.form.networkLinkedin)).not.toBeInTheDocument();
+  });
+
+  it("should show only networks with links", () => {
+    renderWithProviders(
+      <ContactDetail
+        contact={makeContact({
+          socialLinks: [
+            { networkType: "GITHUB", value: "octocat", url: "https://github.com/octocat" },
+          ],
+        })}
+      />,
+    );
+
+    expect(screen.getByText("octocat")).toBeInTheDocument();
+    // LinkedIn label should not appear (no linkedin links)
+    expect(screen.queryByText(S.form.networkLinkedin)).not.toBeInTheDocument();
   });
 });

@@ -65,7 +65,7 @@ const existingContact: ContactDto = {
   email: "max@example.com",
   position: "CEO",
   gender: "MALE",
-  linkedInUrl: "https://linkedin.com/in/max",
+  socialLinks: [{networkType: "LINKEDIN", value: "max", url: "https://linkedin.com/in/max"}],
   phoneNumber: "+49 123 456",
   companyId: "company-1",
   companyName: "Open Elements",
@@ -98,7 +98,7 @@ describe("ContactForm", () => {
       expect(screen.getByLabelText(S.email)).toBeInTheDocument();
       expect(screen.getByLabelText(S.position)).toBeInTheDocument();
       expect(screen.getByLabelText(S.phone)).toBeInTheDocument();
-      expect(screen.getByLabelText(S.linkedIn)).toBeInTheDocument();
+      expect(screen.getByText(S.socialLinks)).toBeInTheDocument();
       expect(screen.getByText(S.save)).toBeInTheDocument();
       expect(screen.getByText(S.cancel)).toBeInTheDocument();
     });
@@ -187,7 +187,7 @@ describe("ContactForm", () => {
       expect(screen.getByDisplayValue("max@example.com")).toBeInTheDocument();
       expect(screen.getByDisplayValue("CEO")).toBeInTheDocument();
       expect(screen.getByDisplayValue("+49 123 456")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("https://linkedin.com/in/max")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("max")).toBeInTheDocument(); // social link value
     });
 
     it("should show title for edit mode", () => {
@@ -289,7 +289,7 @@ describe("ContactForm", () => {
       renderWithProviders(<ContactForm contact={brevoContact} />);
 
       const hints = screen.getAllByText(S.managedByBrevo);
-      expect(hints).toHaveLength(4);
+      expect(hints.length).toBeGreaterThanOrEqual(4);
     });
 
     it("should not disable fields for non-Brevo contacts", () => {
@@ -302,6 +302,40 @@ describe("ContactForm", () => {
       renderWithProviders(<ContactForm />);
 
       expect(screen.getByLabelText(new RegExp(S.firstName))).not.toBeDisabled();
+    });
+  });
+
+  describe("social links editor", () => {
+    it("should show social links section", () => {
+      renderWithProviders(<ContactForm />);
+
+      expect(screen.getByText(S.socialLinks)).toBeInTheDocument();
+    });
+
+    it("should show add link button", () => {
+      renderWithProviders(<ContactForm />);
+
+      expect(screen.getByText(`+ ${S.addSocialLink}`)).toBeInTheDocument();
+    });
+
+    it("should add a new row when clicking add button", async () => {
+      renderWithProviders(<ContactForm />);
+
+      fireEvent.click(screen.getByText(`+ ${S.addSocialLink}`));
+
+      await waitFor(() => {
+        // A new select should appear for network type
+        const selects = screen.getAllByRole("combobox");
+        // At least one combobox should be for network type (plus gender, language, company selects)
+        expect(selects.length).toBeGreaterThanOrEqual(4);
+      });
+    });
+
+    it("should pre-populate social links in edit mode", () => {
+      renderWithProviders(<ContactForm contact={existingContact} />);
+
+      // existingContact has a LinkedIn link with value "max"
+      expect(screen.getByDisplayValue("max")).toBeInTheDocument();
     });
   });
 

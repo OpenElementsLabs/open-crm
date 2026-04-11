@@ -39,7 +39,9 @@ export function ContactForm({ contact }: ContactFormProps) {
   const [email, setEmail] = useState(contact?.email ?? "");
   const [position, setPosition] = useState(contact?.position ?? "");
   const [gender, setGender] = useState(contact?.gender ?? "");
-  const [linkedInUrl, setLinkedInUrl] = useState(contact?.linkedInUrl ?? "");
+  const [socialLinks, setSocialLinks] = useState<{networkType: string; value: string}[]>(
+    contact?.socialLinks?.map(l => ({networkType: l.networkType, value: l.value})) ?? []
+  );
   const [phoneNumber, setPhoneNumber] = useState(contact?.phoneNumber ?? "");
   const [companyId, setCompanyId] = useState(contact?.companyId ?? "");
   const [language, setLanguage] = useState(contact?.language ?? "");
@@ -120,7 +122,7 @@ export function ContactForm({ contact }: ContactFormProps) {
       email: email.trim() || null,
       position: position.trim() || null,
       gender: gender && gender !== "none" ? (gender as "MALE" | "FEMALE" | "DIVERSE") : null,
-      linkedInUrl: linkedInUrl.trim() || null,
+      socialLinks: socialLinks.filter(l => l.value.trim()).map(l => ({networkType: l.networkType, value: l.value.trim()})),
       phoneNumber: phoneNumber.trim() || null,
       companyId: companyId && companyId !== "none" ? companyId : null,
       language: language && language !== "unknown" ? (language as "DE" | "EN") : null,
@@ -268,18 +270,6 @@ export function ContactForm({ contact }: ContactFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="linkedIn">{S.linkedIn}</Label>
-              <Input
-                id="linkedIn"
-                value={linkedInUrl}
-                onChange={(e) => setLinkedInUrl(e.target.value)}
-                placeholder={S.linkedInPlaceholder}
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
               <Label htmlFor="birthday">{S.birthday}</Label>
               <Input
                 id="birthday"
@@ -289,6 +279,79 @@ export function ContactForm({ contact }: ContactFormProps) {
               />
             </div>
           </div>
+
+          {/* Social Links */}
+          <fieldset className="space-y-2" disabled={isBrevoEdit}>
+            <Label>{S.socialLinks}</Label>
+            {socialLinks.map((link, index) => {
+              const placeholders: Record<string, string> = {
+                GITHUB: S.placeholderGithub,
+                LINKEDIN: S.placeholderLinkedin,
+                X: S.placeholderX,
+                MASTODON: S.placeholderMastodon,
+                BLUESKY: S.placeholderBluesky,
+                DISCORD: S.placeholderDiscord,
+                YOUTUBE: S.placeholderYoutube,
+                WEBSITE: S.placeholderWebsite,
+              };
+              return (
+                <div key={index} className="flex gap-2 items-center">
+                  <Select
+                    value={link.networkType}
+                    onValueChange={(val) => {
+                      const updated = [...socialLinks];
+                      updated[index] = { ...updated[index], networkType: val };
+                      setSocialLinks(updated);
+                    }}
+                  >
+                    <SelectTrigger className="w-40 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GITHUB">{S.networkGithub}</SelectItem>
+                      <SelectItem value="LINKEDIN">{S.networkLinkedin}</SelectItem>
+                      <SelectItem value="X">{S.networkX}</SelectItem>
+                      <SelectItem value="MASTODON">{S.networkMastodon}</SelectItem>
+                      <SelectItem value="BLUESKY">{S.networkBluesky}</SelectItem>
+                      <SelectItem value="DISCORD">{S.networkDiscord}</SelectItem>
+                      <SelectItem value="YOUTUBE">{S.networkYoutube}</SelectItem>
+                      <SelectItem value="WEBSITE">{S.networkWebsite}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    value={link.value}
+                    onChange={(e) => {
+                      const updated = [...socialLinks];
+                      updated[index] = { ...updated[index], value: e.target.value };
+                      setSocialLinks(updated);
+                    }}
+                    placeholder={placeholders[link.networkType] ?? ""}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 text-oe-red border-oe-red hover:bg-oe-red-lighter"
+                    onClick={() => {
+                      setSocialLinks(socialLinks.filter((_, i) => i !== index));
+                    }}
+                  >
+                    &times;
+                  </Button>
+                </div>
+              );
+            })}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSocialLinks([...socialLinks, { networkType: "LINKEDIN", value: "" }])}
+            >
+              + {S.addSocialLink}
+            </Button>
+            {isBrevoEdit && <p className="mt-1 text-xs text-oe-gray-mid">{S.managedByBrevo}</p>}
+          </fieldset>
 
           <div>
             <Label htmlFor="company">{S.company}</Label>

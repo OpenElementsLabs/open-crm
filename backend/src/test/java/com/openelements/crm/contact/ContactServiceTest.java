@@ -175,7 +175,7 @@ class ContactServiceTest {
 
             final ContactDto updated = contactService.update(contact.id(),
                     new ContactUpdateDto(null, "New", "Last", "new@test.com", "CTO",
-                            Gender.FEMALE, "https://linkedin.com/in/new", "+49 999",
+                            Gender.FEMALE, java.util.List.of(new SocialLinkCreateDto("LINKEDIN", "new")), "+49 999",
                             company.id(), Language.EN, java.time.LocalDate.of(1990, 3, 15), null, null));
 
             assertEquals("New", updated.firstName());
@@ -183,7 +183,8 @@ class ContactServiceTest {
             assertEquals("new@test.com", updated.email());
             assertEquals("CTO", updated.position());
             assertEquals(Gender.FEMALE, updated.gender());
-            assertEquals("https://linkedin.com/in/new", updated.linkedInUrl());
+            assertEquals(1, updated.socialLinks().size());
+            assertEquals("LINKEDIN", updated.socialLinks().get(0).networkType());
             assertEquals("+49 999", updated.phoneNumber());
             assertEquals(company.id(), updated.companyId());
             assertEquals(Language.EN, updated.language());
@@ -605,6 +606,184 @@ class ContactServiceTest {
             final var ex = assertThrows(ResponseStatusException.class,
                     () -> contactService.getPhoto(contact.id()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        }
+    }
+
+    @Nested
+    @DisplayName("SocialLinks")
+    class SocialLinks {
+
+        @Test
+        @DisplayName("should create contact with social links")
+        void shouldCreateWithSocialLinks() {
+            final ContactDto result = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                            null, null, null, null, null, null));
+
+            assertNotNull(result.socialLinks());
+            assertEquals(1, result.socialLinks().size());
+            assertEquals("GITHUB", result.socialLinks().get(0).networkType());
+            assertEquals("hendrikebbers", result.socialLinks().get(0).value());
+            assertEquals("https://github.com/hendrikebbers", result.socialLinks().get(0).url());
+        }
+
+        @Test
+        @DisplayName("should create contact with multiple links same network")
+        void shouldCreateWithMultipleLinksSameNetwork() {
+            final ContactDto result = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(
+                                    new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
+                                    new SocialLinkCreateDto("GITHUB", "janedev")
+                            ),
+                            null, null, null, null, null, null));
+
+            assertEquals(2, result.socialLinks().size());
+            assertEquals("GITHUB", result.socialLinks().get(0).networkType());
+            assertEquals("GITHUB", result.socialLinks().get(1).networkType());
+        }
+
+        @Test
+        @DisplayName("should create contact with links across networks")
+        void shouldCreateWithLinksAcrossNetworks() {
+            final ContactDto result = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(
+                                    new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
+                                    new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers"),
+                                    new SocialLinkCreateDto("WEBSITE", "https://open-elements.com")
+                            ),
+                            null, null, null, null, null, null));
+
+            assertEquals(3, result.socialLinks().size());
+        }
+
+        @Test
+        @DisplayName("should create contact with no social links")
+        void shouldCreateWithNoSocialLinks() {
+            final ContactDto result = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(),
+                            null, null, null, null, null, null));
+
+            assertNotNull(result.socialLinks());
+            assertEquals(0, result.socialLinks().size());
+        }
+
+        @Test
+        @DisplayName("should replace all social links on update")
+        void shouldReplaceAllSocialLinksOnUpdate() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                            null, null, null, null, null, null));
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers")),
+                            null, null, null, null, null, null));
+
+            assertEquals(1, updated.socialLinks().size());
+            assertEquals("LINKEDIN", updated.socialLinks().get(0).networkType());
+            assertEquals("hendrik-ebbers", updated.socialLinks().get(0).value());
+        }
+
+        @Test
+        @DisplayName("should preserve social links when null")
+        void shouldPreserveSocialLinksWhenNull() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                            null, null, null, null, null, null));
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                            null,
+                            null, null, null, null, null, null));
+
+            assertEquals(1, updated.socialLinks().size());
+            assertEquals("GITHUB", updated.socialLinks().get(0).networkType());
+        }
+
+        @Test
+        @DisplayName("should clear social links with empty list")
+        void shouldClearSocialLinksWithEmptyList() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                            null, null, null, null, null, null));
+
+            final ContactDto updated = contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(),
+                            null, null, null, null, null, null));
+
+            assertEquals(0, updated.socialLinks().size());
+        }
+
+        @Test
+        @DisplayName("should delete contact and cascade social links")
+        void shouldDeleteContactAndCascadeSocialLinks() {
+            final ContactDto contact = contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
+                                    new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers")),
+                            null, null, null, null, null, null));
+
+            contactService.delete(contact.id());
+
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> contactService.getById(contact.id()));
+            assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should find contact by social link value")
+        void shouldFindContactBySocialLinkValue() {
+            contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                            null, null, null, null, null, null));
+            createContact("Other", "Person", null);
+
+            final var page = contactService.list("hendrikebbers", null, false, null, null, null, PageRequest.of(0, 20));
+
+            assertEquals(1, page.getTotalElements());
+            assertEquals("Jane", page.getContent().get(0).firstName());
+        }
+
+        @Test
+        @DisplayName("should find contact by partial social link value")
+        void shouldFindContactByPartialSocialLinkValue() {
+            contactService.create(
+                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                            null, null, null, null, null, null));
+            createContact("Other", "Person", null);
+
+            final var page = contactService.list("hendrik", null, false, null, null, null, PageRequest.of(0, 20));
+
+            assertEquals(1, page.getTotalElements());
+            assertEquals("Jane", page.getContent().get(0).firstName());
+        }
+
+        @Test
+        @DisplayName("should reject social link update for Brevo contacts")
+        void shouldRejectSocialLinkUpdateForBrevoContacts() {
+            final ContactDto contact = createContact("Jane", "Doe", null);
+            final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
+            entity.setBrevoId("200");
+            contactRepository.saveAndFlush(entity);
+
+            final var ex = assertThrows(ResponseStatusException.class,
+                    () -> contactService.update(contact.id(),
+                            new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                                    null, null, null, null, null, null)));
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+            assertNotNull(ex.getReason());
+            assert ex.getReason().contains("socialLinks");
         }
     }
 }
