@@ -484,6 +484,87 @@ class CompanyControllerTest {
     }
 
     @Nested
+    @DisplayName("Company Finance Fields")
+    class CompanyFinanceFields {
+
+        @Test
+        @DisplayName("should create company with financial fields and return 201")
+        void shouldCreateWithFinancialFields() throws Exception {
+            //GIVEN
+            final String json = """
+                    {
+                        "name": "Finance Corp",
+                        "bankName": "Deutsche Bank",
+                        "bic": "DEUTDEFF",
+                        "iban": "DE89370400440532013000",
+                        "vatId": "DE123456789"
+                    }
+                    """;
+
+            //WHEN
+            final var result = mockMvc.perform(post("/api/companies")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json).with(testJwt()));
+
+            //THEN
+            result.andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.bankName").value("Deutsche Bank"))
+                    .andExpect(jsonPath("$.bic").value("DEUTDEFF"))
+                    .andExpect(jsonPath("$.iban").value("DE89370400440532013000"))
+                    .andExpect(jsonPath("$.vatId").value("DE123456789"));
+        }
+
+        @Test
+        @DisplayName("should return 400 when updating with invalid IBAN")
+        void shouldReturn400ForInvalidIban() throws Exception {
+            //GIVEN
+            final String id = createCompany("Invalid IBAN Corp");
+            final String json = """
+                    {"name": "Invalid IBAN Corp", "iban": "DE89"}
+                    """;
+
+            //WHEN
+            final var result = mockMvc.perform(put("/api/companies/" + id)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json).with(testJwt()));
+
+            //THEN
+            result.andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("should return financial fields on GET")
+        void shouldReturnFinancialFieldsOnGet() throws Exception {
+            //GIVEN
+            final String json = """
+                    {
+                        "name": "Get Finance Corp",
+                        "bankName": "Commerzbank",
+                        "bic": "COBADEFF",
+                        "iban": "DE89370400440532013000",
+                        "vatId": "ATU12345678"
+                    }
+                    """;
+            final String response = mockMvc.perform(post("/api/companies")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json).with(testJwt()))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            final String id = objectMapper.readTree(response).get("id").asText();
+
+            //WHEN
+            final var result = mockMvc.perform(get("/api/companies/" + id).with(testJwt()));
+
+            //THEN
+            result.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.bankName").value("Commerzbank"))
+                    .andExpect(jsonPath("$.bic").value("COBADEFF"))
+                    .andExpect(jsonPath("$.iban").value("DE89370400440532013000"))
+                    .andExpect(jsonPath("$.vatId").value("ATU12345678"));
+        }
+    }
+
+    @Nested
     @DisplayName("Company Logo")
     class CompanyLogo {
 

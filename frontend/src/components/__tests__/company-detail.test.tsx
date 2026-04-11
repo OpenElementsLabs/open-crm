@@ -37,13 +37,17 @@ const testCompany: CompanyDto = {
   country: "Germany",
   phoneNumber: "+49 30 12345678",
   description: null,
+  bankName: null,
+  bic: null,
+  iban: null,
+  vatId: null,
   brevo: false,
   hasLogo: false,
   contactCount: 3,
   commentCount: 5,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
-    tagIds: [],
+  tagIds: [],
 };
 
 beforeEach(() => {
@@ -260,5 +264,64 @@ describe("CompanyDetail", () => {
     expect(img).toBeNull();
     const svg = container.querySelector("svg");
     expect(svg).toBeInTheDocument();
+  });
+});
+
+describe("CompanyDetail — Finance Section", () => {
+  it("should show Finanzen section when financial fields are present", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          bankName: "Deutsche Bank",
+          iban: "DE89370400440532013000",
+        }}
+      />,
+    );
+
+    expect(screen.getByText(S.detail.finance.title)).toBeInTheDocument();
+    expect(screen.getByText("Deutsche Bank")).toBeInTheDocument();
+    expect(screen.getByText("DE89370400440532013000")).toBeInTheDocument();
+  });
+
+  it("should hide Finanzen section when all financial fields are null", () => {
+    renderWithProviders(<CompanyDetail company={testCompany} />);
+
+    expect(screen.queryByText(S.detail.finance.title)).not.toBeInTheDocument();
+  });
+
+  it("should show only non-null financial fields", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          iban: "DE89370400440532013000",
+        }}
+      />,
+    );
+
+    expect(screen.getByText(S.detail.finance.title)).toBeInTheDocument();
+    expect(screen.getByText("DE89370400440532013000")).toBeInTheDocument();
+    // Bank label is shown but value is dash since bankName is null
+    expect(screen.getByText(S.detail.finance.bankName)).toBeInTheDocument();
+  });
+
+  it("should show all four financial fields when all are set", () => {
+    renderWithProviders(
+      <CompanyDetail
+        company={{
+          ...testCompany,
+          bankName: "Deutsche Bank",
+          bic: "DEUTDEFF",
+          iban: "DE89370400440532013000",
+          vatId: "DE123456789",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Deutsche Bank")).toBeInTheDocument();
+    expect(screen.getByText("DEUTDEFF")).toBeInTheDocument();
+    expect(screen.getByText("DE89370400440532013000")).toBeInTheDocument();
+    expect(screen.getByText("DE123456789")).toBeInTheDocument();
   });
 });

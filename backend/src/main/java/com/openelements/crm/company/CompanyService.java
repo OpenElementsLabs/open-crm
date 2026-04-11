@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +70,7 @@ public class CompanyService {
         entity.setCountry(request.country());
         entity.setPhoneNumber(request.phoneNumber());
         entity.setDescription(request.description());
+        applyFinanceFields(entity, request.bankName(), request.bic(), request.iban(), request.vatId());
         if (request.tagIds() != null) {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
@@ -114,6 +116,7 @@ public class CompanyService {
         entity.setCountry(request.country());
         entity.setPhoneNumber(request.phoneNumber());
         entity.setDescription(request.description());
+        applyFinanceFields(entity, request.bankName(), request.bic(), request.iban(), request.vatId());
         if (request.tagIds() != null) {
             entity.setTags(tagService.resolveTagIds(request.tagIds()));
         }
@@ -240,6 +243,9 @@ public class CompanyService {
                 .toList();
     }
 
+    private static final Pattern IBAN_PATTERN = Pattern.compile("^[A-Z]{2}[A-Za-z0-9]+$");
+    private static final Pattern BIC_PATTERN = Pattern.compile("^[A-Z0-9]+$");
+
     private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(
             "image/svg+xml", "image/png", "image/jpeg");
 
@@ -294,6 +300,53 @@ public class CompanyService {
         entity.setLogo(null);
         entity.setLogoContentType(null);
         companyRepository.saveAndFlush(entity);
+    }
+
+    private String normalizeBlankToNull(final String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
+    private String validateAndNormalizeIban(final String iban) {
+        if (iban == null || iban.isBlank()) {
+            return null;
+        }
+        final String normalized = iban.replaceAll("\\s", "");
+        if (normalized.length() < 15 || normalized.length() > 34) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "IBAN must be between 15 and 34 characters");
+        }
+        if (!IBAN_PATTERN.matcher(normalized).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid IBAN format: must start with two uppercase letters followed by alphanumeric characters");
+        }
+        return normalized;
+    }
+
+    private String validateAndNormalizeBic(final String bic) {
+        if (bic == null || bic.isBlank()) {
+            return null;
+        }
+        final String trimmed = bic.trim();
+        if (trimmed.length() != 8 && trimmed.length() != 11) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "BIC must be exactly 8 or 11 characters");
+        }
+        if (!BIC_PATTERN.matcher(trimmed).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "BIC must contain only uppercase alphanumeric characters");
+        }
+        return trimmed;
+    }
+
+    private void applyFinanceFields(final CompanyEntity entity, final String bankName,
+                                     final String bic, final String iban, final String vatId) {
+        entity.setBankName(normalizeBlankToNull(bankName));
+        entity.setBic(validateAndNormalizeBic(bic));
+        entity.setIban(validateAndNormalizeIban(iban));
+        entity.setVatId(normalizeBlankToNull(vatId));
     }
 
     private CompanyDto toDto(final CompanyEntity entity) {

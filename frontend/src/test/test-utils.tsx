@@ -1,5 +1,6 @@
 import { render, type RenderOptions } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/lib/i18n/language-context";
 import type { Language } from "@/lib/i18n/index";
 import type { Session } from "next-auth";
@@ -14,7 +15,9 @@ function renderWithProviders(ui: React.ReactElement, options?: TestRenderOptions
   function TestWrapper({ children }: { readonly children: React.ReactNode }) {
     return (
       <SessionProvider session={session}>
-        <LanguageProvider defaultLanguage={language}>{children}</LanguageProvider>
+        <TooltipProvider>
+          <LanguageProvider defaultLanguage={language}>{children}</LanguageProvider>
+        </TooltipProvider>
       </SessionProvider>
     );
   }

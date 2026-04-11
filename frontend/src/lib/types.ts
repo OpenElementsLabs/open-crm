@@ -10,6 +10,10 @@ export interface CompanyDto {
   readonly country: string | null;
   readonly phoneNumber: string | null;
   readonly description: string | null;
+  readonly bankName: string | null;
+  readonly bic: string | null;
+  readonly iban: string | null;
+  readonly vatId: string | null;
   readonly brevo: boolean;
   readonly hasLogo: boolean;
   readonly contactCount: number;
@@ -30,6 +34,10 @@ export interface CompanyCreateDto {
   readonly country?: string | null;
   readonly phoneNumber?: string | null;
   readonly description?: string | null;
+  readonly bankName?: string | null;
+  readonly bic?: string | null;
+  readonly iban?: string | null;
+  readonly vatId?: string | null;
   readonly tagIds?: readonly string[] | null;
 }
 

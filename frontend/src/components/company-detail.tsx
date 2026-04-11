@@ -124,6 +124,22 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
         </CardContent>
       </Card>
 
+      {(company.bankName || company.bic || company.iban || company.vatId) && (
+        <Card className="border-oe-gray-light mt-4">
+          <CardHeader>
+            <CardTitle className="font-heading text-lg text-oe-dark">{S.detail.finance.title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid gap-4 sm:grid-cols-2">
+              <DetailField label={S.detail.finance.bankName} value={company.bankName} copyable />
+              <DetailField label={S.detail.finance.bic} value={company.bic} copyable />
+              <DetailField label={S.detail.finance.iban} value={company.iban} copyable />
+              <DetailField label={S.detail.finance.vatId} value={company.vatId} copyable />
+            </dl>
+          </CardContent>
+        </Card>
+      )}
+
       <TagChips tagIds={company.tagIds} />
 
       {company.description && (

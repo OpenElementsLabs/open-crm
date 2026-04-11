@@ -61,6 +61,22 @@ public record CompanyUpdateDto(
         @Schema(description = "Free-text description")
         String description,
 
+        @Size(max = 255)
+        @Schema(description = "Bank name", example = "Deutsche Bank")
+        String bankName,
+
+        @Size(max = 11)
+        @Schema(description = "Bank Identifier Code (BIC)", example = "DEUTDEFF")
+        String bic,
+
+        @Size(max = 34)
+        @Schema(description = "International Bank Account Number (IBAN)", example = "DE89370400440532013000")
+        String iban,
+
+        @Size(max = 20)
+        @Schema(description = "VAT identification number", example = "DE123456789")
+        String vatId,
+
         @Schema(description = "Tag IDs to assign (null = no change, empty = remove all)")
         List<UUID> tagIds
 ) {

@@ -40,14 +40,18 @@ const existingCompany: CompanyDto = {
   city: "Berlin",
   country: "Germany",
   phoneNumber: null,
-  deleted: false,
+  description: null,
+  bankName: null,
+  bic: null,
+  iban: null,
+  vatId: null,
   brevo: false,
   hasLogo: false,
   contactCount: 0,
   commentCount: 0,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
-    tagIds: [],
+  tagIds: [],
 };
 
 afterEach(() => {
@@ -189,6 +193,82 @@ describe("CompanyForm", () => {
       fireEvent.click(screen.getByText(S.cancel));
 
       expect(mockPush).toHaveBeenCalledWith("/companies/test-id");
+    });
+  });
+
+  describe("finance fields", () => {
+    it("should render finance section with all four fields", () => {
+      renderWithProviders(<CompanyForm />);
+
+      expect(screen.getByText(S.financeTitle)).toBeInTheDocument();
+      expect(screen.getByLabelText(S.bankName)).toBeInTheDocument();
+      expect(screen.getByLabelText(S.bic)).toBeInTheDocument();
+      expect(screen.getByLabelText(S.iban)).toBeInTheDocument();
+      expect(screen.getByLabelText(S.vatId)).toBeInTheDocument();
+    });
+
+    it("should pre-fill finance fields in edit mode", () => {
+      const companyWithFinance: CompanyDto = {
+        ...existingCompany,
+        bankName: "Deutsche Bank",
+        bic: "DEUTDEFF",
+        iban: "DE89370400440532013000",
+        vatId: "DE123456789",
+      };
+
+      renderWithProviders(<CompanyForm company={companyWithFinance} />);
+
+      expect(screen.getByDisplayValue("Deutsche Bank")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("DEUTDEFF")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("DE89370400440532013000")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("DE123456789")).toBeInTheDocument();
+    });
+
+    it("should include finance fields in submit data", async () => {
+      mockCreateCompany.mockResolvedValue({ ...existingCompany, id: "new-id" });
+
+      renderWithProviders(<CompanyForm />);
+
+      fireEvent.change(screen.getByLabelText(new RegExp(S.name)), {
+        target: { value: "Finance Corp" },
+      });
+      fireEvent.change(screen.getByLabelText(S.iban), {
+        target: { value: "DE89370400440532013000" },
+      });
+
+      fireEvent.click(screen.getByText(S.save));
+
+      await waitFor(() => {
+        expect(mockCreateCompany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: "Finance Corp",
+            iban: "DE89370400440532013000",
+          }),
+        );
+      });
+    });
+
+    it("should submit null for empty finance fields", async () => {
+      mockCreateCompany.mockResolvedValue({ ...existingCompany, id: "new-id" });
+
+      renderWithProviders(<CompanyForm />);
+
+      fireEvent.change(screen.getByLabelText(new RegExp(S.name)), {
+        target: { value: "No Finance Corp" },
+      });
+
+      fireEvent.click(screen.getByText(S.save));
+
+      await waitFor(() => {
+        expect(mockCreateCompany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            bankName: null,
+            bic: null,
+            iban: null,
+            vatId: null,
+          }),
+        );
+      });
     });
   });
 

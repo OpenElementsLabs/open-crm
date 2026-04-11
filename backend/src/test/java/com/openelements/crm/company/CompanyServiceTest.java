@@ -67,7 +67,7 @@ class CompanyServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
     }
 
     private void createContact(final String firstName, final String lastName, final UUID companyId) {
@@ -103,7 +103,7 @@ class CompanyServiceTest {
         @DisplayName("should create company with description")
         void shouldCreateWithDescription() {
             final CompanyDto result = companyService.create(
-                    new CompanyCreateDto("Desc Corp", null, null, null, null, null, null, null, null, "A great company", null));
+                    new CompanyCreateDto("Desc Corp", null, null, null, null, null, null, null, null, "A great company", null, null, null, null, null));
 
             assertEquals("A great company", result.description());
         }
@@ -156,7 +156,7 @@ class CompanyServiceTest {
 
             final CompanyDto updated = companyService.update(company.id(),
                     new CompanyUpdateDto("New Name", "new@test.com", "https://new.com",
-                            "New Street", "99", "54321", "Munich", "Austria", "+49 123", null, null));
+                            "New Street", "99", "54321", "Munich", "Austria", "+49 123", null, null, null, null, null, null));
 
             assertEquals("New Name", updated.name());
             assertEquals("new@test.com", updated.email());
@@ -174,7 +174,7 @@ class CompanyServiceTest {
             final CompanyDto company = createCompany("Desc Co");
 
             final CompanyDto updated = companyService.update(company.id(),
-                    new CompanyUpdateDto("Desc Co", null, null, null, null, null, null, null, null, "New description", null));
+                    new CompanyUpdateDto("Desc Co", null, null, null, null, null, null, null, null, "New description", null, null, null, null, null));
 
             assertEquals("New description", updated.description());
         }
@@ -183,10 +183,10 @@ class CompanyServiceTest {
         @DisplayName("should clear description when set to null")
         void shouldClearDescription() {
             final CompanyDto company = companyService.create(
-                    new CompanyCreateDto("Desc Co", null, null, null, null, null, null, null, null, "Initial desc", null));
+                    new CompanyCreateDto("Desc Co", null, null, null, null, null, null, null, null, "Initial desc", null, null, null, null, null));
 
             final CompanyDto updated = companyService.update(company.id(),
-                    new CompanyUpdateDto("Desc Co", null, null, null, null, null, null, null, null, null, null));
+                    new CompanyUpdateDto("Desc Co", null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
             assertNull(updated.description());
         }
@@ -197,7 +197,7 @@ class CompanyServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> companyService.update(fakeId, new CompanyUpdateDto("Name", null, null, null, null, null, null, null, null, null, null)));
+                    () -> companyService.update(fakeId, new CompanyUpdateDto("Name", null, null, null, null, null, null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -250,6 +250,186 @@ class CompanyServiceTest {
 
             final var ex = assertThrows(ResponseStatusException.class, () -> companyService.delete(fakeId, false));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        }
+    }
+
+    @Nested
+    @DisplayName("finance validation")
+    class FinanceValidation {
+
+        @Test
+        @DisplayName("should accept valid IBAN")
+        void shouldAcceptValidIban() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("IBAN Corp", null, null, null, null, null, null, null, null, null, null, null, "DE89370400440532013000", null, null));
+
+            assertEquals("DE89370400440532013000", result.iban());
+        }
+
+        @Test
+        @DisplayName("should strip whitespace from IBAN")
+        void shouldStripWhitespaceFromIban() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("IBAN Space Corp", null, null, null, null, null, null, null, null, null, null, null, "DE89 3704 0044 0532 0130 00", null, null));
+
+            assertEquals("DE89370400440532013000", result.iban());
+        }
+
+        @Test
+        @DisplayName("should reject IBAN too short")
+        void shouldRejectIbanTooShort() {
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.create(
+                    new CompanyCreateDto("Short IBAN Corp", null, null, null, null, null, null, null, null, null, null, null, "DE89", null, null)));
+
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should reject IBAN with invalid country code")
+        void shouldRejectIbanWithInvalidCountryCode() {
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.create(
+                    new CompanyCreateDto("Bad Country IBAN Corp", null, null, null, null, null, null, null, null, null, null, null, "1289370400440532013000", null, null)));
+
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should reject IBAN exceeding max length")
+        void shouldRejectIbanExceedingMaxLength() {
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.create(
+                    new CompanyCreateDto("Long IBAN Corp", null, null, null, null, null, null, null, null, null, null, null, "DE893704004405320130001234567890123", null, null)));
+
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should accept empty IBAN")
+        void shouldAcceptEmptyIban() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("No IBAN Corp", null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+
+            assertNull(result.iban());
+        }
+
+        @Test
+        @DisplayName("should normalize blank IBAN to null")
+        void shouldNormalizeBlankIbanToNull() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("Blank IBAN Corp", null, null, null, null, null, null, null, null, null, null, null, "  ", null, null));
+
+            assertNull(result.iban());
+        }
+
+        @Test
+        @DisplayName("should accept valid 8-character BIC")
+        void shouldAcceptValid8CharBic() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("BIC8 Corp", null, null, null, null, null, null, null, null, null, null, "DEUTDEFF", null, null, null));
+
+            assertEquals("DEUTDEFF", result.bic());
+        }
+
+        @Test
+        @DisplayName("should accept valid 11-character BIC")
+        void shouldAcceptValid11CharBic() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("BIC11 Corp", null, null, null, null, null, null, null, null, null, null, "DEUTDEFF500", null, null, null));
+
+            assertEquals("DEUTDEFF500", result.bic());
+        }
+
+        @Test
+        @DisplayName("should reject BIC with wrong length")
+        void shouldRejectBicWithWrongLength() {
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.create(
+                    new CompanyCreateDto("Bad BIC Corp", null, null, null, null, null, null, null, null, null, null, "DEUTDE", null, null, null)));
+
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should reject BIC with non-alphanumeric characters")
+        void shouldRejectBicWithNonAlphanumericCharacters() {
+            final var ex = assertThrows(ResponseStatusException.class, () -> companyService.create(
+                    new CompanyCreateDto("Special BIC Corp", null, null, null, null, null, null, null, null, null, null, "DEUT-DEFF", null, null, null)));
+
+            assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("should accept empty BIC")
+        void shouldAcceptEmptyBic() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("No BIC Corp", null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+
+            assertNull(result.bic());
+        }
+
+        @Test
+        @DisplayName("should store VAT ID as-is")
+        void shouldStoreVatIdAsIs() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("VAT Corp", null, null, null, null, null, null, null, null, null, null, null, null, "DE123456789", null));
+
+            assertEquals("DE123456789", result.vatId());
+        }
+
+        @Test
+        @DisplayName("should accept any format VAT ID")
+        void shouldAcceptAnyFormatVatId() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("VAT AT Corp", null, null, null, null, null, null, null, null, null, null, null, null, "ATU12345678", null));
+
+            assertEquals("ATU12345678", result.vatId());
+        }
+
+        @Test
+        @DisplayName("should create company with all financial fields")
+        void shouldCreateCompanyWithAllFinancialFields() {
+            final CompanyDto result = companyService.create(
+                    new CompanyCreateDto("Full Finance Corp", null, null, null, null, null, null, null, null, null, "Deutsche Bank", "DEUTDEFF", "DE89370400440532013000", "DE123456789", null));
+
+            assertEquals("Deutsche Bank", result.bankName());
+            assertEquals("DEUTDEFF", result.bic());
+            assertEquals("DE89370400440532013000", result.iban());
+            assertEquals("DE123456789", result.vatId());
+        }
+
+        @Test
+        @DisplayName("should create company without financial fields")
+        void shouldCreateCompanyWithoutFinancialFields() {
+            final CompanyDto result = createCompany("No Finance Corp");
+
+            assertNull(result.bankName());
+            assertNull(result.bic());
+            assertNull(result.iban());
+            assertNull(result.vatId());
+        }
+
+        @Test
+        @DisplayName("should update financial fields")
+        void shouldUpdateFinancialFields() {
+            final CompanyDto company = createCompany("Update Finance Corp");
+
+            final CompanyDto updated = companyService.update(company.id(),
+                    new CompanyUpdateDto("Update Finance Corp", null, null, null, null, null, null, null, null, null, null, null, "DE89370400440532013000", null, null));
+
+            assertEquals("DE89370400440532013000", updated.iban());
+        }
+
+        @Test
+        @DisplayName("should clear financial fields")
+        void shouldClearFinancialFields() {
+            final CompanyDto company = companyService.create(
+                    new CompanyCreateDto("Clear Finance Corp", null, null, null, null, null, null, null, null, null, "Deutsche Bank", "DEUTDEFF", "DE89370400440532013000", "DE123456789", null));
+
+            final CompanyDto updated = companyService.update(company.id(),
+                    new CompanyUpdateDto("Clear Finance Corp", null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+
+            assertNull(updated.bankName());
+            assertNull(updated.bic());
+            assertNull(updated.iban());
+            assertNull(updated.vatId());
         }
     }
 

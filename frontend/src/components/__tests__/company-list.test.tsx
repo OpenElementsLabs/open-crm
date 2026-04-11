@@ -48,6 +48,10 @@ function makeCompany(overrides: Partial<CompanyDto> = {}): CompanyDto {
     updatedAt: "2026-01-01T00:00:00Z",
     tagIds: [],
     description: null,
+    bankName: null,
+    bic: null,
+    iban: null,
+    vatId: null,
     ...overrides,
   };
 }

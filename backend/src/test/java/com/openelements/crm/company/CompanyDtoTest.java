@@ -149,5 +149,35 @@ class CompanyDtoTest {
             assertNull(dto.city());
             assertNull(dto.country());
         }
+
+        @Test
+        @DisplayName("Maps financial fields when present")
+        void mapsFinancialFieldsWhenPresent() throws Exception {
+            CompanyEntity entity = createEntity();
+            entity.setBankName("Deutsche Bank");
+            entity.setBic("DEUTDEFF");
+            entity.setIban("DE89370400440532013000");
+            entity.setVatId("DE123456789");
+
+            CompanyDto dto = CompanyDto.fromEntity(entity, 0, 0);
+
+            assertEquals("Deutsche Bank", dto.bankName());
+            assertEquals("DEUTDEFF", dto.bic());
+            assertEquals("DE89370400440532013000", dto.iban());
+            assertEquals("DE123456789", dto.vatId());
+        }
+
+        @Test
+        @DisplayName("Maps financial fields as null when absent")
+        void mapsFinancialFieldsAsNullWhenAbsent() throws Exception {
+            CompanyEntity entity = createEntity();
+
+            CompanyDto dto = CompanyDto.fromEntity(entity, 0, 0);
+
+            assertNull(dto.bankName());
+            assertNull(dto.bic());
+            assertNull(dto.iban());
+            assertNull(dto.vatId());
+        }
     }
 }

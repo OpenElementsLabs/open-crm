@@ -36,6 +36,10 @@ export function CompanyForm({ company }: CompanyFormProps) {
   const [country, setCountry] = useState(company?.country ?? "");
   const [phoneNumber, setPhoneNumber] = useState(company?.phoneNumber ?? "");
   const [description, setDescription] = useState(company?.description ?? "");
+  const [bankName, setBankName] = useState(company?.bankName ?? "");
+  const [bic, setBic] = useState(company?.bic ?? "");
+  const [iban, setIban] = useState(company?.iban ?? "");
+  const [vatId, setVatId] = useState(company?.vatId ?? "");
   const [tagIds, setTagIds] = useState<string[]>([...(company?.tagIds ?? [])]);
   const [tagIdsChanged, setTagIdsChanged] = useState(false);
 
@@ -97,6 +101,10 @@ export function CompanyForm({ company }: CompanyFormProps) {
       country: country.trim() || null,
       phoneNumber: phoneNumber.trim() || null,
       description: description.trim() || null,
+      bankName: bankName.trim() || null,
+      bic: bic.trim() || null,
+      iban: iban.trim() || null,
+      vatId: vatId.trim() || null,
       ...(tagIdsChanged ? { tagIds } : {}),
     };
 
@@ -247,6 +255,49 @@ export function CompanyForm({ company }: CompanyFormProps) {
               rows={3}
             />
           </div>
+
+          {/* Finance fields */}
+          <fieldset className="space-y-4 rounded-md border border-oe-gray-light p-4">
+            <legend className="px-2 text-sm font-medium text-oe-dark">{S.financeTitle}</legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="bankName">{S.bankName}</Label>
+                <Input
+                  id="bankName"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  placeholder={S.bankNamePlaceholder}
+                />
+              </div>
+              <div>
+                <Label htmlFor="bic">{S.bic}</Label>
+                <Input
+                  id="bic"
+                  value={bic}
+                  onChange={(e) => setBic(e.target.value)}
+                  placeholder={S.bicPlaceholder}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="iban">{S.iban}</Label>
+              <Input
+                id="iban"
+                value={iban}
+                onChange={(e) => setIban(e.target.value)}
+                placeholder={S.ibanPlaceholder}
+              />
+            </div>
+            <div>
+              <Label htmlFor="vatId">{S.vatId}</Label>
+              <Input
+                id="vatId"
+                value={vatId}
+                onChange={(e) => setVatId(e.target.value)}
+                placeholder={S.vatIdPlaceholder}
+              />
+            </div>
+          </fieldset>
 
           {/* Logo upload */}
           <div>

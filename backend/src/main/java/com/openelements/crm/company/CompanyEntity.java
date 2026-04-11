@@ -65,6 +65,18 @@ public class CompanyEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "bank_name", length = 255)
+    private String bankName;
+
+    @Column(name = "bic", length = 11)
+    private String bic;
+
+    @Column(name = "iban", length = 34)
+    private String iban;
+
+    @Column(name = "vat_id", length = 20)
+    private String vatId;
+
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "logo", length = ImageData.MAX_IMAGE_SIZE)
     private byte[] logo;
@@ -337,6 +349,38 @@ public class CompanyEntity {
 
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(final String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBic() {
+        return bic;
+    }
+
+    public void setBic(final String bic) {
+        this.bic = bic;
+    }
+
+    public String getIban() {
+        return iban;
+    }
+
+    public void setIban(final String iban) {
+        this.iban = iban;
+    }
+
+    public String getVatId() {
+        return vatId;
+    }
+
+    public void setVatId(final String vatId) {
+        this.vatId = vatId;
     }
 
     /**
