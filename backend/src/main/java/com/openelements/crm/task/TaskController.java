@@ -3,12 +3,11 @@ package com.openelements.crm.task;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
+import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,6 +24,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/tasks")
 @Tag(name = "Tasks")
@@ -32,10 +35,12 @@ public class TaskController {
 
     private final TaskService taskService;
     private final CommentService commentService;
+    private final UserService userService;
 
-    public TaskController(final TaskService taskService, final CommentService commentService) {
-        this.taskService = taskService;
-        this.commentService = commentService;
+    public TaskController(final TaskService taskService, final CommentService commentService, UserService userService) {
+        this.taskService = Objects.requireNonNull(taskService, "TaskService must not be null");
+        this.commentService = Objects.requireNonNull(commentService, "CommentService must not be null");
+        this.userService = Objects.requireNonNull(userService, "UserService must not be null");
     }
 
     @PostMapping
@@ -48,15 +53,15 @@ public class TaskController {
     @GetMapping("/{id}")
     @Operation(summary = "Get a task by ID")
     public TaskDto getById(
-            @Parameter(description = "Task ID") @PathVariable final UUID id) {
+        @Parameter(description = "Task ID") @PathVariable final UUID id) {
         return taskService.getById(id);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a task")
     public TaskDto update(
-            @Parameter(description = "Task ID") @PathVariable final UUID id,
-            @Valid @RequestBody final TaskUpdateDto request) {
+        @Parameter(description = "Task ID") @PathVariable final UUID id,
+        @Valid @RequestBody final TaskUpdateDto request) {
         return taskService.update(id, request);
     }
 
@@ -64,24 +69,24 @@ public class TaskController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a task")
     public void delete(
-            @Parameter(description = "Task ID") @PathVariable final UUID id) {
+        @Parameter(description = "Task ID") @PathVariable final UUID id) {
         taskService.delete(id);
     }
 
     @GetMapping
     @Operation(summary = "List tasks with optional filters")
     public Page<TaskDto> list(
-            @Parameter(description = "Filter by status") @RequestParam(required = false) final TaskStatus status,
-            @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
-            @PageableDefault(size = 20, sort = "dueDate") final Pageable pageable) {
+        @Parameter(description = "Filter by status") @RequestParam(required = false) final TaskStatus status,
+        @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
+        @PageableDefault(size = 20, sort = "dueDate") final Pageable pageable) {
         return taskService.list(status, tagIds, pageable);
     }
 
     @GetMapping("/{id}/comments")
     @Operation(summary = "List comments for a task")
     public Page<CommentDto> listComments(
-            @Parameter(description = "Task ID") @PathVariable final UUID id,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
+        @Parameter(description = "Task ID") @PathVariable final UUID id,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByTask(id, pageable);
     }
 
@@ -89,8 +94,16 @@ public class TaskController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a comment to a task")
     public CommentDto addComment(
-            @Parameter(description = "Task ID") @PathVariable final UUID id,
-            @Valid @RequestBody final CommentCreateDto request) {
-        return commentService.addToTask(id, request);
+        @Parameter(description = "Task ID") @PathVariable final UUID id,
+        @Valid @RequestBody final CommentCreateDto request) {
+        final CommentDto commentDto = new CommentDto(null,
+            request.text(),
+            userService.getCurrentUser().name(),
+            null,
+            null,
+            id,
+            null,
+            null);
+        return commentService.save(commentDto);
     }
 }
