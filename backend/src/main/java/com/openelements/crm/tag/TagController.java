@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -25,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tags")
@@ -42,10 +43,10 @@ public class TagController {
     @Operation(summary = "List all tags", description = "Returns a paginated list of tags sorted by name")
     @ApiResponse(responseCode = "200", description = "Tags retrieved successfully")
     public Page<TagDto> list(
-            @Parameter(description = "Whether to include company/contact counts per tag")
-            @RequestParam(defaultValue = "false") final boolean includeCounts,
-            @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return tagService.findAll(pageable, includeCounts);
+        @Parameter(description = "Whether to include company/contact counts per tag")
+        @RequestParam(defaultValue = "false") final boolean includeCounts,
+        @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
+        return tagService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
@@ -53,7 +54,7 @@ public class TagController {
     @ApiResponse(responseCode = "200", description = "Tag found")
     @ApiResponse(responseCode = "404", description = "Tag not found")
     public TagDto getById(
-            @Parameter(description = "Tag ID") @PathVariable final UUID id) {
+        @Parameter(description = "Tag ID") @PathVariable final UUID id) {
         return tagService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
     }
 
@@ -64,7 +65,8 @@ public class TagController {
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "409", description = "Tag with this name already exists")
     public TagDto create(@Valid @RequestBody final TagCreateDto request) {
-        return tagService.save(request);
+        final TagDto dto = new TagDto(null, request.name(), request.description(), request.color());
+        return tagService.save(dto);
     }
 
     @PutMapping("/{id}")
@@ -73,9 +75,9 @@ public class TagController {
     @ApiResponse(responseCode = "404", description = "Tag not found")
     @ApiResponse(responseCode = "409", description = "Tag with this name already exists")
     public TagDto update(
-            @Parameter(description = "Tag ID") @PathVariable final UUID id,
-            @Valid @RequestBody final TagD request) {
-        return tagService.save(id, request);
+        @Parameter(description = "Tag ID") @PathVariable final UUID id,
+        @Valid @RequestBody final TagDto request) {
+        return tagService.save(request);
     }
 
     @DeleteMapping("/{id}")
@@ -84,7 +86,7 @@ public class TagController {
     @ApiResponse(responseCode = "204", description = "Tag deleted")
     @ApiResponse(responseCode = "404", description = "Tag not found")
     public void delete(
-            @Parameter(description = "Tag ID") @PathVariable final UUID id) {
+        @Parameter(description = "Tag ID") @PathVariable final UUID id) {
         tagService.delete(id);
     }
 }
