@@ -110,6 +110,6 @@ public class TaskEntity extends AbstractEntity {
 
     @Override
     public String toString() {
-        return "TaskEntity[id=" + id + ", action=" + action + ", status=" + status + "]";
+        return "TaskEntity[id=" + id() + ", action=" + action + ", status=" + status + "]";
     }
 }
