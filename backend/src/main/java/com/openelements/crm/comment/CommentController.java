@@ -1,13 +1,12 @@
 package com.openelements.crm.comment;
 
+import com.openelements.crm.user.UserController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.Objects;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * REST controller for comment update and delete operations.
@@ -31,13 +34,16 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    private final UserController userController;
+
     /**
      * Creates a new CommentController.
      *
      * @param commentService the comment service
      */
-    public CommentController(final CommentService commentService) {
+    public CommentController(final CommentService commentService, final UserController userController) {
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
+        this.userController = Objects.requireNonNull(userController, "userController must not be null");
     }
 
     /**
@@ -53,8 +59,17 @@ public class CommentController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Comment not found")
     public CommentDto update(@Parameter(description = "The comment ID") @PathVariable final UUID id,
-                                  @Valid @RequestBody final CommentUpdateDto request) {
-        return commentService.update(id, request);
+                             @Valid @RequestBody final CommentUpdateDto request) {
+        CommentDto base = commentService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        CommentDto updated = new CommentDto(base.id(),
+            request.text(),
+            base.author(),
+            base.companyId(),
+            base.contactId(),
+            base.taskId(),
+            base.createdAt(),
+            base.updatedAt());
+        return commentService.save(updated);
     }
 
     /**
