@@ -1,7 +1,7 @@
 package com.openelements.crm.task;
 
 import com.openelements.crm.TestSecurityUtil;
-import com.openelements.crm.company.CompanyCreateDto;
+import com.openelements.crm.company.CompanyDataDto;
 import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.company.CompanyService;
@@ -13,9 +13,6 @@ import com.openelements.crm.tag.TagCreateDto;
 import com.openelements.crm.tag.TagDto;
 import com.openelements.crm.tag.TagRepository;
 import com.openelements.crm.tag.TagService;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +26,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,14 +41,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("TaskService")
 class TaskServiceTest {
 
-    @Autowired private TaskService taskService;
-    @Autowired private TaskRepository taskRepository;
-    @Autowired private CompanyService companyService;
-    @Autowired private CompanyRepository companyRepository;
-    @Autowired private ContactService contactService;
-    @Autowired private ContactRepository contactRepository;
-    @Autowired private TagService tagService;
-    @Autowired private TagRepository tagRepository;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private CompanyService companyService;
+    @Autowired
+    private CompanyRepository companyRepository;
+    @Autowired
+    private ContactService contactService;
+    @Autowired
+    private ContactRepository contactRepository;
+    @Autowired
+    private TagService tagService;
+    @Autowired
+    private TagRepository tagRepository;
 
     @BeforeEach
     void setUp() {
@@ -64,7 +73,7 @@ class TaskServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyDataDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
     }
 
     private ContactDto createContact(final String firstName, final String lastName) {
@@ -83,8 +92,8 @@ class TaskServiceTest {
         @DisplayName("should create task for company")
         void shouldCreateForCompany() {
             final CompanyDto company = createCompany("Acme");
-            final TaskDto result = taskService.create(new TaskCreateDto(
-                    "Call back", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto result = taskService.create(new TaskDataDto(
+                "Call back", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             assertNotNull(result.id());
             assertEquals("Call back", result.action());
@@ -99,8 +108,8 @@ class TaskServiceTest {
         @DisplayName("should create task for contact")
         void shouldCreateForContact() {
             final ContactDto contact = createContact("Jane", "Doe");
-            final TaskDto result = taskService.create(new TaskCreateDto(
-                    "Follow up", LocalDate.of(2026, 7, 1), null, null, contact.id(), null));
+            final TaskDto result = taskService.create(new TaskDataDto(
+                "Follow up", LocalDate.of(2026, 7, 1), null, null, contact.id(), null));
 
             assertNotNull(result.id());
             assertEquals(contact.id(), result.contactId());
@@ -112,8 +121,8 @@ class TaskServiceTest {
         @DisplayName("should create with explicit status")
         void shouldCreateWithExplicitStatus() {
             final CompanyDto company = createCompany("Corp");
-            final TaskDto result = taskService.create(new TaskCreateDto(
-                    "Urgent", LocalDate.of(2026, 6, 1), TaskStatus.IN_PROGRESS, company.id(), null, null));
+            final TaskDto result = taskService.create(new TaskDataDto(
+                "Urgent", LocalDate.of(2026, 6, 1), TaskStatus.IN_PROGRESS, company.id(), null, null));
 
             assertEquals(TaskStatus.IN_PROGRESS, result.status());
         }
@@ -124,8 +133,8 @@ class TaskServiceTest {
             final CompanyDto company = createCompany("Corp");
             final TagDto tag1 = createTag("Priority");
             final TagDto tag2 = createTag("Follow-up");
-            final TaskDto result = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag1.id(), tag2.id())));
+            final TaskDto result = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag1.id(), tag2.id())));
 
             assertEquals(2, result.tagIds().size());
             assertTrue(result.tagIds().contains(tag1.id()));
@@ -136,7 +145,7 @@ class TaskServiceTest {
         @DisplayName("should fail without owner")
         void shouldFailWithoutOwner() {
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, null, null, null)));
+                () -> taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -146,7 +155,7 @@ class TaskServiceTest {
             final CompanyDto company = createCompany("Corp");
             final ContactDto contact = createContact("Jane", "Doe");
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), contact.id(), null)));
+                () -> taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), contact.id(), null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -154,7 +163,7 @@ class TaskServiceTest {
         @DisplayName("should fail with non-existent company")
         void shouldFailWithNonExistentCompany() {
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, UUID.randomUUID(), null, null)));
+                () -> taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, UUID.randomUUID(), null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -162,7 +171,7 @@ class TaskServiceTest {
         @DisplayName("should fail with non-existent contact")
         void shouldFailWithNonExistentContact() {
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, null, UUID.randomUUID(), null)));
+                () -> taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, null, UUID.randomUUID(), null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -173,8 +182,8 @@ class TaskServiceTest {
             companyService.delete(company.id(), false);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.create(new TaskCreateDto(
-                            "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null)));
+                () -> taskService.create(new TaskDataDto(
+                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -187,8 +196,8 @@ class TaskServiceTest {
         @DisplayName("should return task")
         void shouldReturnTask() {
             final CompanyDto company = createCompany("Corp");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             final TaskDto result = taskService.getById(created.id());
 
@@ -200,7 +209,7 @@ class TaskServiceTest {
         @DisplayName("should throw 404 for non-existent task")
         void shouldThrow404() {
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.getById(UUID.randomUUID()));
+                () -> taskService.getById(UUID.randomUUID()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -213,11 +222,11 @@ class TaskServiceTest {
         @DisplayName("should update action and due date")
         void shouldUpdateActionAndDueDate() {
             final CompanyDto company = createCompany("Corp");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Old", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Old", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             final TaskDto updated = taskService.update(created.id(),
-                    new TaskUpdateDto("New action", LocalDate.of(2026, 7, 15), TaskStatus.OPEN, null));
+                new TaskUpdateDto("New action", LocalDate.of(2026, 7, 15), TaskStatus.OPEN, null));
 
             assertEquals("New action", updated.action());
             assertEquals(LocalDate.of(2026, 7, 15), updated.dueDate());
@@ -227,11 +236,11 @@ class TaskServiceTest {
         @DisplayName("should update status")
         void shouldUpdateStatus() {
             final CompanyDto company = createCompany("Corp");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             final TaskDto updated = taskService.update(created.id(),
-                    new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.DONE, null));
+                new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.DONE, null));
 
             assertEquals(TaskStatus.DONE, updated.status());
         }
@@ -242,11 +251,11 @@ class TaskServiceTest {
             final CompanyDto company = createCompany("Corp");
             final TagDto tag1 = createTag("Old");
             final TagDto tag2 = createTag("New");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag1.id())));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag1.id())));
 
             final TaskDto updated = taskService.update(created.id(),
-                    new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, List.of(tag2.id())));
+                new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, List.of(tag2.id())));
 
             assertEquals(1, updated.tagIds().size());
             assertTrue(updated.tagIds().contains(tag2.id()));
@@ -257,11 +266,11 @@ class TaskServiceTest {
         void shouldPreserveTagsWhenNull() {
             final CompanyDto company = createCompany("Corp");
             final TagDto tag = createTag("Keep");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag.id())));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag.id())));
 
             final TaskDto updated = taskService.update(created.id(),
-                    new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, null));
+                new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, null));
 
             assertEquals(1, updated.tagIds().size());
             assertTrue(updated.tagIds().contains(tag.id()));
@@ -272,11 +281,11 @@ class TaskServiceTest {
         void shouldRemoveAllTagsWhenEmpty() {
             final CompanyDto company = createCompany("Corp");
             final TagDto tag = createTag("Remove");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag.id())));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag.id())));
 
             final TaskDto updated = taskService.update(created.id(),
-                    new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, List.of()));
+                new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, List.of()));
 
             assertTrue(updated.tagIds().isEmpty());
         }
@@ -285,11 +294,11 @@ class TaskServiceTest {
         @DisplayName("should not change owner on update")
         void shouldNotChangeOwner() {
             final CompanyDto company = createCompany("Corp");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             final TaskDto updated = taskService.update(created.id(),
-                    new TaskUpdateDto("Updated", LocalDate.of(2026, 8, 1), TaskStatus.DONE, null));
+                new TaskUpdateDto("Updated", LocalDate.of(2026, 8, 1), TaskStatus.DONE, null));
 
             assertEquals(company.id(), updated.companyId());
         }
@@ -298,8 +307,8 @@ class TaskServiceTest {
         @DisplayName("should throw 404 for non-existent task")
         void shouldThrow404() {
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.update(UUID.randomUUID(),
-                            new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, null)));
+                () -> taskService.update(UUID.randomUUID(),
+                    new TaskUpdateDto("Task", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -312,8 +321,8 @@ class TaskServiceTest {
         @DisplayName("should delete task")
         void shouldDelete() {
             final CompanyDto company = createCompany("Corp");
-            final TaskDto created = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto created = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             taskService.delete(created.id());
 
@@ -325,7 +334,7 @@ class TaskServiceTest {
         @DisplayName("should throw 404 for non-existent task")
         void shouldThrow404() {
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> taskService.delete(UUID.randomUUID()));
+                () -> taskService.delete(UUID.randomUUID()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -338,9 +347,9 @@ class TaskServiceTest {
         @DisplayName("should list sorted by due date ascending")
         void shouldListSortedByDueDate() {
             final CompanyDto company = createCompany("Corp");
-            taskService.create(new TaskCreateDto("Later", LocalDate.of(2026, 9, 1), null, company.id(), null, null));
-            taskService.create(new TaskCreateDto("Earliest", LocalDate.of(2026, 3, 1), null, company.id(), null, null));
-            taskService.create(new TaskCreateDto("Middle", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("Later", LocalDate.of(2026, 9, 1), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("Earliest", LocalDate.of(2026, 3, 1), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("Middle", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             final var page = taskService.list(null, null, PageRequest.of(0, 20, Sort.by("dueDate")));
 
@@ -354,8 +363,8 @@ class TaskServiceTest {
         @DisplayName("should filter by status")
         void shouldFilterByStatus() {
             final CompanyDto company = createCompany("Corp");
-            taskService.create(new TaskCreateDto("Open", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, company.id(), null, null));
-            taskService.create(new TaskCreateDto("Done", LocalDate.of(2026, 6, 2), TaskStatus.DONE, company.id(), null, null));
+            taskService.create(new TaskDataDto("Open", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, company.id(), null, null));
+            taskService.create(new TaskDataDto("Done", LocalDate.of(2026, 6, 2), TaskStatus.DONE, company.id(), null, null));
 
             final var page = taskService.list(TaskStatus.OPEN, null, PageRequest.of(0, 20));
 
@@ -368,8 +377,8 @@ class TaskServiceTest {
         void shouldFilterByTags() {
             final CompanyDto company = createCompany("Corp");
             final TagDto tag = createTag("Priority");
-            taskService.create(new TaskCreateDto("Tagged", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag.id())));
-            taskService.create(new TaskCreateDto("Untagged", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("Tagged", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag.id())));
+            taskService.create(new TaskDataDto("Untagged", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
 
             final var page = taskService.list(null, List.of(tag.id()), PageRequest.of(0, 20));
 
@@ -388,7 +397,7 @@ class TaskServiceTest {
         @DisplayName("should cascade-delete tasks when company is hard-deleted")
         void shouldCascadeDeleteTasksWhenCompanyHardDeleted() {
             final CompanyDto company = createCompany("Corp");
-            taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
             companyService.delete(company.id(), false);
 
             final var page = taskService.list(null, null, PageRequest.of(0, 20));
@@ -405,9 +414,9 @@ class TaskServiceTest {
         @DisplayName("contact hard-delete cascades tasks")
         void contactDeleteCascadesTasks() {
             final ContactDto contact = createContact("Jane", "Doe");
-            taskService.create(new TaskCreateDto("T1", LocalDate.of(2026, 6, 1), null, null, contact.id(), null));
-            taskService.create(new TaskCreateDto("T2", LocalDate.of(2026, 6, 2), null, null, contact.id(), null));
-            taskService.create(new TaskCreateDto("T3", LocalDate.of(2026, 6, 3), null, null, contact.id(), null));
+            taskService.create(new TaskDataDto("T1", LocalDate.of(2026, 6, 1), null, null, contact.id(), null));
+            taskService.create(new TaskDataDto("T2", LocalDate.of(2026, 6, 2), null, null, contact.id(), null));
+            taskService.create(new TaskDataDto("T3", LocalDate.of(2026, 6, 3), null, null, contact.id(), null));
 
             contactService.delete(contact.id());
 
@@ -418,8 +427,8 @@ class TaskServiceTest {
         @DisplayName("company hard-delete cascades tasks")
         void companyHardDeleteCascadesTasks() {
             final CompanyDto company = createCompany("Corp");
-            taskService.create(new TaskCreateDto("T1", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
-            taskService.create(new TaskCreateDto("T2", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("T1", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("T2", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
 
             companyService.delete(company.id(), false);
 
@@ -432,8 +441,8 @@ class TaskServiceTest {
             final CompanyDto company = createCompany("Corp");
             final TagDto tag1 = createTag("Keep");
             final TagDto tag2 = createTag("Delete");
-            final TaskDto task = taskService.create(new TaskCreateDto(
-                    "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag1.id(), tag2.id())));
+            final TaskDto task = taskService.create(new TaskDataDto(
+                "Task", LocalDate.of(2026, 6, 1), null, company.id(), null, List.of(tag1.id(), tag2.id())));
 
             tagService.delete(tag2.id());
 

@@ -5,11 +5,10 @@ import com.openelements.crm.TestSecurityUtil;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.comment.CommentService;
-import com.openelements.crm.company.CompanyCreateDto;
+import com.openelements.crm.company.CompanyDataDto;
 import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.company.CompanyService;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -65,7 +65,7 @@ class ContactServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyDataDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
     }
 
     private ContactDto createContact(final String firstName, final String lastName, final UUID companyId) {
@@ -104,7 +104,7 @@ class ContactServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> createContact("Jane", "Doe", fakeId));
+                () -> createContact("Jane", "Doe", fakeId));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -112,7 +112,7 @@ class ContactServiceTest {
         @DisplayName("should create contact with description")
         void shouldCreateWithDescription() {
             final ContactDto result = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, "A key contact", null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, "A key contact", null));
 
             assertEquals("A key contact", result.description());
         }
@@ -132,7 +132,7 @@ class ContactServiceTest {
             companyService.delete(company.id(), false);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> createContact("Jane", "Doe", company.id()));
+                () -> createContact("Jane", "Doe", company.id()));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
     }
@@ -174,9 +174,9 @@ class ContactServiceTest {
             final ContactDto contact = createContact("Old", "Name", null);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "New", "Last", "new@test.com", "CTO",
-                            Gender.FEMALE, java.util.List.of(new SocialLinkCreateDto("LINKEDIN", "new")), "+49 999",
-                            company.id(), Language.EN, java.time.LocalDate.of(1990, 3, 15), null, null));
+                new ContactUpdateDto(null, "New", "Last", "new@test.com", "CTO",
+                    Gender.FEMALE, java.util.List.of(new SocialLinkCreateDto("LINKEDIN", "new")), "+49 999",
+                    company.id(), Language.EN, java.time.LocalDate.of(1990, 3, 15), null, null));
 
             assertEquals("New", updated.firstName());
             assertEquals("Last", updated.lastName());
@@ -197,7 +197,7 @@ class ContactServiceTest {
             final ContactDto contact = createContact("Jane", "Doe", null);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, "Updated desc", null));
+                new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, "Updated desc", null));
 
             assertEquals("Updated desc", updated.description());
         }
@@ -206,10 +206,10 @@ class ContactServiceTest {
         @DisplayName("should clear description when set to null")
         void shouldClearDescription() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, "Initial desc", null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, "Initial desc", null));
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, null, null));
+                new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, null, null));
 
             assertNull(updated.description());
         }
@@ -222,9 +222,9 @@ class ContactServiceTest {
             companyService.delete(company.id(), false);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(contact.id(),
-                            new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null,
-                                    company.id(), null, null, null, null)));
+                () -> contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null,
+                        company.id(), null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -234,8 +234,8 @@ class ContactServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(fakeId,
-                            new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, null, null)));
+                () -> contactService.update(fakeId,
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -454,8 +454,8 @@ class ContactServiceTest {
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(contact.id(),
-                            new ContactUpdateDto(null, "Changed", "Last", null, null, null, null, null, null, null, null, null, null)));
+                () -> contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Changed", "Last", null, null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -463,14 +463,14 @@ class ContactServiceTest {
         @DisplayName("update rejects changed email on Brevo contact")
         void updateRejectsChangedEmailOnBrevoContact() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(contact.id(),
-                            new ContactUpdateDto(null, "Jane", "Doe", "new@test.com", null, null, null, null, null, null, null, null, null)));
+                () -> contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", "new@test.com", null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -478,14 +478,14 @@ class ContactServiceTest {
         @DisplayName("update rejects changed language on Brevo contact")
         void updateRejectsChangedLanguageOnBrevoContact() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null, null, null, null, Language.DE, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null, null, null, null, Language.DE, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(contact.id(),
-                            new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, Language.EN, null, null, null)));
+                () -> contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null, null, null, null, Language.EN, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -493,14 +493,14 @@ class ContactServiceTest {
         @DisplayName("update lists all violated fields")
         void updateListsAllViolatedFields() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", "old@test.com", null, null, null, null, null, null, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(contact.id(),
-                            new ContactUpdateDto(null, "Changed", "Doe", "new@test.com", null, null, null, null, null, null, null, null, null)));
+                () -> contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Changed", "Doe", "new@test.com", null, null, null, null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
             assertNotNull(ex.getReason());
             assert ex.getReason().contains("firstName");
@@ -511,13 +511,13 @@ class ContactServiceTest {
         @DisplayName("update succeeds with unchanged protected fields on Brevo contact")
         void updateSucceedsWithUnchangedProtectedFieldsOnBrevoContact() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", "jane@test.com", "Dev", null, null, null, null, Language.DE, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", "jane@test.com", "Dev", null, null, null, null, Language.DE, null, null, null));
             final ContactEntity entity = contactRepository.findById(contact.id()).orElseThrow();
             entity.setBrevoId("200");
             contactRepository.saveAndFlush(entity);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", "jane@test.com", "Manager", null, null, null, null, Language.DE, null, null, null));
+                new ContactUpdateDto(null, "Jane", "Doe", "jane@test.com", "Manager", null, null, null, null, Language.DE, null, null, null));
 
             assertEquals("Manager", updated.position());
         }
@@ -528,7 +528,7 @@ class ContactServiceTest {
             final ContactDto contact = createContact("Original", "Last", null);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Changed", "Last", null, null, null, null, null, null, null, null, null, null));
+                new ContactUpdateDto(null, "Changed", "Last", null, null, null, null, null, null, null, null, null, null));
 
             assertEquals("Changed", updated.firstName());
         }
@@ -542,7 +542,7 @@ class ContactServiceTest {
             contactRepository.saveAndFlush(entity);
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", null, "Manager", null, null, null, null, null, null, null, null));
+                new ContactUpdateDto(null, "Jane", "Doe", null, "Manager", null, null, null, null, null, null, null, null));
 
             assertEquals("Manager", updated.position());
         }
@@ -571,7 +571,7 @@ class ContactServiceTest {
             final ContactDto contact = createContact("PNG", "Rejected", null);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.uploadPhoto(contact.id(), new byte[]{1}, "image/png"));
+                () -> contactService.uploadPhoto(contact.id(), new byte[]{1}, "image/png"));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         }
 
@@ -581,7 +581,7 @@ class ContactServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.uploadPhoto(fakeId, new byte[]{1}, "image/jpeg"));
+                () -> contactService.uploadPhoto(fakeId, new byte[]{1}, "image/jpeg"));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -591,7 +591,7 @@ class ContactServiceTest {
             final ContactDto contact = createContact("No", "Photo", null);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.getPhoto(contact.id()));
+                () -> contactService.getPhoto(contact.id()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -604,7 +604,7 @@ class ContactServiceTest {
             contactService.deletePhoto(contact.id());
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.getPhoto(contact.id()));
+                () -> contactService.getPhoto(contact.id()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -617,9 +617,9 @@ class ContactServiceTest {
         @DisplayName("should create contact with social links")
         void shouldCreateWithSocialLinks() {
             final ContactDto result = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                    null, null, null, null, null, null));
 
             assertNotNull(result.socialLinks());
             assertEquals(1, result.socialLinks().size());
@@ -632,12 +632,12 @@ class ContactServiceTest {
         @DisplayName("should create contact with multiple links same network")
         void shouldCreateWithMultipleLinksSameNetwork() {
             final ContactDto result = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(
-                                    new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
-                                    new SocialLinkCreateDto("GITHUB", "janedev")
-                            ),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(
+                        new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
+                        new SocialLinkCreateDto("GITHUB", "janedev")
+                    ),
+                    null, null, null, null, null, null));
 
             assertEquals(2, result.socialLinks().size());
             assertEquals("GITHUB", result.socialLinks().get(0).networkType());
@@ -648,13 +648,13 @@ class ContactServiceTest {
         @DisplayName("should create contact with links across networks")
         void shouldCreateWithLinksAcrossNetworks() {
             final ContactDto result = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(
-                                    new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
-                                    new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers"),
-                                    new SocialLinkCreateDto("WEBSITE", "https://open-elements.com")
-                            ),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(
+                        new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
+                        new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers"),
+                        new SocialLinkCreateDto("WEBSITE", "https://open-elements.com")
+                    ),
+                    null, null, null, null, null, null));
 
             assertEquals(3, result.socialLinks().size());
         }
@@ -663,9 +663,9 @@ class ContactServiceTest {
         @DisplayName("should create contact with no social links")
         void shouldCreateWithNoSocialLinks() {
             final ContactDto result = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(),
+                    null, null, null, null, null, null));
 
             assertNotNull(result.socialLinks());
             assertEquals(0, result.socialLinks().size());
@@ -675,14 +675,14 @@ class ContactServiceTest {
         @DisplayName("should replace all social links on update")
         void shouldReplaceAllSocialLinksOnUpdate() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                    null, null, null, null, null, null));
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers")),
-                            null, null, null, null, null, null));
+                new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers")),
+                    null, null, null, null, null, null));
 
             assertEquals(1, updated.socialLinks().size());
             assertEquals("LINKEDIN", updated.socialLinks().get(0).networkType());
@@ -693,14 +693,14 @@ class ContactServiceTest {
         @DisplayName("should preserve social links when null")
         void shouldPreserveSocialLinksWhenNull() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                    null, null, null, null, null, null));
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
-                            null,
-                            null, null, null, null, null, null));
+                new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                    null,
+                    null, null, null, null, null, null));
 
             assertEquals(1, updated.socialLinks().size());
             assertEquals("GITHUB", updated.socialLinks().get(0).networkType());
@@ -710,14 +710,14 @@ class ContactServiceTest {
         @DisplayName("should clear social links with empty list")
         void shouldClearSocialLinksWithEmptyList() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                    null, null, null, null, null, null));
 
             final ContactDto updated = contactService.update(contact.id(),
-                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(),
-                            null, null, null, null, null, null));
+                new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(),
+                    null, null, null, null, null, null));
 
             assertEquals(0, updated.socialLinks().size());
         }
@@ -726,15 +726,15 @@ class ContactServiceTest {
         @DisplayName("should delete contact and cascade social links")
         void shouldDeleteContactAndCascadeSocialLinks() {
             final ContactDto contact = contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
-                                    new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers"),
+                        new SocialLinkCreateDto("LINKEDIN", "hendrik-ebbers")),
+                    null, null, null, null, null, null));
 
             contactService.delete(contact.id());
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.getById(contact.id()));
+                () -> contactService.getById(contact.id()));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -742,9 +742,9 @@ class ContactServiceTest {
         @DisplayName("should find contact by social link value")
         void shouldFindContactBySocialLinkValue() {
             contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                    null, null, null, null, null, null));
             createContact("Other", "Person", null);
 
             final var page = contactService.list("hendrikebbers", null, false, null, null, null, PageRequest.of(0, 20));
@@ -757,9 +757,9 @@ class ContactServiceTest {
         @DisplayName("should find contact by partial social link value")
         void shouldFindContactByPartialSocialLinkValue() {
             contactService.create(
-                    new ContactCreateDto(null, "Jane", "Doe", null, null, null,
-                            java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                            null, null, null, null, null, null));
+                new ContactCreateDto(null, "Jane", "Doe", null, null, null,
+                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                    null, null, null, null, null, null));
             createContact("Other", "Person", null);
 
             final var page = contactService.list("hendrik", null, false, null, null, null, PageRequest.of(0, 20));
@@ -777,10 +777,10 @@ class ContactServiceTest {
             contactRepository.saveAndFlush(entity);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> contactService.update(contact.id(),
-                            new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
-                                    java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
-                                    null, null, null, null, null, null)));
+                () -> contactService.update(contact.id(),
+                    new ContactUpdateDto(null, "Jane", "Doe", null, null, null,
+                        java.util.List.of(new SocialLinkCreateDto("GITHUB", "hendrikebbers")),
+                        null, null, null, null, null, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
             assertNotNull(ex.getReason());
             assert ex.getReason().contains("socialLinks");

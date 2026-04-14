@@ -46,7 +46,7 @@ public class TaskController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new task")
-    public TaskDto create(@Valid @RequestBody final TaskCreateDto request) {
+    public TaskDto create(@Valid @RequestBody final TaskDataDto request) {
         return taskService.create(request);
     }
 

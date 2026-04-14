@@ -1,7 +1,7 @@
 package com.openelements.crm.task;
 
 import com.openelements.crm.TestSecurityUtil;
-import com.openelements.crm.company.CompanyCreateDto;
+import com.openelements.crm.company.CompanyDataDto;
 import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.company.CompanyService;
@@ -10,8 +10,6 @@ import com.openelements.crm.contact.ContactDto;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.ContactService;
 import com.openelements.crm.tag.TagRepository;
-import java.time.LocalDate;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -38,14 +39,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Task Controller")
 class TaskControllerTest {
 
-    @Autowired private MockMvc mockMvc;
-    @Autowired private TaskService taskService;
-    @Autowired private TaskRepository taskRepository;
-    @Autowired private CompanyService companyService;
-    @Autowired private CompanyRepository companyRepository;
-    @Autowired private ContactService contactService;
-    @Autowired private ContactRepository contactRepository;
-    @Autowired private TagRepository tagRepository;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private CompanyService companyService;
+    @Autowired
+    private CompanyRepository companyRepository;
+    @Autowired
+    private ContactService contactService;
+    @Autowired
+    private ContactRepository contactRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     @BeforeEach
     void setUp() {
@@ -62,7 +71,7 @@ class TaskControllerTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyDataDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
     }
 
     private ContactDto createContact(final String firstName, final String lastName) {
@@ -79,16 +88,16 @@ class TaskControllerTest {
             final CompanyDto company = createCompany("Acme");
 
             mockMvc.perform(post("/api/tasks")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "Call back", "dueDate": "2026-06-01", "companyId": "%s"}
-                                    """.formatted(company.id())))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.action", is("Call back")))
-                    .andExpect(jsonPath("$.dueDate", is("2026-06-01")))
-                    .andExpect(jsonPath("$.status", is("OPEN")))
-                    .andExpect(jsonPath("$.companyId", is(company.id().toString())))
-                    .andExpect(jsonPath("$.companyName", is("Acme")));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "Call back", "dueDate": "2026-06-01", "companyId": "%s"}
+                        """.formatted(company.id())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.action", is("Call back")))
+                .andExpect(jsonPath("$.dueDate", is("2026-06-01")))
+                .andExpect(jsonPath("$.status", is("OPEN")))
+                .andExpect(jsonPath("$.companyId", is(company.id().toString())))
+                .andExpect(jsonPath("$.companyName", is("Acme")));
         }
 
         @Test
@@ -97,11 +106,11 @@ class TaskControllerTest {
             final CompanyDto company = createCompany("Acme");
 
             mockMvc.perform(post("/api/tasks")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "", "dueDate": "2026-06-01", "companyId": "%s"}
-                                    """.formatted(company.id())))
-                    .andExpect(status().isBadRequest());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "", "dueDate": "2026-06-01", "companyId": "%s"}
+                        """.formatted(company.id())))
+                .andExpect(status().isBadRequest());
         }
 
         @Test
@@ -110,22 +119,22 @@ class TaskControllerTest {
             final CompanyDto company = createCompany("Acme");
 
             mockMvc.perform(post("/api/tasks")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "Task", "companyId": "%s"}
-                                    """.formatted(company.id())))
-                    .andExpect(status().isBadRequest());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "Task", "companyId": "%s"}
+                        """.formatted(company.id())))
+                .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("should return 400 for no owner")
         void shouldReturn400ForNoOwner() throws Exception {
             mockMvc.perform(post("/api/tasks")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "Task", "dueDate": "2026-06-01"}
-                                    """))
-                    .andExpect(status().isBadRequest());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "Task", "dueDate": "2026-06-01"}
+                        """))
+                .andExpect(status().isBadRequest());
         }
     }
 
@@ -137,18 +146,18 @@ class TaskControllerTest {
         @DisplayName("should return task")
         void shouldReturnTask() throws Exception {
             final CompanyDto company = createCompany("Acme");
-            final TaskDto task = taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto task = taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             mockMvc.perform(get("/api/tasks/{id}", task.id()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.action", is("Task")));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action", is("Task")));
         }
 
         @Test
         @DisplayName("should return 404 for non-existent task")
         void shouldReturn404() throws Exception {
             mockMvc.perform(get("/api/tasks/{id}", UUID.randomUUID()))
-                    .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
         }
     }
 
@@ -160,41 +169,41 @@ class TaskControllerTest {
         @DisplayName("should update task")
         void shouldUpdateTask() throws Exception {
             final CompanyDto company = createCompany("Acme");
-            final TaskDto task = taskService.create(new TaskCreateDto("Old", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto task = taskService.create(new TaskDataDto("Old", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             mockMvc.perform(put("/api/tasks/{id}", task.id())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "New", "dueDate": "2026-07-01", "status": "DONE"}
-                                    """))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.action", is("New")))
-                    .andExpect(jsonPath("$.status", is("DONE")));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "New", "dueDate": "2026-07-01", "status": "DONE"}
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action", is("New")))
+                .andExpect(jsonPath("$.status", is("DONE")));
         }
 
         @Test
         @DisplayName("should return 400 for blank action")
         void shouldReturn400ForBlankAction() throws Exception {
             final CompanyDto company = createCompany("Acme");
-            final TaskDto task = taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto task = taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             mockMvc.perform(put("/api/tasks/{id}", task.id())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "  ", "dueDate": "2026-07-01", "status": "OPEN"}
-                                    """))
-                    .andExpect(status().isBadRequest());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "  ", "dueDate": "2026-07-01", "status": "OPEN"}
+                        """))
+                .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("should return 404 for non-existent task")
         void shouldReturn404() throws Exception {
             mockMvc.perform(put("/api/tasks/{id}", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {"action": "Task", "dueDate": "2026-07-01", "status": "OPEN"}
-                                    """))
-                    .andExpect(status().isNotFound());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {"action": "Task", "dueDate": "2026-07-01", "status": "OPEN"}
+                        """))
+                .andExpect(status().isNotFound());
         }
     }
 
@@ -206,20 +215,20 @@ class TaskControllerTest {
         @DisplayName("should delete task and return 204")
         void shouldDeleteTask() throws Exception {
             final CompanyDto company = createCompany("Acme");
-            final TaskDto task = taskService.create(new TaskCreateDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            final TaskDto task = taskService.create(new TaskDataDto("Task", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
 
             mockMvc.perform(delete("/api/tasks/{id}", task.id()))
-                    .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
 
             mockMvc.perform(get("/api/tasks/{id}", task.id()))
-                    .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("should return 404 for non-existent task")
         void shouldReturn404() throws Exception {
             mockMvc.perform(delete("/api/tasks/{id}", UUID.randomUUID()))
-                    .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
         }
     }
 
@@ -231,24 +240,24 @@ class TaskControllerTest {
         @DisplayName("should return paginated tasks")
         void shouldReturnPaginatedTasks() throws Exception {
             final CompanyDto company = createCompany("Acme");
-            taskService.create(new TaskCreateDto("T1", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
-            taskService.create(new TaskCreateDto("T2", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("T1", LocalDate.of(2026, 6, 1), null, company.id(), null, null));
+            taskService.create(new TaskDataDto("T2", LocalDate.of(2026, 6, 2), null, company.id(), null, null));
 
             mockMvc.perform(get("/api/tasks"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.page.totalElements", is(2)));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements", is(2)));
         }
 
         @Test
         @DisplayName("should filter by status")
         void shouldFilterByStatus() throws Exception {
             final CompanyDto company = createCompany("Acme");
-            taskService.create(new TaskCreateDto("Open", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, company.id(), null, null));
-            taskService.create(new TaskCreateDto("Done", LocalDate.of(2026, 6, 2), TaskStatus.DONE, company.id(), null, null));
+            taskService.create(new TaskDataDto("Open", LocalDate.of(2026, 6, 1), TaskStatus.OPEN, company.id(), null, null));
+            taskService.create(new TaskDataDto("Done", LocalDate.of(2026, 6, 2), TaskStatus.DONE, company.id(), null, null));
 
             mockMvc.perform(get("/api/tasks").param("status", "OPEN"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.page.totalElements", is(1)));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements", is(1)));
         }
     }
 }

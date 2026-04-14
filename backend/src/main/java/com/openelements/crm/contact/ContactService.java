@@ -340,4 +340,10 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         return ContactDto.fromEntity(entity, commentCount);
     }
 
+    public List<ContactDto> getForCompany(final UUID companyId) {
+        return contactRepository.findByCompanyId(companyId).stream()
+            .map(this::toDto)
+            .toList();
+    }
+
 }

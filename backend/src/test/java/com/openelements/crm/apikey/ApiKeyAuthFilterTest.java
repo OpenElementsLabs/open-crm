@@ -1,7 +1,6 @@
 package com.openelements.crm.apikey;
 
 import com.openelements.crm.TestSecurityUtil;
-import com.openelements.crm.company.CompanyCreateDto;
 import com.openelements.crm.company.CompanyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +18,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -59,24 +57,24 @@ class ApiKeyAuthFilterTest {
         @DisplayName("valid API key on GET /api/companies returns 200")
         void validKeyOnGetCompanies() throws Exception {
             mockMvc.perform(get("/api/companies").header("X-API-Key", rawKey))
-                    .andExpect(status().isOk());
+                .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("valid API key on GET /api/contacts with pagination returns 200")
         void validKeyOnGetContactsWithPagination() throws Exception {
             mockMvc.perform(get("/api/contacts")
-                            .param("page", "0")
-                            .param("size", "5")
-                            .header("X-API-Key", rawKey))
-                    .andExpect(status().isOk());
+                    .param("page", "0")
+                    .param("size", "5")
+                    .header("X-API-Key", rawKey))
+                .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("valid API key on GET /api/api-keys returns 200")
         void validKeyOnGetApiKeys() throws Exception {
             mockMvc.perform(get("/api/api-keys").header("X-API-Key", rawKey))
-                    .andExpect(status().isOk());
+                .andExpect(status().isOk());
         }
     }
 
@@ -88,36 +86,36 @@ class ApiKeyAuthFilterTest {
         @DisplayName("valid API key on POST returns 403")
         void validKeyOnPostReturns403() throws Exception {
             mockMvc.perform(post("/api/companies")
-                            .header("X-API-Key", rawKey)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"name\":\"Test Company\"}"))
-                    .andExpect(status().isForbidden());
+                    .header("X-API-Key", rawKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\":\"Test Company\"}"))
+                .andExpect(status().isForbidden());
         }
 
         @Test
         @DisplayName("valid API key on PUT returns 403")
         void validKeyOnPutReturns403() throws Exception {
             mockMvc.perform(put("/api/companies/00000000-0000-0000-0000-000000000000")
-                            .header("X-API-Key", rawKey)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"name\":\"Test\"}"))
-                    .andExpect(status().isForbidden());
+                    .header("X-API-Key", rawKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\":\"Test\"}"))
+                .andExpect(status().isForbidden());
         }
 
         @Test
         @DisplayName("valid API key on DELETE returns 403")
         void validKeyOnDeleteReturns403() throws Exception {
             mockMvc.perform(delete("/api/companies/00000000-0000-0000-0000-000000000000")
-                            .header("X-API-Key", rawKey))
-                    .andExpect(status().isForbidden());
+                    .header("X-API-Key", rawKey))
+                .andExpect(status().isForbidden());
         }
 
         @Test
         @DisplayName("valid API key on DELETE /api/api-keys returns 403")
         void validKeyOnDeleteApiKeysReturns403() throws Exception {
             mockMvc.perform(delete("/api/api-keys/00000000-0000-0000-0000-000000000000")
-                            .header("X-API-Key", rawKey))
-                    .andExpect(status().isForbidden());
+                    .header("X-API-Key", rawKey))
+                .andExpect(status().isForbidden());
         }
     }
 
@@ -129,23 +127,23 @@ class ApiKeyAuthFilterTest {
         @DisplayName("invalid API key returns 401")
         void invalidKeyReturns401() throws Exception {
             mockMvc.perform(get("/api/companies")
-                            .header("X-API-Key", "crm_invalid000000000000000000000000000000000000000000"))
-                    .andExpect(status().isUnauthorized());
+                    .header("X-API-Key", "crm_invalid000000000000000000000000000000000000000000"))
+                .andExpect(status().isUnauthorized());
         }
 
         @Test
         @DisplayName("empty API key header returns 401")
         void emptyKeyReturns401() throws Exception {
             mockMvc.perform(get("/api/companies")
-                            .header("X-API-Key", ""))
-                    .andExpect(status().isUnauthorized());
+                    .header("X-API-Key", ""))
+                .andExpect(status().isUnauthorized());
         }
 
         @Test
         @DisplayName("no API key and no JWT returns 401")
         void noKeyNoJwtReturns401() throws Exception {
             mockMvc.perform(get("/api/companies"))
-                    .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
         }
     }
 
@@ -157,9 +155,9 @@ class ApiKeyAuthFilterTest {
         @DisplayName("API key takes precedence over JWT")
         void apiKeyTakesPrecedence() throws Exception {
             mockMvc.perform(get("/api/companies")
-                            .header("X-API-Key", rawKey)
-                            .with(testJwt()))
-                    .andExpect(status().isOk());
+                    .header("X-API-Key", rawKey)
+                    .with(testJwt()))
+                .andExpect(status().isOk());
         }
     }
 
@@ -172,17 +170,17 @@ class ApiKeyAuthFilterTest {
         void deletedKeyStopsWorking() throws Exception {
             // Verify key works
             mockMvc.perform(get("/api/companies").header("X-API-Key", rawKey))
-                    .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
             // Delete the key
             final var entity = apiKeyRepository.findByKeyHash(
-                    ApiKeyService.sha256Hex(rawKey)).orElseThrow();
+                ApiKeyService.sha256Hex(rawKey)).orElseThrow();
             mockMvc.perform(delete("/api/api-keys/" + entity.getId()).with(testJwt()))
-                    .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent());
 
             // Verify key no longer works
             mockMvc.perform(get("/api/companies").header("X-API-Key", rawKey))
-                    .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
         }
     }
 }

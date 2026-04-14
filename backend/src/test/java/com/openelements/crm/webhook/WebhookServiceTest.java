@@ -1,11 +1,5 @@
 package com.openelements.crm.webhook;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +11,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -36,7 +34,7 @@ class WebhookServiceTest {
     }
 
     private WebhookDto createWebhook(final String url) {
-        return webhookService.create(new WebhookCreateDto(url));
+        return webhookService.create(new WebhookDataDto(url));
     }
 
     @Nested
@@ -84,7 +82,7 @@ class WebhookServiceTest {
         @DisplayName("should throw 404 for unknown ID")
         void shouldThrow404ForUnknownId() {
             final var exception = assertThrows(ResponseStatusException.class,
-                    () -> webhookService.getById(java.util.UUID.randomUUID()));
+                () -> webhookService.getById(java.util.UUID.randomUUID()));
             assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         }
     }
@@ -98,7 +96,7 @@ class WebhookServiceTest {
         void shouldUpdateUrl() {
             final WebhookDto created = createWebhook("https://old.com/hook");
             final WebhookDto updated = webhookService.update(created.id(),
-                    new WebhookUpdateDto("https://new.com/hook", true));
+                new WebhookDataDto("https://new.com/hook", true));
 
             assertEquals("https://new.com/hook", updated.url());
             assertTrue(updated.active());
@@ -109,7 +107,7 @@ class WebhookServiceTest {
         void shouldDeactivate() {
             final WebhookDto created = createWebhook("https://example.com/hook");
             final WebhookDto updated = webhookService.update(created.id(),
-                    new WebhookUpdateDto("https://example.com/hook", false));
+                new WebhookDataDto("https://example.com/hook", false));
 
             assertFalse(updated.active());
         }
@@ -118,8 +116,8 @@ class WebhookServiceTest {
         @DisplayName("should throw 404 for unknown ID")
         void shouldThrow404ForUnknownId() {
             final var exception = assertThrows(ResponseStatusException.class,
-                    () -> webhookService.update(java.util.UUID.randomUUID(),
-                            new WebhookUpdateDto("https://example.com", true)));
+                () -> webhookService.update(java.util.UUID.randomUUID(),
+                    new WebhookDataDto("https://example.com", true)));
             assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         }
     }
@@ -135,7 +133,7 @@ class WebhookServiceTest {
             webhookService.delete(created.id());
 
             final var exception = assertThrows(ResponseStatusException.class,
-                    () -> webhookService.getById(created.id()));
+                () -> webhookService.getById(created.id()));
             assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         }
 
@@ -143,7 +141,7 @@ class WebhookServiceTest {
         @DisplayName("should throw 404 for unknown ID")
         void shouldThrow404ForUnknownId() {
             final var exception = assertThrows(ResponseStatusException.class,
-                    () -> webhookService.delete(java.util.UUID.randomUUID()));
+                () -> webhookService.delete(java.util.UUID.randomUUID()));
             assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         }
     }

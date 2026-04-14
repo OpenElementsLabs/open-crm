@@ -47,7 +47,7 @@ public class TaskService {
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
-    public TaskDto create(final TaskCreateDto request) {
+    public TaskDto create(final TaskDataDto request) {
         Objects.requireNonNull(request, "request must not be null");
 
         final boolean hasCompany = request.companyId() != null;

@@ -1,6 +1,7 @@
 package com.openelements.crm.comment;
 
-import com.openelements.crm.company.CompanyCreateDto;
+import com.openelements.crm.TestSecurityUtil;
+import com.openelements.crm.company.CompanyDataDto;
 import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.company.CompanyService;
@@ -8,8 +9,6 @@ import com.openelements.crm.contact.ContactCreateDto;
 import com.openelements.crm.contact.ContactDto;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.ContactService;
-import com.openelements.crm.TestSecurityUtil;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,7 +64,7 @@ class CommentServiceTest {
     }
 
     private CompanyDto createCompany(final String name) {
-        return companyService.create(new CompanyCreateDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        return companyService.create(new CompanyDataDto(name, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
     }
 
     private ContactDto createContact(final String firstName, final String lastName) {
@@ -92,7 +93,7 @@ class CommentServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.addToCompany(fakeId, new CommentCreateDto("text")));
+                () -> commentService.addToCompany(fakeId, new CommentCreateDto("text")));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -103,7 +104,7 @@ class CommentServiceTest {
             companyService.delete(company.id(), false);
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.addToCompany(company.id(), new CommentCreateDto("Still commenting")));
+                () -> commentService.addToCompany(company.id(), new CommentCreateDto("Still commenting")));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -130,7 +131,7 @@ class CommentServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.addToContact(fakeId, new CommentCreateDto("text")));
+                () -> commentService.addToContact(fakeId, new CommentCreateDto("text")));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -156,7 +157,7 @@ class CommentServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.update(fakeId, new CommentUpdateDto("text")));
+                () -> commentService.update(fakeId, new CommentUpdateDto("text")));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -174,7 +175,7 @@ class CommentServiceTest {
             commentService.delete(comment.id());
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.update(comment.id(), new CommentUpdateDto("gone")));
+                () -> commentService.update(comment.id(), new CommentUpdateDto("gone")));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
 
@@ -210,7 +211,7 @@ class CommentServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.listByCompany(fakeId, PageRequest.of(0, 20)));
+                () -> commentService.listByCompany(fakeId, PageRequest.of(0, 20)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }
@@ -237,7 +238,7 @@ class CommentServiceTest {
             final UUID fakeId = UUID.randomUUID();
 
             final var ex = assertThrows(ResponseStatusException.class,
-                    () -> commentService.listByContact(fakeId, PageRequest.of(0, 20)));
+                () -> commentService.listByContact(fakeId, PageRequest.of(0, 20)));
             assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         }
     }

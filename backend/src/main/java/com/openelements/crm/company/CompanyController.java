@@ -3,7 +3,9 @@ package com.openelements.crm.company;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
+import com.openelements.crm.contact.ContactService;
 import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,10 +13,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.data.domain.Page;
@@ -36,6 +34,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 /**
  * REST controller for company management.
  */
@@ -47,6 +50,8 @@ public class CompanyController {
 
     private final CompanyService companyService;
     private final CommentService commentService;
+    private final ContactService contactService;
+    private final UserService userService;
 
     /**
      * Creates a new CompanyController.
@@ -54,9 +59,10 @@ public class CompanyController {
      * @param companyService the company service
      * @param commentService the comment service
      */
-    public CompanyController(final CompanyService companyService, final CommentService commentService) {
+    public CompanyController(final CompanyService companyService, final CommentService commentService, ContactService contactService) {
         this.companyService = Objects.requireNonNull(companyService, "companyService must not be null");
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
+        this.contactService = contactService;
     }
 
     /**
@@ -71,14 +77,14 @@ public class CompanyController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List companies", description = "Returns a paginated list of companies with optional filtering")
     public Page<CompanyDto> list(
-            @Parameter(description = "Partial company name filter (case-insensitive contains)")
-            @RequestParam(required = false) final String name,
-            @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
-            @RequestParam(required = false) final Boolean brevo,
-            @Parameter(description = "Filter by tag IDs (AND semantics)")
-            @RequestParam(required = false) final List<UUID> tagIds,
-            @Parameter(hidden = true)
-            @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
+        @Parameter(description = "Partial company name filter (case-insensitive contains)")
+        @RequestParam(required = false) final String name,
+        @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
+        @RequestParam(required = false) final Boolean brevo,
+        @Parameter(description = "Filter by tag IDs (AND semantics)")
+        @RequestParam(required = false) final List<UUID> tagIds,
+        @Parameter(hidden = true)
+        @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
         return companyService.list(name, brevo, tagIds, pageable);
     }
 
@@ -95,11 +101,11 @@ public class CompanyController {
     @Operation(summary = "Export companies as CSV")
     @ApiResponse(responseCode = "200", description = "CSV file downloaded")
     public void exportCsv(
-            @Parameter(description = "Partial company name filter") @RequestParam(required = false) final String name,
-            @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
-            @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
-            @Parameter(description = "Columns to include in the CSV") @RequestParam final List<CompanyExportColumn> columns,
-            final HttpServletResponse response) throws IOException {
+        @Parameter(description = "Partial company name filter") @RequestParam(required = false) final String name,
+        @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+        @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
+        @Parameter(description = "Columns to include in the CSV") @RequestParam final List<CompanyExportColumn> columns,
+        final HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"companies.csv\"");
 
@@ -127,7 +133,7 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Company found")
     @ApiResponse(responseCode = "404", description = "Company not found")
     public CompanyDto getById(@Parameter(description = "The company ID") @PathVariable final UUID id) {
-        return companyService.getById(id);
+        return companyService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
     }
 
     /**
@@ -141,8 +147,30 @@ public class CompanyController {
     @Operation(summary = "Create a new company")
     @ApiResponse(responseCode = "201", description = "Company created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
-    public CompanyDto create(@Valid @RequestBody final CompanyCreateDto request) {
-        return companyService.create(request);
+    public CompanyDto create(@Valid @RequestBody final CompanyDataDto request) {
+        final CompanyDto dto = new CompanyDto(null,
+            request.name(),
+            request.description(),
+            request.website(),
+            request.street(),
+            request.houseNumber(),
+            request.zipCode(),
+            request.city(),
+            request.country(),
+            request.phoneNumber(),
+            request.description(),
+            request.bankName(),
+            request.bic(),
+            request.iban(),
+            request.vatId(),
+            false,
+            false,
+            0,
+            0,
+            request.tagIds(),
+            null,
+            null);
+        return companyService.save(dto);
     }
 
     /**
@@ -158,8 +186,31 @@ public class CompanyController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Company not found")
     public CompanyDto update(@Parameter(description = "The company ID") @PathVariable final UUID id,
-                                  @Valid @RequestBody final CompanyUpdateDto request) {
-        return companyService.update(id, request);
+                             @Valid @RequestBody final CompanyDataDto request) {
+        final CompanyDto current = companyService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        final CompanyDto dto = new CompanyDto(id,
+            request.name(),
+            request.description(),
+            request.website(),
+            request.street(),
+            request.houseNumber(),
+            request.zipCode(),
+            request.city(),
+            request.country(),
+            request.phoneNumber(),
+            request.description(),
+            request.bankName(),
+            request.bic(),
+            request.iban(),
+            request.vatId(),
+            current.hasLogo(),
+            current.brevo(),
+            current.contactCount(),
+            current.commentCount(),
+            request.tagIds(),
+            current.createdAt(),
+            current.updatedAt());
+        return companyService.save(dto);
     }
 
     /**
@@ -176,7 +227,10 @@ public class CompanyController {
     public void delete(@Parameter(description = "The company ID") @PathVariable final UUID id,
                        @Parameter(description = "Whether to also delete all associated contacts")
                        @RequestParam(defaultValue = "false") final boolean deleteContacts) {
-        companyService.delete(id, deleteContacts);
+        if (deleteContacts) {
+            contactService.getForCompany(id).forEach(contact -> contactService.delete(contact.id()));
+        }
+        companyService.delete(id);
     }
 
     /**
@@ -196,7 +250,7 @@ public class CompanyController {
             companyService.uploadLogo(id, file.getBytes(), file.getContentType());
         } catch (final java.io.IOException e) {
             throw new org.springframework.web.server.ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Failed to read file");
+                HttpStatus.BAD_REQUEST, "Failed to read file");
         }
     }
 
@@ -213,8 +267,8 @@ public class CompanyController {
     public ResponseEntity<byte[]> getLogo(@Parameter(description = "The company ID") @PathVariable final UUID id) {
         final ImageData imageData = companyService.getLogo(id);
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(imageData.contentType()))
-                .body(imageData.data());
+            .contentType(MediaType.parseMediaType(imageData.contentType()))
+            .body(imageData.data());
     }
 
     /**
@@ -243,9 +297,9 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Comments found")
     @ApiResponse(responseCode = "404", description = "Company not found")
     public Page<CommentDto> listComments(
-            @Parameter(description = "The company ID") @PathVariable final UUID id,
-            @Parameter(hidden = true)
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
+        @Parameter(description = "The company ID") @PathVariable final UUID id,
+        @Parameter(hidden = true)
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByCompany(id, pageable);
     }
 
@@ -263,7 +317,16 @@ public class CompanyController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Company not found")
     public CommentDto addComment(@Parameter(description = "The company ID") @PathVariable final UUID id,
-                                      @Valid @RequestBody final CommentCreateDto request) {
-        return commentService.addToCompany(id, request);
+                                 @Valid @RequestBody final CommentCreateDto request) {
+        CommentDto dto = new CommentDto(null,
+            request.text(),
+            userService.getCurrentUser().name(),
+            id,
+            null,
+            null,
+            null,
+            null
+        );
+        return commentService.save(dto);
     }
 }

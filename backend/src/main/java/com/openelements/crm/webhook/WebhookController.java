@@ -9,8 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.Objects;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -25,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * REST controller for webhook management.
@@ -53,8 +54,8 @@ public class WebhookController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List webhooks", description = "Returns a paginated list of registered webhooks")
     public Page<WebhookDto> list(
-            @Parameter(hidden = true)
-            @PageableDefault(size = 20, sort = "createdAt") final Pageable pageable) {
+        @Parameter(hidden = true)
+        @PageableDefault(size = 20, sort = "createdAt") final Pageable pageable) {
         return webhookService.findAll(pageable);
     }
 
@@ -83,7 +84,7 @@ public class WebhookController {
     @Operation(summary = "Create a new webhook")
     @ApiResponse(responseCode = "201", description = "Webhook created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
-    public WebhookDto create(@Valid @RequestBody final WebhookCreateDto request) {
+    public WebhookDto create(@Valid @RequestBody final WebhookDataDto request) {
         final WebhookDto dto = new WebhookDto(null, request.url(), true, null, null);
         return webhookService.save(dto);
     }
