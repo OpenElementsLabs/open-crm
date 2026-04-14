@@ -47,14 +47,27 @@ public class TaskController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new task")
     public TaskDto create(@Valid @RequestBody final TaskDataDto request) {
-        return taskService.create(request);
+        final TaskDto dto = new TaskDto(null,
+            request.action(),
+            request.dueDate(),
+            request.status(),
+            request.companyId(),
+            null,
+            request.contactId(),
+            null,
+            request.tagIds(),
+            0,
+            null,
+            null
+        );
+        return taskService.save(dto);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a task by ID")
     public TaskDto getById(
         @Parameter(description = "Task ID") @PathVariable final UUID id) {
-        return taskService.getById(id);
+        return taskService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
     }
 
     @PutMapping("/{id}")
@@ -62,7 +75,21 @@ public class TaskController {
     public TaskDto update(
         @Parameter(description = "Task ID") @PathVariable final UUID id,
         @Valid @RequestBody final TaskUpdateDto request) {
-        return taskService.update(id, request);
+        final TaskDto current = taskService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        final TaskDto dto = new TaskDto(id,
+            request.action(),
+            request.dueDate(),
+            request.status(),
+            current.companyId(),
+            current.companyName(),
+            current.contactId(),
+            current.contactName(),
+            request.tagIds(),
+            current.commentCount(),
+            current.createdAt(),
+            current.updatedAt()
+        );
+        return taskService.save(dto);
     }
 
     @DeleteMapping("/{id}")

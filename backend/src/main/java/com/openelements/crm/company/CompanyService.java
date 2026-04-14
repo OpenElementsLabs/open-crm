@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -232,9 +233,9 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         entity.setBic(data.bic());
         entity.setIban(data.iban());
         entity.setVatId(data.vatId());
-        entity.setTags(Set.of());
+        entity.setTags(new HashSet<>());
         if (data.tagIds() != null) {
-            entity.setTags(tagRepository.findAll(data.tagIds()));
+            entity.getTags().addAll(tagRepository.findAllById(data.tagIds()));
         }
     }
 
@@ -267,5 +268,13 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
     @Override
     protected EntityRepository<CompanyEntity> getRepository() {
         return companyRepository;
+    }
+
+    public long countWithTag(UUID tagId) {
+        Objects.requireNonNull(tagId, "tagId must not be null");
+        return companyRepository.findAll()
+            .stream()
+            .filter(contact -> contact.getTags().stream().anyMatch(tag -> tag.getId().equals(tagId)))
+            .count();
     }
 }

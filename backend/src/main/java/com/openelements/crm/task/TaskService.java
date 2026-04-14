@@ -127,4 +127,12 @@ public class TaskService extends AbstractDbBackedDataService<TaskEntity, TaskDto
     protected EntityRepository<TaskEntity> getRepository() {
         return taskRepository;
     }
+
+    public long countWithTag(UUID tagId) {
+        Objects.requireNonNull(tagId, "tagId must not be null");
+        return taskRepository.findAll()
+            .stream()
+            .filter(contact -> contact.getTags().stream().anyMatch(tag -> tag.getId().equals(tagId)))
+            .count();
+    }
 }

@@ -1,6 +1,5 @@
 # Environment
 .env
-application-local.yml
 
 # IDE
 .idea/

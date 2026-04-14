@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -304,8 +303,6 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         entity.setDescription(data.description());
         entity.setBirthday(data.birthday());
         entity.setLanguage(data.language());
-
-
         entity.getSocialLinks().clear();
         if (data.socialLinks() != null) {
             for (final SocialLinkDto linkDto : data.socialLinks()) {
@@ -328,9 +325,9 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
             entity.setCompany(null);
         }
 
-        entity.setTags(Set.of());
+        entity.getTags().clear();
         if (data.tagIds() != null) {
-            entity.setTags(tagRepository.findAll(data.tagIds()));
+            entity.getTags().addAll(tagRepository.findAll(data.tagIds()));
         }
     }
 
@@ -344,6 +341,14 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         return contactRepository.findByCompanyId(companyId).stream()
             .map(this::toDto)
             .toList();
+    }
+
+    public long countWithTag(UUID tagId) {
+        Objects.requireNonNull(tagId, "tagId must not be null");
+        return contactRepository.findAll()
+            .stream()
+            .filter(contact -> contact.getTags().stream().anyMatch(tag -> tag.getId().equals(tagId)))
+            .count();
     }
 
 }

@@ -1,5 +1,8 @@
 package com.openelements.crm.tag;
 
+import com.openelements.crm.company.CompanyService;
+import com.openelements.crm.contact.ContactService;
+import com.openelements.crm.task.TaskService;
 import com.openelements.spring.base.services.tag.TagDataService;
 import com.openelements.spring.base.services.tag.TagDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,27 +37,51 @@ public class TagController {
 
     private final TagDataService tagService;
 
-    public TagController(final TagDataService tagService) {
+    private final CompanyService companyService;
+
+    private final ContactService contactService;
+
+    private final TaskService taskService;
+
+    public TagController(final TagDataService tagService, CompanyService companyService, ContactService contactService, TaskService taskService) {
         this.tagService = tagService;
+        this.companyService = companyService;
+        this.contactService = contactService;
+        this.taskService = taskService;
     }
 
     @GetMapping
     @Operation(summary = "List all tags", description = "Returns a paginated list of tags sorted by name")
     @ApiResponse(responseCode = "200", description = "Tags retrieved successfully")
-    public Page<TagDto> list(
+    public Page<TagDtoWithCounts> list(
         @Parameter(description = "Whether to include company/contact counts per tag")
         @RequestParam(defaultValue = "false") final boolean includeCounts,
         @PageableDefault(size = 20, sort = "name") final Pageable pageable) {
-        return tagService.findAll(pageable);
+        return tagService.findAll(pageable).map(tag -> new TagDtoWithCounts(tag.id(),
+            tag.name(),
+            tag.description(),
+            tag.color(),
+            companyService.countWithTag(tag.id()),
+            contactService.countWithTag(tag.id()),
+            taskService.countWithTag(tag.id())));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get tag by ID")
     @ApiResponse(responseCode = "200", description = "Tag found")
     @ApiResponse(responseCode = "404", description = "Tag not found")
-    public TagDto getById(
+    public TagDtoWithCounts getById(
         @Parameter(description = "Tag ID") @PathVariable final UUID id) {
-        return tagService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
+        return tagService.findById(id)
+            .map(tag -> new TagDtoWithCounts(
+                tag.id(),
+                tag.name(),
+                tag.description(),
+                tag.color(),
+                companyService.countWithTag(tag.id()),
+                contactService.countWithTag(tag.id()),
+                taskService.countWithTag(tag.id())
+            )).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
     }
 
     @PostMapping

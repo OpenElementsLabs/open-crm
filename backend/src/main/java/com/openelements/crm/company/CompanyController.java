@@ -59,10 +59,11 @@ public class CompanyController {
      * @param companyService the company service
      * @param commentService the comment service
      */
-    public CompanyController(final CompanyService companyService, final CommentService commentService, ContactService contactService) {
+    public CompanyController(final CompanyService companyService, final CommentService commentService, ContactService contactService, UserService userService) {
         this.companyService = Objects.requireNonNull(companyService, "companyService must not be null");
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
-        this.contactService = contactService;
+        this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
+        this.userService = Objects.requireNonNull(userService, "userService must not be null");
     }
 
     /**
@@ -190,7 +191,7 @@ public class CompanyController {
         final CompanyDto current = companyService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
         final CompanyDto dto = new CompanyDto(id,
             request.name(),
-            request.description(),
+            request.email(),
             request.website(),
             request.street(),
             request.houseNumber(),
