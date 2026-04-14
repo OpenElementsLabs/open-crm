@@ -3,13 +3,15 @@ package com.openelements.crm.company;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.openelements.spring.base.data.EntityRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
  * Spring Data repository for {@link CompanyEntity} persistence operations.
  */
-public interface CompanyRepository extends JpaRepository<CompanyEntity, UUID>,
+public interface CompanyRepository extends EntityRepository<CompanyEntity>,
         JpaSpecificationExecutor<CompanyEntity> {
 
     /**

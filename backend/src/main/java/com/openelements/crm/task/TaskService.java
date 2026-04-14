@@ -5,16 +5,9 @@ import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
-import com.openelements.crm.webhook.WebhookEvent;
-import com.openelements.crm.webhook.WebhookEventType;
-import com.openelements.spring.base.services.tag.TagDataService;
 import com.openelements.spring.base.services.tag.TagRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -56,7 +54,7 @@ public class TaskService {
         final boolean hasContact = request.contactId() != null;
         if (hasCompany == hasContact) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Exactly one of companyId or contactId must be provided");
+                "Exactly one of companyId or contactId must be provided");
         }
 
         final TaskEntity entity = new TaskEntity();
@@ -66,13 +64,13 @@ public class TaskService {
 
         if (hasCompany) {
             final CompanyEntity company = companyRepository.findById(request.companyId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Company not found: " + request.companyId()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Company not found: " + request.companyId()));
             entity.setCompany(company);
         } else {
             final ContactEntity contact = contactRepository.findById(request.contactId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Contact not found: " + request.contactId()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Contact not found: " + request.contactId()));
             entity.setContact(contact);
         }
 
@@ -148,7 +146,7 @@ public class TaskService {
 
     private TaskEntity findOrThrow(final UUID id) {
         return taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Task not found: " + id));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Task not found: " + id));
     }
 }

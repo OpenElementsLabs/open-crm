@@ -1,16 +1,17 @@
 package com.openelements.crm.contact;
 
+import com.openelements.spring.base.data.EntityRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
  * Spring Data repository for {@link ContactEntity} persistence operations.
  */
-public interface ContactRepository extends JpaRepository<ContactEntity, UUID>,
-        JpaSpecificationExecutor<ContactEntity> {
+public interface ContactRepository extends EntityRepository<ContactEntity>,
+    JpaSpecificationExecutor<ContactEntity> {
 
     /**
      * Finds all contacts associated with the given company.

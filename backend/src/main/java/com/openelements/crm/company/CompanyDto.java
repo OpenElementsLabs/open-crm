@@ -1,5 +1,6 @@
 package com.openelements.crm.company;
 
+import com.openelements.spring.base.data.WithId;
 import com.openelements.spring.base.services.tag.TagEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
@@ -30,7 +31,7 @@ public record CompanyDto(
         @Schema(description = "Assigned tag IDs") List<UUID> tagIds,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
-) {
+) implements WithId {
 
     public static CompanyDto fromEntity(final CompanyEntity entity,
                                         final long contactCount,

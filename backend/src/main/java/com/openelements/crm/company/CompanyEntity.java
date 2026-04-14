@@ -1,5 +1,7 @@
 package com.openelements.crm.company;
 
+import com.openelements.spring.base.data.AbstractDbBackedDataService;
+import com.openelements.spring.base.data.AbstractEntity;
 import com.openelements.spring.base.security.user.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Basic;
@@ -28,12 +30,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  */
 @Entity
 @Table(name = "companies")
-public class CompanyEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+public class CompanyEntity extends AbstractEntity {
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
@@ -96,27 +93,10 @@ public class CompanyEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<TagEntity> tags = new HashSet<>();
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
     /**
      * Default constructor required by JPA.
      */
     public CompanyEntity() {
-    }
-
-    /**
-     * Returns the unique identifier of this company.
-     *
-     * @return the company ID
-     */
-    public UUID getId() {
-        return id;
     }
 
     /**
@@ -383,43 +363,9 @@ public class CompanyEntity {
         this.vatId = vatId;
     }
 
-    /**
-     * Returns the creation timestamp.
-     *
-     * @return the creation timestamp
-     */
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * Returns the last update timestamp.
-     *
-     * @return the update timestamp
-     */
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final CompanyEntity that = (CompanyEntity) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 
     @Override
     public String toString() {
-        return "CompanyEntity[id=" + id + ", name=" + name + "]";
+        return "CompanyEntity[id=" + id() + ", name=" + name + "]";
     }
 }

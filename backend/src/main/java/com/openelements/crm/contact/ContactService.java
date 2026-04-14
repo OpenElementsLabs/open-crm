@@ -4,21 +4,12 @@ import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.task.TaskRepository;
-import com.openelements.crm.webhook.WebhookEvent;
-import com.openelements.crm.webhook.WebhookEventType;
+import com.openelements.spring.base.data.AbstractDbBackedDataService;
+import com.openelements.spring.base.data.EntityRepository;
 import com.openelements.spring.base.security.user.ImageData;
-import com.openelements.spring.base.services.tag.TagDataService;
-import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +20,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
 /**
  * Service handling contact business logic including CRUD operations and company validation.
  */
 @Service
 @Transactional
-public class ContactService {
+public class ContactService extends AbstractDbBackedDataService<ContactEntity, ContactDto> {
 
     private final ContactRepository contactRepository;
     private final CompanyRepository companyRepository;
@@ -49,111 +45,13 @@ public class ContactService {
                           final TaskRepository taskRepository,
                           final TagRepository tagRepository,
                           final ApplicationEventPublisher eventPublisher) {
+        super((eventPublisher));
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagService must not be null");
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
-    }
-
-    /**
-     * Creates a new contact.
-     *
-     * @param request the create request
-     * @return the created contact response
-     */
-    public ContactDto create(final ContactCreateDto request) {
-        Objects.requireNonNull(request, "request must not be null");
-        final ContactEntity entity = new ContactEntity();
-        applyFields(entity, request.title(), request.firstName(), request.lastName(), request.email(),
-                request.position(), request.gender(), request.socialLinks(),
-                request.phoneNumber(), request.companyId(), request.language(),
-                request.birthday(), request.description());
-        if (request.tagIds() != null) {
-            entity.setTags(tagRepository.findAll(request.tagIds()));
-        }
-        final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        final ContactDto dto = ContactDto.fromEntity(saved, 0);
-        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.CONTACT_CREATED, saved.getId(), dto));
-        return dto;
-    }
-
-    /**
-     * Returns a contact by its ID.
-     *
-     * @param id the contact ID
-     * @return the contact response
-     * @throws ResponseStatusException with 404 if not found
-     */
-    @Transactional(readOnly = true)
-    public ContactDto getById(final UUID id) {
-        Objects.requireNonNull(id, "id must not be null");
-        final ContactEntity entity = findOrThrow(id);
-        return toDto(entity);
-    }
-
-    /**
-     * Updates an existing contact. Brevo-managed fields (brevoId) are not modified.
-     *
-     * @param id      the contact ID
-     * @param request the update request
-     * @return the updated contact response
-     * @throws ResponseStatusException with 404 if not found
-     */
-    public ContactDto update(final UUID id, final ContactUpdateDto request) {
-        Objects.requireNonNull(id, "id must not be null");
-        Objects.requireNonNull(request, "request must not be null");
-        final ContactEntity entity = findOrThrow(id);
-        if (entity.getBrevoId() != null) {
-            final List<String> violations = new ArrayList<>();
-            if (!Objects.equals(request.firstName(), entity.getFirstName())) {
-                violations.add("firstName");
-            }
-            if (!Objects.equals(request.lastName(), entity.getLastName())) {
-                violations.add("lastName");
-            }
-            if (!Objects.equals(request.email(), entity.getEmail())) {
-                violations.add("email");
-            }
-            if (request.language() != entity.getLanguage()) {
-                violations.add("language");
-            }
-            if (request.socialLinks() != null) {
-                violations.add("socialLinks");
-            }
-            if (!violations.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The fields " + String.join(", ", violations)
-                    + " are managed by Brevo and cannot be modified");
-            }
-        }
-        applyFields(entity, request.title(), request.firstName(), request.lastName(), request.email(),
-                request.position(), request.gender(), request.socialLinks(),
-                request.phoneNumber(), request.companyId(), request.language(),
-                request.birthday(), request.description());
-        if (request.tagIds() != null) {
-            entity.setTags(tagRepository.findAll(request.tagIds()));
-        }
-        final ContactEntity saved = contactRepository.saveAndFlush(entity);
-        final ContactDto dto = toDto(saved);
-        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.CONTACT_UPDATED, saved.getId(), dto));
-        return dto;
-    }
-
-    /**
-     * Hard-deletes a contact and all associated comments (via database cascade).
-     *
-     * @param id the contact ID
-     * @throws ResponseStatusException with 404 if not found
-     */
-    public void delete(final UUID id) {
-        Objects.requireNonNull(id, "id must not be null");
-        final ContactEntity entity = findOrThrow(id);
-        taskRepository.deleteByContactId(id);
-        commentRepository.deleteByContactId(id);
-        contactRepository.delete(entity);
-        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.CONTACT_DELETED, id, null));
     }
 
     /**
@@ -168,16 +66,16 @@ public class ContactService {
      */
     @Transactional(readOnly = true)
     public Page<ContactDto> list(final String search,
-                                      final UUID companyId,
-                                      final boolean noCompany,
-                                      final String language,
-                                      final Boolean brevo,
-                                      final List<UUID> tagIds,
-                                      final Pageable pageable) {
+                                 final UUID companyId,
+                                 final boolean noCompany,
+                                 final String language,
+                                 final Boolean brevo,
+                                 final List<UUID> tagIds,
+                                 final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         if (companyId != null && noCompany) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot combine companyId and noCompany filters");
+                "Cannot combine companyId and noCompany filters");
         }
         Specification<ContactEntity> spec = Specification.where(null);
 
@@ -202,7 +100,7 @@ public class ContactService {
         }
         if (companyId != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("company").get("id"), companyId));
+                cb.equal(root.get("company").get("id"), companyId));
         }
         if (noCompany) {
             spec = spec.and((root, query, cb) -> cb.isNull(root.get("company")));
@@ -256,7 +154,7 @@ public class ContactService {
                                     final List<UUID> tagIds) {
         if (companyId != null && noCompany) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot combine companyId and noCompany filters");
+                "Cannot combine companyId and noCompany filters");
         }
         Specification<ContactEntity> spec = Specification.where(null);
 
@@ -281,7 +179,7 @@ public class ContactService {
         }
         if (companyId != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("company").get("id"), companyId));
+                cb.equal(root.get("company").get("id"), companyId));
         }
         if (noCompany) {
             spec = spec.and((root, query, cb) -> cb.isNull(root.get("company")));
@@ -315,8 +213,8 @@ public class ContactService {
         }
 
         return contactRepository.findAll(spec, Sort.by("lastName", "firstName")).stream()
-                .map(this::toDto)
-                .toList();
+            .map(this::toDto)
+            .toList();
     }
 
     /**
@@ -333,7 +231,7 @@ public class ContactService {
         Objects.requireNonNull(contentType, "contentType must not be null");
         if (!"image/jpeg".equals(contentType)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid content type: " + contentType + ". Only image/jpeg is allowed.");
+                "Invalid content type: " + contentType + ". Only image/jpeg is allowed.");
         }
         final ContactEntity entity = findOrThrow(id);
         entity.setPhoto(data);
@@ -377,30 +275,41 @@ public class ContactService {
         return ContactDto.fromEntity(entity, commentCount);
     }
 
-    private void applyFields(final ContactEntity entity,
-                              final String title,
-                              final String firstName, final String lastName,
-                              final String email, final String position,
-                              final Gender gender, final List<SocialLinkCreateDto> socialLinks,
-                              final String phoneNumber, final UUID companyId,
-                              final Language language, final java.time.LocalDate birthday,
-                              final String description) {
-        entity.setTitle(title);
-        entity.setFirstName(firstName);
-        entity.setLastName(lastName);
-        entity.setEmail(email);
-        entity.setPosition(position);
-        entity.setGender(gender);
-        if (socialLinks != null) {
-            entity.getSocialLinks().clear();
-            for (final SocialLinkCreateDto linkDto : socialLinks) {
-                final SocialNetworkType networkType;
-                try {
-                    networkType = SocialNetworkType.valueOf(linkDto.networkType());
-                } catch (final IllegalArgumentException e) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Invalid network type: " + linkDto.networkType());
-                }
+
+    private ContactEntity findOrThrow(final UUID id) {
+        return contactRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Contact not found: " + id));
+    }
+
+    @Override
+    protected ContactEntity createDetachedEntity() {
+        return new ContactEntity();
+    }
+
+    @Override
+    protected EntityRepository<ContactEntity> getRepository() {
+        return contactRepository;
+    }
+
+    @Override
+    protected void updateEntity(ContactEntity entity, ContactDto data) {
+        entity.setTitle(data.title());
+        entity.setFirstName(data.firstName());
+        entity.setLastName(data.lastName());
+        entity.setEmail(data.email());
+        entity.setPosition(data.position());
+        entity.setGender(data.gender());
+        entity.setPhoneNumber(data.phoneNumber());
+        entity.setDescription(data.description());
+        entity.setBirthday(data.birthday());
+        entity.setLanguage(data.language());
+
+
+        entity.getSocialLinks().clear();
+        if (data.socialLinks() != null) {
+            for (final SocialLinkDto linkDto : data.socialLinks()) {
+                final SocialNetworkType networkType = SocialNetworkType.valueOf(linkDto.networkType());
                 final SocialNetworkType.ResolvedLink resolved = networkType.resolve(linkDto.value());
                 final SocialLinkEntity linkEntity = new SocialLinkEntity();
                 linkEntity.setNetworkType(networkType);
@@ -409,24 +318,26 @@ public class ContactService {
                 entity.getSocialLinks().add(linkEntity);
             }
         }
-        entity.setPhoneNumber(phoneNumber);
-        entity.setLanguage(language);
-        entity.setBirthday(birthday);
-        entity.setDescription(description);
 
-        if (companyId != null) {
-            final CompanyEntity company = companyRepository.findById(companyId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Company not found: " + companyId));
+        if (data.companyId() != null) {
+            final CompanyEntity company = companyRepository.findById(data.companyId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Company not found: " + data.companyId()));
             entity.setCompany(company);
         } else {
             entity.setCompany(null);
         }
+
+        entity.setTags(Set.of());
+        if (data.tagIds() != null) {
+            entity.setTags(tagRepository.findAll(data.tagIds()));
+        }
     }
 
-    private ContactEntity findOrThrow(final UUID id) {
-        return contactRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Contact not found: " + id));
+    @Override
+    protected ContactDto toData(ContactEntity entity) {
+        final long commentCount = commentRepository.countByContactId(entity.getId());
+        return ContactDto.fromEntity(entity, commentCount);
     }
+
 }

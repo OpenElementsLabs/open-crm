@@ -1,21 +1,11 @@
 package com.openelements.crm.company;
 
 import com.openelements.crm.comment.CommentRepository;
-import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.task.TaskRepository;
-import com.openelements.crm.webhook.WebhookEvent;
-import com.openelements.crm.webhook.WebhookEventType;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.openelements.spring.base.data.AbstractDbBackedDataService;
+import com.openelements.spring.base.data.EntityRepository;
 import com.openelements.spring.base.security.user.ImageData;
-import com.openelements.spring.base.services.tag.TagDataService;
-import com.openelements.spring.base.services.tag.TagDto;
 import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,12 +18,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
 /**
  * Service handling company business logic including CRUD operations and hard-delete.
  */
 @Service
 @Transactional
-public class CompanyService {
+public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, CompanyDto> {
 
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
@@ -48,117 +44,13 @@ public class CompanyService {
                           final TaskRepository taskRepository,
                           final TagRepository tagRepository,
                           final ApplicationEventPublisher eventPublisher) {
+        super(eventPublisher);
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
-    }
-
-    /**
-     * Creates a new company.
-     *
-     * @param request the create request
-     * @return the created company response
-     */
-    public CompanyDto create(final CompanyCreateDto request) {
-        Objects.requireNonNull(request, "request must not be null");
-        final CompanyEntity entity = new CompanyEntity();
-        entity.setName(request.name());
-        entity.setEmail(request.email());
-        entity.setWebsite(request.website());
-        entity.setStreet(request.street());
-        entity.setHouseNumber(request.houseNumber());
-        entity.setZipCode(request.zipCode());
-        entity.setCity(request.city());
-        entity.setCountry(request.country());
-        entity.setPhoneNumber(request.phoneNumber());
-        entity.setDescription(request.description());
-        applyFinanceFields(entity, request.bankName(), request.bic(), request.iban(), request.vatId());
-        if (request.tagIds() != null) {
-            entity.setTags(tagRepository.findAll(request.tagIds()));
-        }
-        final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        final CompanyDto dto = CompanyDto.fromEntity(saved, 0, 0);
-        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMPANY_CREATED, saved.getId(), dto));
-        return dto;
-    }
-
-    /**
-     * Returns a company by its ID.
-     *
-     * @param id the company ID
-     * @return the company response
-     * @throws ResponseStatusException with 404 if not found
-     */
-    @Transactional(readOnly = true)
-    public CompanyDto getById(final UUID id) {
-        Objects.requireNonNull(id, "id must not be null");
-        final CompanyEntity entity = findOrThrow(id);
-        return toDto(entity);
-    }
-
-    /**
-     * Updates an existing company.
-     *
-     * @param id      the company ID
-     * @param request the update request
-     * @return the updated company response
-     * @throws ResponseStatusException with 404 if not found
-     */
-    public CompanyDto update(final UUID id, final CompanyUpdateDto request) {
-        Objects.requireNonNull(id, "id must not be null");
-        Objects.requireNonNull(request, "request must not be null");
-        final CompanyEntity entity = findOrThrow(id);
-        entity.setName(request.name());
-        entity.setEmail(request.email());
-        entity.setWebsite(request.website());
-        entity.setStreet(request.street());
-        entity.setHouseNumber(request.houseNumber());
-        entity.setZipCode(request.zipCode());
-        entity.setCity(request.city());
-        entity.setCountry(request.country());
-        entity.setPhoneNumber(request.phoneNumber());
-        entity.setDescription(request.description());
-        applyFinanceFields(entity, request.bankName(), request.bic(), request.iban(), request.vatId());
-        if (request.tagIds() != null) {
-            entity.setTags(tagRepository.findAll(request.tagIds()));
-        }
-        final CompanyEntity saved = companyRepository.saveAndFlush(entity);
-        final CompanyDto dto = toDto(saved);
-        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMPANY_UPDATED, saved.getId(), dto));
-        return dto;
-    }
-
-    /**
-     * Hard-deletes a company. Optionally deletes all associated contacts as well.
-     *
-     * @param id             the company ID
-     * @param deleteContacts if true, delete all contacts belonging to this company
-     * @throws ResponseStatusException with 404 if not found
-     */
-    public void delete(final UUID id, final boolean deleteContacts) {
-        Objects.requireNonNull(id, "id must not be null");
-        final CompanyEntity entity = findOrThrow(id);
-        if (deleteContacts) {
-            final List<ContactEntity> contacts = contactRepository.findByCompanyId(id);
-            for (final ContactEntity contact : contacts) {
-                taskRepository.deleteByContactId(contact.getId());
-                commentRepository.deleteByContactId(contact.getId());
-                contactRepository.delete(contact);
-            }
-        } else {
-            final List<ContactEntity> contacts = contactRepository.findByCompanyId(id);
-            for (final ContactEntity contact : contacts) {
-                contact.setCompany(null);
-                contactRepository.save(contact);
-            }
-        }
-        taskRepository.deleteByCompanyId(id);
-        commentRepository.deleteByCompanyId(id);
-        companyRepository.delete(entity);
-        eventPublisher.publishEvent(new WebhookEvent(WebhookEventType.COMPANY_DELETED, id, null));
     }
 
     /**
@@ -172,15 +64,15 @@ public class CompanyService {
      */
     @Transactional(readOnly = true)
     public Page<CompanyDto> list(final String name,
-                                      final Boolean brevo,
-                                      final List<UUID> tagIds,
-                                      final Pageable pageable) {
+                                 final Boolean brevo,
+                                 final List<UUID> tagIds,
+                                 final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
         Specification<CompanyEntity> spec = Specification.where(null);
 
         if (name != null && !name.isBlank()) {
             spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+                cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
         }
         if (brevo != null) {
             if (brevo) {
@@ -221,7 +113,7 @@ public class CompanyService {
 
         if (name != null && !name.isBlank()) {
             spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+                cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
         }
         if (brevo != null) {
             if (brevo) {
@@ -244,15 +136,15 @@ public class CompanyService {
         }
 
         return companyRepository.findAll(spec, Sort.by("name")).stream()
-                .map(this::toDto)
-                .toList();
+            .map(this::toDto)
+            .toList();
     }
 
     private static final Pattern IBAN_PATTERN = Pattern.compile("^[A-Z]{2}[A-Za-z0-9]+$");
     private static final Pattern BIC_PATTERN = Pattern.compile("^[A-Z0-9]+$");
 
     private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(
-            "image/svg+xml", "image/png", "image/jpeg");
+        "image/svg+xml", "image/png", "image/jpeg");
 
     /**
      * Uploads or replaces the logo for a company.
@@ -268,7 +160,7 @@ public class CompanyService {
         Objects.requireNonNull(contentType, "contentType must not be null");
         if (!ALLOWED_LOGO_TYPES.contains(contentType)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid content type: " + contentType + ". Allowed: " + ALLOWED_LOGO_TYPES);
+                "Invalid content type: " + contentType + ". Allowed: " + ALLOWED_LOGO_TYPES);
         }
         final CompanyEntity entity = findOrThrow(id);
         entity.setLogo(data);
@@ -307,53 +199,6 @@ public class CompanyService {
         companyRepository.saveAndFlush(entity);
     }
 
-    private String normalizeBlankToNull(final String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        return value.trim();
-    }
-
-    private String validateAndNormalizeIban(final String iban) {
-        if (iban == null || iban.isBlank()) {
-            return null;
-        }
-        final String normalized = iban.replaceAll("\\s", "");
-        if (normalized.length() < 15 || normalized.length() > 34) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "IBAN must be between 15 and 34 characters");
-        }
-        if (!IBAN_PATTERN.matcher(normalized).matches()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid IBAN format: must start with two uppercase letters followed by alphanumeric characters");
-        }
-        return normalized;
-    }
-
-    private String validateAndNormalizeBic(final String bic) {
-        if (bic == null || bic.isBlank()) {
-            return null;
-        }
-        final String trimmed = bic.trim();
-        if (trimmed.length() != 8 && trimmed.length() != 11) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "BIC must be exactly 8 or 11 characters");
-        }
-        if (!BIC_PATTERN.matcher(trimmed).matches()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "BIC must contain only uppercase alphanumeric characters");
-        }
-        return trimmed;
-    }
-
-    private void applyFinanceFields(final CompanyEntity entity, final String bankName,
-                                     final String bic, final String iban, final String vatId) {
-        entity.setBankName(normalizeBlankToNull(bankName));
-        entity.setBic(validateAndNormalizeBic(bic));
-        entity.setIban(validateAndNormalizeIban(iban));
-        entity.setVatId(normalizeBlankToNull(vatId));
-    }
-
     private CompanyDto toDto(final CompanyEntity entity) {
         final long contactCount = contactRepository.countByCompanyId(entity.getId());
         final long commentCount = commentRepository.countByCompanyId(entity.getId());
@@ -362,7 +207,65 @@ public class CompanyService {
 
     private CompanyEntity findOrThrow(final UUID id) {
         return companyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Company not found: " + id));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Company not found: " + id));
+    }
+
+    @Override
+    protected CompanyEntity createDetachedEntity() {
+        return new CompanyEntity();
+    }
+
+    @Override
+    protected void updateEntity(CompanyEntity entity, CompanyDto data) {
+        entity.setName(data.name());
+        entity.setEmail(data.email());
+        entity.setWebsite(data.website());
+        entity.setStreet(data.street());
+        entity.setHouseNumber(data.houseNumber());
+        entity.setZipCode(data.zipCode());
+        entity.setCity(data.city());
+        entity.setCountry(data.country());
+        entity.setPhoneNumber(data.phoneNumber());
+        entity.setDescription(data.description());
+        entity.setBankName(data.bankName());
+        entity.setBic(data.bic());
+        entity.setIban(data.iban());
+        entity.setVatId(data.vatId());
+        entity.setTags(Set.of());
+        if (data.tagIds() != null) {
+            entity.setTags(tagRepository.findAll(data.tagIds()));
+        }
+    }
+
+    @Override
+    protected CompanyDto toData(CompanyEntity entity) {
+        return new CompanyDto(entity.getId(),
+            entity.getName(),
+            entity.getEmail(),
+            entity.getWebsite(),
+            entity.getStreet(),
+            entity.getHouseNumber(),
+            entity.getZipCode(),
+            entity.getCity(),
+            entity.getCountry(),
+            entity.getPhoneNumber(),
+            entity.getDescription(),
+            entity.getBankName(),
+            entity.getBic(),
+            entity.getIban(),
+            entity.getVatId(),
+            entity.getLogo() != null,
+            entity.getBrevoCompanyId() != null,
+            contactRepository.countByCompanyId(entity.getId()),
+            commentRepository.countByCompanyId(entity.getId()),
+            entity.getTags().stream().map(TagEntity::getId).toList(),
+            entity.getCreatedAt(),
+            entity.getUpdatedAt());
+    }
+
+    @Override
+    protected EntityRepository<CompanyEntity> getRepository() {
+        return companyRepository;
     }
 }

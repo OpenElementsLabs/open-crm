@@ -1,48 +1,38 @@
 package com.openelements.crm.contact;
 
 import com.openelements.crm.company.CompanyEntity;
+import com.openelements.spring.base.data.AbstractEntity;
 import com.openelements.spring.base.security.user.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import java.time.Instant;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * JPA entity representing a contact person in the CRM system.
  */
 @Entity
 @Table(name = "contacts")
-public class ContactEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+public class ContactEntity extends AbstractEntity {
 
     @Column(name = "title", length = 255)
     private String title;
@@ -99,34 +89,17 @@ public class ContactEntity {
 
     @ManyToMany
     @JoinTable(
-            name = "contact_tags",
-            joinColumns = @JoinColumn(name = "contact_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+        name = "contact_tags",
+        joinColumns = @JoinColumn(name = "contact_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<TagEntity> tags = new HashSet<>();
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
 
     /**
      * Default constructor required by JPA.
      */
     public ContactEntity() {
-    }
-
-    /**
-     * Returns the unique identifier of this contact.
-     *
-     * @return the contact ID
-     */
-    public UUID getId() {
-        return id;
     }
 
     public String getTitle() {
@@ -385,43 +358,9 @@ public class ContactEntity {
         this.description = description;
     }
 
-    /**
-     * Returns the creation timestamp.
-     *
-     * @return the creation timestamp
-     */
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * Returns the last update timestamp.
-     *
-     * @return the update timestamp
-     */
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final ContactEntity that = (ContactEntity) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 
     @Override
     public String toString() {
-        return "ContactEntity[id=" + id + ", lastName=" + lastName + "]";
+        return "ContactEntity[id=" + id() + ", lastName=" + lastName + "]";
     }
 }

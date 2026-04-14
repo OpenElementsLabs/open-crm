@@ -1,5 +1,6 @@
 package com.openelements.crm.webhook;
 
+import com.openelements.spring.base.services.webhook.WebhookSender;
 import com.openelements.spring.base.services.webhook.data.WebhookDataService;
 import com.openelements.spring.base.services.webhook.data.WebhookDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +37,11 @@ public class WebhookController {
 
     private final WebhookDataService webhookService;
 
-    public WebhookController(final WebhookDataService webhookService) {
+    private final WebhookSender webhookSender;
+
+    public WebhookController(final WebhookDataService webhookService, final WebhookSender webhookSender) {
         this.webhookService = Objects.requireNonNull(webhookService, "webhookService must not be null");
+        this.webhookSender = Objects.requireNonNull(webhookSender, "webhookSender must not be null");
     }
 
     /**
@@ -51,7 +55,7 @@ public class WebhookController {
     public Page<WebhookDto> list(
             @Parameter(hidden = true)
             @PageableDefault(size = 20, sort = "createdAt") final Pageable pageable) {
-        return webhookService.list(pageable);
+        return webhookService.findAll(pageable);
     }
 
     /**
@@ -65,7 +69,7 @@ public class WebhookController {
     @ApiResponse(responseCode = "200", description = "Webhook found")
     @ApiResponse(responseCode = "404", description = "Webhook not found")
     public WebhookDto getById(@Parameter(description = "The webhook ID") @PathVariable final UUID id) {
-        return webhookService.getById(id);
+        return webhookService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
     }
 
     /**
@@ -80,7 +84,8 @@ public class WebhookController {
     @ApiResponse(responseCode = "201", description = "Webhook created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     public WebhookDto create(@Valid @RequestBody final WebhookCreateDto request) {
-        return webhookService.create(request);
+        final WebhookDto dto = new WebhookDto(null, request.url(), true, null, null);
+        return webhookService.save(dto);
     }
 
     /**
@@ -96,8 +101,9 @@ public class WebhookController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Webhook not found")
     public WebhookDto update(@Parameter(description = "The webhook ID") @PathVariable final UUID id,
-                             @Valid @RequestBody final WebhookUpdateDto request) {
-        return webhookService.update(id, request);
+                             @Valid @RequestBody final WebhookDto request) {
+        final WebhookDto dto = new WebhookDto(id, request.url(), request.active(), request.lastStatus(), request.lastCalledAt());
+        return webhookService.save(dto);
     }
 
     /**
@@ -111,7 +117,7 @@ public class WebhookController {
     @ApiResponse(responseCode = "202", description = "PING triggered")
     @ApiResponse(responseCode = "404", description = "Webhook not found")
     public void ping(@Parameter(description = "The webhook ID") @PathVariable final UUID id) {
-        webhookService.ping(id);
+        webhookSender.ping(id);
     }
 
     /**

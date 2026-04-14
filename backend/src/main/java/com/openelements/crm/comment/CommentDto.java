@@ -1,5 +1,6 @@
 package com.openelements.crm.comment;
 
+import com.openelements.spring.base.data.WithId;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public record CommentDto(
         @Schema(description = "Task ID (null if not attached to a task)") UUID taskId,
         @Schema(description = "Creation timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant createdAt,
         @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
-) {
+) implements WithId {
 
     /**
      * Creates a response DTO from a comment entity.

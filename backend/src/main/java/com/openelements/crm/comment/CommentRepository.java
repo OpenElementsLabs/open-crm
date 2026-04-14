@@ -1,6 +1,8 @@
 package com.openelements.crm.comment;
 
 import java.util.UUID;
+
+import com.openelements.spring.base.data.EntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * Spring Data repository for {@link CommentEntity} persistence operations.
  */
-public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
+public interface CommentRepository extends EntityRepository<CommentEntity> {
 
     /**
      * Finds all comments attached to the given company, paginated.
