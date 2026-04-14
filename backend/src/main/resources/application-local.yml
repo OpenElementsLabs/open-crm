@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/opencrm
+    username: opencrm
+    password: changeme
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8888/default/jwks
+
+logging:
+  level:
+    com.openelements.crm: DEBUG
+    org.springframework.security: DEBUG
