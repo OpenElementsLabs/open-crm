@@ -15,4 +15,12 @@ public record SocialLinkDto(
             entity.getUrl()
         );
     }
+
+    public static SocialLinkDto fromCreateDto(SocialLinkCreateDto socialLinkCreateDto) {
+        return new SocialLinkDto(
+            socialLinkCreateDto.networkType(),
+            socialLinkCreateDto.value(),
+            null // URL will be generated based on network type and value
+        );
+    }
 }

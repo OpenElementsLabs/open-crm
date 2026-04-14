@@ -4,6 +4,7 @@ import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,10 +12,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.data.domain.Page;
@@ -36,6 +33,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 /**
  * REST controller for contact management.
  */
@@ -47,6 +49,7 @@ public class ContactController {
 
     private final ContactService contactService;
     private final CommentService commentService;
+    private final UserService userService;
 
     /**
      * Creates a new ContactController.
@@ -54,15 +57,16 @@ public class ContactController {
      * @param contactService the contact service
      * @param commentService the comment service
      */
-    public ContactController(final ContactService contactService, final CommentService commentService) {
+    public ContactController(final ContactService contactService, final CommentService commentService, UserService userService) {
         this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
+        this.userService = Objects.requireNonNull(userService, "userService must not be null");
     }
 
     /**
      * Lists contacts with pagination, filtering, and sorting.
      *
-     * @param search   multi-word search across firstName, lastName, email, and company name
+     * @param search    multi-word search across firstName, lastName, email, and company name
      * @param companyId exact company ID filter
      * @param language  exact language filter
      * @param brevo     filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
@@ -72,20 +76,20 @@ public class ContactController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "List contacts", description = "Returns a paginated list of contacts with optional filtering")
     public Page<ContactDto> list(
-            @Parameter(description = "Multi-word search across name, email, and company (case-insensitive contains)")
-            @RequestParam(required = false) final String search,
-            @Parameter(description = "Filter by company ID (exact match)")
-            @RequestParam(required = false) final UUID companyId,
-            @Parameter(description = "Filter by language code (DE, EN, or UNKNOWN for null)")
-            @RequestParam(required = false) final String language,
-            @Parameter(description = "Filter for contacts without a company association")
-            @RequestParam(defaultValue = "false") final boolean noCompany,
-            @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
-            @RequestParam(required = false) final Boolean brevo,
-            @Parameter(description = "Filter by tag IDs (AND semantics)")
-            @RequestParam(required = false) final List<UUID> tagIds,
-            @Parameter(hidden = true)
-            @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
+        @Parameter(description = "Multi-word search across name, email, and company (case-insensitive contains)")
+        @RequestParam(required = false) final String search,
+        @Parameter(description = "Filter by company ID (exact match)")
+        @RequestParam(required = false) final UUID companyId,
+        @Parameter(description = "Filter by language code (DE, EN, or UNKNOWN for null)")
+        @RequestParam(required = false) final String language,
+        @Parameter(description = "Filter for contacts without a company association")
+        @RequestParam(defaultValue = "false") final boolean noCompany,
+        @Parameter(description = "Filter by Brevo origin: true = only Brevo, false = only non-Brevo, omit = all")
+        @RequestParam(required = false) final Boolean brevo,
+        @Parameter(description = "Filter by tag IDs (AND semantics)")
+        @RequestParam(required = false) final List<UUID> tagIds,
+        @Parameter(hidden = true)
+        @PageableDefault(size = 20, sort = "lastName") final Pageable pageable) {
         return contactService.list(search, companyId, noCompany, language, brevo, tagIds, pageable);
     }
 
@@ -103,14 +107,14 @@ public class ContactController {
     @Operation(summary = "Export contacts as CSV")
     @ApiResponse(responseCode = "200", description = "CSV file downloaded")
     public void exportCsv(
-            @Parameter(description = "Multi-word search filter") @RequestParam(required = false) final String search,
-            @Parameter(description = "Filter by company ID") @RequestParam(required = false) final UUID companyId,
-            @Parameter(description = "Filter by language code") @RequestParam(required = false) final String language,
-            @Parameter(description = "Filter for contacts without a company") @RequestParam(defaultValue = "false") final boolean noCompany,
-            @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
-            @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
-            @Parameter(description = "Columns to include in the CSV") @RequestParam final List<ContactExportColumn> columns,
-            final HttpServletResponse response) throws IOException {
+        @Parameter(description = "Multi-word search filter") @RequestParam(required = false) final String search,
+        @Parameter(description = "Filter by company ID") @RequestParam(required = false) final UUID companyId,
+        @Parameter(description = "Filter by language code") @RequestParam(required = false) final String language,
+        @Parameter(description = "Filter for contacts without a company") @RequestParam(defaultValue = "false") final boolean noCompany,
+        @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+        @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
+        @Parameter(description = "Columns to include in the CSV") @RequestParam final List<ContactExportColumn> columns,
+        final HttpServletResponse response) throws IOException {
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"contacts.csv\"");
 
@@ -138,7 +142,7 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Contact found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public ContactDto getById(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
-        return contactService.getById(id);
+        return contactService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
     }
 
     /**
@@ -153,7 +157,30 @@ public class ContactController {
     @ApiResponse(responseCode = "201", description = "Contact created")
     @ApiResponse(responseCode = "400", description = "Invalid request")
     public ContactDto create(@Valid @RequestBody final ContactCreateDto request) {
-        return contactService.create(request);
+        final ContactDto dto = new ContactDto(
+            null,
+            request.title(),
+            request.firstName(),
+            request.lastName(),
+            request.email(),
+            request.position(),
+            request.gender(),
+            request.socialLinks().stream().map(SocialLinkDto::fromCreateDto).toList(),
+            request.phoneNumber(),
+            request.description(),
+            request.companyId(),
+            null,
+            0,
+            false,
+            request.birthday(),
+            false,
+            false,
+            request.language(),
+            request.tagIds(),
+            null,
+            null
+        );
+        return contactService.save(dto);
     }
 
     /**
@@ -169,8 +196,31 @@ public class ContactController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public ContactDto update(@Parameter(description = "The contact ID") @PathVariable final UUID id,
-                                  @Valid @RequestBody final ContactUpdateDto request) {
-        return contactService.update(id, request);
+                             @Valid @RequestBody final ContactUpdateDto request) {
+        final ContactDto dto = new ContactDto(
+            id,
+            request.title(),
+            request.firstName(),
+            request.lastName(),
+            request.email(),
+            request.position(),
+            request.gender(),
+            request.socialLinks().stream().map(SocialLinkDto::fromCreateDto).toList(),
+            request.phoneNumber(),
+            request.description(),
+            request.companyId(),
+            null,
+            0,
+            false,
+            request.birthday(),
+            false,
+            false,
+            request.language(),
+            request.tagIds(),
+            null,
+            null
+        );
+        return contactService.save(dto);
     }
 
     /**
@@ -204,7 +254,7 @@ public class ContactController {
             contactService.uploadPhoto(id, file.getBytes(), file.getContentType());
         } catch (final java.io.IOException e) {
             throw new org.springframework.web.server.ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Failed to read file");
+                HttpStatus.BAD_REQUEST, "Failed to read file");
         }
     }
 
@@ -221,8 +271,8 @@ public class ContactController {
     public ResponseEntity<byte[]> getPhoto(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
         final ImageData imageData = contactService.getPhoto(id);
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(imageData.contentType()))
-                .body(imageData.data());
+            .contentType(MediaType.parseMediaType(imageData.contentType()))
+            .body(imageData.data());
     }
 
     /**
@@ -251,9 +301,9 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Comments found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public Page<CommentDto> listComments(
-            @Parameter(description = "The contact ID") @PathVariable final UUID id,
-            @Parameter(hidden = true)
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
+        @Parameter(description = "The contact ID") @PathVariable final UUID id,
+        @Parameter(hidden = true)
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         return commentService.listByContact(id, pageable);
     }
 
@@ -271,7 +321,15 @@ public class ContactController {
     @ApiResponse(responseCode = "400", description = "Invalid request")
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public CommentDto addComment(@Parameter(description = "The contact ID") @PathVariable final UUID id,
-                                      @Valid @RequestBody final CommentCreateDto request) {
-        return commentService.addToContact(id, request);
+                                 @Valid @RequestBody final CommentCreateDto request) {
+        final CommentDto commentDto = new CommentDto(null,
+            request.text(),
+            userService.getCurrentUser().name(),
+            null,
+            id,
+            null,
+            null,
+            null);
+        return commentService.save(commentDto);
     }
 }
