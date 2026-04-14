@@ -1,5 +1,7 @@
 package com.openelements.crm.webhook;
 
+import com.openelements.spring.base.services.webhook.data.WebhookDataService;
+import com.openelements.spring.base.services.webhook.data.WebhookDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,9 +34,9 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "oidc")
 public class WebhookController {
 
-    private final WebhookService webhookService;
+    private final WebhookDataService webhookService;
 
-    public WebhookController(final WebhookService webhookService) {
+    public WebhookController(final WebhookDataService webhookService) {
         this.webhookService = Objects.requireNonNull(webhookService, "webhookService must not be null");
     }
 
