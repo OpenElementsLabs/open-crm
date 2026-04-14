@@ -1,6 +1,5 @@
 package com.openelements.crm.tag;
 
-import com.openelements.spring.base.services.tag.TagCreateDto;
 import com.openelements.spring.base.services.tag.TagDataService;
 import com.openelements.spring.base.services.tag.TagDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,7 +63,7 @@ public class TagController {
     @ApiResponse(responseCode = "201", description = "Tag created")
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "409", description = "Tag with this name already exists")
-    public TagDto create(@Valid @RequestBody final TagCreateDto request) {
+    public TagDto create(@Valid @RequestBody final TagDataDto request) {
         final TagDto dto = new TagDto(null, request.name(), request.description(), request.color());
         return tagService.save(dto);
     }
@@ -76,8 +75,9 @@ public class TagController {
     @ApiResponse(responseCode = "409", description = "Tag with this name already exists")
     public TagDto update(
         @Parameter(description = "Tag ID") @PathVariable final UUID id,
-        @Valid @RequestBody final TagDto request) {
-        return tagService.save(request);
+        @Valid @RequestBody final TagDataDto request) {
+        final TagDto dto = new TagDto(id, request.name(), request.description(), request.color());
+        return tagService.save(dto);
     }
 
     @DeleteMapping("/{id}")
