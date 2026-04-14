@@ -1,6 +1,6 @@
 package com.openelements.crm.brevo;
 
-import com.openelements.crm.settings.SettingsService;
+import com.openelements.spring.base.services.settings.SettingsDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,7 +30,7 @@ public class BrevoSyncController {
 
     private static final String BREVO_API_KEY = "brevo.api-key";
 
-    private final SettingsService settingsService;
+    private final SettingsDataService settingsService;
     private final BrevoApiClient brevoApiClient;
     private final BrevoSyncService brevoSyncService;
 
@@ -41,7 +41,7 @@ public class BrevoSyncController {
      * @param brevoApiClient   the Brevo API client
      * @param brevoSyncService the Brevo sync service
      */
-    public BrevoSyncController(final SettingsService settingsService,
+    public BrevoSyncController(final SettingsDataService settingsService,
                                final BrevoApiClient brevoApiClient,
                                final BrevoSyncService brevoSyncService) {
         this.settingsService = Objects.requireNonNull(settingsService, "settingsService must not be null");

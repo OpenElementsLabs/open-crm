@@ -1,9 +1,9 @@
 package com.openelements.crm.contact;
 
-import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
+import com.openelements.spring.base.security.user.ImageData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

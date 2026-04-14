@@ -5,9 +5,10 @@ import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
-import com.openelements.crm.tag.TagService;
 import com.openelements.crm.webhook.WebhookEvent;
 import com.openelements.crm.webhook.WebhookEventType;
+import com.openelements.spring.base.services.tag.TagDataService;
+import com.openelements.spring.base.services.tag.TagRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -31,20 +32,20 @@ public class TaskService {
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
     private final CommentRepository commentRepository;
-    private final TagService tagService;
+    private final TagRepository tagRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public TaskService(final TaskRepository taskRepository,
                        final CompanyRepository companyRepository,
                        final ContactRepository contactRepository,
                        final CommentRepository commentRepository,
-                       final TagService tagService,
+                       final TagRepository tagRepository,
                        final ApplicationEventPublisher eventPublisher) {
         this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
-        this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
+        this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
@@ -76,7 +77,7 @@ public class TaskService {
         }
 
         if (request.tagIds() != null) {
-            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+            entity.setTags(tagRepository.findAll(request.tagIds()));
         }
 
         final TaskEntity saved = taskRepository.saveAndFlush(entity);
@@ -100,7 +101,7 @@ public class TaskService {
         entity.setDueDate(request.dueDate());
         entity.setStatus(request.status());
         if (request.tagIds() != null) {
-            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+            entity.setTags(tagRepository.findAll(request.tagIds()));
         }
         final TaskEntity saved = taskRepository.saveAndFlush(entity);
         final TaskDto dto = toDto(saved);

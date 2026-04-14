@@ -1,5 +1,8 @@
 package com.openelements.crm.tag;
 
+import com.openelements.spring.base.services.tag.TagCreateDto;
+import com.openelements.spring.base.services.tag.TagDataService;
+import com.openelements.spring.base.services.tag.TagDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/tags")
@@ -28,9 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "oidc")
 public class TagController {
 
-    private final TagService tagService;
+    private final TagDataService tagService;
 
-    public TagController(final TagService tagService) {
+    public TagController(final TagDataService tagService) {
         this.tagService = tagService;
     }
 
@@ -50,7 +54,7 @@ public class TagController {
     @ApiResponse(responseCode = "404", description = "Tag not found")
     public TagDto getById(
             @Parameter(description = "Tag ID") @PathVariable final UUID id) {
-        return tagService.findById(id);
+        return tagService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
     }
 
     @PostMapping
@@ -60,7 +64,7 @@ public class TagController {
     @ApiResponse(responseCode = "400", description = "Validation error")
     @ApiResponse(responseCode = "409", description = "Tag with this name already exists")
     public TagDto create(@Valid @RequestBody final TagCreateDto request) {
-        return tagService.create(request);
+        return tagService.save(request);
     }
 
     @PutMapping("/{id}")
@@ -70,8 +74,8 @@ public class TagController {
     @ApiResponse(responseCode = "409", description = "Tag with this name already exists")
     public TagDto update(
             @Parameter(description = "Tag ID") @PathVariable final UUID id,
-            @Valid @RequestBody final TagCreateDto request) {
-        return tagService.update(id, request);
+            @Valid @RequestBody final TagD request) {
+        return tagService.save(id, request);
     }
 
     @DeleteMapping("/{id}")

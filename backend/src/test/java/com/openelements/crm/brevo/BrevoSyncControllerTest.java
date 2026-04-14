@@ -1,8 +1,9 @@
 package com.openelements.crm.brevo;
 
-import com.openelements.crm.settings.SettingsRepository;
-import com.openelements.crm.settings.SettingsService;
 import java.util.List;
+
+import com.openelements.spring.base.services.settings.SettingsDataService;
+import com.openelements.spring.base.services.settings.SettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,7 +40,7 @@ class BrevoSyncControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private SettingsService settingsService;
+    private SettingsDataService settingsService;
 
     @Autowired
     private SettingsRepository settingsRepository;

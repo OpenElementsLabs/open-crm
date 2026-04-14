@@ -1,19 +1,24 @@
 package com.openelements.crm.contact;
 
-import com.openelements.crm.ImageData;
 import com.openelements.crm.comment.CommentRepository;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
-import com.openelements.crm.tag.TagService;
 import com.openelements.crm.task.TaskRepository;
 import com.openelements.crm.webhook.WebhookEvent;
 import com.openelements.crm.webhook.WebhookEventType;
+import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.services.tag.TagDataService;
+import com.openelements.spring.base.services.tag.TagEntity;
+import com.openelements.spring.base.services.tag.TagRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,20 +40,20 @@ public class ContactService {
     private final CompanyRepository companyRepository;
     private final CommentRepository commentRepository;
     private final TaskRepository taskRepository;
-    private final TagService tagService;
+    private final TagRepository tagRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public ContactService(final ContactRepository contactRepository,
                           final CompanyRepository companyRepository,
                           final CommentRepository commentRepository,
                           final TaskRepository taskRepository,
-                          final TagService tagService,
+                          final TagRepository tagRepository,
                           final ApplicationEventPublisher eventPublisher) {
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
-        this.tagService = Objects.requireNonNull(tagService, "tagService must not be null");
+        this.tagRepository = Objects.requireNonNull(tagRepository, "tagService must not be null");
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
@@ -66,7 +71,7 @@ public class ContactService {
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday(), request.description());
         if (request.tagIds() != null) {
-            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+            entity.setTags(tagRepository.findAll(request.tagIds()));
         }
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
         final ContactDto dto = ContactDto.fromEntity(saved, 0);
@@ -128,7 +133,7 @@ public class ContactService {
                 request.phoneNumber(), request.companyId(), request.language(),
                 request.birthday(), request.description());
         if (request.tagIds() != null) {
-            entity.setTags(tagService.resolveTagIds(request.tagIds()));
+            entity.setTags(tagRepository.findAll(request.tagIds()));
         }
         final ContactEntity saved = contactRepository.saveAndFlush(entity);
         final ContactDto dto = toDto(saved);

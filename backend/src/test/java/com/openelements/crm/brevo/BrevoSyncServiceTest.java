@@ -8,12 +8,13 @@ import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.Language;
 import com.openelements.crm.contact.SocialLinkEntity;
 import com.openelements.crm.contact.SocialNetworkType;
-import com.openelements.crm.settings.SettingsService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.openelements.spring.base.services.settings.SettingsDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -51,7 +52,7 @@ class BrevoSyncServiceTest {
     private CommentRepository commentRepository;
 
     @Autowired
-    private SettingsService settingsService;
+    private SettingsDataService settingsService;
 
     @Autowired
     private TransactionTemplate transactionTemplate;

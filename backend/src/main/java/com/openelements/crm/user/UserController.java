@@ -1,6 +1,8 @@
 package com.openelements.crm.user;
 
-import com.openelements.crm.ImageData;
+import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.security.user.UserDto;
+import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -29,13 +31,13 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "Get current user info")
     public UserDto getMe() {
-        return userService.getCurrentUserDto();
+        return userService.getCurrentUser();
     }
 
     @GetMapping("/me/avatar")
     @Operation(summary = "Get current user's avatar image")
     public ResponseEntity<byte[]> getAvatar() {
-        final ImageData avatar = userService.getAvatar();
+        final ImageData avatar = userService.getAvatarOfCurrentUser();
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(avatar.contentType()))
                 .body(avatar.data());
@@ -44,13 +46,13 @@ public class UserController {
     @PutMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload or replace avatar")
     public UserDto uploadAvatar(@RequestParam("file") final MultipartFile file) throws Exception {
-        return userService.uploadAvatar(file.getBytes(), file.getContentType());
+        return userService.uploadAvatarForCurrentUser(file.getBytes(), file.getContentType());
     }
 
     @DeleteMapping("/me/avatar")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Remove avatar")
     public void deleteAvatar() {
-        userService.deleteAvatar();
+        userService.deleteAvatarOfCurrentUser();
     }
 }

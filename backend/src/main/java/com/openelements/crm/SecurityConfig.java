@@ -1,9 +1,10 @@
 package com.openelements.crm;
 
-import com.openelements.crm.apikey.ApiKeyAuthenticationFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import com.openelements.spring.base.security.apikey.ApiKeyAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

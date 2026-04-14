@@ -2,7 +2,7 @@ package com.openelements.crm.task;
 
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.contact.ContactEntity;
-import com.openelements.crm.tag.TagEntity;
+import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

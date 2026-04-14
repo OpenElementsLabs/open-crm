@@ -1,6 +1,9 @@
 package com.openelements.crm.settings;
 
 import java.util.Optional;
+
+import com.openelements.spring.base.services.settings.SettingsDataService;
+import com.openelements.spring.base.services.settings.SettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SettingsServiceTest {
 
     @Autowired
-    private SettingsService settingsService;
+    private SettingsDataService settingsService;
 
     @Autowired
     private SettingsRepository settingsRepository;

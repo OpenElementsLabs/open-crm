@@ -6,11 +6,12 @@ import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.task.TaskEntity;
 import com.openelements.crm.task.TaskRepository;
-import com.openelements.crm.user.UserService;
 import com.openelements.crm.webhook.WebhookEvent;
 import com.openelements.crm.webhook.WebhookEventType;
 import java.util.Objects;
 import java.util.UUID;
+
+import com.openelements.spring.base.security.user.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,7 +74,7 @@ public class CommentService {
                         "Company not found: " + companyId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(userService.getCurrentUser().getName());
+        entity.setAuthor(userService.getCurrentUser().name());
         entity.setCompany(company);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         final CommentDto dto = CommentDto.fromEntity(saved);
@@ -97,7 +98,7 @@ public class CommentService {
                         "Contact not found: " + contactId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(userService.getCurrentUser().getName());
+        entity.setAuthor(userService.getCurrentUser().name());
         entity.setContact(contact);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         final CommentDto dto = CommentDto.fromEntity(saved);
@@ -189,7 +190,7 @@ public class CommentService {
                         "Task not found: " + taskId));
         final CommentEntity entity = new CommentEntity();
         entity.setText(request.text());
-        entity.setAuthor(userService.getCurrentUser().getName());
+        entity.setAuthor(userService.getCurrentUser().name());
         entity.setTask(task);
         final CommentEntity saved = commentRepository.saveAndFlush(entity);
         final CommentDto dto = CommentDto.fromEntity(saved);

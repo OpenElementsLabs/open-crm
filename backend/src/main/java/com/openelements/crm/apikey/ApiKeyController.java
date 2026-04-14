@@ -1,5 +1,9 @@
 package com.openelements.crm.apikey;
 
+import com.openelements.spring.base.services.apikey.ApiKeyCreateDto;
+import com.openelements.spring.base.services.apikey.ApiKeyCreatedDto;
+import com.openelements.spring.base.services.apikey.ApiKeyDataService;
+import com.openelements.spring.base.services.apikey.ApiKeyDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,9 +35,9 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "oidc")
 public class ApiKeyController {
 
-    private final ApiKeyService apiKeyService;
+    private final ApiKeyDataService apiKeyService;
 
-    public ApiKeyController(final ApiKeyService apiKeyService) {
+    public ApiKeyController(final ApiKeyDataService apiKeyService) {
         this.apiKeyService = Objects.requireNonNull(apiKeyService, "apiKeyService must not be null");
     }
 

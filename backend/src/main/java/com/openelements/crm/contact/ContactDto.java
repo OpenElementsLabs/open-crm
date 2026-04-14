@@ -1,6 +1,6 @@
 package com.openelements.crm.contact;
 
-import com.openelements.crm.tag.TagEntity;
+import com.openelements.spring.base.services.tag.TagEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.LocalDate;

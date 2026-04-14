@@ -1,13 +1,14 @@
 package com.openelements.crm.brevo;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.openelements.crm.settings.SettingsService;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import com.openelements.spring.base.services.settings.SettingsDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
@@ -27,7 +28,7 @@ public class BrevoApiClient {
     private static final long RATE_LIMIT_MS = 100;
     private static final int MAX_RETRIES = 3;
 
-    private final SettingsService settingsService;
+    private final SettingsDataService settingsService;
     private final RestClient restClient;
     private Instant lastRequestTime = Instant.EPOCH;
 
@@ -36,7 +37,7 @@ public class BrevoApiClient {
      *
      * @param settingsService the settings service for reading the API key
      */
-    public BrevoApiClient(final SettingsService settingsService) {
+    public BrevoApiClient(final SettingsDataService settingsService) {
         this.settingsService = Objects.requireNonNull(settingsService, "settingsService must not be null");
         this.restClient = RestClient.builder()
                 .baseUrl("https://api.brevo.com/v3")
