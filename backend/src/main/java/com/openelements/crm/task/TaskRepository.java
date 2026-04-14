@@ -1,12 +1,13 @@
 package com.openelements.crm.task;
 
-import java.util.UUID;
+import com.openelements.spring.base.data.EntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface TaskRepository extends JpaRepository<TaskEntity, UUID>, JpaSpecificationExecutor<TaskEntity> {
+import java.util.UUID;
+
+public interface TaskRepository extends EntityRepository<TaskEntity>, JpaSpecificationExecutor<TaskEntity> {
 
     Page<TaskEntity> findByCompanyId(UUID companyId, Pageable pageable);
 
