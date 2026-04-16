@@ -592,4 +592,16 @@ export const de = {
       next: "Weiter",
     },
   },
+  errors: {
+    forbidden: {
+      title: "Keine Berechtigung",
+      description: "Du hast nicht die erforderliche Rolle für diese Seite.",
+      backToHome: "Zur Startseite",
+      deleteNoPermission: "Löschen nicht erlaubt — ADMIN-Rolle erforderlich.",
+    },
+    roleRequired: {
+      admin: "ADMIN-Rolle erforderlich",
+      itAdmin: "IT-ADMIN-Rolle erforderlich",
+    },
+  },
 } as const;

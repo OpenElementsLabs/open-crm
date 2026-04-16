@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -15,12 +16,15 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { getTags, deleteTag } from "@/lib/api";
+import { getTags, deleteTag, ForbiddenError } from "@/lib/api";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 import type { TagDto, Page } from "@/lib/types";
 
 export function TagList() {
   const t = useTranslations();
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
   const [data, setData] = useState<Page<TagDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -67,7 +71,11 @@ export function TagList() {
       setDeleteError(null);
       fetchTags();
     } catch (e) {
-      setDeleteError(e instanceof Error ? e.message : "Unknown error");
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        setDeleteError(e instanceof Error ? e.message : "Unknown error");
+      }
     }
   };
 
@@ -179,16 +187,19 @@ export function TagList() {
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-oe-gray hover:text-oe-red"
-                              onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-oe-gray hover:text-oe-red"
+                                disabled={!canDelete}
+                                onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </span>
                           </TooltipTrigger>
-                          <TooltipContent>{t.tags.actions.delete}</TooltipContent>
+                          <TooltipContent>{canDelete ? t.tags.actions.delete : t.errors.roleRequired.admin}</TooltipContent>
                         </Tooltip>
                       </div>
                     </td>

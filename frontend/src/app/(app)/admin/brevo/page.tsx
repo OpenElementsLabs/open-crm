@@ -1,17 +1,12 @@
-"use client";
+import { auth } from "@/auth";
+import { ForbiddenPage } from "@/components/forbidden-page";
+import { ROLE_IT_ADMIN } from "@/lib/roles";
+import { BrevoPageClient } from "./brevo-page-client";
 
-import { BrevoSync } from "@/components/brevo-sync";
-import { useTranslations } from "@/lib/i18n/language-context";
-
-export default function BrevoPage() {
-  const t = useTranslations();
-
-  return (
-    <div>
-      <h1 className="mb-6 font-heading text-2xl font-bold text-oe-dark">
-        {t.nav.brevo}
-      </h1>
-      <BrevoSync />
-    </div>
-  );
+export default async function BrevoPage() {
+  const session = await auth();
+  if (!session?.roles?.includes(ROLE_IT_ADMIN)) {
+    return <ForbiddenPage />;
+  }
+  return <BrevoPageClient />;
 }

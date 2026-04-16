@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { MessageSquarePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -8,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
-import { getTaskComments, createTaskComment, deleteComment } from "@/lib/api";
+import { getTaskComments, createTaskComment, deleteComment, ForbiddenError } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 function formatDate(dateString: string, language: string): string {
   const date = new Date(dateString);
@@ -31,6 +33,8 @@ interface TaskCommentsProps {
 export function TaskComments({ taskId, totalCount }: TaskCommentsProps) {
   const t = useTranslations();
   const S = t.tasks.comments;
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
 
   const [displayCount, setDisplayCount] = useState(totalCount);
   const [comments, setComments] = useState<CommentDto[]>([]);
@@ -100,8 +104,12 @@ export function TaskComments({ taskId, totalCount }: TaskCommentsProps) {
       setDisplayCount((prev) => (prev !== undefined && prev > 0 ? prev - 1 : prev));
       setDeleteTarget(null);
       setDeleteError(null);
-    } catch {
-      setDeleteError(S.deleteDialog.title);
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        setDeleteError(S.deleteDialog.title);
+      }
     }
   };
 
@@ -149,15 +157,18 @@ export function TaskComments({ taskId, totalCount }: TaskCommentsProps) {
                   </p>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
-                        className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                      <span>
+                        <button
+                          type="button"
+                          disabled={!canDelete}
+                          onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
+                          className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2 disabled:opacity-40 disabled:pointer-events-auto disabled:cursor-not-allowed"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </span>
                     </TooltipTrigger>
-                    <TooltipContent>{S.deleteDialog.title}</TooltipContent>
+                    <TooltipContent>{canDelete ? S.deleteDialog.title : t.errors.roleRequired.admin}</TooltipContent>
                   </Tooltip>
                 </div>
                 <p className="mt-1 text-sm text-oe-black whitespace-pre-wrap break-words">

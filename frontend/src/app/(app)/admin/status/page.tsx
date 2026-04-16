@@ -1,26 +1,12 @@
-"use client";
+import { auth } from "@/auth";
+import { ForbiddenPage } from "@/components/forbidden-page";
+import { ROLE_IT_ADMIN } from "@/lib/roles";
+import { ServerStatusClient } from "./server-status-client";
 
-import { useEffect, useState } from "react";
-import { HealthStatus } from "@/components/health-status";
-import { useTranslations } from "@/lib/i18n/language-context";
-
-export default function ServerStatusPage() {
-  const t = useTranslations();
-  const [healthy, setHealthy] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    fetch("/api/health")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setHealthy(data?.status === "UP"))
-      .catch(() => setHealthy(false));
-  }, []);
-
-  return (
-    <div>
-      <h1 className="mb-6 font-heading text-2xl font-bold text-oe-dark">
-        {t.nav.serverStatus}
-      </h1>
-      {healthy !== null && <HealthStatus healthy={healthy} />}
-    </div>
-  );
+export default async function ServerStatusPage() {
+  const session = await auth();
+  if (!session?.roles?.includes(ROLE_IT_ADMIN)) {
+    return <ForbiddenPage />;
+  }
+  return <ServerStatusClient />;
 }

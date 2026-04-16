@@ -11,6 +11,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { LanguageSwitch } from "@/components/language-switch";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_IT_ADMIN } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -28,6 +29,8 @@ function isAdminRoute(pathname: string): boolean {
 function NavLinks({ onNavigate, mobile }: { readonly onNavigate?: () => void; readonly mobile?: boolean }) {
   const t = useTranslations();
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const canSeeAdmin = hasRole(session, ROLE_IT_ADMIN);
   const [adminOpen, setAdminOpen] = useState(() => isAdminRoute(pathname));
 
   // Sync admin open state with pathname changes
@@ -42,13 +45,15 @@ function NavLinks({ onNavigate, mobile }: { readonly onNavigate?: () => void; re
     { label: t.nav.tags, href: "/tags", icon: <Tag className="h-5 w-5" /> },
   ];
 
-  const adminSubItems: NavItem[] = [
-    { label: t.nav.serverStatus, href: "/admin/status", icon: <Activity className="h-5 w-5" /> },
-    { label: t.nav.bearerToken, href: "/admin/token", icon: <KeyRound className="h-5 w-5" /> },
-    { label: t.nav.brevo, href: "/admin/brevo", icon: <RefreshCw className="h-5 w-5" /> },
-    { label: t.nav.apiKeys, href: "/api-keys", icon: <KeyRound className="h-5 w-5" /> },
-    { label: t.nav.webhooks, href: "/webhooks", icon: <Webhook className="h-5 w-5" /> },
-  ];
+  const adminSubItems: NavItem[] = canSeeAdmin
+    ? [
+        { label: t.nav.serverStatus, href: "/admin/status", icon: <Activity className="h-5 w-5" /> },
+        { label: t.nav.bearerToken, href: "/admin/token", icon: <KeyRound className="h-5 w-5" /> },
+        { label: t.nav.brevo, href: "/admin/brevo", icon: <RefreshCw className="h-5 w-5" /> },
+        { label: t.nav.apiKeys, href: "/api-keys", icon: <KeyRound className="h-5 w-5" /> },
+        { label: t.nav.webhooks, href: "/webhooks", icon: <Webhook className="h-5 w-5" /> },
+      ]
+    : [];
 
   const anyAdminActive = isAdminRoute(pathname);
 
@@ -79,37 +84,39 @@ function NavLinks({ onNavigate, mobile }: { readonly onNavigate?: () => void; re
         {mainItems.map((item) => renderItem(item))}
       </nav>
       <div className="mt-auto flex flex-col gap-1 px-3 pb-2">
-        {mobile ? (
-          /* Mobile: flat list of all admin sub-items */
-          adminSubItems.map((item) => renderItem(item))
-        ) : (
-          /* Desktop: collapsible admin group */
-          <>
-            <button
-              type="button"
-              onClick={() => setAdminOpen((prev) => !prev)}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors w-full text-left",
-                anyAdminActive
-                  ? "text-oe-white"
-                  : "text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white",
-              )}
-            >
-              <Settings className="h-5 w-5" />
-              {t.nav.admin}
-              <ChevronDown
+        {canSeeAdmin && (
+          mobile ? (
+            /* Mobile: flat list of all admin sub-items */
+            adminSubItems.map((item) => renderItem(item))
+          ) : (
+            /* Desktop: collapsible admin group */
+            <>
+              <button
+                type="button"
+                onClick={() => setAdminOpen((prev) => !prev)}
                 className={cn(
-                  "ml-auto h-4 w-4 transition-transform",
-                  adminOpen ? "rotate-0" : "-rotate-90",
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors w-full text-left",
+                  anyAdminActive
+                    ? "text-oe-white"
+                    : "text-oe-white/70 hover:bg-oe-white/10 hover:text-oe-white",
                 )}
-              />
-            </button>
-            {adminOpen && (
-              <div className="flex flex-col gap-1">
-                {adminSubItems.map((item) => renderItem(item, true))}
-              </div>
-            )}
-          </>
+              >
+                <Settings className="h-5 w-5" />
+                {t.nav.admin}
+                <ChevronDown
+                  className={cn(
+                    "ml-auto h-4 w-4 transition-transform",
+                    adminOpen ? "rotate-0" : "-rotate-90",
+                  )}
+                />
+              </button>
+              {adminOpen && (
+                <div className="flex flex-col gap-1">
+                  {adminSubItems.map((item) => renderItem(item, true))}
+                </div>
+              )}
+            </>
+          )
         )}
       </div>
     </div>

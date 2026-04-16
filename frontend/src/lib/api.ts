@@ -25,6 +25,9 @@ import type {
 import type { TaskStatus } from "./types";
 
 import { auth } from "@/auth";
+import { ForbiddenError } from "./forbidden-error";
+
+export { ForbiddenError };
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8080";
 
@@ -133,6 +136,9 @@ export async function deleteCompany(id: string, deleteContacts: boolean = false)
   const url = `${baseUrl()}/api/companies/${id}${deleteContacts ? "?deleteContacts=true" : ""}`;
   const response = await apiFetch(url, { method: "DELETE" });
 
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to delete company: ${response.status}`);
   }
@@ -159,6 +165,9 @@ export async function deleteCompanyLogo(id: string): Promise<void> {
   const url = `${baseUrl()}/api/companies/${id}/logo`;
   const response = await apiFetch(url, { method: "DELETE" });
 
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to delete logo: ${response.status}`);
   }
@@ -253,6 +262,9 @@ export async function deleteContact(id: string): Promise<void> {
   const url = `${baseUrl()}/api/contacts/${id}`;
   const response = await apiFetch(url, { method: "DELETE" });
 
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to delete contact: ${response.status}`);
   }
@@ -279,6 +291,9 @@ export async function deleteContactPhoto(id: string): Promise<void> {
   const url = `${baseUrl()}/api/contacts/${id}/photo`;
   const response = await apiFetch(url, { method: "DELETE" });
 
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to delete photo: ${response.status}`);
   }
@@ -398,6 +413,9 @@ export async function deleteComment(commentId: string): Promise<void> {
 
   if (response.status === 404) {
     return; // Comment already deleted
+  }
+  if (response.status === 403) {
+    throw new ForbiddenError();
   }
   if (!response.ok) {
     throw new Error(`Failed to delete comment: ${response.status}`);
@@ -534,6 +552,9 @@ export async function deleteTag(id: string): Promise<void> {
   const url = `${baseUrl()}/api/tags/${id}`;
   const response = await apiFetch(url, { method: "DELETE" });
 
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to delete tag: ${response.status}`);
   }
@@ -655,6 +676,9 @@ export async function deleteTask(id: string): Promise<void> {
   const url = `${baseUrl()}/api/tasks/${id}`;
   const response = await apiFetch(url, { method: "DELETE" });
 
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
   if (!response.ok) {
     throw new Error(`Failed to delete task: ${response.status}`);
   }

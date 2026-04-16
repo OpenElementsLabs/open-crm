@@ -2,18 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Mail, Pencil, Trash2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
 import { TagChips } from "@/components/tag-chips";
 import { DetailField } from "@/components/detail-field";
-import { deleteContact, getContactPhotoUrl } from "@/lib/api";
+import { deleteContact, ForbiddenError, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { useTranslations, useLanguage } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations>): string | null {
   if (!gender) return null;
@@ -58,6 +61,8 @@ export function ContactDetail({ contact }: ContactDetailProps) {
   const S = t.contacts;
   const { language } = useLanguage();
   const router = useRouter();
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -65,8 +70,12 @@ export function ContactDetail({ contact }: ContactDetailProps) {
     try {
       await deleteContact(contact.id);
       router.push("/contacts");
-    } catch {
-      setDeleteError(S.form.errorGeneric);
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        setDeleteError(S.form.errorGeneric);
+      }
     }
   };
 
@@ -115,17 +124,27 @@ export function ContactDetail({ contact }: ContactDetailProps) {
               {S.detail.createTask}
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
-            onClick={() => {
-              setDeleteError(null);
-              setDeleteOpen(true);
-            }}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            {S.detail.delete}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  variant="outline"
+                  className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
+                  disabled={!canDelete}
+                  onClick={() => {
+                    setDeleteError(null);
+                    setDeleteOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {S.detail.delete}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canDelete && (
+              <TooltipContent>{t.errors.roleRequired.admin}</TooltipContent>
+            )}
+          </Tooltip>
         </div>
       </div>
 

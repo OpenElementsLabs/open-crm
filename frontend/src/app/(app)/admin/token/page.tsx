@@ -1,17 +1,12 @@
-"use client";
+import { auth } from "@/auth";
+import { ForbiddenPage } from "@/components/forbidden-page";
+import { ROLE_IT_ADMIN } from "@/lib/roles";
+import { BearerTokenClient } from "./bearer-token-client";
 
-import { BearerTokenCard } from "@/components/bearer-token-card";
-import { useTranslations } from "@/lib/i18n/language-context";
-
-export default function BearerTokenPage() {
-  const t = useTranslations();
-
-  return (
-    <div>
-      <h1 className="mb-6 font-heading text-2xl font-bold text-oe-dark">
-        {t.nav.bearerToken}
-      </h1>
-      <BearerTokenCard />
-    </div>
-  );
+export default async function BearerTokenPage() {
+  const session = await auth();
+  if (!session?.roles?.includes(ROLE_IT_ADMIN)) {
+    return <ForbiddenPage />;
+  }
+  return <BearerTokenClient />;
 }

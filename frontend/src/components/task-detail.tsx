@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { DetailField } from "@/components/detail-field";
 import { TagChips } from "@/components/tag-chips";
 import { TaskComments } from "@/components/task-comments";
-import { deleteTask } from "@/lib/api";
+import { deleteTask, ForbiddenError } from "@/lib/api";
 import type { TaskDto, TaskStatus } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 const STATUS_BADGE_CLASSES: Record<TaskStatus, string> = {
   OPEN: "bg-blue-100 text-blue-800",
@@ -24,14 +27,21 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
   const t = useTranslations();
   const S = t.tasks;
   const router = useRouter();
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDelete = async () => {
     try {
       await deleteTask(task.id);
       router.push("/tasks");
-    } catch {
-      console.error("Failed to delete task");
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        console.error("Failed to delete task");
+      }
     }
   };
 
@@ -54,14 +64,24 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
               {S.edit}
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            {S.deleteDialog.confirm}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  variant="outline"
+                  className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
+                  disabled={!canDelete}
+                  onClick={() => { setDeleteError(null); setDeleteOpen(true); }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {S.deleteDialog.confirm}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canDelete && (
+              <TooltipContent>{t.errors.roleRequired.admin}</TooltipContent>
+            )}
+          </Tooltip>
         </div>
       </div>
 
@@ -108,12 +128,13 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
 
       <DeleteConfirmDialog
         open={deleteOpen}
-        onOpenChange={setDeleteOpen}
+        onOpenChange={(open) => { setDeleteOpen(open); if (!open) setDeleteError(null); }}
         title={S.deleteDialog.title}
         description={S.deleteDialog.description}
         confirmLabel={S.deleteDialog.confirm}
         cancelLabel={S.deleteDialog.cancel}
         onConfirm={handleDelete}
+        error={deleteError}
       />
     </div>
   );

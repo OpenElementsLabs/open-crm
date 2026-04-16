@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,11 +26,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl } from "@/lib/api";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, ForbiddenError } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
 
@@ -79,6 +81,8 @@ export function ContactList() {
   const S = t.contacts;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
   const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -153,8 +157,12 @@ export function ContactList() {
       setDeleteTarget(null);
       setDeleteError(null);
       fetchContacts();
-    } catch {
-      setDeleteError(S.form.errorGeneric);
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        setDeleteError(S.form.errorGeneric);
+      }
     }
   };
 
@@ -368,19 +376,22 @@ export function ContactList() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteError(null);
-                              setDeleteTarget(contact);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-oe-red" />
-                          </Button>
+                          <span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={!canDelete}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteError(null);
+                                setDeleteTarget(contact);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-oe-red" />
+                            </Button>
+                          </span>
                         </TooltipTrigger>
-                        <TooltipContent>{S.detail.delete}</TooltipContent>
+                        <TooltipContent>{canDelete ? S.detail.delete : t.errors.roleRequired.admin}</TooltipContent>
                       </Tooltip>
                     </TableCell>
                   </TableRow>

@@ -23,6 +23,8 @@ interface CompanyDeleteDialogProps {
   readonly deleteAllLabel: string;
   readonly deleteOnlyLabel: string;
   readonly cancelLabel: string;
+  readonly error?: string | null;
+  readonly errorTitle?: string;
 }
 
 export function CompanyDeleteDialog({
@@ -37,32 +39,44 @@ export function CompanyDeleteDialog({
   deleteAllLabel,
   deleteOnlyLabel,
   cancelLabel,
+  error,
+  errorTitle,
 }: CompanyDeleteDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <span className="block">{descriptionAll.replace("{name}", companyName)}</span>
-            <span className="block">{descriptionOnly.replace("{name}", companyName)}</span>
-          </AlertDialogDescription>
+          <AlertDialogTitle>{error ? errorTitle ?? title : title}</AlertDialogTitle>
+          {error ? (
+            <AlertDialogDescription>{error}</AlertDialogDescription>
+          ) : (
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">{descriptionAll.replace("{name}", companyName)}</span>
+              <span className="block">{descriptionOnly.replace("{name}", companyName)}</span>
+            </AlertDialogDescription>
+          )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <Button
-            onClick={onDeleteCompanyOnly}
-            variant="outline"
-            className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
-          >
-            {deleteOnlyLabel}
-          </Button>
-          <Button
-            onClick={onDeleteAll}
-            className="bg-oe-red hover:bg-oe-red-dark text-white"
-          >
-            {deleteAllLabel}
-          </Button>
+          {error ? (
+            <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+          ) : (
+            <>
+              <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+              <Button
+                onClick={onDeleteCompanyOnly}
+                variant="outline"
+                className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
+              >
+                {deleteOnlyLabel}
+              </Button>
+              <Button
+                onClick={onDeleteAll}
+                className="bg-oe-red hover:bg-oe-red-dark text-white"
+              >
+                {deleteAllLabel}
+              </Button>
+            </>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

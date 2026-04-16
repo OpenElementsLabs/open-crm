@@ -2,31 +2,41 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Pencil, Trash2, Users, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CompanyComments } from "@/components/company-comments";
 import { DetailField } from "@/components/detail-field";
 import { TagChips } from "@/components/tag-chips";
-import { deleteCompany, getCompanyLogoUrl } from "@/lib/api";
+import { deleteCompany, ForbiddenError, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
   const t = useTranslations();
   const S = t.companies;
   const router = useRouter();
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDeleteAll = async () => {
     try {
       await deleteCompany(company.id, true);
       router.push("/companies");
-    } catch {
-      console.error("Failed to delete company");
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        console.error("Failed to delete company");
+      }
     }
   };
 
@@ -34,8 +44,12 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
     try {
       await deleteCompany(company.id, false);
       router.push("/companies");
-    } catch {
-      console.error("Failed to delete company");
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        console.error("Failed to delete company");
+      }
     }
   };
 
@@ -82,14 +96,24 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
               {S.detail.createTask}
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            {S.detail.delete}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  variant="outline"
+                  className="text-oe-red border-oe-red hover:bg-oe-red-lighter"
+                  disabled={!canDelete}
+                  onClick={() => { setDeleteError(null); setDeleteOpen(true); }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {S.detail.delete}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canDelete && (
+              <TooltipContent>{t.errors.roleRequired.admin}</TooltipContent>
+            )}
+          </Tooltip>
         </div>
       </div>
 
@@ -155,7 +179,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
 
       <CompanyDeleteDialog
         open={deleteOpen}
-        onOpenChange={setDeleteOpen}
+        onOpenChange={(open) => { setDeleteOpen(open); if (!open) setDeleteError(null); }}
         companyName={company.name}
         onDeleteAll={handleDeleteAll}
         onDeleteCompanyOnly={handleDeleteCompanyOnly}
@@ -165,6 +189,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
         deleteAllLabel={S.deleteDialog.deleteAll}
         deleteOnlyLabel={S.deleteDialog.deleteOnly}
         cancelLabel={S.deleteDialog.cancel}
+        error={deleteError}
       />
     </div>
   );

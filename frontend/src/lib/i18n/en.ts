@@ -594,4 +594,16 @@ export const en: Translations = {
       next: "Next",
     },
   },
+  errors: {
+    forbidden: {
+      title: "Access denied",
+      description: "You don't have the required role to access this page.",
+      backToHome: "Back to home",
+      deleteNoPermission: "Delete not allowed — ADMIN role required.",
+    },
+    roleRequired: {
+      admin: "ADMIN role required",
+      itAdmin: "IT-ADMIN role required",
+    },
+  },
 } as const;

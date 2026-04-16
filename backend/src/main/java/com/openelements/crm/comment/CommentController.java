@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -79,8 +80,10 @@ public class CommentController {
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete a comment")
     @ApiResponse(responseCode = "204", description = "Comment deleted")
+    @ApiResponse(responseCode = "403", description = "Missing ADMIN role")
     @ApiResponse(responseCode = "404", description = "Comment not found")
     public void delete(@Parameter(description = "The comment ID") @PathVariable final UUID id) {
         commentService.delete(id);

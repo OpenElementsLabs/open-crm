@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,11 +26,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl } from "@/lib/api";
+import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, ForbiddenError } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
+import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
 
@@ -74,6 +76,8 @@ export function CompanyList() {
   const S = t.companies;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const canDelete = hasRole(session, ROLE_ADMIN);
   const [data, setData] = useState<Page<CompanyDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -93,6 +97,7 @@ export function CompanyList() {
   });
 
   const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [commentTarget, setCommentTarget] = useState<CompanyDto | null>(null);
   const [commentSending, setCommentSending] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
@@ -133,9 +138,14 @@ export function CompanyList() {
     try {
       await deleteCompany(deleteTarget.id, true);
       setDeleteTarget(null);
+      setDeleteError(null);
       fetchCompanies();
-    } catch {
-      console.error("Failed to delete company");
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        console.error("Failed to delete company");
+      }
     }
   };
 
@@ -144,9 +154,14 @@ export function CompanyList() {
     try {
       await deleteCompany(deleteTarget.id, false);
       setDeleteTarget(null);
+      setDeleteError(null);
       fetchCompanies();
-    } catch {
-      console.error("Failed to delete company");
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        console.error("Failed to delete company");
+      }
     }
   };
 
@@ -327,18 +342,22 @@ export function CompanyList() {
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteTarget(company);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-oe-red" />
-                          </Button>
+                          <span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={!canDelete}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteError(null);
+                                setDeleteTarget(company);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-oe-red" />
+                            </Button>
+                          </span>
                         </TooltipTrigger>
-                        <TooltipContent>{S.detail.delete}</TooltipContent>
+                        <TooltipContent>{canDelete ? S.detail.delete : t.errors.roleRequired.admin}</TooltipContent>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
@@ -396,6 +415,7 @@ export function CompanyList() {
         onOpenChange={(open) => {
           if (!open) {
             setDeleteTarget(null);
+            setDeleteError(null);
           }
         }}
         companyName={deleteTarget?.name ?? ""}
@@ -407,6 +427,7 @@ export function CompanyList() {
         deleteAllLabel={S.deleteDialog.deleteAll}
         deleteOnlyLabel={S.deleteDialog.deleteOnly}
         cancelLabel={S.deleteDialog.cancel}
+        error={deleteError}
       />
 
       <AddCommentDialog
