@@ -1,7 +1,6 @@
 package com.openelements.crm.task;
 
 import com.openelements.spring.base.data.WithId;
-import com.openelements.spring.base.services.tag.TagEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -25,29 +24,4 @@ public record TaskDto(
     @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) implements WithId {
 
-    public static TaskDto fromEntity(final TaskEntity entity, final long commentCount) {
-        final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
-        final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
-        final UUID contactId = entity.getContact() != null ? entity.getContact().getId() : null;
-        final String contactName = entity.getContact() != null
-            ? entity.getContact().getFirstName() + " " + entity.getContact().getLastName()
-            : null;
-        final List<UUID> tagIds = entity.getTags().stream()
-            .map(TagEntity::getId)
-            .toList();
-        return new TaskDto(
-            entity.getId(),
-            entity.getAction(),
-            entity.getDueDate(),
-            entity.getStatus(),
-            companyId,
-            companyName,
-            contactId,
-            contactName,
-            tagIds,
-            commentCount,
-            entity.getCreatedAt(),
-            entity.getUpdatedAt()
-        );
-    }
 }

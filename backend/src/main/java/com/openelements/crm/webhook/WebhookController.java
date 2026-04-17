@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -72,7 +73,7 @@ public class WebhookController {
     @ApiResponse(responseCode = "200", description = "Webhook found")
     @ApiResponse(responseCode = "404", description = "Webhook not found")
     public WebhookDto getById(@Parameter(description = "The webhook ID") @PathVariable final UUID id) {
-        return webhookService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        return webhookService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     /**

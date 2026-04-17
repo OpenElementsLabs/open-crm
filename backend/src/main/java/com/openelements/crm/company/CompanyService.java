@@ -5,7 +5,7 @@ import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.task.TaskRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Service handling company business logic including CRUD operations and hard-delete.
@@ -32,12 +32,12 @@ import java.util.regex.Pattern;
 @Transactional
 public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, CompanyDto> {
 
+    private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(ImageData.CONTENT_TYPE_SVG, ImageData.CONTENT_TYPE_PNG, ImageData.CONTENT_TYPE_JPEG);
+
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
     private final CommentRepository commentRepository;
-    private final TaskRepository taskRepository;
     private final TagRepository tagRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public CompanyService(final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
@@ -49,9 +49,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
-        this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
-        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     /**
@@ -95,7 +93,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
             });
         }
 
-        return companyRepository.findAll(spec, pageable).map(this::toDto);
+        return companyRepository.findAll(spec, pageable).map(e -> toData(e));
     }
 
     /**
@@ -137,15 +135,9 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         }
 
         return companyRepository.findAll(spec, Sort.by("name")).stream()
-            .map(this::toDto)
+            .map(e -> toData(e))
             .toList();
     }
-
-    private static final Pattern IBAN_PATTERN = Pattern.compile("^[A-Z]{2}[A-Za-z0-9]+$");
-    private static final Pattern BIC_PATTERN = Pattern.compile("^[A-Z0-9]+$");
-
-    private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(
-        "image/svg+xml", "image/png", "image/jpeg");
 
     /**
      * Uploads or replaces the logo for a company.
@@ -163,7 +155,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Invalid content type: " + contentType + ". Allowed: " + ALLOWED_LOGO_TYPES);
         }
-        final CompanyEntity entity = findOrThrow(id);
+        final CompanyEntity entity = companyRepository.findByIdOrThrow(id);
         entity.setLogo(data);
         entity.setLogoContentType(contentType);
         companyRepository.saveAndFlush(entity);
@@ -179,7 +171,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
     @Transactional(readOnly = true)
     public ImageData getLogo(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        final CompanyEntity entity = findOrThrow(id);
+        final CompanyEntity entity = companyRepository.findByIdOrThrow(id);
         if (entity.getLogo() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No logo for company: " + id);
         }
@@ -194,22 +186,10 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
      */
     public void deleteLogo(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        final CompanyEntity entity = findOrThrow(id);
+        final CompanyEntity entity = companyRepository.findByIdOrThrow(id);
         entity.setLogo(null);
         entity.setLogoContentType(null);
         companyRepository.saveAndFlush(entity);
-    }
-
-    private CompanyDto toDto(final CompanyEntity entity) {
-        final long contactCount = contactRepository.countByCompanyId(entity.getId());
-        final long commentCount = commentRepository.countByCompanyId(entity.getId());
-        return CompanyDto.fromEntity(entity, contactCount, commentCount);
-    }
-
-    private CompanyEntity findOrThrow(final UUID id) {
-        return companyRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Company not found: " + id));
     }
 
     @Override
@@ -233,10 +213,11 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         entity.setBic(data.bic());
         entity.setIban(data.iban());
         entity.setVatId(data.vatId());
-        entity.setTags(new HashSet<>());
-        if (data.tagIds() != null) {
-            entity.getTags().addAll(tagRepository.findAllById(data.tagIds()));
-        }
+        final Set<TagEntity> tags = Optional.ofNullable(data.tagIds())
+            .orElse(List.of()).stream()
+            .map(id -> tagRepository.findByIdOrThrow(id))
+            .collect(Collectors.toUnmodifiableSet());
+        entity.setTags(tags);
     }
 
     @Override

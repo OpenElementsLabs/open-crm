@@ -4,7 +4,7 @@ import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import com.openelements.crm.contact.ContactService;
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -135,7 +136,7 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Company found")
     @ApiResponse(responseCode = "404", description = "Company not found")
     public CompanyDto getById(@Parameter(description = "The company ID") @PathVariable final UUID id) {
-        return companyService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        return companyService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
     }
 
     /**
@@ -189,7 +190,7 @@ public class CompanyController {
     @ApiResponse(responseCode = "404", description = "Company not found")
     public CompanyDto update(@Parameter(description = "The company ID") @PathVariable final UUID id,
                              @Valid @RequestBody final CompanyDataDto request) {
-        final CompanyDto current = companyService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        final CompanyDto current = companyService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
         final CompanyDto dto = new CompanyDto(id,
             request.name(),
             request.email(),

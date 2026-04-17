@@ -6,10 +6,12 @@ import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.task.TaskRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
+import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service handling contact business logic including CRUD operations and company validation.
@@ -34,9 +39,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
     private final ContactRepository contactRepository;
     private final CompanyRepository companyRepository;
     private final CommentRepository commentRepository;
-    private final TaskRepository taskRepository;
     private final TagRepository tagRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public ContactService(final ContactRepository contactRepository,
                           final CompanyRepository companyRepository,
@@ -48,9 +51,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
-        this.taskRepository = Objects.requireNonNull(taskRepository, "taskRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagService must not be null");
-        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     /**
@@ -132,7 +133,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
             });
         }
 
-        return contactRepository.findAll(spec, pageable).map(this::toDto);
+        return contactRepository.findAll(spec, pageable).map(e -> toData(e));
     }
 
     /**
@@ -212,7 +213,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         }
 
         return contactRepository.findAll(spec, Sort.by("lastName", "firstName")).stream()
-            .map(this::toDto)
+            .map(e -> toData(e))
             .toList();
     }
 
@@ -232,7 +233,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Invalid content type: " + contentType + ". Only image/jpeg is allowed.");
         }
-        final ContactEntity entity = findOrThrow(id);
+        final ContactEntity entity = contactRepository.findByIdOrThrow(id);
         entity.setPhoto(data);
         entity.setPhotoContentType(contentType);
         contactRepository.saveAndFlush(entity);
@@ -248,7 +249,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
     @Transactional(readOnly = true)
     public ImageData getPhoto(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        final ContactEntity entity = findOrThrow(id);
+        final ContactEntity entity = contactRepository.findByIdOrThrow(id);
         if (entity.getPhoto() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No photo for contact: " + id);
         }
@@ -263,22 +264,10 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
      */
     public void deletePhoto(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        final ContactEntity entity = findOrThrow(id);
+        final ContactEntity entity = contactRepository.findByIdOrThrow(id);
         entity.setPhoto(null);
         entity.setPhotoContentType(null);
         contactRepository.saveAndFlush(entity);
-    }
-
-    private ContactDto toDto(final ContactEntity entity) {
-        final long commentCount = commentRepository.countByContactId(entity.getId());
-        return ContactDto.fromEntity(entity, commentCount);
-    }
-
-
-    private ContactEntity findOrThrow(final UUID id) {
-        return contactRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Contact not found: " + id));
     }
 
     @Override
@@ -303,43 +292,69 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         entity.setDescription(data.description());
         entity.setBirthday(data.birthday());
         entity.setLanguage(data.language());
-        entity.getSocialLinks().clear();
-        if (data.socialLinks() != null) {
-            for (final SocialLinkDto linkDto : data.socialLinks()) {
+
+        final List<SocialLinkEntity> socialLinks = Optional.ofNullable(data.socialLinks()).orElse(List.of())
+            .stream().map(linkDto -> {
                 final SocialNetworkType networkType = SocialNetworkType.valueOf(linkDto.networkType());
                 final SocialNetworkType.ResolvedLink resolved = networkType.resolve(linkDto.value());
                 final SocialLinkEntity linkEntity = new SocialLinkEntity();
                 linkEntity.setNetworkType(networkType);
                 linkEntity.setValue(resolved.value());
                 linkEntity.setUrl(resolved.url());
-                entity.getSocialLinks().add(linkEntity);
-            }
-        }
+                return linkEntity;
+            }).toList();
+        entity.setSocialLinks(socialLinks);
 
-        if (data.companyId() != null) {
-            final CompanyEntity company = companyRepository.findById(data.companyId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Company not found: " + data.companyId()));
-            entity.setCompany(company);
-        } else {
-            entity.setCompany(null);
-        }
+        final CompanyEntity company = Optional.ofNullable(data.companyId())
+            .map(id -> companyRepository.findByIdOrThrow(id))
+            .orElse(null);
+        entity.setCompany(company);
 
-        entity.getTags().clear();
-        if (data.tagIds() != null) {
-            entity.getTags().addAll(tagRepository.findAll(data.tagIds()));
-        }
+
+        final Set<TagEntity> tags = Optional.ofNullable(data.tagIds()).orElse(List.of()).stream()
+            .map(id -> tagRepository.findByIdOrThrow(id))
+            .collect(Collectors.toUnmodifiableSet());
+        entity.setTags(tags);
     }
 
     @Override
     protected ContactDto toData(ContactEntity entity) {
         final long commentCount = commentRepository.countByContactId(entity.getId());
-        return ContactDto.fromEntity(entity, commentCount);
+        final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
+        final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
+        final List<UUID> tagIds = entity.getTags().stream()
+            .map(TagEntity::getId)
+            .toList();
+        return new ContactDto(
+            entity.getId(),
+            entity.getTitle(),
+            entity.getFirstName(),
+            entity.getLastName(),
+            entity.getEmail(),
+            entity.getPosition(),
+            entity.getGender(),
+            entity.getSocialLinks().stream().map(e -> socialLinkFromEntity(e)).toList(),
+            entity.getPhoneNumber(),
+            entity.getDescription(),
+            companyId,
+            companyName,
+            commentCount,
+            entity.getPhoto() != null,
+            entity.getBirthday(),
+            entity.getBrevoId() != null,
+            entity.isReceivesNewsletter(),
+            entity.getLanguage(),
+            tagIds,
+            entity.getCreatedAt(),
+            entity.getUpdatedAt()
+        );
     }
 
-    public List<ContactDto> getForCompany(final UUID companyId) {
+    @NonNull
+    public List<ContactDto> getForCompany(@NonNull final UUID companyId) {
+        Objects.requireNonNull(companyId, "companyId must not be null");
         return contactRepository.findByCompanyId(companyId).stream()
-            .map(this::toDto)
+            .map(e -> toData(e))
             .toList();
     }
 
@@ -351,4 +366,11 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
             .count();
     }
 
+    private static SocialLinkDto socialLinkFromEntity(final SocialLinkEntity entity) {
+        return new SocialLinkDto(
+            entity.getNetworkType().name(),
+            entity.getValue(),
+            entity.getUrl()
+        );
+    }
 }

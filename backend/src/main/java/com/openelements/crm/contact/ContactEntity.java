@@ -2,7 +2,7 @@ package com.openelements.crm.contact;
 
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.spring.base.data.AbstractEntity;
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;

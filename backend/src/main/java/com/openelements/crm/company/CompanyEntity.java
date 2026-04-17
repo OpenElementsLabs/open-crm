@@ -1,29 +1,22 @@
 package com.openelements.crm.company;
 
-import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.AbstractEntity;
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import java.time.Instant;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * JPA entity representing a company in the CRM system.
@@ -86,9 +79,9 @@ public class CompanyEntity extends AbstractEntity {
 
     @ManyToMany
     @JoinTable(
-            name = "company_tags",
-            joinColumns = @JoinColumn(name = "company_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+        name = "company_tags",
+        joinColumns = @JoinColumn(name = "company_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<TagEntity> tags = new HashSet<>();

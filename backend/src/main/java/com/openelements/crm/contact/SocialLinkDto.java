@@ -8,14 +8,6 @@ public record SocialLinkDto(
     @Schema(description = "Normalized value (username/handle)") String value,
     @Schema(description = "Full URL") String url
 ) {
-    public static SocialLinkDto fromEntity(final SocialLinkEntity entity) {
-        return new SocialLinkDto(
-            entity.getNetworkType().name(),
-            entity.getValue(),
-            entity.getUrl()
-        );
-    }
-
     public static SocialLinkDto fromCreateDto(SocialLinkCreateDto socialLinkCreateDto) {
         return new SocialLinkDto(
             socialLinkCreateDto.networkType(),

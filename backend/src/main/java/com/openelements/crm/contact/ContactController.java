@@ -3,7 +3,7 @@ package com.openelements.crm.contact;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -143,7 +144,7 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Contact found")
     @ApiResponse(responseCode = "404", description = "Contact not found")
     public ContactDto getById(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
-        return contactService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        return contactService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -256,8 +257,7 @@ public class ContactController {
         try {
             contactService.uploadPhoto(id, file.getBytes(), file.getContentType());
         } catch (final java.io.IOException e) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Failed to read file");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to read file");
         }
     }
 

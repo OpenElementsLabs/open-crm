@@ -1,6 +1,6 @@
 package com.openelements.crm.user;
 
-import com.openelements.spring.base.security.user.ImageData;
+import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.security.user.UserDto;
 import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,8 +39,8 @@ public class UserController {
     public ResponseEntity<byte[]> getAvatar() {
         final ImageData avatar = userService.getAvatarOfCurrentUser();
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(avatar.contentType()))
-                .body(avatar.data());
+            .contentType(MediaType.parseMediaType(avatar.contentType()))
+            .body(avatar.data());
     }
 
     @PutMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

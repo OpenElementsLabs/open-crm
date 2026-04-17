@@ -1,11 +1,10 @@
 package com.openelements.crm.comment;
 
-import java.util.UUID;
-
 import com.openelements.spring.base.data.EntityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
 
 /**
  * Spring Data repository for {@link CommentEntity} persistence operations.
@@ -31,20 +30,6 @@ public interface CommentRepository extends EntityRepository<CommentEntity> {
     Page<CommentEntity> findByContactId(UUID contactId, Pageable pageable);
 
     /**
-     * Deletes all comments attached to the given contact.
-     *
-     * @param contactId the contact ID
-     */
-    void deleteByContactId(UUID contactId);
-
-    /**
-     * Deletes all comments attached to the given company.
-     *
-     * @param companyId the company ID
-     */
-    void deleteByCompanyId(UUID companyId);
-
-    /**
      * Counts all comments attached to the given company.
      *
      * @param companyId the company ID
@@ -68,13 +53,6 @@ public interface CommentRepository extends EntityRepository<CommentEntity> {
      * @return a page of comments
      */
     Page<CommentEntity> findByTaskId(UUID taskId, Pageable pageable);
-
-    /**
-     * Deletes all comments attached to the given task.
-     *
-     * @param taskId the task ID
-     */
-    void deleteByTaskId(UUID taskId);
 
     /**
      * Counts all comments attached to the given task.

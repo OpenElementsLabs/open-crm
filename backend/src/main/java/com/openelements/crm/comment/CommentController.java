@@ -1,6 +1,5 @@
 package com.openelements.crm.comment;
 
-import com.openelements.crm.user.UserController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,16 +34,14 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    private final UserController userController;
 
     /**
      * Creates a new CommentController.
      *
      * @param commentService the comment service
      */
-    public CommentController(final CommentService commentService, final UserController userController) {
+    public CommentController(final CommentService commentService) {
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
-        this.userController = Objects.requireNonNull(userController, "userController must not be null");
     }
 
     /**
@@ -61,8 +58,8 @@ public class CommentController {
     @ApiResponse(responseCode = "404", description = "Comment not found")
     public CommentDto update(@Parameter(description = "The comment ID") @PathVariable final UUID id,
                              @Valid @RequestBody final CommentUpdateDto request) {
-        CommentDto base = commentService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
-        CommentDto updated = new CommentDto(base.id(),
+        final CommentDto base = commentService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        final CommentDto updated = new CommentDto(base.id(),
             request.text(),
             base.author(),
             base.companyId(),

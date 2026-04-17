@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
@@ -68,7 +69,7 @@ public class TaskController {
     @Operation(summary = "Get a task by ID")
     public TaskDto getById(
         @Parameter(description = "Task ID") @PathVariable final UUID id) {
-        return taskService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        return taskService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping("/{id}")
@@ -76,7 +77,7 @@ public class TaskController {
     public TaskDto update(
         @Parameter(description = "Task ID") @PathVariable final UUID id,
         @Valid @RequestBody final TaskUpdateDto request) {
-        final TaskDto current = taskService.findById(id).orElseThrow(() -> new IllegalArgumentException("id"));
+        final TaskDto current = taskService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         final TaskDto dto = new TaskDto(id,
             request.action(),
             request.dueDate(),

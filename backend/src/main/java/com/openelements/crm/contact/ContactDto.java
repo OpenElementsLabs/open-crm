@@ -1,7 +1,6 @@
 package com.openelements.crm.contact;
 
 import com.openelements.spring.base.data.WithId;
-import com.openelements.spring.base.services.tag.TagEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -34,34 +33,4 @@ public record ContactDto(
     @Schema(description = "Last update timestamp", requiredMode = Schema.RequiredMode.REQUIRED) Instant updatedAt
 ) implements WithId {
 
-    public static ContactDto fromEntity(final ContactEntity entity, final long commentCount) {
-        final UUID companyId = entity.getCompany() != null ? entity.getCompany().getId() : null;
-        final String companyName = entity.getCompany() != null ? entity.getCompany().getName() : null;
-        final List<UUID> tagIds = entity.getTags().stream()
-            .map(TagEntity::getId)
-            .toList();
-        return new ContactDto(
-            entity.getId(),
-            entity.getTitle(),
-            entity.getFirstName(),
-            entity.getLastName(),
-            entity.getEmail(),
-            entity.getPosition(),
-            entity.getGender(),
-            entity.getSocialLinks().stream().map(SocialLinkDto::fromEntity).toList(),
-            entity.getPhoneNumber(),
-            entity.getDescription(),
-            companyId,
-            companyName,
-            commentCount,
-            entity.getPhoto() != null,
-            entity.getBirthday(),
-            entity.getBrevoId() != null,
-            entity.isReceivesNewsletter(),
-            entity.getLanguage(),
-            tagIds,
-            entity.getCreatedAt(),
-            entity.getUpdatedAt()
-        );
-    }
 }

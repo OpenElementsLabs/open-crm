@@ -1,7 +1,9 @@
 package com.openelements.crm.task;
 
 import com.openelements.crm.comment.CommentRepository;
+import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
+import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
@@ -19,8 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,7 +35,6 @@ public class TaskService extends AbstractDbBackedDataService<TaskEntity, TaskDto
     private final ContactRepository contactRepository;
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public TaskService(final TaskRepository taskRepository,
                        final CompanyRepository companyRepository,
@@ -45,13 +48,12 @@ public class TaskService extends AbstractDbBackedDataService<TaskEntity, TaskDto
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
-        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
     }
 
     @Transactional(readOnly = true)
     public Page<TaskDto> list(final TaskStatus status, final List<UUID> tagIds, final Pageable pageable) {
         final Specification<TaskEntity> spec = buildSpec(status, tagIds);
-        return taskRepository.findAll(spec, pageable).map(this::toDto);
+        return taskRepository.findAll(spec, pageable).map(e -> toData(e));
     }
 
     private Specification<TaskEntity> buildSpec(final TaskStatus status, final List<UUID> tagIds) {
@@ -72,11 +74,6 @@ public class TaskService extends AbstractDbBackedDataService<TaskEntity, TaskDto
         };
     }
 
-    private TaskDto toDto(final TaskEntity entity) {
-        final long commentCount = commentRepository.countByTaskId(entity.getId());
-        return TaskDto.fromEntity(entity, commentCount);
-    }
-
     @Override
     protected TaskEntity createDetachedEntity() {
         return new TaskEntity();
@@ -87,22 +84,21 @@ public class TaskService extends AbstractDbBackedDataService<TaskEntity, TaskDto
         entity.setAction(data.action());
         entity.setDueDate(data.dueDate());
         entity.setStatus(data.status());
-        if (data.companyId() != null) {
-            companyRepository.findById(data.companyId()).ifPresent(entity::setCompany);
-        } else {
-            entity.setCompany(null);
-        }
-        if (data.contactId() != null) {
-            contactRepository.findById(data.contactId()).ifPresent(entity::setContact);
-        } else {
-            entity.setContact(null);
-        }
-        if (data.tagIds() != null) {
-            final List<TagEntity> tags = tagRepository.findAllById(data.tagIds());
-            entity.setTags(Set.copyOf(tags));
-        } else {
-            entity.setTags(Set.of());
-        }
+
+        final CompanyEntity company = Optional.ofNullable(data.companyId())
+            .map(id -> companyRepository.findByIdOrThrow(id))
+            .orElse(null);
+        entity.setCompany(company);
+
+        final ContactEntity contact = Optional.ofNullable(data.contactId())
+            .map(id -> contactRepository.findByIdOrThrow(id))
+            .orElse(null);
+        entity.setContact(contact);
+
+        final Set<TagEntity> tags = Optional.ofNullable(data.tagIds()).orElse(List.of()).stream()
+            .map(id -> tagRepository.findByIdOrThrow(id))
+            .collect(Collectors.toUnmodifiableSet());
+        entity.setTags(tags);
     }
 
     @Override
