@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@open-elements/ui";
 import {
   Dialog,
   DialogContent,

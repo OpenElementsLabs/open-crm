@@ -1,4 +1,5 @@
 import type { Translations } from "./index";
+import { en as uiEn } from "@open-elements/ui";
 
 export const en: Translations = {
   print: {
@@ -606,4 +607,5 @@ export const en: Translations = {
       itAdmin: "IT-ADMIN role required",
     },
   },
+  ...uiEn,
 } as const;

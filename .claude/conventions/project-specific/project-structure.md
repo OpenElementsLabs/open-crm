@@ -31,7 +31,20 @@ open-crm/
 │   ├── db-backup.sh                — pg_dump + gzip + S3 upload with retention cleanup
 │   ├── db-restore.sh               — S3 download + database restore
 │   └── Dockerfile                  — Alpine container with postgresql-client and aws-cli
-├── frontend/                       — Next.js TypeScript frontend
+├── frontend/                       — Next.js TypeScript frontend (pnpm workspace root)
+│   ├── pnpm-workspace.yaml         — Workspace config (packages/*)
+│   ├── packages/
+│   │   └── ui/                     — @open-elements/ui package
+│   │       ├── src/
+│   │       │   ├── components/     — Extracted UI components (Button, Input, Textarea, InputGroup, Combobox, TagMultiSelect)
+│   │       │   ├── lib/utils.ts    — cn() class merging utility
+│   │       │   ├── types/index.ts  — TagDto and TagMultiSelect types
+│   │       │   ├── i18n/           — DE/EN translations for package components
+│   │       │   ├── styles/brand.css — Open Elements brand colors, fonts, semantic tokens
+│   │       │   └── index.ts        — Barrel export (public API)
+│   │       ├── package.json        — Peer dependencies, dev tooling
+│   │       ├── tsconfig.json       — TypeScript config with @ui/* path alias
+│   │       └── vitest.config.ts    — Test config (jsdom)
 │   ├── src/auth.ts                 — Auth.js v5 OIDC configuration (provider, JWT, session callbacks, custom login page)
 │   ├── src/middleware.ts            — Route protection (excludes /login, /api/auth, static assets)
 │   ├── src/app/                    — Next.js App Router pages
@@ -57,7 +70,7 @@ open-crm/
 │   │       ├── logout/             — Logout handler (chunked cookie deletion, OIDC end-session)
 │   │       └── [...path]/          — API proxy with JWT token forwarding
 │   ├── src/components/             — React components
-│   │   ├── ui/                     — shadcn/ui primitives (button, card, table, dialog, tooltip, etc.)
+│   │   ├── ui/                     — shadcn/ui primitives (card, table, dialog, tooltip, etc. — Button, Input, Textarea, InputGroup, Combobox moved to @open-elements/ui)
 │   │   ├── sidebar.tsx             — Navigation sidebar with branding and authenticated user section
 │   │   ├── session-provider.tsx    — Auth.js SessionProvider wrapper
 │   │   ├── company-list.tsx        — Company list with filters, print, CSV export
@@ -77,7 +90,7 @@ open-crm/
 │   │   ├── bearer-token-card.tsx   — Bearer token display with show/hide, copy, validity countdown
 │   │   ├── tag-form.tsx            — Tag create/edit form with color picker
 │   │   ├── tag-chips.tsx           — Colored tag chips for detail views
-│   │   ├── tag-multi-select.tsx    — Multi-select dropdown for tag assignment in forms
+│   │   ├── (tag-multi-select.tsx)   — Moved to @open-elements/ui package
 │   │   ├── detail-field.tsx        — Shared detail field with action icons (copy, link, mail, tel)
 │   │   ├── csv-export-dialog.tsx   — CSV column selection dialog
 │   │   ├── add-comment-dialog.tsx  — Comment creation modal
@@ -89,7 +102,7 @@ open-crm/
 │   ├── src/lib/                    — Shared utilities
 │   │   ├── api.ts                  — Backend API client functions
 │   │   ├── types.ts                — TypeScript type definitions (DTOs, Page)
-│   │   ├── utils.ts                — General utilities (cn helper)
+│   │   ├── (utils.ts)              — cn() moved to @open-elements/ui package
 │   │   └── i18n/                   — Internationalization
 │   │       ├── de.ts               — German translations
 │   │       ├── en.ts               — English translations

@@ -5,7 +5,6 @@ import type {
   ContactCreateDto,
   CommentDto,
   CommentCreateDto,
-  TagDto,
   TagCreateDto,
   TaskDto,
   TaskCreateDto,
@@ -21,6 +20,7 @@ import type {
   BrevoSyncResultDto,
   Page,
 } from "./types";
+import type { TagDto } from "@open-elements/ui";
 
 import type { TaskStatus } from "./types";
 

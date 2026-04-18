@@ -1,3 +1,5 @@
+import { de as uiDe } from "@open-elements/ui";
+
 export const de = {
   print: {
     button: "Drucken",
@@ -604,4 +606,5 @@ export const de = {
       itAdmin: "IT-ADMIN-Rolle erforderlich",
     },
   },
+  ...uiDe,
 } as const;

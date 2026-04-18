@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Radio, Webhook } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, Input } from "@open-elements/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,

@@ -3,9 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Trash2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button, Input, Textarea, TagMultiSelect } from "@open-elements/ui";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TagMultiSelect } from "@/components/tag-multi-select";
-import { createContact, updateContact, getCompaniesForSelect, uploadContactPhoto, deleteContactPhoto, getContactPhotoUrl } from "@/lib/api";
+import { createContact, updateContact, getCompaniesForSelect, uploadContactPhoto, deleteContactPhoto, getContactPhotoUrl, getTags } from "@/lib/api";
 import type { ContactDto, ContactCreateDto, CompanyDto } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 
@@ -375,6 +372,8 @@ export function ContactForm({ contact }: ContactFormProps) {
             <TagMultiSelect
               selectedIds={tagIds}
               onChange={(ids) => { setTagIds(ids); setTagIdsChanged(true); }}
+              loadTags={async () => { const result = await getTags({ size: 1000 }); return result.content.map(tag => ({ value: tag.id, label: tag.name, color: tag.color })); }}
+              translations={{ placeholder: t.tags.label + "...", empty: t.tags.empty }}
             />
           </div>
 

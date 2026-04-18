@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n/language-context";
 
 export function ForbiddenPage() {

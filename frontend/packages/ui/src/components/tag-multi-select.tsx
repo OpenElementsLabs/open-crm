@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTags } from "@/lib/api";
-import { useTranslations } from "@/lib/i18n/language-context";
-import type { TagDto } from "@/lib/types";
+import type { TagOption, TagMultiSelectProps, TagMultiSelectTranslations } from "../types";
 import {
   Combobox,
   ComboboxChips,
@@ -13,18 +11,7 @@ import {
   ComboboxItem,
   ComboboxList,
   useComboboxAnchor,
-} from "@/components/ui/combobox";
-
-interface TagMultiSelectProps {
-  readonly selectedIds: readonly string[];
-  readonly onChange: (ids: string[]) => void;
-}
-
-interface TagOption {
-  readonly value: string;
-  readonly label: string;
-  readonly color: string;
-}
+} from "./combobox";
 
 function isValidHex(color: string): boolean {
   return /^#[0-9A-Fa-f]{6}$/.test(color);
@@ -38,30 +25,22 @@ function getContrastColor(hex: string): string {
   return luminance > 0.5 ? "#1A1A1A" : "#FFFFFF";
 }
 
-export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
-  const t = useTranslations();
-  const [allTags, setAllTags] = useState<TagDto[]>([]);
+export function TagMultiSelect({ selectedIds, onChange, loadTags, translations }: TagMultiSelectProps) {
+  const [tagOptions, setTagOptions] = useState<TagOption[]>([]);
   const anchorRef = useComboboxAnchor();
 
   useEffect(() => {
-    getTags({ size: 1000 })
-      .then((result) => setAllTags([...result.content]))
+    loadTags()
+      .then((tags) => setTagOptions(tags))
       .catch(() => {});
-  }, []);
-
-  const tagOptions: TagOption[] = allTags.map((tag) => ({
-    value: tag.id,
-    label: tag.name,
-    color: tag.color,
-  }));
+  }, [loadTags]);
 
   const selectedOptions = tagOptions.filter((opt) => selectedIds.includes(opt.value));
-  const selectedValues = selectedOptions;
 
   return (
     <Combobox
       multiple
-      value={selectedValues}
+      value={selectedOptions}
       onValueChange={(options: TagOption[]) => onChange(options.map((o) => o.value))}
     >
       <ComboboxChips ref={anchorRef}>
@@ -77,11 +56,11 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
             </ComboboxChip>
           );
         })}
-        <ComboboxChipsInput placeholder={`${t.tags.label}...`} />
+        <ComboboxChipsInput placeholder={translations.placeholder} />
       </ComboboxChips>
       <ComboboxContent anchor={anchorRef}>
         {tagOptions.length === 0 ? (
-          <p className="py-2 text-center text-sm text-muted-foreground">{t.tags.empty}</p>
+          <p className="py-2 text-center text-sm text-muted-foreground">{translations.empty}</p>
         ) : (
           <ComboboxList>
             {tagOptions.map((opt) => (
@@ -99,3 +78,5 @@ export function TagMultiSelect({ selectedIds, onChange }: TagMultiSelectProps) {
     </Combobox>
   );
 }
+
+export type { TagMultiSelectProps, TagMultiSelectTranslations, TagOption };

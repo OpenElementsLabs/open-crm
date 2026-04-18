@@ -15,7 +15,7 @@
 ## Build Tools & Package Managers
 
 - Maven with Maven Wrapper (`./mvnw`) — backend
-- pnpm — frontend package manager
+- pnpm with workspaces — frontend package manager (workspace root at `frontend/`, packages at `frontend/packages/*`)
 
 ## Databases & External Services
 

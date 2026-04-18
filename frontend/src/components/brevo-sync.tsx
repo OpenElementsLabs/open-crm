@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n/language-context";
 import {
   getBrevoSettings,

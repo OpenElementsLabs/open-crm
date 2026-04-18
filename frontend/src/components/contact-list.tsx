@@ -5,9 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, Input, TagMultiSelect } from "@open-elements/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -26,9 +25,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, ForbiddenError } from "@/lib/api";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
-import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -265,6 +263,8 @@ export function ContactList() {
               const query = params.toString();
               router.replace(`/contacts${query ? `?${query}` : ""}`, { scroll: false });
             }}
+            loadTags={async () => { const result = await getTags({ size: 1000 }); return result.content.map(tag => ({ value: tag.id, label: tag.name, color: tag.color })); }}
+            translations={{ placeholder: t.tags.label + "...", empty: t.tags.empty }}
           />
         </div>
       </div>

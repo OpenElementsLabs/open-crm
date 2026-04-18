@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getTag } from "@/lib/api";
 import { useTranslations } from "@/lib/i18n/language-context";
-import type { TagDto } from "@/lib/types";
+import type { TagDto } from "@open-elements/ui";
 
 function getContrastColor(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16);

@@ -5,9 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, Input, TagMultiSelect } from "@open-elements/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -26,9 +25,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, ForbiddenError } from "@/lib/api";
+import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
-import { TagMultiSelect } from "@/components/tag-multi-select";
 import type { CompanyDto, Page } from "@/lib/types";
 import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -233,6 +231,8 @@ export function CompanyList() {
               const query = params.toString();
               router.replace(`/companies${query ? `?${query}` : ""}`, { scroll: false });
             }}
+            loadTags={async () => { const result = await getTags({ size: 1000 }); return result.content.map(tag => ({ value: tag.id, label: tag.name, color: tag.color })); }}
+            translations={{ placeholder: t.tags.label + "...", empty: t.tags.empty }}
           />
         </div>
       </div>

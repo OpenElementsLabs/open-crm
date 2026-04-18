@@ -3,7 +3,7 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n/language-context";
 
 export default function LoginPage() {

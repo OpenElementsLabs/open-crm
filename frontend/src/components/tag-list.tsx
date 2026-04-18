@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, Input } from "@open-elements/ui";
+import type { TagDto } from "@open-elements/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getTags, deleteTag, ForbiddenError } from "@/lib/api";
 import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
-import type { TagDto, Page } from "@/lib/types";
+import type { Page } from "@/lib/types";
 
 export function TagList() {
   const t = useTranslations();
