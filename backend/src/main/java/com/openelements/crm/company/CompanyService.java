@@ -195,7 +195,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         final Set<TagEntity> tags = Optional.ofNullable(data.tagIds())
             .orElse(List.of()).stream()
             .map(id -> tagRepository.findByIdOrThrow(id))
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toSet());
         entity.setTags(tags);
     }
 

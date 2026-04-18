@@ -299,7 +299,8 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
                 linkEntity.setUrl(resolved.url());
                 return linkEntity;
             }).toList();
-        entity.setSocialLinks(socialLinks);
+        entity.getSocialLinks().clear();
+        entity.getSocialLinks().addAll(socialLinks);
 
         final CompanyEntity company = Optional.ofNullable(data.companyId())
             .map(id -> companyRepository.findByIdOrThrow(id))
@@ -309,7 +310,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
 
         final Set<TagEntity> tags = Optional.ofNullable(data.tagIds()).orElse(List.of()).stream()
             .map(id -> tagRepository.findByIdOrThrow(id))
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toSet());
         entity.setTags(tags);
     }
 
