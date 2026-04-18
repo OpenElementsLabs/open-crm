@@ -2,7 +2,8 @@ package com.openelements.crm.contact;
 
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.spring.base.data.AbstractEntity;
-import com.openelements.spring.base.data.ImageData;
+import com.openelements.spring.base.data.image.EntityWithImage;
+import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
@@ -32,7 +33,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "contacts")
-public class ContactEntity extends AbstractEntity {
+public class ContactEntity extends AbstractEntity implements EntityWithImage {
 
     @Column(name = "title", length = 255)
     private String title;
@@ -362,5 +363,26 @@ public class ContactEntity extends AbstractEntity {
     @Override
     public String toString() {
         return "ContactEntity[id=" + id() + ", lastName=" + lastName + "]";
+    }
+
+    @Override
+    public byte[] getRawImageData() {
+        return photo;
+    }
+
+    @Override
+    public void setRawImageData(byte[] rawImageData) {
+        this.photo = rawImageData;
+    }
+
+
+    @Override
+    public String getContentType() {
+        return photoContentType;
+    }
+
+    @Override
+    public void setContentType(String contentType) {
+        this.photoContentType = contentType;
     }
 }

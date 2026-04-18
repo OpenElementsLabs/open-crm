@@ -5,7 +5,7 @@ import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.task.TaskRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
-import com.openelements.spring.base.data.ImageData;
+import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,8 +30,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, CompanyDto> {
-
-    private static final Set<String> ALLOWED_LOGO_TYPES = Set.of(ImageData.CONTENT_TYPE_SVG, ImageData.CONTENT_TYPE_PNG, ImageData.CONTENT_TYPE_JPEG);
 
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
@@ -139,25 +136,11 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
             .toList();
     }
 
-    /**
-     * Uploads or replaces the logo for a company.
-     *
-     * @param id          the company ID
-     * @param data        the image bytes
-     * @param contentType the MIME content type
-     * @throws ResponseStatusException with 404 if not found, 400 if content type is invalid
-     */
-    public void uploadLogo(final UUID id, final byte[] data, final String contentType) {
+    public void updateLogo(final UUID id, final ImageData imageData) {
         Objects.requireNonNull(id, "id must not be null");
-        Objects.requireNonNull(data, "data must not be null");
-        Objects.requireNonNull(contentType, "contentType must not be null");
-        if (!ALLOWED_LOGO_TYPES.contains(contentType)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Invalid content type: " + contentType + ". Allowed: " + ALLOWED_LOGO_TYPES);
-        }
+        Objects.requireNonNull(imageData, "imageData must not be null");
         final CompanyEntity entity = companyRepository.findByIdOrThrow(id);
-        entity.setLogo(data);
-        entity.setLogoContentType(contentType);
+        entity.setImageData(imageData);
         companyRepository.saveAndFlush(entity);
     }
 
@@ -169,13 +152,10 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
      * @throws ResponseStatusException with 404 if not found or no logo exists
      */
     @Transactional(readOnly = true)
-    public ImageData getLogo(final UUID id) {
+    public Optional<ImageData> getLogo(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        final CompanyEntity entity = companyRepository.findByIdOrThrow(id);
-        if (entity.getLogo() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No logo for company: " + id);
-        }
-        return new ImageData(entity.getLogo(), entity.getLogoContentType());
+        return companyRepository.findByIdOrThrow(id)
+            .imageData();
     }
 
     /**
@@ -187,8 +167,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
     public void deleteLogo(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final CompanyEntity entity = companyRepository.findByIdOrThrow(id);
-        entity.setLogo(null);
-        entity.setLogoContentType(null);
+        entity.setImageData(null);
         companyRepository.saveAndFlush(entity);
     }
 

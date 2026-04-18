@@ -1,7 +1,8 @@
 package com.openelements.crm.company;
 
 import com.openelements.spring.base.data.AbstractEntity;
-import com.openelements.spring.base.data.ImageData;
+import com.openelements.spring.base.data.image.EntityWithImage;
+import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -23,7 +24,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "companies")
-public class CompanyEntity extends AbstractEntity {
+public class CompanyEntity extends AbstractEntity implements EntityWithImage {
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
@@ -360,5 +361,25 @@ public class CompanyEntity extends AbstractEntity {
     @Override
     public String toString() {
         return "CompanyEntity[id=" + id() + ", name=" + name + "]";
+    }
+
+    @Override
+    public byte[] getRawImageData() {
+        return logo;
+    }
+
+    @Override
+    public void setRawImageData(byte[] rawImageData) {
+        this.logo = rawImageData;
+    }
+
+    @Override
+    public String getContentType() {
+        return logoContentType;
+    }
+
+    @Override
+    public void setContentType(String contentType) {
+        this.logoContentType = contentType;
     }
 }

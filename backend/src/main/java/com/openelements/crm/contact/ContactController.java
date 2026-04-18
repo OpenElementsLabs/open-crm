@@ -3,7 +3,6 @@ package com.openelements.crm.contact;
 import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
-import com.openelements.spring.base.data.ImageData;
 import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -272,10 +271,9 @@ public class ContactController {
     @ApiResponse(responseCode = "200", description = "Photo found")
     @ApiResponse(responseCode = "404", description = "Contact or photo not found")
     public ResponseEntity<byte[]> getPhoto(@Parameter(description = "The contact ID") @PathVariable final UUID id) {
-        final ImageData imageData = contactService.getPhoto(id);
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(imageData.contentType()))
-            .body(imageData.data());
+        return contactService.getPhoto(id)
+            .map(i -> i.toHttpResponse())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     /**

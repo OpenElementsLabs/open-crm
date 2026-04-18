@@ -6,7 +6,7 @@ import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.task.TaskRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
-import com.openelements.spring.base.data.ImageData;
+import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
 import jakarta.persistence.criteria.Join;
@@ -247,13 +247,10 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
      * @throws ResponseStatusException with 404 if not found or no photo exists
      */
     @Transactional(readOnly = true)
-    public ImageData getPhoto(final UUID id) {
+    public Optional<ImageData> getPhoto(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        final ContactEntity entity = contactRepository.findByIdOrThrow(id);
-        if (entity.getPhoto() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No photo for contact: " + id);
-        }
-        return new ImageData(entity.getPhoto(), entity.getPhotoContentType());
+        return contactRepository.findByIdOrThrow(id)
+            .imageData();
     }
 
     /**
@@ -265,8 +262,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
     public void deletePhoto(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         final ContactEntity entity = contactRepository.findByIdOrThrow(id);
-        entity.setPhoto(null);
-        entity.setPhotoContentType(null);
+        entity.setImageData(null);
         contactRepository.saveAndFlush(entity);
     }
 

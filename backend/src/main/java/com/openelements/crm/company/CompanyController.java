@@ -4,7 +4,7 @@ import com.openelements.crm.comment.CommentCreateDto;
 import com.openelements.crm.comment.CommentDto;
 import com.openelements.crm.comment.CommentService;
 import com.openelements.crm.contact.ContactService;
-import com.openelements.spring.base.data.ImageData;
+import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.security.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -252,7 +252,7 @@ public class CompanyController {
     public void uploadLogo(@Parameter(description = "The company ID") @PathVariable final UUID id,
                            @Parameter(description = "The logo image file (JPEG, PNG, or SVG; max 2 MB)") @RequestParam("file") final MultipartFile file) {
         try {
-            companyService.uploadLogo(id, file.getBytes(), file.getContentType());
+            companyService.updateLogo(id, ImageData.of(file));
         } catch (final java.io.IOException e) {
             throw new org.springframework.web.server.ResponseStatusException(
                 HttpStatus.BAD_REQUEST, "Failed to read file");
@@ -270,10 +270,9 @@ public class CompanyController {
     @ApiResponse(responseCode = "200", description = "Logo found")
     @ApiResponse(responseCode = "404", description = "Company or logo not found")
     public ResponseEntity<byte[]> getLogo(@Parameter(description = "The company ID") @PathVariable final UUID id) {
-        final ImageData imageData = companyService.getLogo(id);
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(imageData.contentType()))
-            .body(imageData.data());
+        return companyService.getLogo(id)
+            .map(i -> i.toHttpResponse())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
     }
 
     /**
