@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Textarea, cn } from "@open-elements/ui";
+import { Button, Input, Textarea, cn, Label, Card, CardContent, CardHeader, CardTitle } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import type { TagDto } from "@open-elements/ui";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createTag, updateTag } from "@/lib/api";
-import { useTranslations } from "@/lib/i18n/language-context";
 import { Check } from "lucide-react";
 
 const PALETTE_COLORS = [

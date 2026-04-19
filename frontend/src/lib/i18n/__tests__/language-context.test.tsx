@@ -1,9 +1,10 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor, render } from "@testing-library/react";
 import { renderWithProviders } from "@/test/test-utils";
-import { useTranslations, useLanguage, LanguageProvider } from "@/lib/i18n/language-context";
+import { useTranslations, useLanguage, LanguageProvider } from "@open-elements/ui";
 import { de } from "@/lib/i18n/de";
 import { en } from "@/lib/i18n/en";
+import { translations } from "@/lib/i18n";
 
 function TranslationDisplay() {
   const t = useTranslations();
@@ -38,7 +39,7 @@ describe("Language Detection", () => {
     vi.spyOn(navigator, "language", "get").mockReturnValue("de-DE");
 
     render(
-      <LanguageProvider>
+      <LanguageProvider translations={translations}>
         <TranslationDisplay />
       </LanguageProvider>,
     );
@@ -53,7 +54,7 @@ describe("Language Detection", () => {
     vi.spyOn(navigator, "language", "get").mockReturnValue("en-US");
 
     render(
-      <LanguageProvider>
+      <LanguageProvider translations={translations}>
         <TranslationDisplay />
       </LanguageProvider>,
     );
@@ -68,7 +69,7 @@ describe("Language Detection", () => {
     vi.spyOn(navigator, "language", "get").mockReturnValue("fr");
 
     render(
-      <LanguageProvider>
+      <LanguageProvider translations={translations}>
         <TranslationDisplay />
       </LanguageProvider>,
     );
@@ -95,7 +96,7 @@ describe("Language Detection", () => {
     });
 
     render(
-      <LanguageProvider>
+      <LanguageProvider translations={translations}>
         <TranslationDisplay />
       </LanguageProvider>,
     );

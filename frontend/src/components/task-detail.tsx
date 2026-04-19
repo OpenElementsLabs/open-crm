@@ -5,16 +5,14 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button, Card, CardContent, CardHeader, CardTitle, Tooltip, TooltipContent, TooltipTrigger } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { DetailField } from "@/components/detail-field";
 import { TagChips } from "@/components/tag-chips";
 import { TaskComments } from "@/components/task-comments";
 import { deleteTask, ForbiddenError } from "@/lib/api";
 import type { TaskDto, TaskStatus } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 const STATUS_BADGE_CLASSES: Record<TaskStatus, string> = {

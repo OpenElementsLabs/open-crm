@@ -4,20 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
-import { Button, Input } from "@open-elements/ui";
+import { Button, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import type { TagDto } from "@open-elements/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getTags, deleteTag, ForbiddenError } from "@/lib/api";
-import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 import type { Page } from "@/lib/types";
 

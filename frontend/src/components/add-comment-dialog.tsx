@@ -2,23 +2,7 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@open-elements/ui";
 
 interface AddCommentDialogProps {
   readonly open: boolean;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@open-elements/ui";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { useTranslations } from "@/lib/i18n";
 
 export function ForbiddenPage() {
   const t = useTranslations();

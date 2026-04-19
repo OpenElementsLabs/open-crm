@@ -1,7 +1,7 @@
 "use client";
 
 import { BearerTokenCard } from "@/components/bearer-token-card";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { useTranslations } from "@/lib/i18n";
 
 export function BearerTokenClient() {
   const t = useTranslations();

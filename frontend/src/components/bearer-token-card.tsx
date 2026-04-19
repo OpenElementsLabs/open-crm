@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Copy, Check, Eye, EyeOff } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 
 export function BearerTokenCard() {
   const t = useTranslations();

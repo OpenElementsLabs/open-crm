@@ -10,10 +10,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { getCompanies, getCompanyLogoUrl, getTag } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 
 export const dynamic = "force-dynamic";
 

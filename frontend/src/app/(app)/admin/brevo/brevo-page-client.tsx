@@ -1,7 +1,7 @@
 "use client";
 
 import { BrevoSync } from "@/components/brevo-sync";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { useTranslations } from "@/lib/i18n";
 
 export function BrevoPageClient() {
   const t = useTranslations();

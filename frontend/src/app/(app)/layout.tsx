@@ -1,5 +1,5 @@
 import { Sidebar } from "@/components/sidebar";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@open-elements/ui";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

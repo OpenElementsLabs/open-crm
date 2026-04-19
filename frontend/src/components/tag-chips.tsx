@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getTag } from "@/lib/api";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { useTranslations } from "@/lib/i18n";
 import type { TagDto } from "@open-elements/ui";
 
 function getContrastColor(hex: string): string {

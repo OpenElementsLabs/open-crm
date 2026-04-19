@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { HealthStatus } from "@/components/health-status";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { useTranslations } from "@/lib/i18n";
 
 export function ServerStatusClient() {
   const t = useTranslations();

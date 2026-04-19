@@ -3,19 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Trash2, Upload } from "lucide-react";
-import { Button, Input, Textarea, TagMultiSelect } from "@open-elements/ui";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button, Input, Textarea, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { createContact, updateContact, getCompaniesForSelect, uploadContactPhoto, deleteContactPhoto, getContactPhotoUrl, getTags } from "@/lib/api";
 import type { ContactDto, ContactCreateDto, CompanyDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 

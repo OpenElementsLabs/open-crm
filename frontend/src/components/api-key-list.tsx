@@ -2,27 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react";
-import { Button, Input } from "@open-elements/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getApiKeys, createApiKey, deleteApiKey } from "@/lib/api";
-import { useTranslations } from "@/lib/i18n/language-context";
 import type { ApiKeyDto, ApiKeyCreatedDto, Page } from "@/lib/types";
 
 export function ApiKeyList() {

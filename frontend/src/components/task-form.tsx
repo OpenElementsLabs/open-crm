@@ -2,16 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Input, Textarea, TagMultiSelect } from "@open-elements/ui";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button, Input, Textarea, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import {
   createTask,
   updateTask,
@@ -20,7 +12,6 @@ import {
   getTags,
 } from "@/lib/api";
 import type { TaskDto, TaskCreateDto, TaskUpdateDto, TaskStatus, CompanyDto, ContactDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 
 type EntityType = "company" | "contact";
 

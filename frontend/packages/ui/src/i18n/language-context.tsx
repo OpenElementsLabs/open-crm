@@ -1,18 +1,19 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
-import type { Language, Translations } from "./index";
-import { translations } from "./index";
+
+export type Language = "de" | "en";
 
 const STORAGE_KEY = "language";
 
-interface LanguageContextValue {
+interface LanguageContextValue<T = Record<string, unknown>> {
   readonly language: Language;
   readonly setLanguage: (lang: Language) => void;
-  readonly t: Translations;
+  readonly t: T;
 }
 
-const LanguageContext = createContext<LanguageContextValue | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const LanguageContext = createContext<LanguageContextValue<any> | null>(null);
 
 function detectLanguage(): Language {
   try {
@@ -34,12 +35,13 @@ function detectLanguage(): Language {
   return "en";
 }
 
-interface LanguageProviderProps {
-  readonly children: React.ReactNode;
+interface LanguageProviderProps<T> {
+  readonly translations: Record<Language, T>;
   readonly defaultLanguage?: Language;
+  readonly children: React.ReactNode;
 }
 
-export function LanguageProvider({ children, defaultLanguage }: LanguageProviderProps) {
+export function LanguageProvider<T>({ translations, children, defaultLanguage }: LanguageProviderProps<T>) {
   const [language, setLanguageState] = useState<Language>(defaultLanguage ?? "en");
   const [mounted, setMounted] = useState(!!defaultLanguage);
 
@@ -74,7 +76,7 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
     }
   }, [language, mounted]);
 
-  const t = useMemo(() => translations[language], [language]);
+  const t = useMemo(() => translations[language], [translations, language]);
 
   const value = useMemo(
     () => ({ language, setLanguage, t }),
@@ -84,12 +86,12 @@ export function LanguageProvider({ children, defaultLanguage }: LanguageProvider
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
-export function useTranslations(): Translations {
+export function useTranslations<T = Record<string, unknown>>(): T {
   const context = useContext(LanguageContext);
   if (!context) {
     throw new Error("useTranslations must be used within a LanguageProvider");
   }
-  return context.t;
+  return context.t as T;
 }
 
 export function useLanguage(): { language: Language; setLanguage: (lang: Language) => void } {

@@ -3,12 +3,10 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Trash2, Upload } from "lucide-react";
-import { Button, Input, Textarea, TagMultiSelect } from "@open-elements/ui";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button, Input, Textarea, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { createCompany, updateCompany, uploadCompanyLogo, deleteCompanyLogo, getCompanyLogoUrl, getTags } from "@/lib/api";
 import type { CompanyDto, CompanyCreateDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 
 const ALLOWED_LOGO_TYPES = ["image/svg+xml", "image/png", "image/jpeg"];
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Check, ExternalLink, Mail, Phone } from "lucide-react";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@open-elements/ui";
 
 interface DetailFieldProps {
   readonly label: string;

@@ -4,27 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
-import { Button, TagMultiSelect } from "@open-elements/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { getTasks, getTags } from "@/lib/api";
 import type { TaskDto, TaskStatus, Page } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 
 const STATUS_BADGE_CLASSES: Record<TaskStatus, string> = {
   OPEN: "bg-blue-100 text-blue-800",

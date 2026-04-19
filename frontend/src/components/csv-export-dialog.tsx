@@ -2,15 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 
 interface Column {
   readonly key: string;

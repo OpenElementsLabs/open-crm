@@ -3,15 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { MessageSquarePlus, X } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { getTaskComments, createTaskComment, deleteComment, ForbiddenError } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 function formatDate(dateString: string, language: string): string {

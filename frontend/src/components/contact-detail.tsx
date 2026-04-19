@@ -5,17 +5,14 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Mail, Pencil, Trash2, User } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button, Card, CardContent, CardHeader, CardTitle, Separator, Tooltip, TooltipContent, TooltipTrigger } from "@open-elements/ui";
+import { useTranslations, useLanguage } from "@/lib/i18n";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
 import { TagChips } from "@/components/tag-chips";
 import { DetailField } from "@/components/detail-field";
 import { deleteContact, ForbiddenError, getContactPhotoUrl } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
-import { useTranslations, useLanguage } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 function genderLabel(gender: string | null, t: ReturnType<typeof useTranslations>): string | null {

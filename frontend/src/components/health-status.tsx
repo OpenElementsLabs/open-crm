@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTranslations } from "@/lib/i18n/language-context";
+import { Card, CardContent, CardHeader, CardTitle } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 
 interface HealthStatusProps {
   readonly healthy: boolean;

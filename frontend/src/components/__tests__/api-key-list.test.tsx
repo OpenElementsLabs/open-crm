@@ -1,10 +1,10 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor, render } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
-import { LanguageProvider } from "@/lib/i18n/language-context";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { LanguageProvider, TooltipProvider } from "@open-elements/ui";
 import { ApiKeyList } from "@/components/api-key-list";
 import { de } from "@/lib/i18n/de";
+import { translations } from "@/lib/i18n";
 import type { ApiKeyDto, ApiKeyCreatedDto, Page } from "@/lib/types";
 
 const K = de.apiKeys;
@@ -63,7 +63,7 @@ function makePage(keys: ApiKeyDto[], totalElements?: number): Page<ApiKeyDto> {
 function renderApiKeyList() {
   return render(
     <SessionProvider session={null}>
-      <LanguageProvider defaultLanguage="de">
+      <LanguageProvider translations={translations} defaultLanguage="de">
         <TooltipProvider>
           <ApiKeyList />
         </TooltipProvider>

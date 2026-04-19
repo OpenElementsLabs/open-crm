@@ -5,17 +5,14 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Pencil, Trash2, Users, Building2 } from "lucide-react";
-import { Button } from "@open-elements/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button, Card, CardContent, CardHeader, CardTitle, Separator, Tooltip, TooltipContent, TooltipTrigger } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CompanyComments } from "@/components/company-comments";
 import { DetailField } from "@/components/detail-field";
 import { TagChips } from "@/components/tag-chips";
 import { deleteCompany, ForbiddenError, getCompanyLogoUrl } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
-import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 export function CompanyDetail({ company }: { readonly company: CompanyDto }) {

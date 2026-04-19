@@ -1,8 +1,9 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyComments } from "@/components/company-comments";
-import { LanguageProvider } from "@/lib/i18n/language-context";
+import { LanguageProvider } from "@open-elements/ui";
 import { de } from "@/lib/i18n/de";
+import { translations } from "@/lib/i18n";
 import { renderWithProviders } from "@/test/test-utils";
 import type { CommentDto, Page } from "@/lib/types";
 
@@ -387,7 +388,7 @@ describe("CompanyComments", () => {
       );
 
       const { rerender } = render(
-        <LanguageProvider defaultLanguage="de">
+        <LanguageProvider translations={translations} defaultLanguage="de">
           <CompanyComments companyId="company-1" totalCount={3} />
         </LanguageProvider>,
       );
@@ -411,7 +412,7 @@ describe("CompanyComments", () => {
 
       // Simulate navigation to a different company by changing the prop
       rerender(
-        <LanguageProvider defaultLanguage="de">
+        <LanguageProvider translations={translations} defaultLanguage="de">
           <CompanyComments companyId="company-2" totalCount={1} />
         </LanguageProvider>,
       );

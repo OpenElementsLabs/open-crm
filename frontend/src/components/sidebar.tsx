@@ -6,11 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Activity, Building2, CheckSquare, ChevronDown, CircleUser, KeyRound, LayoutDashboard, LogOut, Menu, RefreshCw, Settings, Tag, Users, Webhook } from "lucide-react";
 import { getCurrentUser, getUserAvatarUrl, uploadUserAvatar } from "@/lib/api";
-import { Button, cn } from "@open-elements/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Button, cn, Tooltip, TooltipTrigger, TooltipContent, Sheet, SheetContent, SheetTrigger, SheetTitle } from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/language-switch";
-import { useTranslations } from "@/lib/i18n/language-context";
 import { hasRole, ROLE_IT_ADMIN } from "@/lib/roles";
 
 interface NavItem {
