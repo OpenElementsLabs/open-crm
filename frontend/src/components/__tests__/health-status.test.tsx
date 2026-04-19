@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { screen, cleanup } from "@testing-library/react";
-import { HealthStatus } from "@/components/health-status";
+import { HealthStatus } from "@open-elements/ui";
 import { de } from "@/lib/i18n/de";
 import { renderWithProviders } from "@/test/test-utils";
 
@@ -11,7 +11,7 @@ afterEach(() => {
 describe("HealthStatus", () => {
   describe("when backend is healthy", () => {
     it("should render up status text and green indicator", () => {
-      const { container } = renderWithProviders(<HealthStatus healthy={true} />);
+      const { container } = renderWithProviders(<HealthStatus healthy={true} translations={{ title: de.health.title, statusUp: de.health.statusUp, statusDown: de.health.statusDown }} />);
 
       const statusText = container.querySelector("span.font-medium");
       expect(statusText).toHaveTextContent(de.health.statusUp);
@@ -22,7 +22,7 @@ describe("HealthStatus", () => {
     });
 
     it("should display the system status title", () => {
-      const { container } = renderWithProviders(<HealthStatus healthy={true} />);
+      const { container } = renderWithProviders(<HealthStatus healthy={true} translations={{ title: de.health.title, statusUp: de.health.statusUp, statusDown: de.health.statusDown }} />);
 
       const title = container.querySelector("[data-slot='card-title']");
       expect(title).toHaveTextContent(de.health.title);
@@ -31,7 +31,7 @@ describe("HealthStatus", () => {
 
   describe("when backend is unavailable", () => {
     it("should render down status text and red indicator", () => {
-      const { container } = renderWithProviders(<HealthStatus healthy={false} />);
+      const { container } = renderWithProviders(<HealthStatus healthy={false} translations={{ title: de.health.title, statusUp: de.health.statusUp, statusDown: de.health.statusDown }} />);
 
       const statusText = container.querySelector("span.font-medium");
       expect(statusText).toHaveTextContent(de.health.statusDown);
@@ -44,7 +44,7 @@ describe("HealthStatus", () => {
 
   describe("static display behavior", () => {
     it("should render status as a pure display without re-fetch logic", () => {
-      const { container } = renderWithProviders(<HealthStatus healthy={true} />);
+      const { container } = renderWithProviders(<HealthStatus healthy={true} translations={{ title: de.health.title, statusUp: de.health.statusUp, statusDown: de.health.statusDown }} />);
 
       const indicator = container.querySelector("span[aria-label]");
       expect(indicator).toBeInTheDocument();

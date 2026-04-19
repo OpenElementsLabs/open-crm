@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTag } from "@/lib/api";
-import { TagForm } from "@/components/tag-form";
+import { EditTagClient } from "./edit-tag-client";
 
 export default async function EditTagPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -10,5 +10,5 @@ export default async function EditTagPage({ params }: { params: Promise<{ id: st
   } catch {
     notFound();
   }
-  return <TagForm tag={tag} />;
+  return <EditTagClient tag={tag} />;
 }

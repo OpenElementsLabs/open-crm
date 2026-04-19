@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { screen, cleanup, fireEvent } from "@testing-library/react";
-import { LanguageSwitch } from "@/components/language-switch";
+import { LanguageSwitch } from "@open-elements/ui";
 import { renderWithProviders } from "@/test/test-utils";
 
 afterEach(() => {

@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@open-elements/ui";
-import { useLanguage } from "@/lib/i18n";
+import { cn } from "../lib/utils";
+import { useLanguage } from "../i18n/language-context";
 
 export function LanguageSwitch() {
   const { language, setLanguage } = useLanguage();

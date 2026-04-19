@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Tooltip, TooltipContent, TooltipTrigger } from "@open-elements/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Tooltip, TooltipContent, TooltipTrigger, TagChips } from "@open-elements/ui";
+import type { TagDto } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { DetailField } from "@/components/detail-field";
-import { TagChips } from "@/components/tag-chips";
 import { TaskComments } from "@/components/task-comments";
-import { deleteTask, ForbiddenError } from "@/lib/api";
+import { deleteTask, ForbiddenError, getTag } from "@/lib/api";
 import type { TaskDto, TaskStatus } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
@@ -29,6 +29,13 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
   const canDelete = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [tags, setTags] = useState<TagDto[]>([]);
+
+  useEffect(() => {
+    if (task.tagIds.length === 0) return;
+    Promise.all(task.tagIds.map((id) => getTag(id).catch(() => null)))
+      .then((results) => setTags(results.filter((r): r is TagDto => r !== null)));
+  }, [task.tagIds]);
 
   const handleDelete = async () => {
     try {
@@ -113,7 +120,7 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
         </CardContent>
       </Card>
 
-      <TagChips tagIds={task.tagIds} />
+      <TagChips tags={tags} label={t.tags.label} />
 
       <div className="mt-4">
         <h3 className="text-sm font-medium text-oe-gray-mid">{S.fields.action}</h3>

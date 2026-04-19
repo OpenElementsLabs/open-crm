@@ -2,19 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { TagForm } from "@open-elements/ui";
+import type { TagDto } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { createTag } from "@/lib/api";
+import { updateTag } from "@/lib/api";
 
-export default function NewTagPage() {
+export function EditTagClient({ tag }: { tag: TagDto }) {
   const t = useTranslations();
   const router = useRouter();
 
   return (
     <TagForm
-      onSave={async (data) => { await createTag(data); router.push("/tags"); }}
+      tag={tag}
+      onSave={async (data) => { await updateTag(tag.id, data); router.push("/tags"); }}
       onCancel={() => router.push("/tags")}
       translations={{
-        title: t.tags.createTag,
+        title: t.tags.editTag,
         name: t.tags.form.name,
         nameRequired: t.tags.form.nameRequired,
         namePlaceholder: t.tags.form.namePlaceholder,

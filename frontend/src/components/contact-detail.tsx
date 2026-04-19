@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Mail, Pencil, Trash2, User } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Separator, Tooltip, TooltipContent, TooltipTrigger } from "@open-elements/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips } from "@open-elements/ui";
+import type { TagDto } from "@open-elements/ui";
 import { useTranslations, useLanguage } from "@/lib/i18n";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
-import { TagChips } from "@/components/tag-chips";
 import { DetailField } from "@/components/detail-field";
-import { deleteContact, ForbiddenError, getContactPhotoUrl } from "@/lib/api";
+import { deleteContact, ForbiddenError, getContactPhotoUrl, getTag } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
@@ -62,6 +62,13 @@ export function ContactDetail({ contact }: ContactDetailProps) {
   const canDelete = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [tags, setTags] = useState<TagDto[]>([]);
+
+  useEffect(() => {
+    if (contact.tagIds.length === 0) return;
+    Promise.all(contact.tagIds.map((id) => getTag(id).catch(() => null)))
+      .then((results) => setTags(results.filter((r): r is TagDto => r !== null)));
+  }, [contact.tagIds]);
 
   const handleDelete = async () => {
     try {
@@ -210,7 +217,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
         </CardContent>
       </Card>
 
-      <TagChips tagIds={contact.tagIds} />
+      <TagChips tags={tags} label={t.tags.label} />
 
       {contact.description && (
         <div className="mt-4">

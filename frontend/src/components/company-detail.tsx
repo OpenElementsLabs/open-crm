@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Pencil, Trash2, Users, Building2 } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Separator, Tooltip, TooltipContent, TooltipTrigger } from "@open-elements/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips } from "@open-elements/ui";
+import type { TagDto } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CompanyComments } from "@/components/company-comments";
 import { DetailField } from "@/components/detail-field";
-import { TagChips } from "@/components/tag-chips";
-import { deleteCompany, ForbiddenError, getCompanyLogoUrl } from "@/lib/api";
+import { deleteCompany, ForbiddenError, getCompanyLogoUrl, getTag } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
@@ -23,6 +23,13 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
   const canDelete = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [tags, setTags] = useState<TagDto[]>([]);
+
+  useEffect(() => {
+    if (company.tagIds.length === 0) return;
+    Promise.all(company.tagIds.map((id) => getTag(id).catch(() => null)))
+      .then((results) => setTags(results.filter((r): r is TagDto => r !== null)));
+  }, [company.tagIds]);
 
   const handleDeleteAll = async () => {
     try {
@@ -161,7 +168,7 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
         </Card>
       )}
 
-      <TagChips tagIds={company.tagIds} />
+      <TagChips tags={tags} label={t.tags.label} />
 
       {company.description && (
         <div className="mt-4">

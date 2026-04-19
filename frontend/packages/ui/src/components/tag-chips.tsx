@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getTag } from "@/lib/api";
-import { useTranslations } from "@/lib/i18n";
-import type { TagDto } from "@open-elements/ui";
+import type { TagDto } from "../types";
 
 function getContrastColor(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -18,24 +15,18 @@ function isValidHex(color: string): boolean {
 }
 
 interface TagChipsProps {
-  readonly tagIds: readonly string[];
+  readonly tags: readonly TagDto[];
+  readonly label?: string;
 }
 
-export function TagChips({ tagIds }: TagChipsProps) {
-  const t = useTranslations();
-  const [tags, setTags] = useState<TagDto[]>([]);
-
-  useEffect(() => {
-    if (tagIds.length === 0) return;
-    Promise.all(tagIds.map((id) => getTag(id).catch(() => null)))
-      .then((results) => setTags(results.filter((r): r is TagDto => r !== null)));
-  }, [tagIds]);
-
-  if (tagIds.length === 0 || tags.length === 0) return null;
+export function TagChips({ tags, label }: TagChipsProps) {
+  if (tags.length === 0) return null;
 
   return (
     <div className="mt-4">
-      <h3 className="mb-2 text-sm font-medium text-oe-gray">{t.tags.label}</h3>
+      {label && (
+        <h3 className="mb-2 text-sm font-medium text-oe-gray">{label}</h3>
+      )}
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => {
           const bgColor = isValidHex(tag.color) ? tag.color : "#6B7280";
@@ -54,3 +45,5 @@ export function TagChips({ tagIds }: TagChipsProps) {
     </div>
   );
 }
+
+export type { TagChipsProps };

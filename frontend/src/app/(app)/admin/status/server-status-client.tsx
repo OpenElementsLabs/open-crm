@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HealthStatus } from "@/components/health-status";
+import { HealthStatus } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 
 export function ServerStatusClient() {
@@ -20,7 +20,7 @@ export function ServerStatusClient() {
       <h1 className="mb-6 font-heading text-2xl font-bold text-oe-dark">
         {t.nav.serverStatus}
       </h1>
-      {healthy !== null && <HealthStatus healthy={healthy} />}
+      {healthy !== null && <HealthStatus healthy={healthy} translations={{ title: t.health.title, statusUp: t.health.statusUp, statusDown: t.health.statusDown }} />}
     </div>
   );
 }

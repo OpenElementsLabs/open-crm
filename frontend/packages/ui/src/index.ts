@@ -53,6 +53,22 @@ export {
 } from "./components/table";
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./components/tooltip";
 
+// App-level components
+export { LanguageSwitch } from "./components/language-switch";
+export { HealthStatus } from "./components/health-status";
+export type { HealthStatusProps, HealthStatusTranslations } from "./components/health-status";
+export { TagChips } from "./components/tag-chips";
+export type { TagChipsProps } from "./components/tag-chips";
+export { TagForm } from "./components/tag-form";
+export type { TagFormProps, TagFormTranslations } from "./components/tag-form";
+export {
+  Sidebar, SidebarHeader, NavItem, CollapsibleGroup, UserSection,
+} from "./components/sidebar";
+export type {
+  SidebarProps, SidebarHeaderProps, NavItemProps, CollapsibleGroupProps,
+  UserSectionProps, UserSectionTranslations,
+} from "./components/sidebar";
+
 // Types
 export type { TagDto } from "./types";
 
