@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.openelements.crm.security.RequiresItAdmin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/brevo")
 @Tag(name = "Brevo Sync", description = "Brevo import and settings management")
 @SecurityRequirement(name = "oidc")
-@PreAuthorize("hasRole('IT-ADMIN')")
+@RequiresItAdmin
 public class BrevoSyncController {
 
     private static final String BREVO_API_KEY = "brevo.api-key";
