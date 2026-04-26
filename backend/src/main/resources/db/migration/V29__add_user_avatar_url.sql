@@ -1,0 +1,4 @@
+ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);
+
+ALTER TABLE users DROP COLUMN IF EXISTS avatar;
+ALTER TABLE users DROP COLUMN IF EXISTS avatar_content_type;
