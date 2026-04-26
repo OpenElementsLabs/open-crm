@@ -36,6 +36,7 @@ export const de = {
     brevo: "Brevo-Integration",
     webhooks: "Webhooks",
     apiKeys: "API Keys",
+    users: "Benutzer",
   },
   admin: {
     title: "Administration",
@@ -591,6 +592,22 @@ export const de = {
       perPage: "pro Seite",
       previous: "Zurück",
       next: "Weiter",
+    },
+  },
+  users: {
+    title: "Benutzer",
+    empty: "Noch keine Benutzer registriert.",
+    columns: {
+      avatar: "Avatar",
+      name: "Name",
+      email: "E-Mail",
+    },
+    pagination: {
+      perPage: "pro Seite",
+      previous: "Zurück",
+      next: "Weiter",
+      totalOne: "{count} Benutzer",
+      totalOther: "{count} Benutzer",
     },
   },
   errors: {

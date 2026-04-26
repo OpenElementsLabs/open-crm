@@ -58,6 +58,7 @@ function CrmSidebar() {
               <NavItem href="/admin/brevo" icon={<RefreshCw className="h-5 w-5" />} label={t.nav.brevo} active={pathname.startsWith("/admin/brevo")} indented />
               <NavItem href="/api-keys" icon={<KeyRound className="h-5 w-5" />} label={t.nav.apiKeys} active={pathname.startsWith("/api-keys")} indented />
               <NavItem href="/webhooks" icon={<Webhook className="h-5 w-5" />} label={t.nav.webhooks} active={pathname.startsWith("/webhooks")} indented />
+              <NavItem href="/admin/users" icon={<Users className="h-5 w-5" />} label={t.nav.users} active={pathname.startsWith("/admin/users")} indented />
             </CollapsibleGroup>
           ) : undefined
         }

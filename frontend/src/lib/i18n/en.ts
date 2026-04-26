@@ -37,6 +37,7 @@ export const en: Translations = {
     brevo: "Brevo Integration",
     webhooks: "Webhooks",
     apiKeys: "API Keys",
+    users: "Users",
   },
   admin: {
     title: "Administration",
@@ -592,6 +593,22 @@ export const en: Translations = {
       perPage: "per page",
       previous: "Previous",
       next: "Next",
+    },
+  },
+  users: {
+    title: "Users",
+    empty: "No users registered yet.",
+    columns: {
+      avatar: "Avatar",
+      name: "Name",
+      email: "Email",
+    },
+    pagination: {
+      perPage: "per page",
+      previous: "Previous",
+      next: "Next",
+      totalOne: "{count} User",
+      totalOther: "{count} Users",
     },
   },
   errors: {
