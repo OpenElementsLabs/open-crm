@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.openelements.crm.apikey.ApiKeyController;
+import com.openelements.crm.auditlog.AuditLogController;
 import com.openelements.crm.brevo.BrevoSyncController;
 import com.openelements.crm.comment.CommentController;
 import com.openelements.crm.company.CompanyController;
@@ -83,6 +84,11 @@ class PreAuthorizeAnnotationTest {
     @Test
     void brevoSyncControllerRequiresItAdmin() {
         assertClassHasRequiresItAdmin(BrevoSyncController.class);
+    }
+
+    @Test
+    void auditLogControllerRequiresItAdmin() {
+        assertClassHasRequiresItAdmin(AuditLogController.class);
     }
 
     @Test

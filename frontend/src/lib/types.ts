@@ -165,6 +165,17 @@ export interface UserDto {
   readonly updatedAt: string;
 }
 
+export type AuditAction = "INSERT" | "UPDATE" | "DELETE";
+
+export interface AuditLogDto {
+  readonly id: string;
+  readonly entityType: string;
+  readonly entityId: string;
+  readonly action: AuditAction;
+  readonly user: string;
+  readonly createdAt: string;
+}
+
 export interface BrevoSettingsDto {
   readonly apiKeyConfigured: boolean;
 }
