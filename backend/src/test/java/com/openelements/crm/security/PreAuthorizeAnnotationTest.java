@@ -10,10 +10,12 @@ import com.openelements.crm.company.CompanyController;
 import com.openelements.crm.contact.ContactController;
 import com.openelements.crm.tag.TagController;
 import com.openelements.crm.task.TaskController;
+import com.openelements.crm.user.UserController;
 import com.openelements.crm.webhook.WebhookController;
 import java.lang.reflect.Method;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Verifies that every delete endpoint carries {@code @RequiresAdmin}
@@ -83,10 +85,23 @@ class PreAuthorizeAnnotationTest {
         assertClassHasRequiresItAdmin(BrevoSyncController.class);
     }
 
+    @Test
+    void userControllerListUsersRequiresItAdmin() throws NoSuchMethodException {
+        assertHasRequiresItAdmin(UserController.class.getDeclaredMethod(
+            "listUsers", Pageable.class));
+    }
+
     private static void assertHasRequiresAdmin(Method method) {
         final RequiresAdmin annotation = method.getAnnotation(RequiresAdmin.class);
         assertNotNull(annotation,
             "Missing @RequiresAdmin on " + method.getDeclaringClass().getSimpleName()
+                + "." + method.getName());
+    }
+
+    private static void assertHasRequiresItAdmin(Method method) {
+        final RequiresItAdmin annotation = method.getAnnotation(RequiresItAdmin.class);
+        assertNotNull(annotation,
+            "Missing @RequiresItAdmin on " + method.getDeclaringClass().getSimpleName()
                 + "." + method.getName());
     }
 

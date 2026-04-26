@@ -702,6 +702,29 @@ export async function getCurrentUser(): Promise<UserDto> {
   return response.json();
 }
 
+export interface UserListParams {
+  readonly page?: number;
+  readonly size?: number;
+}
+
+export async function getUsers(
+  params: UserListParams = {},
+): Promise<Page<UserDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+
+  const query = searchParams.toString();
+  const url = `${baseUrl()}/api/users${query ? `?${query}` : ""}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch users: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 
 // --- Webhooks ---
 
