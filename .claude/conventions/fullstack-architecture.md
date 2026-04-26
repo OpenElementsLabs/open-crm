@@ -7,7 +7,10 @@ both parts are treated as fully independent applications within a single reposit
 They share no code, no build process, and no runtime.
 The only coupling is at the network level through APIs.
 
-A reference implementation of this architecture is [maven-initializer](https://github.com/support-and-care/maven-initializer).
+Reference implementations of this architecture:
+
+- [maven-initializer](https://github.com/support-and-care/maven-initializer) — Fullstack application without authentication andf without database.
+- [application-skeleton](https://github.com/OpenElementsLabs/application-skeleton) — Fullstack application starter with OAuth2/OIDC authentication (compatible with Authentik, Keycloak, and other OIDC providers), mock OAuth2 server for local development, and `docker-compose.override.yml` pattern for dev/prod separation. Designed for deployment on Open Elements Coolify infrastructure.
 
 ## Repository Structure
 
@@ -135,6 +138,48 @@ BACKEND_PORT=9081
 FRONTEND_PORT=4001
 ```
 
+### Docker Compose Override for Local Development
+
+Use a `docker-compose.override.yml` file to add development-only services and configuration that should not be part of the production setup. Docker Compose automatically merges this file with `docker-compose.yml` when running `docker-compose up`.
+
+Typical use cases for the override file:
+
+- **Port mappings**: Expose service ports for local access (the base `docker-compose.yml` should not expose ports when the production deployment runs behind a reverse proxy).
+- **Mock services**: Add mock servers for external dependencies (e.g., a mock OAuth2 server for local authentication testing).
+- **Debug configuration**: Additional environment variables for development mode, verbose logging, or hot-reload.
+- **Host networking**: `extra_hosts: ["localhost:host-gateway"]` to allow containers to reach the host machine.
+
+Example structure:
+
+```yaml
+# docker-compose.override.yml — Development overrides (not committed or gitignored)
+services:
+  db:
+    ports:
+      - "${DB_PORT:-5432}:5432"
+
+  backend:
+    ports:
+      - "${BACKEND_PORT:-9081}:8080"
+    environment:
+      SOME_DEV_OVERRIDE: "dev-value"
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-4001}:3000"
+    extra_hosts:
+      - "localhost:host-gateway"
+
+  mock-oauth2:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.10
+    ports:
+      - "8888:8888"
+```
+
+The base `docker-compose.yml` should be a complete, working configuration for production/deployment (without port mappings when behind a reverse proxy). The override file adds only what is needed for local development.
+
+See [application-skeleton](https://github.com/OpenElementsLabs/application-skeleton) for a working example of this pattern with a mock OAuth2 server.
+
 ### Common Docker Compose Commands
 
 Document the following commands in the project README:
@@ -166,6 +211,41 @@ Document the following commands in the project README:
 - In local development, the frontend proxy connects to the backend via `localhost` and the backend's dev port. Set `BACKEND_URL=http://localhost:8080` in the frontend's `.env` or start script.
 - Do not configure CORS on the backend to allow frontend origins as a workaround — use the proxy approach instead.
 - API contracts should be clearly defined. Changes to the API should be coordinated between frontend and backend.
+
+## Authentication with OAuth2/OIDC
+
+Fullstack applications that require user authentication should use **OAuth2/OIDC** with a generic provider configuration. This allows the same codebase to work with any OIDC-compliant identity provider (Authentik, Keycloak, Auth0, etc.).
+
+### Architecture
+
+- **Backend**: Configure as an OAuth2 Resource Server that validates JWTs. Use `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` (Spring Boot) to validate tokens against the identity provider.
+- **Frontend**: Use [NextAuth.js (Auth.js)](https://authjs.dev/) with a generic OIDC provider. Use JWT session strategy (no database sessions). Implement token refresh flow.
+- **Middleware**: Protect all routes except public pages (login, health checks, static assets) via Next.js middleware.
+
+### Required Environment Variables
+
+Configure the identity provider entirely via environment variables — never hardcode provider URLs or credentials:
+
+- `OIDC_ISSUER_URI` — The OIDC issuer URL (e.g., `https://auth.example.com/application/o/my-app/`)
+- `OIDC_CLIENT_ID` — OAuth2 client ID
+- `OIDC_CLIENT_SECRET` — OAuth2 client secret
+- `OIDC_JWK_SET_URI` — JWK Set URI for token validation (backend)
+- `AUTH_SECRET` — NextAuth.js session encryption secret (frontend)
+- `AUTH_TRUST_HOST=true` — Required when the frontend runs behind a reverse proxy
+
+### Local Development with Mock OAuth2
+
+For local development, use a mock OAuth2 server (e.g., `ghcr.io/navikt/mock-oauth2-server`) in `docker-compose.override.yml` instead of requiring a real identity provider. Override the backend's `OIDC_JWK_SET_URI` to point to the mock server.
+
+See [application-skeleton](https://github.com/OpenElementsLabs/application-skeleton) for a complete working example.
+
+### Deployment with Authentik on Coolify
+
+For Open Elements projects deployed on Coolify, the identity provider is **Authentik**. Configure an OAuth2/OpenID Provider in Authentik with:
+
+- Redirect URI pointing to the frontend's NextAuth callback (`https://<frontend-url>/api/auth/callback/oidc`)
+- Scopes: `openid profile email offline_access`
+- Set the environment variables (`OIDC_ISSUER_URI`, `OIDC_CLIENT_ID`, etc.) in the Coolify service configuration.
 
 ## Pinned Tool Versions
 

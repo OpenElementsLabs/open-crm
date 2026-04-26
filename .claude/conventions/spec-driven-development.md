@@ -197,6 +197,25 @@ Each step is:
 - **Independently verifiable** — Can be confirmed after completion
 - **Sequenced by dependency** — Earlier steps are foundations for later ones
 
+## Roadmap Integration
+
+Projects may include a `ROADMAP.md` in the project root that defines high-level milestones as a checklist:
+
+```markdown
+# Roadmap V1
+
+- [ ] User authentication with JWT (login, registration, password reset)
+- [ ] Dashboard page showing key metrics
+- [ ] CSV export for reports
+- [x] Project setup (already done)
+```
+
+Each top-level checkbox represents one step that maps to a spec. Steps marked `[x]` are completed. The roadmap provides the **what** at a high level — specs provide the **how** in detail.
+
+When a `ROADMAP.md` exists, the `/roadmap-execute` skill can autonomously process all unchecked steps end-to-end: creating specs, implementing them, reviewing, and committing — using a fresh sub-agent for each step to avoid context bloat.
+
+The roadmap is optional. Projects can also create specs directly from GitHub issues using `/spec-create`.
+
 ## Workflow
 
 The spec-driven workflow uses three skills:
@@ -206,6 +225,8 @@ The spec-driven workflow uses three skills:
 | `/spec-create` | Create `design.md` and `behaviors.md` through interactive discussion |
 | `/spec-implement` | Generate `steps.md` from a completed spec |
 | `/spec-review` | Verify implementation completeness against design and behaviors |
+| `/spec-flow` | End-to-end GitHub flow: issue → branch → implement → review → PR |
+| `/roadmap-execute` | Autonomously process all unchecked steps in `ROADMAP.md` end-to-end using sub-agents |
 
 A typical flow:
 1. Start with a GitHub issue (or create one first)
@@ -213,6 +234,15 @@ A typical flow:
 3. `/spec-implement` — Break it down into steps (optional)
 4. Implement (manually, guided, or automated)
 5. `/spec-review` — Verify completeness
+
+Alternative flow with spec-flow (recommended for a complete GitHub workflow):
+1. Start with a GitHub issue (or create one first)
+2. `/spec-create` — Plan the change collaboratively
+3. `/spec-flow` — Implements, reviews iteratively, and opens a PR
+
+Alternative flow with roadmap:
+1. Write a `ROADMAP.md` with high-level steps
+2. `/roadmap-execute` — Processes all steps autonomously (creates specs, implements, reviews, commits)
 
 ## Principles
 
