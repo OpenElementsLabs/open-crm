@@ -14,6 +14,10 @@ A project in that case is most often a GitHub repository that contains code for 
 It provides guidance on project structure, best practices, and helps ensure that projects align with our standards and guidelines.
 Whether you're setting up a new project or reviewing an existing one, this skill can provide valuable insights and recommendations.
 
+## Reference Implementation
+
+For fullstack applications with authentication, the [application-skeleton](https://github.com/OpenElementsLabs/application-skeleton) repository provides a ready-to-use starter template. It includes Spring Boot + Next.js with OAuth2/OIDC authentication (compatible with Authentik on Coolify), a mock OAuth2 server for local development, and a `docker-compose.override.yml` pattern for dev/prod separation. When setting up a new fullstack application that needs authentication, consider using or referencing this skeleton instead of creating everything from scratch.
+
 ## Project types
 
 A project can be a Java library, a TypeScript library, a Java Backend (Spring Boot or Helidon SE based), a Web Frontend or a full application (containing 1-N back-ends and 1-N front-ends).
