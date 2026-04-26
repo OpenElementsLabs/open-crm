@@ -1,8 +1,7 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor, render } from "@testing-library/react";
-import { SessionProvider } from "next-auth/react";
 import { LanguageProvider, TooltipProvider } from "@open-elements/ui";
-import { UsersClient } from "../users-client";
+import { UsersClient, PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE, PAGE_SIZE_STORAGE_KEY } from "../users-client";
 import { de } from "@/lib/i18n/de";
 import { translations } from "@/lib/i18n";
 import type { Page, UserDto } from "@/lib/types";
@@ -66,13 +65,11 @@ function makePage(users: UserDto[], opts: { totalElements?: number; size?: numbe
 
 function renderUsersClient() {
   return render(
-    <SessionProvider session={null}>
-      <LanguageProvider translations={translations} defaultLanguage="de">
-        <TooltipProvider>
-          <UsersClient />
-        </TooltipProvider>
-      </LanguageProvider>
-    </SessionProvider>,
+    <LanguageProvider translations={translations} defaultLanguage="de">
+      <TooltipProvider>
+        <UsersClient />
+      </TooltipProvider>
+    </LanguageProvider>,
   );
 }
 
@@ -86,6 +83,20 @@ afterEach(() => {
 });
 
 describe("UsersClient", () => {
+  describe("constants (matches behaviors.md)", () => {
+    it("exposes the canonical page-size options 10/20/50/100/200", () => {
+      expect(Array.from(PAGE_SIZE_OPTIONS)).toEqual([10, 20, 50, 100, 200]);
+    });
+
+    it("defaults to 20 items per page", () => {
+      expect(DEFAULT_PAGE_SIZE).toBe(20);
+    });
+
+    it("persists user-selected page size under pageSize.users", () => {
+      expect(PAGE_SIZE_STORAGE_KEY).toBe("pageSize.users");
+    });
+  });
+
   describe("loading and empty states", () => {
     it("renders skeleton while loading", () => {
       // never-resolving promise keeps loading=true
@@ -101,6 +112,19 @@ describe("UsersClient", () => {
         expect(screen.getByTestId("users-empty")).toBeInTheDocument();
         expect(screen.getByText(T.empty)).toBeInTheDocument();
       });
+    });
+
+    it("renders error state when the fetch rejects", async () => {
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      mockGetUsers.mockRejectedValue(new Error("boom"));
+      renderUsersClient();
+      await waitFor(() => {
+        expect(screen.getByTestId("users-error")).toBeInTheDocument();
+        expect(screen.getByText(T.loadError)).toBeInTheDocument();
+      });
+      // Empty state must NOT be shown — that would mislead the user.
+      expect(screen.queryByTestId("users-empty")).toBeNull();
+      consoleError.mockRestore();
     });
   });
 

@@ -598,6 +598,7 @@ export const en: Translations = {
   users: {
     title: "Users",
     empty: "No users registered yet.",
+    loadError: "Users could not be loaded.",
     columns: {
       avatar: "Avatar",
       name: "Name",

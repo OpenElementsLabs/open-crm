@@ -597,6 +597,7 @@ export const de = {
   users: {
     title: "Benutzer",
     empty: "Noch keine Benutzer registriert.",
+    loadError: "Benutzer konnten nicht geladen werden.",
     columns: {
       avatar: "Avatar",
       name: "Name",

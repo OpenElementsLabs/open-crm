@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { User as UserIcon, Users as UsersIcon } from "lucide-react";
+import { AlertCircle, User as UserIcon, Users as UsersIcon } from "lucide-react";
 import {
   Button,
   Select,
@@ -10,21 +10,26 @@ import {
   SelectTrigger,
   SelectValue,
   Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { getUsers } from "@/lib/api";
 import type { Page, UserDto } from "@/lib/types";
 
-const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200] as const;
-const DEFAULT_PAGE_SIZE = 20;
-const PAGE_SIZE_STORAGE_KEY = "pageSize.users";
+export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200] as const;
+export const DEFAULT_PAGE_SIZE = 20;
+export const PAGE_SIZE_STORAGE_KEY = "pageSize.users";
 
 function readStoredPageSize(): number {
   if (typeof window === "undefined") return DEFAULT_PAGE_SIZE;
   const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
   const parsed = Number(stored);
   if ((PAGE_SIZE_OPTIONS as readonly number[]).includes(parsed)) return parsed;
-  localStorage.setItem(PAGE_SIZE_STORAGE_KEY, String(DEFAULT_PAGE_SIZE));
   return DEFAULT_PAGE_SIZE;
 }
 
@@ -32,18 +37,24 @@ export function UsersClient() {
   const t = useTranslations();
   const [data, setData] = useState<Page<UserDto> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(() => readStoredPageSize());
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await getUsers({ page, size: pageSize });
       setData(result);
+    } catch (err: unknown) {
+      console.error("Failed to load users", err);
+      setError(t.users.loadError);
+      setData(null);
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize]);
+  }, [page, pageSize, t.users.loadError]);
 
   useEffect(() => {
     fetchUsers();
@@ -68,6 +79,15 @@ export function UsersClient() {
             <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
+      ) : error ? (
+        <div
+          className="flex flex-col items-center justify-center py-16 text-center"
+          data-testid="users-error"
+          role="alert"
+        >
+          <AlertCircle className="mb-4 h-12 w-12 text-oe-red/70" />
+          <p className="text-oe-red">{error}</p>
+        </div>
       ) : !data || data.content.length === 0 ? (
         <div
           className="flex flex-col items-center justify-center py-16 text-center"
@@ -79,36 +99,18 @@ export function UsersClient() {
       ) : (
         <>
           <div className="overflow-hidden rounded-lg border border-oe-gray-light">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-oe-gray-light bg-oe-gray-lightest">
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left font-medium text-oe-gray w-16"
-                  >
-                    {t.users.columns.avatar}
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left font-medium text-oe-gray"
-                  >
-                    {t.users.columns.name}
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-4 py-3 text-left font-medium text-oe-gray"
-                  >
-                    {t.users.columns.email}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">{t.users.columns.avatar}</TableHead>
+                  <TableHead>{t.users.columns.name}</TableHead>
+                  <TableHead>{t.users.columns.email}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {data.content.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="border-b border-oe-gray-light last:border-0"
-                  >
-                    <td className="px-4 py-3">
+                  <TableRow key={user.id}>
+                    <TableCell>
                       {user.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -125,15 +127,15 @@ export function UsersClient() {
                           <UserIcon className="h-4 w-4" />
                         </div>
                       )}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-oe-dark">
+                    </TableCell>
+                    <TableCell className="font-medium text-oe-dark">
                       {user.name}
-                    </td>
-                    <td className="px-4 py-3 text-oe-gray">{user.email}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="text-oe-gray">{user.email}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           <div className="mt-4 flex items-center justify-between">

@@ -14,8 +14,8 @@ import com.openelements.crm.user.UserController;
 import com.openelements.crm.webhook.WebhookController;
 import java.lang.reflect.Method;
 import java.util.UUID;
-import org.springframework.data.domain.Pageable;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Verifies that every delete endpoint carries {@code @RequiresAdmin}
