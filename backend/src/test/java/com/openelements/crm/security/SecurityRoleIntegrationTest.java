@@ -201,6 +201,47 @@ class SecurityRoleIntegrationTest {
             get("/api/brevo/settings"), List.of("IT-ADMIN"))));
     }
 
+    // -- GET /api/users requires IT-ADMIN (spec 089) --
+
+    @Test
+    void usersListUnauthenticatedReturns401() throws Exception {
+        mockMvc.perform(get("/api/users"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void usersListForbiddenForUserNone() throws Exception {
+        mockMvc.perform(withRoles(get("/api/users"), List.of()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void usersListForbiddenForAdminOnly() throws Exception {
+        mockMvc.perform(withRoles(get("/api/users"), List.of("ADMIN")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void usersListAllowedForItAdmin() throws Exception {
+        mockMvc.perform(withRoles(get("/api/users"), List.of("IT-ADMIN")))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void usersListAllowedForUserBoth() throws Exception {
+        mockMvc.perform(withRoles(get("/api/users"),
+                List.of("ADMIN", "IT-ADMIN")))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void usersMeRemainsAccessibleForUserNone() throws Exception {
+        // /api/users/me must remain accessible to any authenticated user;
+        // the IT-ADMIN restriction only applies to the list endpoint.
+        assertRoleCheckPassed(() -> mockMvc.perform(withRoles(
+            get("/api/users/me"), List.of())));
+    }
+
     /**
      * Performs the supplied MockMvc call. If it succeeds, asserts the status is
      * not 403. If it throws during servlet processing (business logic error),
