@@ -283,6 +283,7 @@ export function CompanyList() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            title={S.detail.edit}
                             onClick={(e) => {
                               e.stopPropagation();
                               router.push(`/companies/${company.id}/edit`);
@@ -329,6 +330,7 @@ export function CompanyList() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              title={S.detail.delete}
                               disabled={!canDelete}
                               onClick={(e) => {
                                 e.stopPropagation();

@@ -1,9 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { ContactComments } from "@/components/contact-comments";
-import { LanguageProvider } from "@open-elements/ui";
 import { de } from "@/lib/i18n/de";
-import { translations } from "@/lib/i18n";
 import { renderWithProviders } from "@/test/test-utils";
 import type { CommentDto, Page } from "@/lib/types";
 
@@ -154,10 +152,8 @@ describe("ContactComments", () => {
         makeComment({ id: "new", text: "New comment" }),
       );
 
-      const { rerender } = render(
-        <LanguageProvider translations={translations} defaultLanguage="de">
-          <ContactComments contactId="contact-1" totalCount={2} />
-        </LanguageProvider>,
+      const { rerender } = renderWithProviders(
+        <ContactComments contactId="contact-1" totalCount={2} />,
       );
 
       await waitFor(() => {
@@ -179,9 +175,7 @@ describe("ContactComments", () => {
 
       // Simulate navigation to a different contact by changing the prop
       rerender(
-        <LanguageProvider translations={translations} defaultLanguage="de">
-          <ContactComments contactId="contact-2" totalCount={0} />
-        </LanguageProvider>,
+        <ContactComments contactId="contact-2" totalCount={0} />,
       );
 
       await waitFor(() => {

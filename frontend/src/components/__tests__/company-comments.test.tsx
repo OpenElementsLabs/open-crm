@@ -1,9 +1,7 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import { CompanyComments } from "@/components/company-comments";
-import { LanguageProvider } from "@open-elements/ui";
 import { de } from "@/lib/i18n/de";
-import { translations } from "@/lib/i18n";
 import { renderWithProviders } from "@/test/test-utils";
 import type { CommentDto, Page } from "@/lib/types";
 
@@ -387,10 +385,8 @@ describe("CompanyComments", () => {
         makeComment({ id: "new", text: "New comment" }),
       );
 
-      const { rerender } = render(
-        <LanguageProvider translations={translations} defaultLanguage="de">
-          <CompanyComments companyId="company-1" totalCount={3} />
-        </LanguageProvider>,
+      const { rerender } = renderWithProviders(
+        <CompanyComments companyId="company-1" totalCount={3} />,
       );
 
       await waitFor(() => {
@@ -412,9 +408,7 @@ describe("CompanyComments", () => {
 
       // Simulate navigation to a different company by changing the prop
       rerender(
-        <LanguageProvider translations={translations} defaultLanguage="de">
-          <CompanyComments companyId="company-2" totalCount={1} />
-        </LanguageProvider>,
+        <CompanyComments companyId="company-2" totalCount={1} />,
       );
 
       await waitFor(() => {

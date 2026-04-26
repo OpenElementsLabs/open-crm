@@ -317,6 +317,7 @@ export function ContactList() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            title={S.detail.edit}
                             onClick={(e) => {
                               e.stopPropagation();
                               router.push(`/contacts/${contact.id}/edit`);
@@ -363,6 +364,7 @@ export function ContactList() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              title={S.detail.delete}
                               disabled={!canDelete}
                               onClick={(e) => {
                                 e.stopPropagation();
