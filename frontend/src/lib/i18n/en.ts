@@ -24,7 +24,6 @@ export const en: Translations = {
   },
   sidebar: {
     uploadAvatar: "Change avatar",
-    removeAvatar: "Remove avatar",
     menu: "Menu",
   },
   nav: {

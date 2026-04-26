@@ -23,7 +23,6 @@ export const de = {
   },
   sidebar: {
     uploadAvatar: "Avatar ändern",
-    removeAvatar: "Avatar entfernen",
     menu: "Menü",
   },
   nav: {

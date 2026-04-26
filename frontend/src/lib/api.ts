@@ -702,35 +702,6 @@ export async function getCurrentUser(): Promise<UserDto> {
   return response.json();
 }
 
-export function getUserAvatarUrl(): string {
-  return `${baseUrl()}/api/users/me/avatar`;
-}
-
-export async function uploadUserAvatar(file: File): Promise<UserDto> {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const url = `${baseUrl()}/api/users/me/avatar`;
-  const response = await apiFetch(url, {
-    method: "PUT",
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to upload avatar: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-export async function deleteUserAvatar(): Promise<void> {
-  const url = `${baseUrl()}/api/users/me/avatar`;
-  const response = await apiFetch(url, { method: "DELETE" });
-
-  if (!response.ok) {
-    throw new Error(`Failed to delete avatar: ${response.status}`);
-  }
-}
 
 // --- Webhooks ---
 
