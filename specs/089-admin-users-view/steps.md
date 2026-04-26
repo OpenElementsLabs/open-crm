@@ -39,15 +39,15 @@ Read-only admin page listing all registered users. Backend: paginated `GET /api/
 
 **Changes**
 
-- [ ] Add `@GetMapping` method `listUsers(Pageable)` to `backend/src/main/java/com/openelements/crm/user/UserController.java`
-- [ ] Annotate with `@RequiresItAdmin`
-- [ ] Add OpenAPI `@Operation` and `@Parameter` annotations for `page` and `size`
-- [ ] Use `@PageableDefault(size = 20)` so unspecified params default to size 20, page 0
-- [ ] Return `Page<UserDto>` from `userService.findAll(pageable)`
+- [x] Add `@GetMapping` method `listUsers(Pageable)` to `backend/src/main/java/com/openelements/crm/user/UserController.java`
+- [x] Annotate with `@RequiresItAdmin`
+- [x] Add OpenAPI `@Operation` and `@Parameter` annotations for `page` and `size`
+- [x] Use `@PageableDefault(size = 20)` so unspecified params default to size 20, page 0
+- [x] Return `Page<UserDto>` from `userService.findAll(pageable)`
 
 **Acceptance criteria**
 
-- [ ] Backend builds: `cd backend && ./mvnw compile`
+- [x] Backend builds: `cd backend && ./mvnw compile`
 - [ ] Endpoint returns 200 + `Page<UserDto>` JSON when called as IT-ADMIN
 - [ ] Endpoint returns 401 unauthenticated, 403 for other roles
 
