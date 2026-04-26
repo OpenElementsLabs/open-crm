@@ -59,25 +59,25 @@ The endpoint contract, query parameters, response payload, and filter semantics 
 
 **Changes**
 
-- [ ] Create package `com.openelements.crm.auditlog` under `backend/src/main/java/`
-- [ ] Create `CrmAuditLogRepository` extending `JpaRepository<AuditLogEntity, UUID>` with methods:
-    - [ ] `Page<AuditLogEntity> findByEntityType(String entityType, Pageable pageable)`
-    - [ ] `Page<AuditLogEntity> findByUserName(String userName, Pageable pageable)`
-    - [ ] `Page<AuditLogEntity> findByEntityTypeAndUserName(String entityType, String userName, Pageable pageable)`
-    - [ ] `@Query("SELECT DISTINCT a.entityType FROM AuditLogEntity a ORDER BY a.entityType") List<String> findDistinctEntityTypes()`
-- [ ] Create `AuditLogController` with class-level `@RestController`, `@RequestMapping("/api/audit-logs")`, `@Tag(name = "Audit Log")`, `@SecurityRequirement(name = "oidc")`, `@RequiresItAdmin`
-- [ ] `GET /api/audit-logs` returning `Page<AuditLogDto>`:
-    - [ ] Uses `@PageableDefault(size = 20, sort = "createdAt", direction = DESC)` to pin default ordering to `createdAt DESC`
-    - [ ] Optional `@RequestParam` `entityType` and `user`
-    - [ ] Routes to repository method per filter combination, then maps via `page.map(AuditLogDto::fromEntity)`
-- [ ] `GET /api/audit-logs/entity-types` returning `List<String>` from `findDistinctEntityTypes()`
-- [ ] OpenAPI `@Operation` + `@Parameter` annotations for query params
+- [x] Create package `com.openelements.crm.auditlog` under `backend/src/main/java/`
+- [x] Create `CrmAuditLogRepository` extending `JpaRepository<AuditLogEntity, UUID>` with methods:
+    - [x] `Page<AuditLogEntity> findByEntityType(String entityType, Pageable pageable)`
+    - [x] `Page<AuditLogEntity> findByUserName(String userName, Pageable pageable)`
+    - [x] `Page<AuditLogEntity> findByEntityTypeAndUserName(String entityType, String userName, Pageable pageable)`
+    - [x] `@Query("SELECT DISTINCT a.entityType FROM AuditLogEntity a ORDER BY a.entityType") List<String> findDistinctEntityTypes()`
+- [x] Create `AuditLogController` with class-level `@RestController`, `@RequestMapping("/api/audit-logs")`, `@Tag(name = "Audit Log")`, `@SecurityRequirement(name = "oidc")`, `@RequiresItAdmin`
+- [x] `GET /api/audit-logs` returning `Page<AuditLogDto>`:
+    - [x] Uses `@PageableDefault(size = 20, sort = "createdAt", direction = DESC)` to pin default ordering to `createdAt DESC`
+    - [x] Optional `@RequestParam` `entityType` and `user`
+    - [x] Routes to repository method per filter combination, then maps via `page.map(AuditLogDto::fromEntity)`
+- [x] `GET /api/audit-logs/entity-types` returning `List<String>` from `findDistinctEntityTypes()`
+- [x] OpenAPI `@Operation` + `@Parameter` annotations for query params
 
 **Acceptance criteria**
 
-- [ ] `cd backend && ./mvnw compile` succeeds
-- [ ] Controller is wired into Spring context (no startup failures)
-- [ ] Repository queries compile against `AuditLogEntity`
+- [x] `cd backend && ./mvnw compile` succeeds
+- [x] Controller is wired into Spring context (no startup failures)
+- [x] Repository queries compile against `AuditLogEntity`
 
 **Related behaviors:** GET /api/audit-logs without filters; GET /api/audit-logs with entityType filter; GET /api/audit-logs with user filter; GET /api/audit-logs with both filters; GET /api/audit-logs/entity-types; GET /api/audit-logs/entity-types with empty table; Unauthenticated request to API is rejected; Non-IT-ADMIN request to API is rejected
 
@@ -87,16 +87,16 @@ The endpoint contract, query parameters, response payload, and filter semantics 
 
 **Changes**
 
-- [ ] Add `AuditAction` and `AuditLogDto` types to `frontend/src/lib/types.ts`:
-    - [ ] `export type AuditAction = "INSERT" | "UPDATE" | "DELETE";`
-    - [ ] `AuditLogDto = { id, entityType, entityId, action: AuditAction, user, createdAt }` (all readonly strings except `action`)
-- [ ] Add `AuditLogListParams` (`page?`, `size?`, `entityType?`, `user?`) and `getAuditLogs()` to `frontend/src/lib/api.ts`, returning `Page<AuditLogDto>`
-- [ ] Add `getAuditLogEntityTypes(): Promise<string[]>` to `frontend/src/lib/api.ts`
-- [ ] Both functions use `apiFetch` with `cache: "no-store"`, throw on non-OK responses (mirror `getUsers` pattern)
+- [x] Add `AuditAction` and `AuditLogDto` types to `frontend/src/lib/types.ts`:
+    - [x] `export type AuditAction = "INSERT" | "UPDATE" | "DELETE";`
+    - [x] `AuditLogDto = { id, entityType, entityId, action: AuditAction, user, createdAt }` (all readonly strings except `action`)
+- [x] Add `AuditLogListParams` (`page?`, `size?`, `entityType?`, `user?`) and `getAuditLogs()` to `frontend/src/lib/api.ts`, returning `Page<AuditLogDto>`
+- [x] Add `getAuditLogEntityTypes(): Promise<string[]>` to `frontend/src/lib/api.ts`
+- [x] Both functions use `apiFetch` with `cache: "no-store"`, throw on non-OK responses (mirror `getUsers` pattern)
 
 **Acceptance criteria**
 
-- [ ] `pnpm --filter frontend exec tsc --noEmit` passes
+- [x] `pnpm --filter frontend exec tsc --noEmit` passes
 
 ---
 
@@ -104,13 +104,13 @@ The endpoint contract, query parameters, response payload, and filter semantics 
 
 **Changes**
 
-- [ ] Add `nav.auditLogs` to `frontend/src/lib/i18n/de.ts` (`"Audit Log"`) and `en.ts` (`"Audit Log"`)
-- [ ] Add new `auditLog` namespace to both with: `title`, `empty`, `loadError`, `filter.{entityType, entityTypeAll, user, userAll}`, `columns.{entityType, entityId, action, user, createdAt}`, `pagination.{perPage, previous, next, totalOne, totalOther}`
-- [ ] Use the existing `users` namespace as a structural template
+- [x] Add `nav.auditLogs` to `frontend/src/lib/i18n/de.ts` (`"Audit Log"`) and `en.ts` (`"Audit Log"`)
+- [x] Add new `auditLog` namespace to both with: `title`, `empty`, `loadError`, `filter.{entityType, entityTypeAll, user, userAll}`, `columns.{entityType, entityId, action, user, createdAt}`, `pagination.{perPage, previous, next, totalOne, totalOther}`
+- [x] Use the existing `users` namespace as a structural template
 
 **Acceptance criteria**
 
-- [ ] `pnpm --filter frontend exec tsc --noEmit` passes (translation typing across en/de matches)
+- [x] `pnpm --filter frontend exec tsc --noEmit` passes (translation typing across en/de matches)
 
 ---
 
@@ -118,25 +118,25 @@ The endpoint contract, query parameters, response payload, and filter semantics 
 
 **Changes**
 
-- [ ] Create `frontend/src/app/(app)/admin/audit-logs/page.tsx` (server component): calls `auth()`, returns `<ForbiddenPage />` when `ROLE_IT_ADMIN` is missing, otherwise renders `<AuditLogsClient />`
-- [ ] Create `frontend/src/app/(app)/admin/audit-logs/audit-logs-client.tsx` with:
-    - [ ] Exported constants: `PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200]`, `DEFAULT_PAGE_SIZE = 20`, `PAGE_SIZE_STORAGE_KEY = "pageSize.auditLogs"`
-    - [ ] State: `data`, `loading`, `error`, `page`, `pageSize` (hydrated from localStorage), `entityType` (string|undefined), `user` (string|undefined), `entityTypes` (string[]), `users` (UserDto[])
-    - [ ] Effect on mount: load entity types via `getAuditLogEntityTypes()` and users via `getUsers({ size: 200 })` to populate dropdowns
-    - [ ] Effect on `page`/`pageSize`/`entityType`/`user` change: load `getAuditLogs({ page, size, entityType, user })`
-    - [ ] Two `<Select>` filters above the table; "All types" / "All users" first option clears the filter and resets `page` to 0
-    - [ ] Table columns: Type, Entity ID, Action, User, Date (Date formatted via `new Date(createdAt).toLocaleString()`)
-    - [ ] Loading: 5 `<Skeleton>` rows (`data-testid="audit-logs-loading"`)
-    - [ ] Empty: `FileText` icon + `t.auditLog.empty` (`data-testid="audit-logs-empty"`)
-    - [ ] Error: `AlertCircle` + `t.auditLog.loadError` (`data-testid="audit-logs-error"`)
-    - [ ] Page-size `<Select>` (10/20/50/100/200); on change persists to localStorage and resets `page` to 0
-    - [ ] Total-count text using `t.auditLog.pagination.totalOne` / `totalOther`
-    - [ ] Prev/Next buttons hidden when `totalPages <= 1`; disabled at boundaries
-    - [ ] Imports from `@open-elements/ui`: `Button`, `Select*`, `Skeleton`, `Table*`
+- [x] Create `frontend/src/app/(app)/admin/audit-logs/page.tsx` (server component): calls `auth()`, returns `<ForbiddenPage />` when `ROLE_IT_ADMIN` is missing, otherwise renders `<AuditLogsClient />`
+- [x] Create `frontend/src/app/(app)/admin/audit-logs/audit-logs-client.tsx` with:
+    - [x] Exported constants: `PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200]`, `DEFAULT_PAGE_SIZE = 20`, `PAGE_SIZE_STORAGE_KEY = "pageSize.auditLogs"`
+    - [x] State: `data`, `loading`, `error`, `page`, `pageSize` (hydrated from localStorage), `entityType` (string|undefined), `user` (string|undefined), `entityTypes` (string[]), `users` (UserDto[])
+    - [x] Effect on mount: load entity types via `getAuditLogEntityTypes()` and users via `getUsers({ size: 200 })` to populate dropdowns
+    - [x] Effect on `page`/`pageSize`/`entityType`/`user` change: load `getAuditLogs({ page, size, entityType, user })`
+    - [x] Two `<Select>` filters above the table; "All types" / "All users" first option clears the filter and resets `page` to 0
+    - [x] Table columns: Type, Entity ID, Action, User, Date (Date formatted via `new Date(createdAt).toLocaleString()`)
+    - [x] Loading: 5 `<Skeleton>` rows (`data-testid="audit-logs-loading"`)
+    - [x] Empty: `FileText` icon + `t.auditLog.empty` (`data-testid="audit-logs-empty"`)
+    - [x] Error: `AlertCircle` + `t.auditLog.loadError` (`data-testid="audit-logs-error"`)
+    - [x] Page-size `<Select>` (10/20/50/100/200); on change persists to localStorage and resets `page` to 0
+    - [x] Total-count text using `t.auditLog.pagination.totalOne` / `totalOther`
+    - [x] Prev/Next buttons hidden when `totalPages <= 1`; disabled at boundaries
+    - [x] Imports from `@open-elements/ui`: `Button`, `Select*`, `Skeleton`, `Table*`
 
 **Acceptance criteria**
 
-- [ ] `pnpm --filter frontend exec tsc --noEmit` passes
+- [x] `pnpm --filter frontend exec tsc --noEmit` passes
 
 **Related behaviors:** all "Frontend" rows in the coverage table (excluding sidebar)
 
@@ -146,14 +146,14 @@ The endpoint contract, query parameters, response payload, and filter semantics 
 
 **Changes**
 
-- [ ] Edit `frontend/src/app/(app)/layout.tsx`: add a `<NavItem>` for `/admin/audit-logs` inside the existing admin `<CollapsibleGroup>`, after the `Users` item
-- [ ] Use `FileText` icon from `lucide-react`, label `t.nav.auditLogs`
-- [ ] Visibility inherited from existing `canSeeAdmin` gate — no extra logic needed
+- [x] Edit `frontend/src/app/(app)/layout.tsx`: add a `<NavItem>` for `/admin/audit-logs` inside the existing admin `<CollapsibleGroup>`, after the `Users` item
+- [x] Use `FileText` icon from `lucide-react`, label `t.nav.auditLogs`
+- [x] Visibility inherited from existing `canSeeAdmin` gate — no extra logic needed
 
 **Acceptance criteria**
 
-- [ ] Sidebar shows "Audit Log" item under Admin for IT-ADMIN
-- [ ] Sidebar admin section is hidden for non-IT-ADMIN (existing behaviour, no regression)
+- [x] Sidebar shows "Audit Log" item under Admin for IT-ADMIN
+- [x] Sidebar admin section is hidden for non-IT-ADMIN (existing behaviour, no regression)
 
 **Related behaviors:** Audit log entry visible for IT-ADMIN; Audit log entry hidden for non-IT-ADMIN
 
@@ -163,26 +163,26 @@ The endpoint contract, query parameters, response payload, and filter semantics 
 
 **Changes**
 
-- [ ] Create `backend/src/test/java/com/openelements/crm/auditlog/AuditLogControllerTest.java` using the same `@SpringBootTest` + `@AutoConfigureMockMvc` + `@ActiveProfiles("test")` + `asItAdmin(...)` JWT helper pattern as `UserControllerTest`
-- [ ] Tests covering the API contract:
-    - [ ] `GET /api/audit-logs` as IT-ADMIN → 200, body has `content[]`, `page.size`, `page.number`, `page.totalElements`, `page.totalPages`
-    - [ ] `GET /api/audit-logs` (no params) as IT-ADMIN → `page.size == 20`, `page.number == 0`
-    - [ ] `GET /api/audit-logs?page=0&size=10` as IT-ADMIN → `page.size == 10`
-    - [ ] `GET /api/audit-logs?entityType=CompanyDto` as IT-ADMIN → 200 (filter accepted, content limited to that type)
-    - [ ] `GET /api/audit-logs?user=Max%20Mustermann` as IT-ADMIN → 200 (filter accepted)
-    - [ ] `GET /api/audit-logs?entityType=CompanyDto&user=Max%20Mustermann` as IT-ADMIN → 200
-    - [ ] `GET /api/audit-logs/entity-types` as IT-ADMIN → 200, JSON array (may be empty)
-    - [ ] Sort defaults to `createdAt` DESC (verify via repeated entries inserted in test, or check the response default-sort param exposed in error / explicit `sort=createdAt,desc` accepted)
-- [ ] Add 401/403 coverage to `SecurityRoleIntegrationTest`:
-    - [ ] `GET /api/audit-logs` unauthenticated → 401
-    - [ ] `GET /api/audit-logs` as USER role → 403
-    - [ ] `GET /api/audit-logs` as ADMIN role → 403
-    - [ ] `GET /api/audit-logs` as IT-ADMIN → 200
-- [ ] Add the `AuditLogController` class to `PreAuthorizeAnnotationTest` so the `@RequiresItAdmin` annotation is asserted to be present
+- [x] Create `backend/src/test/java/com/openelements/crm/auditlog/AuditLogControllerTest.java` using the same `@SpringBootTest` + `@AutoConfigureMockMvc` + `@ActiveProfiles("test")` + `asItAdmin(...)` JWT helper pattern as `UserControllerTest`
+- [x] Tests covering the API contract:
+    - [x] `GET /api/audit-logs` as IT-ADMIN → 200, body has `content[]`, `page.size`, `page.number`, `page.totalElements`, `page.totalPages`
+    - [x] `GET /api/audit-logs` (no params) as IT-ADMIN → `page.size == 20`, `page.number == 0`
+    - [x] `GET /api/audit-logs?page=0&size=10` as IT-ADMIN → `page.size == 10`
+    - [x] `GET /api/audit-logs?entityType=CompanyDto` as IT-ADMIN → 200 (filter accepted, content limited to that type)
+    - [x] `GET /api/audit-logs?user=Max%20Mustermann` as IT-ADMIN → 200 (filter accepted)
+    - [x] `GET /api/audit-logs?entityType=CompanyDto&user=Max%20Mustermann` as IT-ADMIN → 200
+    - [x] `GET /api/audit-logs/entity-types` as IT-ADMIN → 200, JSON array (may be empty)
+    - [x] Sort defaults to `createdAt` DESC (verify via repeated entries inserted in test, or check the response default-sort param exposed in error / explicit `sort=createdAt,desc` accepted)
+- [x] Add 401/403 coverage to `SecurityRoleIntegrationTest`:
+    - [x] `GET /api/audit-logs` unauthenticated → 401
+    - [x] `GET /api/audit-logs` as USER role → 403
+    - [x] `GET /api/audit-logs` as ADMIN role → 403
+    - [x] `GET /api/audit-logs` as IT-ADMIN → 200
+- [x] Add the `AuditLogController` class to `PreAuthorizeAnnotationTest` so the `@RequiresItAdmin` annotation is asserted to be present
 
 **Acceptance criteria**
 
-- [ ] `cd backend && ./mvnw test` passes (full suite green)
+- [x] `cd backend && ./mvnw test` passes (full suite green)
 
 **Related behaviors:** Unauthenticated request to API is rejected; Non-IT-ADMIN request to API is rejected; GET /api/audit-logs without/with filters; GET /api/audit-logs/entity-types (and empty case)
 
@@ -198,34 +198,34 @@ Reserved to keep step numbering aligned with other specs in this repo. Skip.
 
 **Changes**
 
-- [ ] Create `frontend/src/app/(app)/admin/audit-logs/__tests__/audit-logs-client.test.tsx` (Vitest + React Testing Library) following the `users-client.test.tsx` template
-- [ ] Mock `@/lib/api` (`getAuditLogs`, `getAuditLogEntityTypes`, `getUsers`), `next/navigation`, and `localStorage`
-- [ ] Tests:
-    - [ ] Constants: `PAGE_SIZE_OPTIONS`, `DEFAULT_PAGE_SIZE`, `PAGE_SIZE_STORAGE_KEY === "pageSize.auditLogs"`
-    - [ ] Renders skeleton during loading
-    - [ ] Renders empty state when `totalElements === 0`
-    - [ ] Renders error state when fetch rejects
-    - [ ] Renders rows with all columns (Type, Entity ID, Action, User, Date)
-    - [ ] System-user row renders (`user: "System"`)
-    - [ ] Default page size is 20 on first load (no localStorage)
-    - [ ] Reads page size from `localStorage["pageSize.auditLogs"]` on mount
-    - [ ] Changing page size requests page 0 (reset)
-    - [ ] Total-count text rendered (singular + plural)
-    - [ ] Prev/Next hidden when `totalPages === 1`
-    - [ ] Prev disabled on first page; Next disabled on last
-    - [ ] Click Next requests page 1; Click Prev requests page 0
-    - [ ] On mount, `getAuditLogEntityTypes` is called and the result populates filter options (assert via captured options or rerender)
-    - [ ] On mount, `getUsers` is called and dropdown excludes `System`
-    - [ ] Selecting an `entityType` filter calls `getAuditLogs({ entityType, page: 0, size })`
-    - [ ] Clearing the `entityType` filter calls `getAuditLogs({ page: 0, size })` (no entityType param)
-    - [ ] Selecting a `user` filter calls `getAuditLogs({ user, page: 0, size })`
-    - [ ] Clearing the `user` filter while `entityType` is set keeps `entityType` in the request
-- [ ] Note (mirror spec 089): Radix `<Select>` interactions are flaky in jsdom; where the underlying state can be exercised more directly (e.g. via a programmatic handler exposed for testing or via the page-size constant), prefer that over `fireEvent` on the popover. For filter interaction tests, use `fireEvent.change` on the underlying native control if possible, otherwise drive the `onValueChange` handler directly through a test helper.
+- [x] Create `frontend/src/app/(app)/admin/audit-logs/__tests__/audit-logs-client.test.tsx` (Vitest + React Testing Library) following the `users-client.test.tsx` template
+- [x] Mock `@/lib/api` (`getAuditLogs`, `getAuditLogEntityTypes`, `getUsers`), `next/navigation`, and `localStorage`
+- [x] Tests:
+    - [x] Constants: `PAGE_SIZE_OPTIONS`, `DEFAULT_PAGE_SIZE`, `PAGE_SIZE_STORAGE_KEY === "pageSize.auditLogs"`
+    - [x] Renders skeleton during loading
+    - [x] Renders empty state when `totalElements === 0`
+    - [x] Renders error state when fetch rejects
+    - [x] Renders rows with all columns (Type, Entity ID, Action, User, Date)
+    - [x] System-user row renders (`user: "System"`)
+    - [x] Default page size is 20 on first load (no localStorage)
+    - [x] Reads page size from `localStorage["pageSize.auditLogs"]` on mount
+    - [x] Changing page size requests page 0 (reset)
+    - [x] Total-count text rendered (singular + plural)
+    - [x] Prev/Next hidden when `totalPages === 1`
+    - [x] Prev disabled on first page; Next disabled on last
+    - [x] Click Next requests page 1; Click Prev requests page 0
+    - [x] On mount, `getAuditLogEntityTypes` is called and the result populates filter options (assert via captured options or rerender)
+    - [x] On mount, `getUsers` is called and dropdown excludes `System`
+    - [x] Selecting an `entityType` filter calls `getAuditLogs({ entityType, page: 0, size })`
+    - [x] Clearing the `entityType` filter calls `getAuditLogs({ page: 0, size })` (no entityType param)
+    - [x] Selecting a `user` filter calls `getAuditLogs({ user, page: 0, size })`
+    - [x] Clearing the `user` filter while `entityType` is set keeps `entityType` in the request
+- [x] Note (mirror spec 089): Radix `<Select>` interactions are flaky in jsdom; where the underlying state can be exercised more directly (e.g. via a programmatic handler exposed for testing or via the page-size constant), prefer that over `fireEvent` on the popover. For filter interaction tests, use `fireEvent.change` on the underlying native control if possible, otherwise drive the `onValueChange` handler directly through a test helper.
 
 **Acceptance criteria**
 
-- [ ] `pnpm --filter frontend test src/app/\(app\)/admin/audit-logs/__tests__/audit-logs-client.test.tsx` passes
-- [ ] No regressions in the rest of the suite (compare against `main` baseline)
+- [x] `pnpm --filter frontend test src/app/\(app\)/admin/audit-logs/__tests__/audit-logs-client.test.tsx` passes
+- [x] No regressions in the rest of the suite (compare against `main` baseline)
 
 **Related behaviors:** all "Frontend" rows in the coverage table (excluding sidebar visibility)
 
@@ -235,10 +235,10 @@ Reserved to keep step numbering aligned with other specs in this repo. Skip.
 
 **Changes**
 
-- [ ] Update `.claude/conventions/project-specific/project-features.md` with the new admin audit log view feature (if file exists and is non-empty)
-- [ ] Update `.claude/conventions/project-specific/project-structure.md` if it lists admin pages
-- [ ] (Performed by spec-flow Step 6, not here) Update `specs/INDEX.md`: `090` status → `done`
+- [x] Update `.claude/conventions/project-specific/project-features.md` with the new admin audit log view feature (if file exists and is non-empty)
+- [x] Update `.claude/conventions/project-specific/project-structure.md` if it lists admin pages
+- [x] (Performed by spec-flow Step 6, not here) Update `specs/INDEX.md`: `090` status → `done`
 
 **Acceptance criteria**
 
-- [ ] Project docs reference the new page accurately
+- [x] Project docs reference the new page accurately
