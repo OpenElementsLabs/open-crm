@@ -242,6 +242,57 @@ class SecurityRoleIntegrationTest {
             get("/api/users/me"), List.of())));
     }
 
+    // -- GET /api/audit-logs requires IT-ADMIN (spec 090) --
+
+    @Test
+    void auditLogsListUnauthenticatedReturns401() throws Exception {
+        mockMvc.perform(get("/api/audit-logs"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void auditLogsListForbiddenForUserNone() throws Exception {
+        mockMvc.perform(withRoles(get("/api/audit-logs"), List.of()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void auditLogsListForbiddenForAdminOnly() throws Exception {
+        mockMvc.perform(withRoles(get("/api/audit-logs"), List.of("ADMIN")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void auditLogsListAllowedForItAdmin() throws Exception {
+        mockMvc.perform(withRoles(get("/api/audit-logs"), List.of("IT-ADMIN")))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void auditLogsListAllowedForUserBoth() throws Exception {
+        mockMvc.perform(withRoles(get("/api/audit-logs"),
+                List.of("ADMIN", "IT-ADMIN")))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void auditLogEntityTypesUnauthenticatedReturns401() throws Exception {
+        mockMvc.perform(get("/api/audit-logs/entity-types"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void auditLogEntityTypesForbiddenForUserNone() throws Exception {
+        mockMvc.perform(withRoles(get("/api/audit-logs/entity-types"), List.of()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void auditLogEntityTypesAllowedForItAdmin() throws Exception {
+        mockMvc.perform(withRoles(get("/api/audit-logs/entity-types"), List.of("IT-ADMIN")))
+            .andExpect(status().isOk());
+    }
+
     /**
      * Performs the supplied MockMvc call. If it succeeds, asserts the status is
      * not 403. If it throws during servlet processing (business logic error),
