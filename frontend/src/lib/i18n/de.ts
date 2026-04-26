@@ -37,6 +37,7 @@ export const de = {
     webhooks: "Webhooks",
     apiKeys: "API Keys",
     users: "Benutzer",
+    auditLogs: "Audit Log",
   },
   admin: {
     title: "Administration",
@@ -609,6 +610,31 @@ export const de = {
       next: "Weiter",
       totalOne: "{count} Benutzer",
       totalOther: "{count} Benutzer",
+    },
+  },
+  auditLog: {
+    title: "Audit Log",
+    empty: "Keine Audit-Log-Einträge.",
+    loadError: "Audit-Log konnte nicht geladen werden.",
+    filter: {
+      entityType: "Entity-Typ",
+      entityTypeAll: "Alle Typen",
+      user: "Benutzer",
+      userAll: "Alle Benutzer",
+    },
+    columns: {
+      entityType: "Typ",
+      entityId: "Entity-ID",
+      action: "Aktion",
+      user: "Benutzer",
+      createdAt: "Datum",
+    },
+    pagination: {
+      perPage: "pro Seite",
+      previous: "Zurück",
+      next: "Weiter",
+      totalOne: "{count} Eintrag",
+      totalOther: "{count} Einträge",
     },
   },
   errors: {

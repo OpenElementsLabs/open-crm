@@ -38,6 +38,7 @@ export const en: Translations = {
     webhooks: "Webhooks",
     apiKeys: "API Keys",
     users: "Users",
+    auditLogs: "Audit Log",
   },
   admin: {
     title: "Administration",
@@ -610,6 +611,31 @@ export const en: Translations = {
       next: "Next",
       totalOne: "{count} User",
       totalOther: "{count} Users",
+    },
+  },
+  auditLog: {
+    title: "Audit Log",
+    empty: "No audit log entries.",
+    loadError: "Audit log could not be loaded.",
+    filter: {
+      entityType: "Entity Type",
+      entityTypeAll: "All types",
+      user: "User",
+      userAll: "All users",
+    },
+    columns: {
+      entityType: "Type",
+      entityId: "Entity ID",
+      action: "Action",
+      user: "User",
+      createdAt: "Date",
+    },
+    pagination: {
+      perPage: "per page",
+      previous: "Previous",
+      next: "Next",
+      totalOne: "{count} Entry",
+      totalOther: "{count} Entries",
     },
   },
   errors: {

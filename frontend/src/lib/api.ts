@@ -1,4 +1,5 @@
 import type {
+  AuditLogDto,
   CompanyDto,
   CompanyCreateDto,
   ContactDto,
@@ -720,6 +721,46 @@ export async function getUsers(
 
   if (!response.ok) {
     throw new Error(`Failed to fetch users: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// --- Audit Log ---
+
+export interface AuditLogListParams {
+  readonly page?: number;
+  readonly size?: number;
+  readonly entityType?: string;
+  readonly user?: string;
+}
+
+export async function getAuditLogs(
+  params: AuditLogListParams = {},
+): Promise<Page<AuditLogDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+  if (params.entityType) searchParams.set("entityType", params.entityType);
+  if (params.user) searchParams.set("user", params.user);
+
+  const query = searchParams.toString();
+  const url = `${baseUrl()}/api/audit-logs${query ? `?${query}` : ""}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch audit logs: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getAuditLogEntityTypes(): Promise<readonly string[]> {
+  const url = `${baseUrl()}/api/audit-logs/entity-types`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch audit log entity types: ${response.status}`);
   }
 
   return response.json();
