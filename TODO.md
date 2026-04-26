@@ -62,43 +62,7 @@ are part of the initial implementation — these integration tests go beyond tha
 **Context:** Identified during the grill session for Spec 075 (Webhook Support). Prerequisite: Spec 075 must be
 implemented first.
 
-## Frontend: Extract Reusable Components into @open-elements/ui Package
+## Move topics to frontend lib
 
-Extract generic UI components, shared domain types, and brand styling from the CRM frontend into a reusable
-`@open-elements/ui` package — mirroring what `spring-services` does for the backend.
-
-### Approach
-
-- **Distribution model:** Raw `.tsx` source files (no compile step in the package). The consuming app's Tailwind config
-  scans the package source to discover utility classes.
-- **Package boundary:** pnpm workspace with `"@open-elements/ui": "workspace:*"`. Later extraction to a separate repo
-  and npm publishing.
-- **Entry point:** Barrel export — `import { Combobox, TagMultiSelect, TagDto } from "@open-elements/ui"`.
-
-### Minimal Scope (first iteration)
-
-- **Combobox** component (generic multi-select primitive based on @base-ui/react)
-- **TagMultiSelect** component (refactored: receives `getTags: () => Promise<TagDto[]>` callback instead of importing
-  from `api.ts`)
-- **TagDto** type definition (owned by the package, consumed by the app)
-- **`cn()` utility** (clsx + tailwind-merge)
-- **Brand CSS** — Open Elements brand colors (oe-green, oe-red, oe-blue, etc.), fonts (Montserrat, Lato), Tailwind
-  theme tokens. Package owns the brand; app imports and can override.
-- **Translation strings** — Package ships DE/EN translations for its components. App merges them into its own
-  LanguageProvider (no separate provider in the package).
-
-### Dependencies
-
-All dependencies as `peerDependencies`: React, @base-ui/react, tailwind-merge, clsx, class-variance-authority.
-
-### Tooling
-
-Package has its own ESLint, Prettier, Vitest + Testing Library config. Tests live with the components in the package.
-
-### Open
-
-- **npm publishing strategy** — deferred until the package is extracted to its own repo. Decision needed: publish raw
-  `.tsx` source (conflicts with npm convention) or compiled JS + CSS (conflicts with Tailwind class scanning).
-
-**Context:** Identified during grill session for frontend component extraction. Mirrors the backend's `spring-services`
-extraction pattern.
+- User Table
+- Audit table
