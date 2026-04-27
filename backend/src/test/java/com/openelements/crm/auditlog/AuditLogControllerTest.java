@@ -1,16 +1,7 @@
 package com.openelements.crm.auditlog;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.openelements.spring.base.services.audit.AuditAction;
 import com.openelements.spring.base.services.audit.AuditLogDataService;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +13,16 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Behaviour tests for the GET /api/audit-logs and /entity-types endpoints
@@ -42,10 +43,7 @@ class AuditLogControllerTest {
 
     @Autowired
     private AuditLogDataService auditLogDataService;
-
-    @Autowired
-    private CrmAuditLogRepository auditLogRepository;
-
+    
     private static MockHttpServletRequestBuilder asItAdmin(MockHttpServletRequestBuilder builder) {
         final List<String> roles = List.of("IT-ADMIN");
         final Jwt jwt = Jwt.withTokenValue("token")
@@ -64,7 +62,7 @@ class AuditLogControllerTest {
 
     @BeforeEach
     void cleanAuditLog() {
-        auditLogRepository.deleteAll();
+        auditLogDataService.getAll().forEach(entry -> auditLogDataService.delete(entry.id()));
     }
 
     @Test
