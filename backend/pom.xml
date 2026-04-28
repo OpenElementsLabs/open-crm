@@ -36,7 +36,7 @@
     <properties>
         <java.version>21</java.version>
         <maven.compiler.release>21</maven.compiler.release>
-        <springdoc.version>2.8.6</springdoc.version>
+        <springdoc.version>2.8.17</springdoc.version>
         <cyclonedx.version>2.9.1</cyclonedx.version>
     </properties>
 
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.open-elements</groupId>
             <artifactId>spring-services</artifactId>
-            <version>0.11.0</version>
+            <version>0.12.0</version>
         </dependency>
 
         <dependency>
@@ -166,7 +166,7 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>${cyclonedx.version}</version>
+                <version>2.9.1</version>
                 <executions>
                     <execution>
                         <phase>verify</phase>
