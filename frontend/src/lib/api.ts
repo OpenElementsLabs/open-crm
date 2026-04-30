@@ -19,6 +19,8 @@ import type {
   ApiKeyCreatedDto,
   BrevoSettingsDto,
   BrevoSyncResultDto,
+  TranslationConfigDto,
+  TranslateResponseDto,
   Page,
 } from "./types";
 import type { TagDto } from "@open-elements/ui";
@@ -897,4 +899,35 @@ export async function deleteApiKey(id: string): Promise<void> {
   if (!response.ok) {
     throw new Error(`Failed to delete API key: ${response.status}`);
   }
+}
+
+// Translation API
+
+export async function getTranslationSettings(): Promise<TranslationConfigDto> {
+  const url = `${baseUrl()}/api/translate/settings`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch translation settings: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function translateText(
+  text: string,
+  targetLanguage: "de" | "en",
+): Promise<TranslateResponseDto> {
+  const url = `${baseUrl()}/api/translate`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, targetLanguage }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to translate: ${response.status}`);
+  }
+
+  return response.json();
 }

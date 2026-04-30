@@ -180,6 +180,14 @@ export interface BrevoSettingsDto {
   readonly apiKeyConfigured: boolean;
 }
 
+export interface TranslationConfigDto {
+  readonly configured: boolean;
+}
+
+export interface TranslateResponseDto {
+  readonly translatedText: string;
+}
+
 export interface WebhookDto {
   readonly id: string;
   readonly url: string;

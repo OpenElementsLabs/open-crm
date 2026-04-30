@@ -7,6 +7,7 @@ import { Button, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, Car
 import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
+import { TranslateButton } from "@/components/translate-button";
 import { getCompanyComments, createCompanyComment, deleteComment, ForbiddenError } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -152,21 +153,24 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
                   <p className="text-xs text-oe-gray-mid">
                     {comment.author} &middot; {formatDate(comment.createdAt, "de")}
                   </p>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <button
-                          type="button"
-                          disabled={!canDelete}
-                          onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
-                          className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2 disabled:opacity-40 disabled:pointer-events-auto disabled:cursor-not-allowed"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>{canDelete ? S.deleteDialog.title : t.errors.roleRequired.admin}</TooltipContent>
-                  </Tooltip>
+                  <div className="flex items-center">
+                    <TranslateButton text={comment.text} size="md" />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <button
+                            type="button"
+                            disabled={!canDelete}
+                            onClick={() => { setDeleteTarget(comment.id); setDeleteError(null); }}
+                            className="text-oe-red hover:text-oe-red-dark shrink-0 ml-2 disabled:opacity-40 disabled:pointer-events-auto disabled:cursor-not-allowed"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{canDelete ? S.deleteDialog.title : t.errors.roleRequired.admin}</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
                 <p className="mt-1 text-sm text-oe-black whitespace-pre-wrap break-words">
                   {comment.text}

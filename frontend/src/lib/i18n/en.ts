@@ -650,5 +650,14 @@ export const en: Translations = {
       itAdmin: "IT-ADMIN role required",
     },
   },
+  translation: {
+    translate: "Translate",
+    title: "Translation",
+    loading: "Translating...",
+    error: "Translation failed. Please try again later.",
+    copy: "Copy",
+    copied: "Copied",
+    close: "Close",
+  },
   ...uiEn,
 } as const;

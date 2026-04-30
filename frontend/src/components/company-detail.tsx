@@ -11,6 +11,7 @@ import { useTranslations } from "@/lib/i18n";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CompanyComments } from "@/components/company-comments";
 import { DetailField } from "@/components/detail-field";
+import { TranslateButton } from "@/components/translate-button";
 import { deleteCompany, ForbiddenError, getCompanyLogoUrl, getTag } from "@/lib/api";
 import type { CompanyDto } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -172,7 +173,10 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
 
       {company.description && (
         <div className="mt-4">
-          <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
+            <TranslateButton text={company.description} size="sm" />
+          </div>
           <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{company.description}</p>
         </div>
       )}
