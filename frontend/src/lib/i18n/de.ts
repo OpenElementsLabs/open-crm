@@ -649,5 +649,14 @@ export const de = {
       itAdmin: "IT-ADMIN-Rolle erforderlich",
     },
   },
+  translation: {
+    translate: "Übersetzen",
+    title: "Übersetzung",
+    loading: "Wird übersetzt...",
+    error: "Übersetzung fehlgeschlagen. Bitte später erneut versuchen.",
+    copy: "Kopieren",
+    copied: "Kopiert",
+    close: "Schließen",
+  },
   ...uiDe,
 } as const;

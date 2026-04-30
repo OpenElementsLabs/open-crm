@@ -13,6 +13,7 @@ const mockCreateContactComment = vi.fn();
 vi.mock("@/lib/api", () => ({
   getContactComments: (...args: unknown[]) => mockGetContactComments(...args),
   createContactComment: (...args: unknown[]) => mockCreateContactComment(...args),
+  getTranslationSettings: vi.fn().mockResolvedValue({ configured: false }),
 }));
 
 function makeComment(overrides: Partial<CommentDto> = {}): CommentDto {

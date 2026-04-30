@@ -11,6 +11,7 @@ import { useTranslations, useLanguage } from "@/lib/i18n";
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { ContactComments } from "@/components/contact-comments";
 import { DetailField } from "@/components/detail-field";
+import { TranslateButton } from "@/components/translate-button";
 import { deleteContact, ForbiddenError, getContactPhotoUrl, getTag } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -221,7 +222,10 @@ export function ContactDetail({ contact }: ContactDetailProps) {
 
       {contact.description && (
         <div className="mt-4">
-          <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
+            <TranslateButton text={contact.description} size="sm" />
+          </div>
           <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{contact.description}</p>
         </div>
       )}
