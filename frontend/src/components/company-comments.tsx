@@ -3,10 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { MessageSquarePlus, X } from "lucide-react";
-import { Button, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@open-elements/ui";
+import { Button, DeleteConfirmDialog, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog";
 import { TranslateButton } from "@/components/translate-button";
 import { getCompanyComments, createCompanyComment, deleteComment, ForbiddenError } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
