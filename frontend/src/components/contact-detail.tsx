@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Mail, Pencil, Trash2, User } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips } from "@open-elements/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips, MarkdownView } from "@open-elements/ui";
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations, useLanguage } from "@/lib/i18n";
 import { ContactComments } from "@/components/contact-comments";
@@ -224,7 +224,9 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
             <TranslateButton text={contact.description} size="sm" />
           </div>
-          <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{contact.description}</p>
+          <div className="mt-1 text-sm">
+            <MarkdownView content={contact.description} />
+          </div>
         </div>
       )}
 

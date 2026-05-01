@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@open-elements/ui";
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, MarkdownEditor } from "@open-elements/ui";
 
 interface AddCommentDialogProps {
   readonly open: boolean;
@@ -45,13 +45,6 @@ export function AddCommentDialog({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
   const handleOpenChange = (value: boolean) => {
     if (!value) {
       setText("");
@@ -66,14 +59,10 @@ export function AddCommentDialog({
           <DialogHeader>
             <DialogTitle className="font-heading">{title}</DialogTitle>
           </DialogHeader>
-          <textarea
-            className="w-full rounded-md border border-oe-gray-light p-3 text-sm focus:border-oe-green focus:outline-none focus:ring-1 focus:ring-oe-green resize-y min-h-[80px]"
-            placeholder={placeholder}
+          <MarkdownEditor
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={3}
-            disabled={sending}
+            onChange={setText}
+            placeholder={placeholder}
           />
           <DialogFooter>
             <Button

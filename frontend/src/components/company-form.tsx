@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Trash2, Upload } from "lucide-react";
-import { Button, Input, Textarea, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle } from "@open-elements/ui";
+import { Button, Input, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, MarkdownEditor } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { createCompany, updateCompany, uploadCompanyLogo, deleteCompanyLogo, getCompanyLogoUrl, getTags } from "@/lib/api";
 import type { CompanyDto, CompanyCreateDto } from "@/lib/types";
@@ -243,13 +243,11 @@ export function CompanyForm({ company }: CompanyFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">{S.description}</Label>
-            <Textarea
-              id="description"
+            <Label>{S.description}</Label>
+            <MarkdownEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
               placeholder={S.descriptionPlaceholder}
-              rows={3}
             />
           </div>
 

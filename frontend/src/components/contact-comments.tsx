@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { MessageSquarePlus, X } from "lucide-react";
-import { Button, DeleteConfirmDialog, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@open-elements/ui";
+import { Button, DeleteConfirmDialog, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton, MarkdownView } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { TranslateButton } from "@/components/translate-button";
@@ -168,9 +168,9 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
                     </Tooltip>
                   </div>
                 </div>
-                <p className="mt-1 text-sm text-oe-black whitespace-pre-wrap break-words">
-                  {comment.text}
-                </p>
+                <div className="mt-1 text-sm">
+                  <MarkdownView content={comment.text} />
+                </div>
               </div>
             ))}
           </div>

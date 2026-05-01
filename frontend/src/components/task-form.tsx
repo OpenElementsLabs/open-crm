@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Input, Textarea, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@open-elements/ui";
+import { Button, Input, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MarkdownEditor } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import {
   createTask,
@@ -119,14 +119,11 @@ export function TaskForm({ task }: TaskFormProps) {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="action">{S.fields.action} *</Label>
-            <Textarea
-              id="action"
+            <Label>{S.fields.action} *</Label>
+            <MarkdownEditor
               value={action}
-              onChange={(e) => setAction(e.target.value)}
+              onChange={setAction}
               placeholder={S.fields.actionPlaceholder}
-              rows={4}
-              className={actionError ? "border-oe-red" : ""}
             />
             {actionError && <p className="mt-1 text-sm text-oe-red">{actionError}</p>}
           </div>

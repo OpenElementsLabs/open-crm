@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CheckSquare, Pencil, Trash2, Users, Building2 } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips } from "@open-elements/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips, MarkdownView } from "@open-elements/ui";
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
@@ -176,7 +176,9 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
             <h3 className="text-sm font-medium text-oe-gray-mid">{S.detail.description}</h3>
             <TranslateButton text={company.description} size="sm" />
           </div>
-          <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{company.description}</p>
+          <div className="mt-1 text-sm">
+            <MarkdownView content={company.description} />
+          </div>
         </div>
       )}
 

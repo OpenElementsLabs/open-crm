@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, DetailField, Tooltip, TooltipContent, TooltipTrigger, TagChips } from "@open-elements/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, DetailField, Tooltip, TooltipContent, TooltipTrigger, TagChips, MarkdownView } from "@open-elements/ui";
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { TaskComments } from "@/components/task-comments";
@@ -122,7 +122,9 @@ export function TaskDetail({ task }: { readonly task: TaskDto }) {
 
       <div className="mt-4">
         <h3 className="text-sm font-medium text-oe-gray-mid">{S.fields.action}</h3>
-        <p className="mt-1 text-sm text-oe-black whitespace-pre-line">{task.action}</p>
+        <div className="mt-1 text-sm">
+          <MarkdownView content={task.action} />
+        </div>
       </div>
 
       <div className="mt-6">

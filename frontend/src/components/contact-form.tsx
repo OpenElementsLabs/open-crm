@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Trash2, Upload } from "lucide-react";
-import { Button, Input, Textarea, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@open-elements/ui";
+import { Button, Input, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MarkdownEditor } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { createContact, updateContact, getCompaniesForSelect, uploadContactPhoto, deleteContactPhoto, getContactPhotoUrl, getTags } from "@/lib/api";
 import type { ContactDto, ContactCreateDto, CompanyDto } from "@/lib/types";
@@ -369,13 +369,11 @@ export function ContactForm({ contact }: ContactFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">{S.description}</Label>
-            <Textarea
-              id="description"
+            <Label>{S.description}</Label>
+            <MarkdownEditor
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
               placeholder={S.descriptionPlaceholder}
-              rows={3}
             />
           </div>
 
