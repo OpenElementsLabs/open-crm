@@ -60,6 +60,7 @@ const testCompanies: CompanyDto[] = [
 
 const existingContact: ContactDto = {
   id: "test-id",
+  title: null,
   firstName: "Max",
   lastName: "Mustermann",
   email: "max@example.com",
@@ -67,16 +68,18 @@ const existingContact: ContactDto = {
   gender: "MALE",
   socialLinks: [{networkType: "LINKEDIN", value: "max", url: "https://linkedin.com/in/max"}],
   phoneNumber: "+49 123 456",
+  description: null,
   companyId: "company-1",
   companyName: "Open Elements",
   commentCount: 0,
   hasPhoto: false,
   birthday: "1990-03-15",
   brevo: false,
+  receivesNewsletter: false,
   language: "DE",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
-    tagIds: [],
+  tagIds: [],
 };
 
 afterEach(() => {

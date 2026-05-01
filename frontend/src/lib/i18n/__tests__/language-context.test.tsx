@@ -1,10 +1,10 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor, render } from "@testing-library/react";
 import { renderWithProviders } from "@/test/test-utils";
-import { useTranslations, useLanguage, LanguageProvider } from "@open-elements/ui";
+import { useLanguage, LanguageProvider } from "@open-elements/ui";
 import { de } from "@/lib/i18n/de";
 import { en } from "@/lib/i18n/en";
-import { translations } from "@/lib/i18n";
+import { translations, useTranslations } from "@/lib/i18n";
 
 function TranslationDisplay() {
   const t = useTranslations();

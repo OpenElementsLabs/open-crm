@@ -28,6 +28,7 @@ vi.mock("@/lib/api", () => ({
 function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
   return {
     id: "test-id",
+    title: null,
     firstName: "Max",
     lastName: "Mustermann",
     email: "max@example.com",
@@ -35,12 +36,14 @@ function makeContact(overrides: Partial<ContactDto> = {}): ContactDto {
     gender: "MALE",
     socialLinks: [{networkType: "LINKEDIN", value: "max", url: "https://linkedin.com/in/max"}],
     phoneNumber: "+49 123 456",
+    description: null,
     companyId: "company-1",
     companyName: "Open Elements",
     commentCount: 2,
     hasPhoto: false,
     birthday: "1990-03-15",
     brevo: true,
+    receivesNewsletter: false,
     language: "DE",
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",

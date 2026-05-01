@@ -16,6 +16,28 @@ vi.mock("@/lib/api", () => ({
   getTranslationSettings: vi.fn().mockResolvedValue({ configured: false }),
 }));
 
+vi.mock("@open-elements/ui", async () => {
+  const actual = await vi.importActual<typeof import("@open-elements/ui")>("@open-elements/ui");
+  return {
+    ...actual,
+    MarkdownEditor: ({
+      value,
+      onChange,
+      placeholder,
+    }: {
+      readonly value: string;
+      readonly onChange: (v: string) => void;
+      readonly placeholder?: string;
+    }) => (
+      <textarea
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    ),
+  };
+});
+
 function makeComment(overrides: Partial<CommentDto> = {}): CommentDto {
   return {
     id: "comment-1",
@@ -23,9 +45,9 @@ function makeComment(overrides: Partial<CommentDto> = {}): CommentDto {
     author: "UNKNOWN",
     companyId: null,
     contactId: "contact-1",
+    taskId: null,
     createdAt: "2026-03-27T15:30:00Z",
     updatedAt: "2026-03-27T15:30:00Z",
-    tagIds: [],
     ...overrides,
   };
 }
