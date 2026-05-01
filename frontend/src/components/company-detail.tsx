@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { CheckSquare, Pencil, Trash2, Users, Building2 } from "lucide-react";
+import { Pencil, Trash2, Users, Building2 } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips, MarkdownView } from "@open-elements/ui";
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
@@ -92,12 +92,6 @@ export function CompanyDetail({ company }: { readonly company: CompanyDto }) {
             <Link href={`/companies/${company.id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
               {S.detail.edit}
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={`/tasks/new?companyId=${company.id}`}>
-              <CheckSquare className="mr-2 h-4 w-4" />
-              {S.detail.createTask}
             </Link>
           </Button>
           <Tooltip>

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
@@ -341,21 +341,6 @@ export function ContactList() {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>{t.companies.comments.addTitle}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/tasks/new?contactId=${contact.id}`);
-                            }}
-                          >
-                            <CheckSquare className="h-4 w-4 text-oe-blue" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{S.detail.createTask}</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>

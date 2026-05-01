@@ -122,7 +122,6 @@ export function TagList() {
                   <th className="px-4 py-3 text-left font-medium text-oe-gray hidden md:table-cell">{t.tags.columns.description}</th>
                   <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.companies}</th>
                   <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.contacts}</th>
-                  <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.tasks}</th>
                   <th className="px-4 py-3 text-right font-medium text-oe-gray w-24">{t.tags.columns.actions}</th>
                 </tr>
               </thead>
@@ -151,14 +150,6 @@ export function TagList() {
                       <span className="text-oe-dark">{tag.contactCount ?? 0}</span>
                       {(tag.contactCount ?? 0) > 0 && (
                         <Link href={`/contacts?tagIds=${tag.id}`} className="ml-1 inline-block align-middle text-oe-gray hover:text-oe-green">
-                          <ArrowUpRight className="h-4 w-4" />
-                        </Link>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="text-oe-dark">{tag.taskCount ?? 0}</span>
-                      {(tag.taskCount ?? 0) > 0 && (
-                        <Link href={`/tasks?tagIds=${tag.id}`} className="ml-1 inline-block align-middle text-oe-gray hover:text-oe-green">
                           <ArrowUpRight className="h-4 w-4" />
                         </Link>
                       )}

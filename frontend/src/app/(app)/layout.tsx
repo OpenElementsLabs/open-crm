@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Activity, Building2, CheckSquare, FileText, KeyRound, RefreshCw, Settings, Tag, Users, Webhook } from "lucide-react";
+import { Activity, Building2, FileText, KeyRound, RefreshCw, Settings, Tag, Users, Webhook } from "lucide-react";
 import { Sidebar, NavItem, CollapsibleGroup, TooltipProvider } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/api";
@@ -66,7 +66,6 @@ function CrmSidebar() {
       >
         <NavItem href="/companies" icon={<Building2 className="h-5 w-5" />} label={t.nav.companies} active={pathname.startsWith("/companies")} />
         <NavItem href="/contacts" icon={<Users className="h-5 w-5" />} label={t.nav.contacts} active={pathname.startsWith("/contacts")} />
-        <NavItem href="/tasks" icon={<CheckSquare className="h-5 w-5" />} label={t.nav.tasks} active={pathname.startsWith("/tasks")} />
         <NavItem href="/tags" icon={<Tag className="h-5 w-5" />} label={t.nav.tags} active={pathname.startsWith("/tags")} />
       </Sidebar>
   );

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, CheckSquare, FileDown, Copy, Check, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink } from "lucide-react";
 import { Button, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
@@ -308,21 +308,6 @@ export function CompanyList() {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>{S.comments.addTitle}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/tasks/new?companyId=${company.id}`);
-                            }}
-                          >
-                            <CheckSquare className="h-4 w-4 text-oe-blue" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{S.detail.createTask}</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { CheckSquare, Mail, Pencil, Trash2, User } from "lucide-react";
+import { Mail, Pencil, Trash2, User } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips, MarkdownView } from "@open-elements/ui";
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations, useLanguage } from "@/lib/i18n";
@@ -119,12 +119,6 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <Link href={`/contacts/${contact.id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
               {S.detail.edit}
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={`/tasks/new?contactId=${contact.id}`}>
-              <CheckSquare className="mr-2 h-4 w-4" />
-              {S.detail.createTask}
             </Link>
           </Button>
           <Tooltip>
