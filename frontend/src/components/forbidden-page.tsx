@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
-import { Button } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { PrimaryButton } from "@/components/primary-button";
 
 export function ForbiddenPage() {
   const t = useTranslations();
@@ -13,9 +13,9 @@ export function ForbiddenPage() {
       <ShieldAlert className="h-16 w-16 text-oe-red" />
       <h1 className="font-heading text-3xl font-bold text-oe-dark">{S.title}</h1>
       <p className="max-w-md text-sm text-oe-gray-mid">{S.description}</p>
-      <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white mt-2">
+      <PrimaryButton asChild className="mt-2">
         <Link href="/companies">{S.backToHome}</Link>
-      </Button>
+      </PrimaryButton>
     </div>
   );
 }

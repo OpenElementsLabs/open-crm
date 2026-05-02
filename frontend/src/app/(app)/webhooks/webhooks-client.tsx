@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Radio, Webhook } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { PrimaryButton } from "@/components/primary-button";
 import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import {
   getWebhooks,
@@ -128,8 +129,7 @@ export function WebhooksClient() {
         <h1 className="font-heading text-2xl font-bold text-oe-dark">
           {t.webhooks.title}
         </h1>
-        <Button
-          className="bg-oe-green hover:bg-oe-green/90 text-white"
+        <PrimaryButton
           onClick={() => {
             setCreateUrl("");
             setCreateError(null);
@@ -138,7 +138,7 @@ export function WebhooksClient() {
         >
           <Plus className="mr-2 h-4 w-4" />
           {t.webhooks.newWebhook}
-        </Button>
+        </PrimaryButton>
       </div>
 
       {/* Loading */}
@@ -153,8 +153,7 @@ export function WebhooksClient() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Webhook className="mb-4 h-12 w-12 text-oe-gray/50" />
           <p className="mb-4 text-oe-gray">{t.webhooks.empty}</p>
-          <Button
-            className="bg-oe-green hover:bg-oe-green/90 text-white"
+          <PrimaryButton
             onClick={() => {
               setCreateUrl("");
               setCreateError(null);
@@ -162,7 +161,7 @@ export function WebhooksClient() {
             }}
           >
             {t.webhooks.createFirst}
-          </Button>
+          </PrimaryButton>
         </div>
       ) : (
         <>
@@ -336,13 +335,12 @@ export function WebhooksClient() {
             <Button variant="outline" onClick={() => setCreateOpen(false)}>
               {t.webhooks.createDialog.cancel}
             </Button>
-            <Button
-              className="bg-oe-green hover:bg-oe-green/90 text-white"
+            <PrimaryButton
               onClick={handleCreate}
               disabled={createSubmitting}
             >
               {t.webhooks.createDialog.create}
-            </Button>
+            </PrimaryButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

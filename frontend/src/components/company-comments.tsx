@@ -6,6 +6,7 @@ import { MessageSquarePlus, X } from "lucide-react";
 import { Button, DeleteConfirmDialog, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton, MarkdownView } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
+import { PrimaryButton } from "@/components/primary-button";
 import { TranslateButton } from "@/components/translate-button";
 import { getCompanyComments, createCompanyComment, deleteComment, ForbiddenError } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
@@ -116,14 +117,13 @@ export function CompanyComments({ companyId, totalCount }: CompanyCommentsProps)
         <CardTitle className="font-heading text-lg text-oe-dark">
           {S.title}{displayCount !== undefined ? ` (${displayCount})` : ""}
         </CardTitle>
-        <Button
+        <PrimaryButton
           onClick={() => setDialogOpen(true)}
-          className="bg-oe-green hover:bg-oe-green-dark text-white"
           size="sm"
         >
           <MessageSquarePlus className="mr-2 h-4 w-4" />
           {S.add}
-        </Button>
+        </PrimaryButton>
       </CardHeader>
       <CardContent>
         {/* Loading skeleton */}

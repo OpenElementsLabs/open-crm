@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { User, Trash2, Upload } from "lucide-react";
 import { Button, Input, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, MarkdownEditor } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { PrimaryButton } from "@/components/primary-button";
 import { createContact, updateContact, getCompaniesForSelect, uploadContactPhoto, deleteContactPhoto, getContactPhotoUrl, getTags } from "@/lib/api";
 import type { ContactDto, ContactCreateDto, CompanyDto } from "@/lib/types";
 
@@ -425,13 +426,12 @@ export function ContactForm({ contact }: ContactFormProps) {
           {apiError && <p className="text-sm text-oe-red">{apiError}</p>}
 
           <div className="flex gap-3 pt-4">
-            <Button
+            <PrimaryButton
               type="submit"
               disabled={submitting}
-              className="bg-oe-green hover:bg-oe-green-dark text-white"
             >
               {S.save}
-            </Button>
+            </PrimaryButton>
             <Button
               type="button"
               variant="outline"

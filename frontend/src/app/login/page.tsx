@@ -3,8 +3,8 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { Button } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { PrimaryButton } from "@/components/primary-button";
 
 export default function LoginPage() {
   return (
@@ -57,13 +57,13 @@ function LoginContent() {
         )}
 
         {/* Login button */}
-        <Button
+        <PrimaryButton
           onClick={() => signIn("oidc")}
-          className="w-full max-w-xs bg-oe-green hover:bg-oe-green-dark text-white text-lg py-6"
+          className="w-full max-w-xs text-lg py-6"
           size="lg"
         >
           {S.button}
-        </Button>
+        </PrimaryButton>
 
         {/* Developer credit */}
         <div className="mt-4 flex items-center gap-2 text-xs text-oe-gray-light">

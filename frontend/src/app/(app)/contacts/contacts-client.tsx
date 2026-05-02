@@ -12,6 +12,7 @@ import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { MailtoButton } from "@/components/mailto-button";
+import { PrimaryButton } from "@/components/primary-button";
 import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
@@ -173,12 +174,12 @@ export function ContactsClient() {
             <FileDown className="mr-2 h-4 w-4" />
             {t.csvExport.button}
           </Button>
-          <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
+          <PrimaryButton asChild>
             <Link href="/contacts/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newContact}
             </Link>
-          </Button>
+          </PrimaryButton>
         </div>
       </div>
 
@@ -258,12 +259,12 @@ export function ContactsClient() {
       {!loading && data && data.content.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="mb-4 text-oe-gray-mid">{S.empty}</p>
-          <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
+          <PrimaryButton asChild>
             <Link href="/contacts/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newContact}
             </Link>
-          </Button>
+          </PrimaryButton>
         </div>
       )}
 

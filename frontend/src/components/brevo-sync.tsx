@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, Badge, Button, Input } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { PrimaryButton } from "@/components/primary-button";
 import {
   getBrevoSettings,
   updateBrevoSettings,
@@ -146,13 +147,12 @@ export function BrevoSync() {
                     onChange={(e) => setApiKey(e.target.value)}
                     className="max-w-md"
                   />
-                  <Button
-                    className="bg-oe-green hover:bg-oe-green-dark text-white"
+                  <PrimaryButton
                     onClick={handleSave}
                     disabled={saving || !apiKey.trim()}
                   >
                     {saving ? S.settings.saving : S.settings.save}
-                  </Button>
+                  </PrimaryButton>
                   {editing && (
                     <Button
                       variant="outline"
@@ -185,13 +185,12 @@ export function BrevoSync() {
             ) : (
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
-                  <Button
-                    className="bg-oe-green hover:bg-oe-green-dark text-white"
+                  <PrimaryButton
                     onClick={handleSync}
                     disabled={syncing}
                   >
                     {S.sync.start}
-                  </Button>
+                  </PrimaryButton>
                   {syncing && (
                     <span className="flex items-center gap-2 text-sm text-oe-gray-mid">
                       <Loader2 className="h-4 w-4 animate-spin" />

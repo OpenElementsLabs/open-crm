@@ -13,6 +13,7 @@ import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { ExternalLinkButton } from "@/components/external-link-button";
+import { PrimaryButton } from "@/components/primary-button";
 import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
@@ -171,12 +172,12 @@ export function CompaniesClient() {
             <FileDown className="mr-2 h-4 w-4" />
             {t.csvExport.button}
           </Button>
-          <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
+          <PrimaryButton asChild>
             <Link href="/companies/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newCompany}
             </Link>
-          </Button>
+          </PrimaryButton>
         </div>
       </div>
 
@@ -231,12 +232,12 @@ export function CompaniesClient() {
       {!loading && data && data.content.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="mb-4 text-oe-gray-mid">{S.empty}</p>
-          <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
+          <PrimaryButton asChild>
             <Link href="/companies/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newCompany}
             </Link>
-          </Button>
+          </PrimaryButton>
         </div>
       )}
 

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, MarkdownEditor } from "@open-elements/ui";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, MarkdownEditor } from "@open-elements/ui";
+import { PrimaryButton } from "@/components/primary-button";
 
 interface AddCommentDialogProps {
   readonly open: boolean;
@@ -65,14 +66,13 @@ export function AddCommentDialog({
             placeholder={placeholder}
           />
           <DialogFooter>
-            <Button
+            <PrimaryButton
               onClick={handleSubmit}
               disabled={isTextEmpty || sending}
-              className="bg-oe-green hover:bg-oe-green-dark text-white"
             >
               <Send className="mr-2 h-4 w-4" />
               {sending ? sendingLabel : sendLabel}
-            </Button>
+            </PrimaryButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

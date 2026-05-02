@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
 import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { PrimaryButton } from "@/components/primary-button";
 
 interface Column {
   readonly key: string;
@@ -88,14 +89,13 @@ export function CsvExportDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {E.cancel}
           </Button>
-          <Button
+          <PrimaryButton
             onClick={handleDownload}
             disabled={selected.size === 0}
-            className="bg-oe-green hover:bg-oe-green-dark text-white"
           >
             <Download className="mr-2 h-4 w-4" />
             {E.download}
-          </Button>
+          </PrimaryButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -17,6 +17,7 @@ import {
   Skeleton
 } from "@open-elements/ui";
 import {useTranslations} from "@/lib/i18n";
+import {PrimaryButton} from "@/components/primary-button";
 import {TooltipIconButton} from "@/components/tooltip-icon-button";
 import {deleteTag, ForbiddenError, getTags} from "@/lib/api";
 import {hasRole, ROLE_ADMIN} from "@/lib/roles";
@@ -90,10 +91,10 @@ export function TagsClient() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-oe-dark">{t.tags.title}</h1>
         <Link href="/tags/new">
-          <Button className="bg-oe-green hover:bg-oe-green/90 text-white">
+          <PrimaryButton>
             <Plus className="mr-2 h-4 w-4"/>
             {t.tags.newTag}
-          </Button>
+          </PrimaryButton>
         </Link>
       </div>
 
@@ -117,9 +118,9 @@ export function TagsClient() {
           <Tag className="mb-4 h-12 w-12 text-oe-gray-light"/>
           <p className="mb-4 text-oe-gray">{t.tags.empty}</p>
           <Link href="/tags/new">
-            <Button className="bg-oe-green hover:bg-oe-green/90 text-white">
+            <PrimaryButton>
               {t.tags.createFirst}
-            </Button>
+            </PrimaryButton>
           </Link>
         </div>
       ) : (
