@@ -1,20 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
-import { Button, DeleteConfirmDialog, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
-import { useTranslations } from "@/lib/i18n";
-import type { TagDto } from "@open-elements/ui";
-import { TooltipIconButton } from "@/components/tooltip-icon-button";
-import { getTags, deleteTag, ForbiddenError } from "@/lib/api";
-import { hasRole, ROLE_ADMIN } from "@/lib/roles";
-import type { Page } from "@/lib/types";
+import {useSession} from "next-auth/react";
+import {ArrowUpRight, Pencil, Plus, Tag, Trash2} from "lucide-react";
+import type {TagDto} from "@open-elements/ui";
+import {
+  Button,
+  DeleteConfirmDialog,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Skeleton
+} from "@open-elements/ui";
+import {useTranslations} from "@/lib/i18n";
+import {TooltipIconButton} from "@/components/tooltip-icon-button";
+import {deleteTag, ForbiddenError, getTags} from "@/lib/api";
+import {hasRole, ROLE_ADMIN} from "@/lib/roles";
+import type {Page} from "@/lib/types";
 
 export function TagsClient() {
   const t = useTranslations();
-  const { data: session } = useSession();
+  const {data: session} = useSession();
   const canDelete = hasRole(session, ROLE_ADMIN);
   const [data, setData] = useState<Page<TagDto> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +53,7 @@ export function TagsClient() {
   const fetchTags = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getTags({ page, size: pageSize, name: debouncedSearch || undefined, includeCounts: true });
+      const result = await getTags({page, size: pageSize, name: debouncedSearch || undefined, includeCounts: true});
       setData(result);
     } finally {
       setLoading(false);
@@ -81,7 +91,7 @@ export function TagsClient() {
         <h1 className="font-heading text-2xl font-bold text-oe-dark">{t.tags.title}</h1>
         <Link href="/tags/new">
           <Button className="bg-oe-green hover:bg-oe-green/90 text-white">
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4"/>
             {t.tags.newTag}
           </Button>
         </Link>
@@ -98,13 +108,13 @@ export function TagsClient() {
 
       {loading ? (
         <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+          {Array.from({length: 5}).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full"/>
           ))}
         </div>
       ) : !data || data.content.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Tag className="mb-4 h-12 w-12 text-oe-gray-light" />
+          <Tag className="mb-4 h-12 w-12 text-oe-gray-light"/>
           <p className="mb-4 text-oe-gray">{t.tags.empty}</p>
           <Link href="/tags/new">
             <Button className="bg-oe-green hover:bg-oe-green/90 text-white">
@@ -117,62 +127,74 @@ export function TagsClient() {
           <div className="overflow-hidden rounded-lg border border-oe-gray-light">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-oe-gray-light bg-oe-gray-lightest">
-                  <th className="px-4 py-3 text-left font-medium text-oe-gray w-16">{t.tags.columns.color}</th>
-                  <th className="px-4 py-3 text-left font-medium text-oe-gray">{t.tags.columns.name}</th>
-                  <th className="px-4 py-3 text-left font-medium text-oe-gray hidden md:table-cell">{t.tags.columns.description}</th>
-                  <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.companies}</th>
-                  <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.contacts}</th>
-                  <th className="px-4 py-3 text-right font-medium text-oe-gray w-24">{t.tags.columns.actions}</th>
-                </tr>
+              <tr className="border-b border-oe-gray-light bg-oe-gray-lightest">
+                <th className="px-4 py-3 text-left font-medium text-oe-gray w-16">{t.tags.columns.color}</th>
+                <th className="px-4 py-3 text-left font-medium text-oe-gray">{t.tags.columns.name}</th>
+                <th
+                  className="px-4 py-3 text-left font-medium text-oe-gray hidden md:table-cell">{t.tags.columns.description}</th>
+                <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.companies}</th>
+                <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.contacts}</th>
+                <th className="px-4 py-3 text-right font-medium text-oe-gray w-24">{t.tags.columns.actions}</th>
+              </tr>
               </thead>
               <tbody>
-                {data.content.map((tag) => (
-                  <tr key={tag.id} className="border-b border-oe-gray-light last:border-0">
-                    <td className="px-4 py-3">
+              {data.content.map((tag) => (
+                <tr key={tag.id} className="border-b border-oe-gray-light last:border-0">
+                  <td className="px-4 py-3">
                       <span
                         className="inline-block h-5 w-5 rounded-full"
-                        style={{ backgroundColor: tag.color }}
+                        style={{backgroundColor: tag.color}}
                       />
-                    </td>
-                    <td className="px-4 py-3 font-medium text-oe-dark">{tag.name}</td>
-                    <td className="px-4 py-3 text-oe-gray hidden md:table-cell truncate max-w-xs">
-                      {tag.description ?? ""}
-                    </td>
-                    <td className="px-4 py-3 text-center">
+                  </td>
+                  <td className="px-4 py-3 font-medium text-oe-dark">{tag.name}</td>
+                  <td className="px-4 py-3 text-oe-gray hidden md:table-cell truncate max-w-xs">
+                    {tag.description ?? ""}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="inline-flex items-center justify-center gap-1">
                       <span className="text-oe-dark">{tag.companyCount ?? 0}</span>
                       {(tag.companyCount ?? 0) > 0 && (
-                        <Link href={`/companies?tagIds=${tag.id}`} className="ml-1 inline-block align-middle text-oe-gray hover:text-oe-green">
-                          <ArrowUpRight className="h-4 w-4" />
-                        </Link>
+                        <TooltipIconButton
+                          icon={<ArrowUpRight/>}
+                          tooltip={t.nav.companies}
+                          href={`/companies?tagIds=${tag.id}`}
+                        />
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-center">
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="inline-flex items-center justify-center gap-1">
                       <span className="text-oe-dark">{tag.contactCount ?? 0}</span>
                       {(tag.contactCount ?? 0) > 0 && (
-                        <Link href={`/contacts?tagIds=${tag.id}`} className="ml-1 inline-block align-middle text-oe-gray hover:text-oe-green">
-                          <ArrowUpRight className="h-4 w-4" />
-                        </Link>
+                        <TooltipIconButton
+                          icon={<ArrowUpRight/>}
+                          tooltip={t.nav.contacts}
+                          href={`/contacts?tagIds=${tag.id}`}
+                        />
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <TooltipIconButton
-                          icon={<Pencil />}
-                          tooltip={t.tags.actions.edit}
-                          href={`/tags/${tag.id}/edit`}
-                        />
-                        <TooltipIconButton
-                          icon={<Trash2 />}
-                          tone="destructive"
-                          tooltip={canDelete ? t.tags.actions.delete : t.errors.roleRequired.admin}
-                          disabled={!canDelete}
-                          onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <TooltipIconButton
+                        icon={<Pencil/>}
+                        tooltip={t.tags.actions.edit}
+                        href={`/tags/${tag.id}/edit`}
+                      />
+                      <TooltipIconButton
+                        icon={<Trash2/>}
+                        tone="destructive"
+                        tooltip={canDelete ? t.tags.actions.delete : t.errors.roleRequired.admin}
+                        disabled={!canDelete}
+                        onClick={() => {
+                          setDeleteTarget(tag);
+                          setDeleteError(null);
+                        }}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
               </tbody>
             </table>
           </div>
@@ -180,9 +202,14 @@ export function TagsClient() {
           {totalPages > 1 && (
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Select value={String(pageSize)} onValueChange={(v) => { const n = Number(v); setPageSize(n); localStorage.setItem("pageSize.tags", v); setPage(0); }}>
+                <Select value={String(pageSize)} onValueChange={(v) => {
+                  const n = Number(v);
+                  setPageSize(n);
+                  localStorage.setItem("pageSize.tags", v);
+                  setPage(0);
+                }}>
                   <SelectTrigger className="w-[80px] h-8 text-sm">
-                    <SelectValue />
+                    <SelectValue/>
                   </SelectTrigger>
                   <SelectContent>
                     {[10, 20, 50, 100, 200].map((s) => (
@@ -221,7 +248,12 @@ export function TagsClient() {
 
       <DeleteConfirmDialog
         open={deleteTarget !== null}
-        onOpenChange={(open) => { if (!open) { setDeleteTarget(null); setDeleteError(null); } }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setDeleteError(null);
+          }
+        }}
         onConfirm={handleDelete}
         title={t.tags.deleteDialog.title}
         description={t.tags.deleteDialog.description}
