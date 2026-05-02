@@ -4,32 +4,29 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink } from "lucide-react";
 import { Button, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
+import { ActionIconButton } from "@/components/action-icon-button";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
+import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
+import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
+import { ExternalLinkButton } from "@/components/external-link-button";
+import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
-const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
-
 function WebsiteCell({ value }: { readonly value: string | null }) {
-  const [copied, setCopied] = useState(false);
   if (!value) return <TableCell className="text-oe-gray-mid">—</TableCell>;
+  const href = value.startsWith("http") ? value : `https://${value}`;
   return (
     <TableCell className="text-oe-gray-mid">
       <span className="inline-flex items-center gap-1">
         <span>{value}</span>
         <span className="inline-flex gap-0.5 shrink-0">
-          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
-            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); window.open(value.startsWith("http") ? value : `https://${value}`, "_blank"); }}>
-            <ExternalLink className={ACTION_ICON} />
-          </button>
+          <CopyToClipboardButton value={value} />
+          <ExternalLinkButton href={href} />
         </span>
       </span>
     </TableCell>
@@ -43,9 +40,9 @@ function ContactCountCell({ count, companyId }: { readonly count: number; readon
       <span className="inline-flex items-center gap-1">
         <span>{count}</span>
         {count > 0 && (
-          <button onClick={(e) => { e.stopPropagation(); router.push(`/contacts?companyId=${companyId}`); }}>
-            <ExternalLink className={ACTION_ICON} />
-          </button>
+          <ActionIconButton onClick={() => router.push(`/contacts?companyId=${companyId}`)}>
+            <ExternalLink />
+          </ActionIconButton>
         )}
       </span>
     </TableCell>

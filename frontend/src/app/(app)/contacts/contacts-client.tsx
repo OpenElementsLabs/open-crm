@@ -4,31 +4,27 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { ActionIconButton } from "@/components/action-icon-button";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
+import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
+import { MailtoButton } from "@/components/mailto-button";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
-const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
-
 function EmailCell({ value }: { readonly value: string | null }) {
-  const [copied, setCopied] = useState(false);
   if (!value) return <TableCell className="text-oe-gray-mid">—</TableCell>;
   return (
     <TableCell className="text-oe-gray-mid">
       <span className="inline-flex items-center gap-1">
         <span>{value}</span>
         <span className="inline-flex gap-0.5 shrink-0">
-          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
-            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${value}`; }}>
-            <Mail className={ACTION_ICON} />
-          </button>
+          <CopyToClipboardButton value={value} />
+          <MailtoButton email={value} />
         </span>
       </span>
     </TableCell>
@@ -36,7 +32,6 @@ function EmailCell({ value }: { readonly value: string | null }) {
 }
 
 function CompanyNameCell({ name, companyId }: { readonly name: string | null; readonly companyId: string | null }) {
-  const [copied, setCopied] = useState(false);
   const router = useRouter();
   if (!name || !companyId) return <TableCell className="text-oe-gray-mid">—</TableCell>;
   return (
@@ -44,12 +39,10 @@ function CompanyNameCell({ name, companyId }: { readonly name: string | null; re
       <span className="inline-flex items-center gap-1">
         <span>{name}</span>
         <span className="inline-flex gap-0.5 shrink-0">
-          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(name); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
-            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); router.push(`/companies/${companyId}`); }}>
-            <ExternalLink className={ACTION_ICON} />
-          </button>
+          <CopyToClipboardButton value={name} />
+          <ActionIconButton onClick={() => router.push(`/companies/${companyId}`)}>
+            <ExternalLink />
+          </ActionIconButton>
         </span>
       </span>
     </TableCell>
