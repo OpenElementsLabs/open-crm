@@ -2,17 +2,17 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor, render } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
 import { LanguageProvider, TooltipProvider } from "@open-elements/ui";
-import { WebhookList } from "@/components/webhook-list";
+import { WebhooksClient } from "../webhooks-client";
 import { de } from "@/lib/i18n/de";
 import { translations } from "@/lib/i18n";
 import type { WebhookDto, Page } from "@/lib/types";
 
-function renderWebhookList() {
+function renderWebhooksClient() {
   return render(
     <SessionProvider session={null}>
       <LanguageProvider translations={translations} defaultLanguage="de">
         <TooltipProvider>
-          <WebhookList />
+          <WebhooksClient />
         </TooltipProvider>
       </LanguageProvider>
     </SessionProvider>,
@@ -86,12 +86,12 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("WebhookList", () => {
+describe("WebhooksClient", () => {
   describe("table display", () => {
     it("should render table with correct columns", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.columns.url)).toBeInTheDocument();
         expect(screen.getByText(W.columns.active)).toBeInTheDocument();
@@ -106,7 +106,7 @@ describe("WebhookList", () => {
         makePage([makeWebhook({ url: "https://receiver.test/hook" })]),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText("https://receiver.test/hook"),
@@ -119,7 +119,7 @@ describe("WebhookList", () => {
         makePage([makeWebhook({ lastStatus: 200 })]),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.status.ok)).toBeInTheDocument();
       });
@@ -130,7 +130,7 @@ describe("WebhookList", () => {
         makePage([makeWebhook({ lastStatus: -1 })]),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.status.timeout)).toBeInTheDocument();
       });
@@ -141,7 +141,7 @@ describe("WebhookList", () => {
         makePage([makeWebhook({ lastStatus: 0 })]),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.status.connectionError)).toBeInTheDocument();
       });
@@ -152,7 +152,7 @@ describe("WebhookList", () => {
         makePage([makeWebhook({ lastStatus: 404 })]),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText(`${W.status.badCall} (404)`),
@@ -165,7 +165,7 @@ describe("WebhookList", () => {
         makePage([makeWebhook({ lastStatus: null })]),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         const cells = screen.getAllByText("—");
         expect(cells.length).toBeGreaterThan(0);
@@ -177,7 +177,7 @@ describe("WebhookList", () => {
     it("should show empty state when no webhooks", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.empty)).toBeInTheDocument();
         expect(screen.getByText(W.createFirst)).toBeInTheDocument();
@@ -189,7 +189,7 @@ describe("WebhookList", () => {
     it("should show skeletons during loading", () => {
       mockGetWebhooks.mockReturnValue(new Promise(() => {})); // Never resolves
 
-      renderWebhookList();
+      renderWebhooksClient();
       const skeletons = document.querySelectorAll("[data-slot='skeleton']");
       expect(skeletons.length).toBeGreaterThan(0);
     });
@@ -199,7 +199,7 @@ describe("WebhookList", () => {
     it("should open create dialog on button click", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.newWebhook)).toBeInTheDocument();
       });
@@ -217,7 +217,7 @@ describe("WebhookList", () => {
         makeWebhook({ url: "https://new.test/hook" }),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.createFirst)).toBeInTheDocument();
       });
@@ -245,7 +245,7 @@ describe("WebhookList", () => {
     it("should show validation error on empty URL", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.newWebhook)).toBeInTheDocument();
       });
@@ -268,7 +268,7 @@ describe("WebhookList", () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
       mockCreateWebhook.mockRejectedValue(new Error("Server error"));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.newWebhook)).toBeInTheDocument();
       });
@@ -292,7 +292,7 @@ describe("WebhookList", () => {
     it("should close dialog on cancel", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText(W.newWebhook)).toBeInTheDocument();
       });
@@ -321,7 +321,7 @@ describe("WebhookList", () => {
         makeWebhook({ id: "wh-1", active: false }),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText("OFF")).toBeInTheDocument();
       });
@@ -344,7 +344,7 @@ describe("WebhookList", () => {
         makeWebhook({ id: "wh-1", active: true }),
       );
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(screen.getByText("ON")).toBeInTheDocument();
       });
@@ -367,7 +367,7 @@ describe("WebhookList", () => {
       );
       mockPingWebhook.mockResolvedValue(undefined);
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText("https://example.com/hook"),
@@ -393,7 +393,7 @@ describe("WebhookList", () => {
       );
       mockPingWebhook.mockResolvedValue(undefined);
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText("https://example.com/hook"),
@@ -417,7 +417,7 @@ describe("WebhookList", () => {
     it("should open delete dialog on click", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText("https://example.com/hook"),
@@ -446,7 +446,7 @@ describe("WebhookList", () => {
       );
       mockDeleteWebhook.mockResolvedValue(undefined);
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText("https://example.com/hook"),
@@ -473,7 +473,7 @@ describe("WebhookList", () => {
     it("should close dialog on cancel", async () => {
       mockGetWebhooks.mockResolvedValue(makePage([makeWebhook()]));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText("https://example.com/hook"),
@@ -505,7 +505,7 @@ describe("WebhookList", () => {
       );
       mockGetWebhooks.mockResolvedValue(makePage(webhooks, 25));
 
-      renderWebhookList();
+      renderWebhooksClient();
       await waitFor(() => {
         expect(
           screen.getByText(W.pagination.next),

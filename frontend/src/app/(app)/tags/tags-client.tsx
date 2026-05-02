@@ -11,7 +11,7 @@ import { getTags, deleteTag, ForbiddenError } from "@/lib/api";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 import type { Page } from "@/lib/types";
 
-export function TagList() {
+export function TagsClient() {
   const t = useTranslations();
   const { data: session } = useSession();
   const canDelete = hasRole(session, ROLE_ADMIN);

@@ -4,19 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink } from "lucide-react";
-import { Button, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, Copy, Check, ExternalLink, Mail } from "lucide-react";
+import { Button, DeleteConfirmDialog, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
-import type { CompanyDto, Page } from "@/lib/types";
+import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 
 const ACTION_ICON = "h-3.5 w-3.5 text-oe-gray-light hover:text-oe-dark [@media(pointer:coarse)]:text-oe-dark transition-colors";
 
-function WebsiteCell({ value }: { readonly value: string | null }) {
+function EmailCell({ value }: { readonly value: string | null }) {
   const [copied, setCopied] = useState(false);
   if (!value) return <TableCell className="text-oe-gray-mid">—</TableCell>;
   return (
@@ -27,7 +26,28 @@ function WebsiteCell({ value }: { readonly value: string | null }) {
           <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
             {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
           </button>
-          <button onClick={(e) => { e.stopPropagation(); window.open(value.startsWith("http") ? value : `https://${value}`, "_blank"); }}>
+          <button onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${value}`; }}>
+            <Mail className={ACTION_ICON} />
+          </button>
+        </span>
+      </span>
+    </TableCell>
+  );
+}
+
+function CompanyNameCell({ name, companyId }: { readonly name: string | null; readonly companyId: string | null }) {
+  const [copied, setCopied] = useState(false);
+  const router = useRouter();
+  if (!name || !companyId) return <TableCell className="text-oe-gray-mid">—</TableCell>;
+  return (
+    <TableCell className="text-oe-gray-mid">
+      <span className="inline-flex items-center gap-1">
+        <span>{name}</span>
+        <span className="inline-flex gap-0.5 shrink-0">
+          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(name); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
+            {copied ? <Check className={`${ACTION_ICON} text-oe-green`} /> : <Copy className={ACTION_ICON} />}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); router.push(`/companies/${companyId}`); }}>
             <ExternalLink className={ACTION_ICON} />
           </button>
         </span>
@@ -36,112 +56,92 @@ function WebsiteCell({ value }: { readonly value: string | null }) {
   );
 }
 
-function ContactCountCell({ count, companyId }: { readonly count: number; readonly companyId: string }) {
-  const router = useRouter();
-  return (
-    <TableCell>
-      <span className="inline-flex items-center gap-1">
-        <span>{count}</span>
-        {count > 0 && (
-          <button onClick={(e) => { e.stopPropagation(); router.push(`/contacts?companyId=${companyId}`); }}>
-            <ExternalLink className={ACTION_ICON} />
-          </button>
-        )}
-      </span>
-    </TableCell>
-  );
-}
-
-export function CompanyList() {
+export function ContactsClient() {
   const t = useTranslations();
-  const S = t.companies;
+  const S = t.contacts;
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const canDelete = hasRole(session, ROLE_ADMIN);
-  const [data, setData] = useState<Page<CompanyDto> | null>(null);
+  const [data, setData] = useState<Page<ContactDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(() => {
     if (typeof window === "undefined") return 20;
-    const stored = localStorage.getItem("pageSize.companies");
+    const stored = localStorage.getItem("pageSize.contacts");
     const parsed = Number(stored);
     if ([10, 20, 50, 100, 200].includes(parsed)) return parsed;
-    localStorage.setItem("pageSize.companies", "20");
+    localStorage.setItem("pageSize.contacts", "20");
     return 20;
   });
-  const [nameFilter, setNameFilter] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
+  const [companyIdFilter, setCompanyIdFilter] = useState(searchParams.get("companyId") ?? "");
+  const [languageFilter, setLanguageFilter] = useState("");
   const [brevoFilter, setBrevoFilter] = useState("all");
   const [tagIds, setTagIds] = useState<string[]>(() => {
     const param = searchParams.get("tagIds");
     return param ? param.split(",") : [];
   });
 
-  const [deleteTarget, setDeleteTarget] = useState<CompanyDto | null>(null);
+  const [companies, setCompanies] = useState<CompanyDto[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<ContactDto | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [commentTarget, setCommentTarget] = useState<CompanyDto | null>(null);
+  const [commentTarget, setCommentTarget] = useState<ContactDto | null>(null);
   const [commentSending, setCommentSending] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
 
-  const companyColumns = Object.entries(t.csvExport.companyColumns).map(([key, label]) => ({
+  const contactColumns = Object.entries(t.csvExport.contactColumns).map(([key, label]) => ({
     key: key.replace(/([A-Z])/g, "_$1").toUpperCase(),
     label,
   }));
 
-  const fetchCompanies = useCallback(async () => {
+  useEffect(() => {
+    getCompaniesForSelect()
+      .then(setCompanies)
+      .catch(() => {});
+  }, []);
+
+  const fetchContacts = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getCompanies({
+      const result = await getContacts({
         page,
         size: pageSize,
-        name: nameFilter || undefined,
+        search: searchFilter || undefined,
+        companyId: companyIdFilter && companyIdFilter !== "all" && companyIdFilter !== "none" ? companyIdFilter : undefined,
+        noCompany: companyIdFilter === "none" ? true : undefined,
+        language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
         brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
         tagIds: tagIds.length > 0 ? tagIds : undefined,
       });
       setData(result);
     } catch {
-      console.error("Failed to fetch companies");
+      console.error("Failed to fetch contacts");
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, nameFilter, brevoFilter, tagIds]);
+  }, [page, pageSize, searchFilter, companyIdFilter, languageFilter, brevoFilter, tagIds]);
 
   useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
+    fetchContacts();
+  }, [fetchContacts]);
 
   useEffect(() => {
     setPage(0);
-  }, [nameFilter, brevoFilter, tagIds]);
+  }, [searchFilter, companyIdFilter, languageFilter, brevoFilter, tagIds]);
 
-  const handleDeleteAll = async () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await deleteCompany(deleteTarget.id, true);
+      await deleteContact(deleteTarget.id);
       setDeleteTarget(null);
       setDeleteError(null);
-      fetchCompanies();
+      fetchContacts();
     } catch (e) {
       if (e instanceof ForbiddenError) {
         setDeleteError(t.errors.forbidden.deleteNoPermission);
       } else {
-        console.error("Failed to delete company");
-      }
-    }
-  };
-
-  const handleDeleteCompanyOnly = async () => {
-    if (!deleteTarget) return;
-    try {
-      await deleteCompany(deleteTarget.id, false);
-      setDeleteTarget(null);
-      setDeleteError(null);
-      fetchCompanies();
-    } catch (e) {
-      if (e instanceof ForbiddenError) {
-        setDeleteError(t.errors.forbidden.deleteNoPermission);
-      } else {
-        console.error("Failed to delete company");
+        setDeleteError(S.form.errorGeneric);
       }
     }
   };
@@ -155,11 +155,17 @@ export function CompanyList() {
             variant="outline"
             onClick={() => {
               const params = new URLSearchParams();
-              if (nameFilter) params.set("name", nameFilter);
+              if (searchFilter) params.set("search", searchFilter);
+              if (companyIdFilter === "none") {
+                params.set("noCompany", "true");
+              } else if (companyIdFilter && companyIdFilter !== "all") {
+                params.set("companyId", companyIdFilter);
+              }
+              if (languageFilter && languageFilter !== "all") params.set("language", languageFilter);
               if (brevoFilter !== "all") params.set("brevo", brevoFilter);
               if (tagIds.length > 0) params.set("tagIds", tagIds.join(","));
               const query = params.toString();
-              window.open(`/companies/print${query ? `?${query}` : ""}`, "_blank");
+              window.open(`/contacts/print${query ? `?${query}` : ""}`, "_blank");
             }}
           >
             <Printer className="mr-2 h-4 w-4" />
@@ -174,22 +180,47 @@ export function CompanyList() {
             {t.csvExport.button}
           </Button>
           <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
-            <Link href="/companies/new">
+            <Link href="/contacts/new">
               <Plus className="mr-2 h-4 w-4" />
-              {S.newCompany}
+              {S.newContact}
             </Link>
           </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Input
-          placeholder={S.filter.name}
-          value={nameFilter}
-          onChange={(e) => setNameFilter(e.target.value)}
-          className="sm:max-w-[200px]"
+          placeholder={S.filter.search}
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
+          className="sm:max-w-[180px]"
         />
+        <Select value={companyIdFilter} onValueChange={setCompanyIdFilter}>
+          <SelectTrigger className="sm:max-w-[200px]">
+            <SelectValue placeholder={S.filter.company} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{S.filter.allCompanies}</SelectItem>
+            <SelectItem value="none">{S.form.noCompany}</SelectItem>
+            {companies.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={languageFilter} onValueChange={setLanguageFilter}>
+          <SelectTrigger className="sm:max-w-[180px]">
+            <SelectValue placeholder={S.filter.language} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{S.filter.allLanguages}</SelectItem>
+            <SelectItem value="UNKNOWN">{S.filter.unknownLanguage}</SelectItem>
+            <SelectItem value="DE">DE</SelectItem>
+            <SelectItem value="EN">EN</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={brevoFilter} onValueChange={setBrevoFilter}>
           <SelectTrigger className="sm:max-w-[200px]">
             <SelectValue placeholder={t.brevoFilter.label} />
@@ -212,7 +243,7 @@ export function CompanyList() {
                 params.delete("tagIds");
               }
               const query = params.toString();
-              router.replace(`/companies${query ? `?${query}` : ""}`, { scroll: false });
+              router.replace(`/contacts${query ? `?${query}` : ""}`, { scroll: false });
             }}
             loadTags={async () => { const result = await getTags({ size: 1000 }); return result.content.map(tag => ({ value: tag.id, label: tag.name, color: tag.color })); }}
             translations={{ placeholder: t.tags.label + "...", empty: t.tags.empty }}
@@ -234,9 +265,9 @@ export function CompanyList() {
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="mb-4 text-oe-gray-mid">{S.empty}</p>
           <Button asChild className="bg-oe-green hover:bg-oe-green-dark text-white">
-            <Link href="/companies/new">
+            <Link href="/contacts/new">
               <Plus className="mr-2 h-4 w-4" />
-              {S.newCompany}
+              {S.newContact}
             </Link>
           </Button>
         </div>
@@ -251,32 +282,34 @@ export function CompanyList() {
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>{S.columns.name}</TableHead>
-                  <TableHead>{S.columns.website}</TableHead>
-                  <TableHead>{S.columns.contacts}</TableHead>
+                  <TableHead>{S.columns.email}</TableHead>
+                  <TableHead>{S.columns.company}</TableHead>
                   <TableHead className="w-[140px] text-right">{S.columns.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.content.map((company) => (
+                {data.content.map((contact) => (
                   <TableRow
-                    key={company.id}
+                    key={contact.id}
                     className="cursor-pointer"
-                    onClick={() => router.push(`/companies/${company.id}`)}
+                    onClick={() => router.push(`/contacts/${contact.id}`)}
                   >
                     <TableCell>
-                      {company.hasLogo ? (
+                      {contact.hasPhoto ? (
                         <img
-                          src={getCompanyLogoUrl(company.id)}
-                          alt={company.name}
-                          className="h-8 w-8 object-contain"
+                          src={getContactPhotoUrl(contact.id)}
+                          alt={`${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`}
+                          className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <Building2 className="h-8 w-8 text-oe-gray-mid" />
+                        <User className="h-8 w-8 text-oe-gray-mid" />
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">{company.name}</TableCell>
-                    <WebsiteCell value={company.website} />
-                    <ContactCountCell count={company.contactCount} companyId={company.id} />
+                    <TableCell className="font-medium">
+                      {`${contact.title ? contact.title + " " : ""}${contact.firstName} ${contact.lastName}`.trim()}
+                    </TableCell>
+                    <EmailCell value={contact.email} />
+                    <CompanyNameCell name={contact.companyName} companyId={contact.companyId} />
                     <TableCell className="text-right">
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -286,7 +319,7 @@ export function CompanyList() {
                             title={S.detail.edit}
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/companies/${company.id}/edit`);
+                              router.push(`/contacts/${contact.id}/edit`);
                             }}
                           >
                             <Pencil className="h-4 w-4 text-oe-blue" />
@@ -301,13 +334,13 @@ export function CompanyList() {
                             size="icon"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setCommentTarget(company);
+                              setCommentTarget(contact);
                             }}
                           >
                             <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>{S.comments.addTitle}</TooltipContent>
+                        <TooltipContent>{t.companies.comments.addTitle}</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -320,7 +353,7 @@ export function CompanyList() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setDeleteError(null);
-                                setDeleteTarget(company);
+                                setDeleteTarget(contact);
                               }}
                             >
                               <Trash2 className="h-4 w-4 text-oe-red" />
@@ -339,7 +372,7 @@ export function CompanyList() {
           {/* Pagination */}
           <div className="mt-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Select value={String(pageSize)} onValueChange={(v) => { const n = Number(v); setPageSize(n); localStorage.setItem("pageSize.companies", v); setPage(0); }}>
+              <Select value={String(pageSize)} onValueChange={(v) => { const n = Number(v); setPageSize(n); localStorage.setItem("pageSize.contacts", v); setPage(0); }}>
                 <SelectTrigger className="w-[80px] h-8 text-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -380,7 +413,7 @@ export function CompanyList() {
       )}
 
       {/* Delete dialog */}
-      <CompanyDeleteDialog
+      <DeleteConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => {
           if (!open) {
@@ -388,15 +421,14 @@ export function CompanyList() {
             setDeleteError(null);
           }
         }}
-        companyName={deleteTarget?.name ?? ""}
-        onDeleteAll={handleDeleteAll}
-        onDeleteCompanyOnly={handleDeleteCompanyOnly}
         title={S.deleteDialog.title}
-        descriptionAll={S.deleteDialog.descriptionAll}
-        descriptionOnly={S.deleteDialog.descriptionOnly}
-        deleteAllLabel={S.deleteDialog.deleteAll}
-        deleteOnlyLabel={S.deleteDialog.deleteOnly}
+        description={S.deleteDialog.description.replace(
+          "{name}",
+          deleteTarget ? `${deleteTarget.title ? deleteTarget.title + " " : ""}${deleteTarget.firstName} ${deleteTarget.lastName}` : "",
+        )}
+        confirmLabel={S.deleteDialog.confirm}
         cancelLabel={S.deleteDialog.cancel}
+        onConfirm={handleDelete}
         error={deleteError}
       />
 
@@ -406,29 +438,32 @@ export function CompanyList() {
         onSubmit={async (text) => {
           setCommentSending(true);
           try {
-            await createCompanyComment(commentTarget!.id, { text });
+            await createContactComment(commentTarget!.id, { text });
             setCommentTarget(null);
           } finally {
             setCommentSending(false);
           }
         }}
         sending={commentSending}
-        title={S.comments.addTitle}
-        placeholder={S.comments.placeholder}
-        sendLabel={S.comments.send}
-        sendingLabel={S.comments.sending}
-        errorTitle={S.comments.errorTitle}
-        errorMessage={S.comments.errorGeneric}
+        title={t.companies.comments.addTitle}
+        placeholder={t.companies.comments.placeholder}
+        sendLabel={t.companies.comments.send}
+        sendingLabel={t.companies.comments.sending}
+        errorTitle={t.companies.comments.errorTitle}
+        errorMessage={t.companies.comments.errorGeneric}
       />
 
       <CsvExportDialog
         open={csvOpen}
         onOpenChange={setCsvOpen}
-        columns={companyColumns}
+        columns={contactColumns}
         onDownload={(columns) => {
-          const url = getCompanyExportUrl(
+          const url = getContactExportUrl(
             {
-              name: nameFilter || undefined,
+              search: searchFilter || undefined,
+              companyId: companyIdFilter && companyIdFilter !== "all" && companyIdFilter !== "none" ? companyIdFilter : undefined,
+              noCompany: companyIdFilter === "none" ? true : undefined,
+              language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
               brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
               tagIds: tagIds.length > 0 ? tagIds : undefined,
             },

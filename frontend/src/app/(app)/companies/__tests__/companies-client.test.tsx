@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
 import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
-import { CompanyList } from "@/components/company-list";
+import { CompaniesClient } from "../companies-client";
 import { de } from "@/lib/i18n/de";
 import { renderWithProviders } from "@/test/test-utils";
 import type { CompanyDto, Page } from "@/lib/types";
@@ -73,7 +73,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("CompanyList", () => {
+describe("CompaniesClient", () => {
   describe("data display", () => {
     it("should render companies with name and website", async () => {
       mockGetCompanies.mockResolvedValue(
@@ -83,7 +83,7 @@ describe("CompanyList", () => {
         ]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText("Open Elements")).toBeInTheDocument();
@@ -96,7 +96,7 @@ describe("CompanyList", () => {
     it("should show empty state when no companies exist", async () => {
       mockGetCompanies.mockResolvedValue(makePage([]));
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.empty)).toBeInTheDocument();
@@ -106,7 +106,7 @@ describe("CompanyList", () => {
     it("should show loading skeleton while fetching", () => {
       mockGetCompanies.mockReturnValue(new Promise(() => {})); // never resolves
 
-      const { container } = renderWithProviders(<CompanyList />);
+      const { container } = renderWithProviders(<CompaniesClient />);
 
       const skeletons = container.querySelectorAll("[data-slot='skeleton']");
       expect(skeletons.length).toBeGreaterThan(0);
@@ -119,7 +119,7 @@ describe("CompanyList", () => {
         makePage([makeCompany()], 25),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
@@ -138,7 +138,7 @@ describe("CompanyList", () => {
         },
       });
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText(/42 Firmen/)).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe("CompanyList", () => {
         },
       });
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
@@ -178,7 +178,7 @@ describe("CompanyList", () => {
     });
 
     it("should render brevo filter dropdown", async () => {
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         const allTriggers = screen.getAllByRole("combobox");
@@ -190,7 +190,7 @@ describe("CompanyList", () => {
     });
 
     it("should filter by name when typing in name filter", async () => {
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText(S.filter.name)).toBeInTheDocument();
@@ -215,7 +215,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "test-id-1", name: "Open Elements" })]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText("Open Elements")).toBeInTheDocument();
@@ -229,7 +229,7 @@ describe("CompanyList", () => {
     it("should show Neue Firma button linking to /companies/new", async () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
 
-      const { container } = renderWithProviders(<CompanyList />);
+      const { container } = renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         const newButton = Array.from(container.querySelectorAll("a")).find(
@@ -246,7 +246,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -265,7 +265,7 @@ describe("CompanyList", () => {
       );
       mockDeleteCompany.mockResolvedValue(undefined);
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -290,7 +290,7 @@ describe("CompanyList", () => {
       );
       mockDeleteCompany.mockResolvedValue(undefined);
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -314,7 +314,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -338,7 +338,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "logo-1", hasLogo: true, name: "Logo Corp" })]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
@@ -355,7 +355,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ hasLogo: false })]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
@@ -373,7 +373,7 @@ describe("CompanyList", () => {
         makePage([makeCompany()]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         const headerRow = screen.getAllByRole("row")[0];
@@ -391,7 +391,7 @@ describe("CompanyList", () => {
     it("should show print button", async () => {
       mockGetCompanies.mockResolvedValue(makePage([makeCompany()]));
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByText(de.print.button)).toBeInTheDocument();
@@ -405,7 +405,7 @@ describe("CompanyList", () => {
         makePage([makeCompany({ id: "1", name: "Test Corp" })]),
       );
 
-      renderWithProviders(<CompanyList />);
+      renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();

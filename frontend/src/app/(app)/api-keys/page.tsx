@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ApiKeyList } from "@/components/api-key-list";
+import { ApiKeysClient } from "./api-keys-client";
 import { ForbiddenPage } from "@/components/forbidden-page";
 import { ROLE_IT_ADMIN } from "@/lib/roles";
 
@@ -8,5 +8,5 @@ export default async function ApiKeysPage() {
   if (!session?.roles?.includes(ROLE_IT_ADMIN)) {
     return <ForbiddenPage />;
   }
-  return <ApiKeyList />;
+  return <ApiKeysClient />;
 }

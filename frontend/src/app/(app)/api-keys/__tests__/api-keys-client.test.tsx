@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, cleanup, fireEvent, waitFor, render } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
 import { LanguageProvider, TooltipProvider } from "@open-elements/ui";
-import { ApiKeyList } from "@/components/api-key-list";
+import { ApiKeysClient } from "../api-keys-client";
 import { de } from "@/lib/i18n/de";
 import { translations } from "@/lib/i18n";
 import type { ApiKeyDto, ApiKeyCreatedDto, Page } from "@/lib/types";
@@ -60,12 +60,12 @@ function makePage(keys: ApiKeyDto[], totalElements?: number): Page<ApiKeyDto> {
   };
 }
 
-function renderApiKeyList() {
+function renderApiKeysClient() {
   return render(
     <SessionProvider session={null}>
       <LanguageProvider translations={translations} defaultLanguage="de">
         <TooltipProvider>
-          <ApiKeyList />
+          <ApiKeysClient />
         </TooltipProvider>
       </LanguageProvider>
     </SessionProvider>,
@@ -77,12 +77,12 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("ApiKeyList", () => {
+describe("ApiKeysClient", () => {
   describe("table display", () => {
     it("should render table with correct columns", async () => {
       mockGetApiKeys.mockResolvedValue(makePage([makeApiKey()]));
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText(K.columns.name)).toBeInTheDocument();
         expect(screen.getByText(K.columns.key)).toBeInTheDocument();
@@ -97,7 +97,7 @@ describe("ApiKeyList", () => {
         makePage([makeApiKey({ keyPrefix: "crm_xYzW...AbCd" })]),
       );
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText("crm_xYzW...AbCd")).toBeInTheDocument();
       });
@@ -108,7 +108,7 @@ describe("ApiKeyList", () => {
         makePage([makeApiKey({ name: "My Key", createdBy: "Admin" })]),
       );
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText("My Key")).toBeInTheDocument();
         expect(screen.getByText("Admin")).toBeInTheDocument();
@@ -120,7 +120,7 @@ describe("ApiKeyList", () => {
     it("should show empty state when no keys", async () => {
       mockGetApiKeys.mockResolvedValue(makePage([]));
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText(K.empty)).toBeInTheDocument();
         expect(screen.getByText(K.createFirst)).toBeInTheDocument();
@@ -132,7 +132,7 @@ describe("ApiKeyList", () => {
     it("should open create dialog on button click", async () => {
       mockGetApiKeys.mockResolvedValue(makePage([makeApiKey()]));
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText(K.newApiKey)).toBeInTheDocument();
       });
@@ -155,7 +155,7 @@ describe("ApiKeyList", () => {
       };
       mockCreateApiKey.mockResolvedValue(createdKey);
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText(K.createFirst)).toBeInTheDocument();
       });
@@ -182,7 +182,7 @@ describe("ApiKeyList", () => {
     it("should show validation error on empty name", async () => {
       mockGetApiKeys.mockResolvedValue(makePage([makeApiKey()]));
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText(K.newApiKey)).toBeInTheDocument();
       });
@@ -210,7 +210,7 @@ describe("ApiKeyList", () => {
       };
       mockCreateApiKey.mockResolvedValue(createdKey);
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText(K.createFirst)).toBeInTheDocument();
       });
@@ -242,7 +242,7 @@ describe("ApiKeyList", () => {
     it("should open delete dialog on click", async () => {
       mockGetApiKeys.mockResolvedValue(makePage([makeApiKey()]));
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText("CI Pipeline")).toBeInTheDocument();
       });
@@ -263,7 +263,7 @@ describe("ApiKeyList", () => {
       mockGetApiKeys.mockResolvedValue(makePage([makeApiKey({ id: "ak-1" })]));
       mockDeleteApiKey.mockResolvedValue(undefined);
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText("CI Pipeline")).toBeInTheDocument();
       });
@@ -287,7 +287,7 @@ describe("ApiKeyList", () => {
     it("should close dialog on cancel", async () => {
       mockGetApiKeys.mockResolvedValue(makePage([makeApiKey()]));
 
-      renderApiKeyList();
+      renderApiKeysClient();
       await waitFor(() => {
         expect(screen.getByText("CI Pipeline")).toBeInTheDocument();
       });

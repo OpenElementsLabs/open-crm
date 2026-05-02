@@ -7,7 +7,7 @@ import { useTranslations } from "@/lib/i18n";
 import { getApiKeys, createApiKey, deleteApiKey } from "@/lib/api";
 import type { ApiKeyDto, ApiKeyCreatedDto, Page } from "@/lib/types";
 
-export function ApiKeyList() {
+export function ApiKeysClient() {
   const t = useTranslations();
   const [data, setData] = useState<Page<ApiKeyDto> | null>(null);
   const [loading, setLoading] = useState(true);

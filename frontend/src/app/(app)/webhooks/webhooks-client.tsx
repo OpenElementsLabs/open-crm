@@ -29,7 +29,7 @@ function formatTimestamp(ts: string | null): string {
   return new Date(ts).toLocaleString();
 }
 
-export function WebhookList() {
+export function WebhooksClient() {
   const t = useTranslations();
   const [data, setData] = useState<Page<WebhookDto> | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,5 @@
-import { TagList } from "@/components/tag-list";
+import { TagsClient } from "./tags-client";
 
 export default function TagsPage() {
-  return <TagList />;
+  return <TagsClient />;
 }

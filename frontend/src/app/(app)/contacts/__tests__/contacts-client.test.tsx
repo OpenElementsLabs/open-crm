@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
 import { screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
-import { ContactList } from "@/components/contact-list";
+import { ContactsClient } from "../contacts-client";
 import { de } from "@/lib/i18n/de";
 import { en } from "@/lib/i18n/en";
 import { renderWithProviders } from "@/test/test-utils";
@@ -102,7 +102,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("ContactList", () => {
+describe("ContactsClient", () => {
   beforeEach(() => {
     mockGetCompaniesForSelect.mockResolvedValue(defaultCompanies);
   });
@@ -116,7 +116,7 @@ describe("ContactList", () => {
         ]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("ContactList", () => {
     it("should show empty state when no contacts exist", async () => {
       mockGetContacts.mockResolvedValue(makePage([]));
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.empty)).toBeInTheDocument();
@@ -141,7 +141,7 @@ describe("ContactList", () => {
     it("should show empty state when filters match nothing", async () => {
       mockGetContacts.mockResolvedValue(makePage([]));
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.empty)).toBeInTheDocument();
@@ -153,7 +153,7 @@ describe("ContactList", () => {
         makePage([makeContact({ companyId: null, companyName: null })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe("ContactList", () => {
     it("should show loading skeleton while fetching", () => {
       mockGetContacts.mockReturnValue(new Promise(() => {}));
 
-      const { container } = renderWithProviders(<ContactList />);
+      const { container } = renderWithProviders(<ContactsClient />);
 
       const skeletons = container.querySelectorAll("[data-slot='skeleton']");
       expect(skeletons.length).toBeGreaterThan(0);
@@ -188,7 +188,7 @@ describe("ContactList", () => {
         },
       });
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
@@ -207,7 +207,7 @@ describe("ContactList", () => {
         },
       });
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText(/1 Kontakt/)).toBeInTheDocument();
@@ -225,7 +225,7 @@ describe("ContactList", () => {
         },
       });
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText(S.pagination.next)).toBeInTheDocument();
@@ -247,7 +247,7 @@ describe("ContactList", () => {
     });
 
     it("should render brevo filter dropdown", async () => {
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         const allTriggers = screen.getAllByRole("combobox");
@@ -259,7 +259,7 @@ describe("ContactList", () => {
     });
 
     it("should call API with search parameter", async () => {
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByPlaceholderText(S.filter.search)).toBeInTheDocument();
@@ -277,7 +277,7 @@ describe("ContactList", () => {
     });
 
     it("should show language filter with placeholder text", async () => {
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
@@ -298,7 +298,7 @@ describe("ContactList", () => {
         makePage([makeContact({ id: "contact-1", firstName: "Max" })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText("Max Mustermann")).toBeInTheDocument();
@@ -316,7 +316,7 @@ describe("ContactList", () => {
         makePage([makeContact({ id: "1", firstName: "Max", lastName: "Mustermann" })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -336,7 +336,7 @@ describe("ContactList", () => {
       );
       mockDeleteContact.mockResolvedValue(undefined);
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -360,7 +360,7 @@ describe("ContactList", () => {
         makePage([makeContact({ id: "1" })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
@@ -384,7 +384,7 @@ describe("ContactList", () => {
         makePage([makeContact({ id: "1", firstName: "Max", lastName: "Mustermann" })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();
@@ -396,7 +396,7 @@ describe("ContactList", () => {
     it("should show print button", async () => {
       mockGetContacts.mockResolvedValue(makePage([makeContact()]));
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         expect(screen.getByText(de.print.button)).toBeInTheDocument();
@@ -410,7 +410,7 @@ describe("ContactList", () => {
         makePage([makeContact({ id: "photo-1", hasPhoto: true, firstName: "Max", lastName: "Mustermann" })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
@@ -427,7 +427,7 @@ describe("ContactList", () => {
         makePage([makeContact({ hasPhoto: false })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
@@ -445,7 +445,7 @@ describe("ContactList", () => {
         makePage([makeContact({ firstName: "Max", lastName: "Mustermann", email: "max@example.com" })]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         const rows = screen.getAllByRole("row");
@@ -461,7 +461,7 @@ describe("ContactList", () => {
         makePage([makeContact()]),
       );
 
-      renderWithProviders(<ContactList />);
+      renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
         const headerRow = screen.getAllByRole("row")[0];
@@ -479,7 +479,7 @@ describe("ContactList", () => {
     it("should render German labels by default", async () => {
       mockGetContacts.mockResolvedValue(makePage([makeContact()]));
 
-      renderWithProviders(<ContactList />, { language: "de" });
+      renderWithProviders(<ContactsClient />, { language: "de" });
 
       await waitFor(() => {
         expect(screen.getByText(de.contacts.title)).toBeInTheDocument();
@@ -491,7 +491,7 @@ describe("ContactList", () => {
     it("should render English labels when language is en", async () => {
       mockGetContacts.mockResolvedValue(makePage([makeContact()]));
 
-      renderWithProviders(<ContactList />, { language: "en" });
+      renderWithProviders(<ContactsClient />, { language: "en" });
 
       await waitFor(() => {
         expect(screen.getByText(en.contacts.title)).toBeInTheDocument();

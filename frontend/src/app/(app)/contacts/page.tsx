@@ -1,12 +1,12 @@
 import { Suspense } from "react";
-import { ContactList } from "@/components/contact-list";
+import { ContactsClient } from "./contacts-client";
 
 export const dynamic = "force-dynamic";
 
 export default function ContactsPage() {
   return (
     <Suspense>
-      <ContactList />
+      <ContactsClient />
     </Suspense>
   );
 }
