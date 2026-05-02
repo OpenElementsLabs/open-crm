@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ArrowUpRight, Pencil, Plus, Tag, Trash2 } from "lucide-react";
-import { Button, DeleteConfirmDialog, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
+import { Button, DeleteConfirmDialog, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import type { TagDto } from "@open-elements/ui";
+import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getTags, deleteTag, ForbiddenError } from "@/lib/api";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
 import type { Page } from "@/lib/types";
@@ -156,32 +157,18 @@ export function TagsClient() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Link href={`/tags/${tag.id}/edit`}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-oe-gray hover:text-oe-dark">
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                          </TooltipTrigger>
-                          <TooltipContent>{t.tags.actions.edit}</TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-oe-gray hover:text-oe-red"
-                                disabled={!canDelete}
-                                onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>{canDelete ? t.tags.actions.delete : t.errors.roleRequired.admin}</TooltipContent>
-                        </Tooltip>
+                        <TooltipIconButton
+                          icon={<Pencil />}
+                          tooltip={t.tags.actions.edit}
+                          href={`/tags/${tag.id}/edit`}
+                        />
+                        <TooltipIconButton
+                          icon={<Trash2 />}
+                          tone="destructive"
+                          tooltip={canDelete ? t.tags.actions.delete : t.errors.roleRequired.admin}
+                          disabled={!canDelete}
+                          onClick={() => { setDeleteTarget(tag); setDeleteError(null); }}
+                        />
                       </div>
                     </td>
                   </tr>

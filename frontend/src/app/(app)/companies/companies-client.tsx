@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink } from "lucide-react";
-import { Button, Input, TagMultiSelect, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
+import { Button, Input, TagMultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { ActionIconButton } from "@/components/action-icon-button";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
@@ -13,6 +13,7 @@ import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
 import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
 import { ExternalLinkButton } from "@/components/external-link-button";
+import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -275,57 +276,26 @@ export function CompaniesClient() {
                     <WebsiteCell value={company.website} />
                     <ContactCountCell count={company.contactCount} companyId={company.id} />
                     <TableCell className="text-right">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={S.detail.edit}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/companies/${company.id}/edit`);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4 text-oe-blue" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{S.detail.edit}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCommentTarget(company);
-                            }}
-                          >
-                            <MessageSquarePlus className="h-4 w-4 text-oe-blue" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{S.comments.addTitle}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title={S.detail.delete}
-                              disabled={!canDelete}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteError(null);
-                                setDeleteTarget(company);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-oe-red" />
-                            </Button>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>{canDelete ? S.detail.delete : t.errors.roleRequired.admin}</TooltipContent>
-                      </Tooltip>
+                      <TooltipIconButton
+                        icon={<Pencil />}
+                        tooltip={S.detail.edit}
+                        onClick={() => router.push(`/companies/${company.id}/edit`)}
+                      />
+                      <TooltipIconButton
+                        icon={<MessageSquarePlus />}
+                        tooltip={S.comments.addTitle}
+                        onClick={() => setCommentTarget(company)}
+                      />
+                      <TooltipIconButton
+                        icon={<Trash2 />}
+                        tone="destructive"
+                        tooltip={canDelete ? S.detail.delete : t.errors.roleRequired.admin}
+                        disabled={!canDelete}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setDeleteTarget(company);
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

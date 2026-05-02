@@ -249,10 +249,10 @@ describe("CompaniesClient", () => {
       renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.title)).toBeInTheDocument();
@@ -268,10 +268,10 @@ describe("CompaniesClient", () => {
       renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.deleteAll)).toBeInTheDocument();
@@ -293,10 +293,10 @@ describe("CompaniesClient", () => {
       renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.deleteOnly)).toBeInTheDocument();
@@ -317,10 +317,10 @@ describe("CompaniesClient", () => {
       renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.cancel)).toBeInTheDocument();
@@ -408,7 +408,7 @@ describe("CompaniesClient", () => {
       renderWithProviders(<CompaniesClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.edit })).toBeInTheDocument();
       });
     });
   });

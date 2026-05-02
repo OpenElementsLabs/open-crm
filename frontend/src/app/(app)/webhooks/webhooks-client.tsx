@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Radio, Webhook } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import {
   getWebhooks,
   createWebhook,
@@ -230,39 +231,20 @@ export function WebhooksClient() {
                               : t.webhooks.actions.activate}
                           </TooltipContent>
                         </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-oe-gray hover:text-oe-dark"
-                              onClick={() => handlePing(webhook)}
-                            >
-                              <Radio className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t.webhooks.actions.ping}
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-oe-gray hover:text-oe-red"
-                              onClick={() => {
-                                setDeleteTarget(webhook);
-                                setDeleteError(null);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {t.webhooks.actions.delete}
-                          </TooltipContent>
-                        </Tooltip>
+                        <TooltipIconButton
+                          icon={<Radio />}
+                          tooltip={t.webhooks.actions.ping}
+                          onClick={() => handlePing(webhook)}
+                        />
+                        <TooltipIconButton
+                          icon={<Trash2 />}
+                          tone="destructive"
+                          tooltip={t.webhooks.actions.delete}
+                          onClick={() => {
+                            setDeleteTarget(webhook);
+                            setDeleteError(null);
+                          }}
+                        />
                       </div>
                     </td>
                   </tr>

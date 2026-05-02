@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react";
-import { Button, DeleteConfirmDialog, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
+import { Button, DeleteConfirmDialog, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getApiKeys, createApiKey, deleteApiKey } from "@/lib/api";
 import type { ApiKeyDto, ApiKeyCreatedDto, Page } from "@/lib/types";
 
@@ -174,24 +175,15 @@ export function ApiKeysClient() {
                       {new Date(apiKey.createdAt).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-oe-gray hover:text-oe-red"
-                            onClick={() => {
-                              setDeleteTarget(apiKey);
-                              setDeleteError(null);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {t.apiKeys.actions.delete}
-                        </TooltipContent>
-                      </Tooltip>
+                      <TooltipIconButton
+                        icon={<Trash2 />}
+                        tone="destructive"
+                        tooltip={t.apiKeys.actions.delete}
+                        onClick={() => {
+                          setDeleteTarget(apiKey);
+                          setDeleteError(null);
+                        }}
+                      />
                     </td>
                   </tr>
                 ))}

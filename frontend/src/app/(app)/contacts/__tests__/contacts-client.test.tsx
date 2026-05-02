@@ -319,10 +319,10 @@ describe("ContactsClient", () => {
       renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         const expectedText = S.deleteDialog.description.replace("{name}", "Max Mustermann");
@@ -339,10 +339,10 @@ describe("ContactsClient", () => {
       renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.confirm)).toBeInTheDocument();
@@ -363,10 +363,10 @@ describe("ContactsClient", () => {
       renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.delete)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.delete })).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByTitle(S.detail.delete));
+      fireEvent.click(screen.getByRole("button", { name: S.detail.delete }));
 
       await waitFor(() => {
         expect(screen.getByText(S.deleteDialog.cancel)).toBeInTheDocument();
@@ -387,7 +387,7 @@ describe("ContactsClient", () => {
       renderWithProviders(<ContactsClient />);
 
       await waitFor(() => {
-        expect(screen.getByTitle(S.detail.edit)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: S.detail.edit })).toBeInTheDocument();
       });
     });
   });
