@@ -18,6 +18,7 @@ import {
 } from "@open-elements/ui";
 import {useTranslations} from "@/lib/i18n";
 import {PrimaryButton} from "@/components/primary-button";
+import {TablePagination} from "@/components/table-pagination";
 import {TooltipIconButton} from "@/components/tooltip-icon-button";
 import {deleteTag, ForbiddenError, getTags} from "@/lib/api";
 import {hasRole, ROLE_ADMIN} from "@/lib/roles";
@@ -83,8 +84,6 @@ export function TagsClient() {
 
   const totalElements = data?.page.totalElements ?? 0;
   const totalPages = data?.page.totalPages ?? 0;
-  const start = totalElements > 0 ? page * pageSize + 1 : 0;
-  const end = Math.min((page + 1) * pageSize, totalElements);
 
   return (
     <div>
@@ -200,50 +199,17 @@ export function TagsClient() {
             </table>
           </div>
 
-          {totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Select value={String(pageSize)} onValueChange={(v) => {
-                  const n = Number(v);
-                  setPageSize(n);
-                  localStorage.setItem("pageSize.tags", v);
-                  setPage(0);
-                }}>
-                  <SelectTrigger className="w-[80px] h-8 text-sm">
-                    <SelectValue/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[10, 20, 50, 100, 200].map((s) => (
-                      <SelectItem key={s} value={String(s)}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <span className="text-sm text-oe-gray">{t.tags.pagination.perPage}</span>
-                <span className="text-sm text-oe-gray">·</span>
-                <span className="text-sm text-oe-gray">
-                  {t.tags.pagination.showing} {start}–{end} {t.tags.pagination.of} {totalElements} {t.tags.pagination.tags}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  {t.tags.pagination.previous}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t.tags.pagination.next}
-                </Button>
-              </div>
-            </div>
-          )}
+          <TablePagination
+            page={page}
+            pageSize={pageSize}
+            totalElements={totalElements}
+            totalPages={totalPages}
+            pageSizeOptions={[10, 20, 50, 100, 200]}
+            storageKey="pageSize.tags"
+            translations={t.tags.pagination}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </>
       )}
 

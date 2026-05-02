@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, FileText } from "lucide-react";
 import {
-  Button,
   Select,
   SelectContent,
   SelectItem,
@@ -18,6 +17,7 @@ import {
   TableRow,
 } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
+import { TablePagination } from "@/components/table-pagination";
 import {
   getAuditLogEntityTypes,
   getAuditLogs,
@@ -83,10 +83,6 @@ export function AuditLogsClient() {
 
   const totalElements = data?.page.totalElements ?? 0;
   const totalPages = data?.page.totalPages ?? 0;
-  const totalLabel =
-    totalElements === 1
-      ? t.auditLog.pagination.totalOne.replace("{count}", String(totalElements))
-      : t.auditLog.pagination.totalOther.replace("{count}", String(totalElements));
 
   const userDropdownOptions = users.filter((u) => u.name !== SYSTEM_USER);
 
@@ -214,57 +210,17 @@ export function AuditLogsClient() {
             </Table>
           </div>
 
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Select
-                value={String(pageSize)}
-                onValueChange={(v) => {
-                  const n = Number(v);
-                  setPageSize(n);
-                  localStorage.setItem(PAGE_SIZE_STORAGE_KEY, v);
-                  setPage(0);
-                }}
-              >
-                <SelectTrigger
-                  className="w-[80px] h-8 text-sm"
-                  aria-label={t.auditLog.pagination.perPage}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAGE_SIZE_OPTIONS.map((s) => (
-                    <SelectItem key={s} value={String(s)}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-oe-gray">
-                {t.auditLog.pagination.perPage}
-              </span>
-              <span className="text-sm text-oe-gray">· {totalLabel}</span>
-            </div>
-            {totalPages > 1 && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  {t.auditLog.pagination.previous}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t.auditLog.pagination.next}
-                </Button>
-              </div>
-            )}
-          </div>
+          <TablePagination
+            page={page}
+            pageSize={pageSize}
+            totalElements={totalElements}
+            totalPages={totalPages}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            storageKey={PAGE_SIZE_STORAGE_KEY}
+            translations={t.auditLog.pagination}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </>
       )}
     </div>

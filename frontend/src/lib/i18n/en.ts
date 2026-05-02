@@ -166,7 +166,6 @@ export const en: Translations = {
     pagination: {
       previous: "Previous",
       next: "Next",
-      page: "Page {current} of {total}",
       totalOne: "{count} Company",
       totalOther: "{count} Companies",
       perPage: "per page",
@@ -282,7 +281,6 @@ export const en: Translations = {
     pagination: {
       previous: "Previous",
       next: "Next",
-      page: "Page {current} of {total}",
       totalOne: "{count} Contact",
       totalOther: "{count} Contacts",
       perPage: "per page",
@@ -404,12 +402,11 @@ export const en: Translations = {
       cancel: "Cancel",
     },
     pagination: {
-      showing: "Showing",
-      of: "of",
-      tags: "tags",
       previous: "Previous",
       next: "Next",
       perPage: "per page",
+      totalOne: "{count} tag",
+      totalOther: "{count} tags",
     },
     label: "Tags",
     selected: "{count} tags selected",
@@ -468,10 +465,10 @@ export const en: Translations = {
     },
     pagination: {
       perPage: "per page",
-      showing: "Showing",
-      of: "of",
       previous: "Previous",
       next: "Next",
+      totalOne: "{count} webhook",
+      totalOther: "{count} webhooks",
     },
   },
   apiKeys: {
@@ -517,6 +514,8 @@ export const en: Translations = {
       perPage: "per page",
       previous: "Previous",
       next: "Next",
+      totalOne: "{count} API key",
+      totalOther: "{count} API keys",
     },
   },
   users: {

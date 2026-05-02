@@ -165,7 +165,6 @@ export const de = {
     pagination: {
       previous: "Zurück",
       next: "Weiter",
-      page: "Seite {current} von {total}",
       totalOne: "{count} Firma",
       totalOther: "{count} Firmen",
       perPage: "pro Seite",
@@ -281,7 +280,6 @@ export const de = {
     pagination: {
       previous: "Zurück",
       next: "Weiter",
-      page: "Seite {current} von {total}",
       totalOne: "{count} Kontakt",
       totalOther: "{count} Kontakte",
       perPage: "pro Seite",
@@ -403,12 +401,11 @@ export const de = {
       cancel: "Abbrechen",
     },
     pagination: {
-      showing: "Zeige",
-      of: "von",
-      tags: "Tags",
       previous: "Zurück",
       next: "Weiter",
       perPage: "pro Seite",
+      totalOne: "{count} Tag",
+      totalOther: "{count} Tags",
     },
     label: "Tags",
     selected: "{count} Tags ausgewählt",
@@ -467,10 +464,10 @@ export const de = {
     },
     pagination: {
       perPage: "pro Seite",
-      showing: "Zeige",
-      of: "von",
       previous: "Zurück",
       next: "Weiter",
+      totalOne: "{count} Webhook",
+      totalOther: "{count} Webhooks",
     },
   },
   apiKeys: {
@@ -516,6 +513,8 @@ export const de = {
       perPage: "pro Seite",
       previous: "Zurück",
       next: "Weiter",
+      totalOne: "{count} API-Key",
+      totalOther: "{count} API-Keys",
     },
   },
   users: {

@@ -5,6 +5,7 @@ import { Plus, Trash2, Radio, Webhook } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, Tooltip, TooltipTrigger, TooltipContent, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { PrimaryButton } from "@/components/primary-button";
+import { TablePagination } from "@/components/table-pagination";
 import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import {
   getWebhooks,
@@ -252,57 +253,17 @@ export function WebhooksClient() {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Select
-                value={String(pageSize)}
-                onValueChange={(v) => {
-                  const n = Number(v);
-                  setPageSize(n);
-                  localStorage.setItem("pageSize.webhooks", v);
-                  setPage(0);
-                }}
-              >
-                <SelectTrigger className="w-[80px] h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[10, 20, 50, 100, 200].map((s) => (
-                    <SelectItem key={s} value={String(s)}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-oe-gray">
-                {t.webhooks.pagination.perPage}
-              </span>
-              <span className="text-sm text-oe-gray">
-                · {totalElements} {t.webhooks.title}
-              </span>
-            </div>
-            {totalPages > 1 && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  {t.webhooks.pagination.previous}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t.webhooks.pagination.next}
-                </Button>
-              </div>
-            )}
-          </div>
+          <TablePagination
+            page={page}
+            pageSize={pageSize}
+            totalElements={totalElements}
+            totalPages={totalPages}
+            pageSizeOptions={[10, 20, 50, 100, 200]}
+            storageKey="pageSize.webhooks"
+            translations={t.webhooks.pagination}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </>
       )}
 
