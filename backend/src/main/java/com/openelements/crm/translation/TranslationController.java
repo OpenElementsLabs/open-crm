@@ -1,17 +1,22 @@
 package com.openelements.crm.translation;
 
+import com.openelements.spring.base.services.translation.Language;
+import com.openelements.spring.base.services.translation.TranslationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Locale;
 import java.util.Objects;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * REST controller for the translation feature. Exposes a configuration probe endpoint and a
@@ -62,7 +67,14 @@ public class TranslationController {
     @ApiResponse(responseCode = "502", description = "Upstream translation API failed")
     @ApiResponse(responseCode = "503", description = "Translation feature not configured")
     public TranslateResponseDto translate(@Valid @RequestBody final TranslateRequestDto request) {
-        final String translated = translationService.translate(request.text(), request.targetLanguage());
+        final Language language;
+        try {
+            language = Language.valueOf(request.targetLanguage().toUpperCase(Locale.ROOT));
+        } catch (final IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Unsupported target language: " + request.targetLanguage());
+        }
+        final String translated = translationService.translate(request.text(), language);
         return new TranslateResponseDto(translated);
     }
 }

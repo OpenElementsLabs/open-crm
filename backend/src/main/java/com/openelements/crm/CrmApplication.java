@@ -1,6 +1,7 @@
 package com.openelements.crm;
 
 import com.openelements.spring.base.FullSpringServiceConfig;
+import com.openelements.spring.base.services.translation.TranslationService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -14,7 +15,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableAsync
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
-@Import({FullSpringServiceConfig.class})
+@Import({FullSpringServiceConfig.class, TranslationService.class})
 public class CrmApplication {
 
     public static void main(final String[] args) {
