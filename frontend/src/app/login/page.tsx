@@ -4,7 +4,7 @@ import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { useTranslations } from "@/lib/i18n";
-import { PrimaryButton } from "@/components/primary-button";
+import { Button } from "@open-elements/ui";
 
 export default function LoginPage() {
   return (
@@ -57,13 +57,13 @@ function LoginContent() {
         )}
 
         {/* Login button */}
-        <PrimaryButton
+        <Button
           onClick={() => signIn("oidc")}
           className="w-full max-w-xs text-lg py-6"
           size="lg"
         >
           {S.button}
-        </PrimaryButton>
+        </Button>
 
         {/* Developer credit */}
         <div className="mt-4 flex items-center gap-2 text-xs text-oe-gray-light">

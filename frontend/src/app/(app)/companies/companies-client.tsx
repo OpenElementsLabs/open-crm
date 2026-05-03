@@ -7,15 +7,10 @@ import Link from "next/link";
 import { Plus, Trash2, Building2, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink } from "lucide-react";
 import { Button, Input, TagMultiSelect, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { ActionIconButton } from "@/components/action-icon-button";
+import { ActionIconButton, CopyToClipboardButton, ExternalLinkButton, TablePagination, TooltipIconButton } from "@open-elements/ui";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
 import { CompanyDeleteDialog } from "@/components/company-delete-dialog";
-import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
-import { ExternalLinkButton } from "@/components/external-link-button";
-import { PrimaryButton } from "@/components/primary-button";
-import { TablePagination } from "@/components/table-pagination";
-import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getCompanies, deleteCompany, getCompanyLogoUrl, createCompanyComment, getCompanyExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -173,12 +168,12 @@ export function CompaniesClient() {
             <FileDown className="mr-2 h-4 w-4" />
             {t.csvExport.button}
           </Button>
-          <PrimaryButton asChild>
+          <Button asChild>
             <Link href="/companies/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newCompany}
             </Link>
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
 
@@ -233,12 +228,12 @@ export function CompaniesClient() {
       {!loading && data && data.content.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="mb-4 text-oe-gray-mid">{S.empty}</p>
-          <PrimaryButton asChild>
+          <Button asChild>
             <Link href="/companies/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newCompany}
             </Link>
-          </PrimaryButton>
+          </Button>
         </div>
       )}
 

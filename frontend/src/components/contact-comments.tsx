@@ -6,7 +6,6 @@ import { MessageSquarePlus, X } from "lucide-react";
 import { Button, DeleteConfirmDialog, Tooltip, TooltipTrigger, TooltipContent, Card, CardContent, CardHeader, CardTitle, Skeleton, MarkdownView } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { PrimaryButton } from "@/components/primary-button";
 import { TranslateButton } from "@/components/translate-button";
 import { getContactComments, createContactComment, deleteComment, ForbiddenError } from "@/lib/api";
 import type { CommentDto } from "@/lib/types";
@@ -117,13 +116,13 @@ export function ContactComments({ contactId, totalCount }: ContactCommentsProps)
         <CardTitle className="font-heading text-lg text-oe-dark">
           {S.title}{displayCount !== undefined ? ` (${displayCount})` : ""}
         </CardTitle>
-        <PrimaryButton
+        <Button
           onClick={() => setDialogOpen(true)}
           size="sm"
         >
           <MessageSquarePlus className="mr-2 h-4 w-4" />
           {S.add}
-        </PrimaryButton>
+        </Button>
       </CardHeader>
       <CardContent>
         {loading && (

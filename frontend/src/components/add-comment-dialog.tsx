@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, MarkdownEditor } from "@open-elements/ui";
-import { PrimaryButton } from "@/components/primary-button";
+import { Button } from "@open-elements/ui";
 
 interface AddCommentDialogProps {
   readonly open: boolean;
@@ -66,13 +66,13 @@ export function AddCommentDialog({
             placeholder={placeholder}
           />
           <DialogFooter>
-            <PrimaryButton
+            <Button
               onClick={handleSubmit}
               disabled={isTextEmpty || sending}
             >
               <Send className="mr-2 h-4 w-4" />
               {sending ? sendingLabel : sendLabel}
-            </PrimaryButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

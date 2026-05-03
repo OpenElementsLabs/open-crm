@@ -7,14 +7,9 @@ import Link from "next/link";
 import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, TagMultiSelect, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { ActionIconButton } from "@/components/action-icon-button";
+import { ActionIconButton, CopyToClipboardButton, MailtoButton, TablePagination, TooltipIconButton } from "@open-elements/ui";
 import { AddCommentDialog } from "@/components/add-comment-dialog";
-import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
-import { MailtoButton } from "@/components/mailto-button";
-import { PrimaryButton } from "@/components/primary-button";
-import { TablePagination } from "@/components/table-pagination";
-import { TooltipIconButton } from "@/components/tooltip-icon-button";
 import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@/lib/roles";
@@ -175,12 +170,12 @@ export function ContactsClient() {
             <FileDown className="mr-2 h-4 w-4" />
             {t.csvExport.button}
           </Button>
-          <PrimaryButton asChild>
+          <Button asChild>
             <Link href="/contacts/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newContact}
             </Link>
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
 
@@ -260,12 +255,12 @@ export function ContactsClient() {
       {!loading && data && data.content.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="mb-4 text-oe-gray-mid">{S.empty}</p>
-          <PrimaryButton asChild>
+          <Button asChild>
             <Link href="/contacts/new">
               <Plus className="mr-2 h-4 w-4" />
               {S.newContact}
             </Link>
-          </PrimaryButton>
+          </Button>
         </div>
       )}
 

@@ -17,9 +17,7 @@ import {
   Skeleton
 } from "@open-elements/ui";
 import {useTranslations} from "@/lib/i18n";
-import {PrimaryButton} from "@/components/primary-button";
-import {TablePagination} from "@/components/table-pagination";
-import {TooltipIconButton} from "@/components/tooltip-icon-button";
+import {TablePagination, TooltipIconButton} from "@open-elements/ui";
 import {deleteTag, ForbiddenError, getTags} from "@/lib/api";
 import {hasRole, ROLE_ADMIN} from "@/lib/roles";
 import type {Page} from "@/lib/types";
@@ -90,10 +88,10 @@ export function TagsClient() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold text-oe-dark">{t.tags.title}</h1>
         <Link href="/tags/new">
-          <PrimaryButton>
+          <Button>
             <Plus className="mr-2 h-4 w-4"/>
             {t.tags.newTag}
-          </PrimaryButton>
+          </Button>
         </Link>
       </div>
 
@@ -117,9 +115,9 @@ export function TagsClient() {
           <Tag className="mb-4 h-12 w-12 text-oe-gray-light"/>
           <p className="mb-4 text-oe-gray">{t.tags.empty}</p>
           <Link href="/tags/new">
-            <PrimaryButton>
+            <Button>
               {t.tags.createFirst}
-            </PrimaryButton>
+            </Button>
           </Link>
         </div>
       ) : (
@@ -154,11 +152,11 @@ export function TagsClient() {
                     <span className="inline-flex items-center justify-center gap-1">
                       <span className="text-oe-dark">{tag.companyCount ?? 0}</span>
                       {(tag.companyCount ?? 0) > 0 && (
-                        <TooltipIconButton
-                          icon={<ArrowUpRight/>}
-                          tooltip={t.nav.companies}
-                          href={`/companies?tagIds=${tag.id}`}
-                        />
+                        <TooltipIconButton tooltip={t.nav.companies} asChild>
+                          <Link href={`/companies?tagIds=${tag.id}`}>
+                            <ArrowUpRight/>
+                          </Link>
+                        </TooltipIconButton>
                       )}
                     </span>
                   </td>
@@ -166,21 +164,21 @@ export function TagsClient() {
                     <span className="inline-flex items-center justify-center gap-1">
                       <span className="text-oe-dark">{tag.contactCount ?? 0}</span>
                       {(tag.contactCount ?? 0) > 0 && (
-                        <TooltipIconButton
-                          icon={<ArrowUpRight/>}
-                          tooltip={t.nav.contacts}
-                          href={`/contacts?tagIds=${tag.id}`}
-                        />
+                        <TooltipIconButton tooltip={t.nav.contacts} asChild>
+                          <Link href={`/contacts?tagIds=${tag.id}`}>
+                            <ArrowUpRight/>
+                          </Link>
+                        </TooltipIconButton>
                       )}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <TooltipIconButton
-                        icon={<Pencil/>}
-                        tooltip={t.tags.actions.edit}
-                        href={`/tags/${tag.id}/edit`}
-                      />
+                      <TooltipIconButton tooltip={t.tags.actions.edit} asChild>
+                        <Link href={`/tags/${tag.id}/edit`}>
+                          <Pencil/>
+                        </Link>
+                      </TooltipIconButton>
                       <TooltipIconButton
                         icon={<Trash2/>}
                         tone="destructive"

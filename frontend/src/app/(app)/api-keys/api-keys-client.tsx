@@ -4,9 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, KeyRound, Plus, Trash2 } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { PrimaryButton } from "@/components/primary-button";
-import { TablePagination } from "@/components/table-pagination";
-import { TooltipIconButton } from "@/components/tooltip-icon-button";
+import { TablePagination, TooltipIconButton } from "@open-elements/ui";
 import { getApiKeys, createApiKey, deleteApiKey } from "@/lib/api";
 import type { ApiKeyDto, ApiKeyCreatedDto, Page } from "@/lib/types";
 
@@ -98,7 +96,7 @@ export function ApiKeysClient() {
         <h1 className="font-heading text-2xl font-bold text-oe-dark">
           {t.apiKeys.title}
         </h1>
-        <PrimaryButton
+        <Button
           onClick={() => {
             setCreateName("");
             setCreateError(null);
@@ -107,7 +105,7 @@ export function ApiKeysClient() {
         >
           <Plus className="mr-2 h-4 w-4" />
           {t.apiKeys.newApiKey}
-        </PrimaryButton>
+        </Button>
       </div>
 
       {/* Loading */}
@@ -122,7 +120,7 @@ export function ApiKeysClient() {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <KeyRound className="mb-4 h-12 w-12 text-oe-gray/50" />
           <p className="mb-4 text-oe-gray">{t.apiKeys.empty}</p>
-          <PrimaryButton
+          <Button
             onClick={() => {
               setCreateName("");
               setCreateError(null);
@@ -130,7 +128,7 @@ export function ApiKeysClient() {
             }}
           >
             {t.apiKeys.createFirst}
-          </PrimaryButton>
+          </Button>
         </div>
       ) : (
         <>
@@ -234,12 +232,12 @@ export function ApiKeysClient() {
             <Button variant="outline" onClick={() => setCreateOpen(false)}>
               {t.apiKeys.createDialog.cancel}
             </Button>
-            <PrimaryButton
+            <Button
               onClick={handleCreate}
               disabled={createSubmitting}
             >
               {t.apiKeys.createDialog.create}
-            </PrimaryButton>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

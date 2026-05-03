@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { TablePagination } from "@/components/table-pagination";
+import { TablePagination } from "@open-elements/ui";
 import {
   getAuditLogEntityTypes,
   getAuditLogs,

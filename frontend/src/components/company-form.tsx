@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Building2, Trash2, Upload } from "lucide-react";
 import { Button, Input, TagMultiSelect, Label, Card, CardContent, CardHeader, CardTitle, MarkdownEditor } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { PrimaryButton } from "@/components/primary-button";
 import { createCompany, updateCompany, uploadCompanyLogo, deleteCompanyLogo, getCompanyLogoUrl, getTags } from "@/lib/api";
 import type { CompanyDto, CompanyCreateDto } from "@/lib/types";
 
@@ -345,12 +344,12 @@ export function CompanyForm({ company }: CompanyFormProps) {
           )}
 
           <div className="flex gap-3 pt-4">
-            <PrimaryButton
+            <Button
               type="submit"
               disabled={submitting}
             >
               {S.save}
-            </PrimaryButton>
+            </Button>
             <Button
               type="button"
               variant="outline"
