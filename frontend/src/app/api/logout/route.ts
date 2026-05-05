@@ -12,7 +12,8 @@ export async function GET(req: NextRequest) {
 
   // Discover the OIDC provider's end-session endpoint
   const baseUrl = process.env.AUTH_URL ?? "http://localhost:3000";
-  let endSessionUrl = baseUrl;
+  const loginUrl = `${baseUrl}/login`;
+  let endSessionUrl = loginUrl;
   if (oidcIssuer) {
     try {
       const wellKnownResponse = await fetch(
@@ -26,11 +27,11 @@ export async function GET(req: NextRequest) {
         if (idToken) {
           params.set("id_token_hint", idToken);
         }
-        params.set("post_logout_redirect_uri", process.env.AUTH_URL ?? "http://localhost:3000");
+        params.set("post_logout_redirect_uri", loginUrl);
         endSessionUrl = `${endSessionEndpoint}?${params.toString()}`;
       }
     } catch {
-      // Fall back to app root if discovery fails
+      // Fall back to /login if discovery fails
     }
   }
 

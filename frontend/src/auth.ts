@@ -6,6 +6,7 @@ declare module "next-auth" {
     idToken?: string;
     expiresAt?: number;
     roles: string[];
+    error?: string;
   }
 }
 
@@ -109,6 +110,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.idToken = t.idToken as string | undefined;
       session.expiresAt = t.expiresAt as number | undefined;
       session.roles = Array.isArray(t.roles) ? (t.roles as string[]) : [];
+      session.error = typeof t.error === "string" ? t.error : undefined;
       if (t.error === "RefreshTokenError") {
         session.accessToken = undefined;
       }

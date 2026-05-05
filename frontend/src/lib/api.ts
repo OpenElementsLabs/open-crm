@@ -54,8 +54,13 @@ async function apiFetch(url: string, init?: RequestInit): Promise<Response> {
     } catch {
       // No session available
     }
+    return fetch(url, init);
   }
-  return fetch(url, init);
+  const response = await fetch(url, init);
+  if (response.status === 401) {
+    window.location.href = "/api/logout";
+  }
+  return response;
 }
 
 export interface CompanyListParams {
