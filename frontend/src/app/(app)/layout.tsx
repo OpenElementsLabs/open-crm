@@ -36,7 +36,7 @@ function CrmSidebar() {
         menuLabel={t.sidebar.menu}
         user={{
           userName: session?.user?.name ?? "User",
-          avatarUrl,
+          avatarUrl: avatarUrl ?? session?.user?.image ?? undefined,
           roles: session?.roles,
           onLogout: () => { window.location.href = "/api/logout"; },
           translations: {
