@@ -53,10 +53,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return token;
       }
 
-      // Return token if not expired
+      // Return token if it still has more than 60s left.
+      // The 60s buffer protects against in-flight requests racing the expiry.
       if (
         typeof t.expiresAt === "number" &&
-        Date.now() < t.expiresAt * 1000
+        Date.now() < (t.expiresAt - 60) * 1000
       ) {
         return token;
       }

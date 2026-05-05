@@ -22,7 +22,7 @@ export function SessionProvider({
   readonly children: React.ReactNode;
 }) {
   return (
-    <NextAuthSessionProvider>
+    <NextAuthSessionProvider refetchInterval={120} refetchOnWindowFocus>
       <RefreshTokenErrorWatcher />
       {children}
     </NextAuthSessionProvider>
