@@ -66,3 +66,15 @@ implemented first.
 
 - User Table
 - Audit table
+
+## Awesome DB Backup
+
+der DB_Backup Container soll aufgebohrt werden und ein REST API bereistellen durch den man Backups triggern kann und
+sich Backups runterladen kann.
+Es soll keine FUnktionalität geben um Backups zu löschen, da die Backups automatisch nach 7 Tagen gelöscht werden.
+Alles soll additiv sein.
+Es soll auch keine Funktionalität geben um Backups zu planen, da die Backups automatisch alle 24 Stunden erstellt
+werden.
+
+Das Backjend kann dann darauf zugreifen und im Frontend kann man im Admin Bereich funktionen zum triggern von Backups
+und den Download des letzten backups bereitstellen.
