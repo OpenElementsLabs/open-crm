@@ -4,6 +4,9 @@ import com.openelements.crm.contact.ContactRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
 import com.openelements.spring.base.data.image.ImageData;
+import com.openelements.spring.base.services.audit.AuditAction;
+import com.openelements.spring.base.services.audit.AuditLogEntity;
+import com.openelements.spring.base.services.audit.AuditLogRepository;
 import com.openelements.spring.base.services.comment.CommentCreateDto;
 import com.openelements.spring.base.services.comment.CommentDto;
 import com.openelements.spring.base.services.comment.CommentEntity;
@@ -11,6 +14,7 @@ import com.openelements.spring.base.services.comment.CommentRepository;
 import com.openelements.spring.base.services.comment.CommentService;
 import com.openelements.spring.base.services.tag.TagEntity;
 import com.openelements.spring.base.services.tag.TagRepository;
+import com.openelements.spring.base.services.user.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,17 +40,23 @@ import java.util.stream.Collectors;
 @Transactional
 public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, CompanyDto> {
 
+    public static final String COMMENT_ENTITY_TYPE = "CompanyComment";
+
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
     private final CommentService commentService;
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final UserService userService;
 
     public CompanyService(final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
                           final CommentService commentService,
                           final CommentRepository commentRepository,
                           final TagRepository tagRepository,
+                          final AuditLogRepository auditLogRepository,
+                          final UserService userService,
                           final ApplicationEventPublisher eventPublisher) {
         super(eventPublisher);
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
@@ -54,6 +64,8 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
+        this.auditLogRepository = Objects.requireNonNull(auditLogRepository, "auditLogRepository must not be null");
+        this.userService = Objects.requireNonNull(userService, "userService must not be null");
     }
 
     /**
@@ -205,6 +217,7 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         final CommentEntity entity = commentRepository.findByIdOrThrow(saved.id());
         company.getComments().add(entity);
         companyRepository.save(company);
+        recordCommentAudit(companyId, AuditAction.INSERT);
         return saved;
     }
 
@@ -219,7 +232,10 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         assertCommentBelongsToCompany(companyId, commentId);
         final CommentDto current = commentService.findById(commentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
-        return commentService.save(new CommentDto(commentId, request.text(), current.author(), current.createdAt(), current.updatedAt()));
+        final CommentDto saved = commentService.save(
+            new CommentDto(commentId, request.text(), current.author(), current.createdAt(), current.updatedAt()));
+        recordCommentAudit(companyId, AuditAction.UPDATE);
+        return saved;
     }
 
     /**
@@ -234,6 +250,16 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         company.getComments().removeIf(c -> c.getId().equals(commentId));
         companyRepository.saveAndFlush(company);
         commentService.delete(commentId);
+        recordCommentAudit(companyId, AuditAction.DELETE);
+    }
+
+    private void recordCommentAudit(final UUID companyId, final AuditAction action) {
+        final AuditLogEntity entry = new AuditLogEntity();
+        entry.setEntityType(COMMENT_ENTITY_TYPE);
+        entry.setEntityId(companyId);
+        entry.setAction(action);
+        entry.setUser(userService.getCurrentUserEntity());
+        auditLogRepository.save(entry);
     }
 
     private void assertCommentBelongsToCompany(final UUID companyId, final UUID commentId) {
