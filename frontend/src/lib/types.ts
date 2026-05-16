@@ -169,7 +169,7 @@ export interface AuditLogDto {
   readonly entityType: string;
   readonly entityId: string;
   readonly action: AuditAction;
-  readonly user: string;
+  readonly user: UserDto;
   readonly createdAt: string;
 }
 
