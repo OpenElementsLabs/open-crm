@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -50,7 +51,7 @@ class AuditLogControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     private UserEntity alice;
     private UserEntity bob;
@@ -157,6 +158,17 @@ class AuditLogControllerTest {
             .andExpect(jsonPath("$.content[0].entityType").value("CompanyDto"))
             .andExpect(jsonPath("$.content[0].user.id").value(alice.id().toString()))
             .andExpect(jsonPath("$.content[0].user.name").value("Alice"));
+    }
+
+    @Test
+    void listAuditLogsFiltersByUserAssertsId() throws Exception {
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
+
+        mockMvc.perform(asItAdmin(get("/api/audit-logs").param("user", alice.id().toString())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].user.id").value(alice.id().toString()));
     }
 
     @Test

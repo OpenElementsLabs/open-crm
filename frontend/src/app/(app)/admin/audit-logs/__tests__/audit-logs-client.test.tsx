@@ -348,5 +348,16 @@ describe("AuditLogsClient", () => {
         expect(mockGetUsers).toHaveBeenCalledWith({ size: 200 });
       });
     });
+
+    it("does not crash when the user list is empty", async () => {
+      mockGetUsers.mockResolvedValue(makePage<UserDto>([]));
+      mockGetAuditLogs.mockResolvedValue(makePage([makeEntry()]));
+      renderClient();
+      await waitFor(() => {
+        expect(mockGetUsers).toHaveBeenCalledWith({ size: 200 });
+      });
+      expect(screen.getByTestId("audit-logs-user-filter")).toBeInTheDocument();
+    });
   });
+
 });

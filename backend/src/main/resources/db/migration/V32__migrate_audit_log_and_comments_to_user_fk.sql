@@ -29,6 +29,8 @@ ALTER TABLE comments RENAME COLUMN author TO author_id;
 
 ALTER TABLE comments ALTER COLUMN author_id TYPE UUID USING author_id::uuid;
 
+ALTER TABLE comments ALTER COLUMN author_id SET NOT NULL;
+
 ALTER TABLE comments
     ADD CONSTRAINT fk_comments_author
     FOREIGN KEY (author_id) REFERENCES users(id);

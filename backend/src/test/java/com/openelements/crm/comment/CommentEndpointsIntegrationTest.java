@@ -152,6 +152,7 @@ class CommentEndpointsIntegrationTest {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").exists())
             .andExpect(jsonPath("$.text").value("Hello world"))
+            .andExpect(jsonPath("$.author.name").value("Test User"))
             .andReturn().getResponse().getContentAsString();
         final UUID commentId = UUID.fromString(objectMapper.readTree(body).get("id").asText());
 
