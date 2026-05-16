@@ -1,10 +1,10 @@
 package com.openelements.crm.user;
 
-import com.openelements.spring.base.security.NeedsItAdminRole;
-import com.openelements.spring.base.security.user.SystemUser;
-import com.openelements.spring.base.security.user.UserDto;
-import com.openelements.spring.base.security.user.UserEntity;
-import com.openelements.spring.base.security.user.UserService;
+import com.openelements.spring.base.security.roles.RequiresItAdmin;
+import com.openelements.spring.base.services.user.SystemUser;
+import com.openelements.spring.base.services.user.UserDto;
+import com.openelements.spring.base.services.user.UserEntity;
+import com.openelements.spring.base.services.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -40,7 +40,7 @@ public class UserController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @NeedsItAdminRole
+    @RequiresItAdmin
     @Operation(summary = "List users", description = "Returns a paginated list of all registered users excluding the SYSTEM-USER. Requires the IT-ADMIN role.")
     public Page<UserDto> listUsers(
         @Parameter(hidden = true)

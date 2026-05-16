@@ -1,6 +1,6 @@
 package com.openelements.crm.webhook;
 
-import com.openelements.spring.base.security.NeedsItAdminRole;
+import com.openelements.spring.base.security.roles.RequiresItAdmin;
 import com.openelements.spring.base.services.webhook.WebhookSender;
 import com.openelements.spring.base.services.webhook.data.WebhookDataService;
 import com.openelements.spring.base.services.webhook.data.WebhookDto;
@@ -36,7 +36,7 @@ import java.util.UUID;
 @RequestMapping("/api/webhooks")
 @Tag(name = "Webhooks", description = "Webhook management operations")
 @SecurityRequirement(name = "oidc")
-@NeedsItAdminRole
+@RequiresItAdmin
 public class WebhookController {
 
     private final WebhookDataService webhookService;

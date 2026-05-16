@@ -67,6 +67,16 @@ implemented first.
 - User Table
 - Audit table
 
+## GDPR-Abdeckung für Updates-View (Mitarbeiter-Aktivitätstransparenz)
+
+Die geplante „Updates"-View (Activity Feed) zeigt jedem eingeloggten Benutzer, welcher Kollege wann welche Firma/
+Person/Kommentar erstellt, geändert oder gelöscht hat. Das ist eine personenbezogene Aktivitätsverfolgung von
+Mitarbeitenden durch andere Mitarbeitende und benötigt eine saubere rechtliche Grundlage — z. B. eine
+Betriebsvereinbarung oder eine entsprechende Klausel im AV-Vertrag, die diese Transparenz abdeckt.
+
+**Context:** Offene Frage aus der Grill-Session zur Updates-View-Spec. Die Spec wird mit der Annahme erstellt, dass
+diese Grundlage geschaffen wird; das eigentliche Dokument/Vereinbarung ist ein separater organisatorischer Schritt.
+
 ## Awesome DB Backup
 
 der DB_Backup Container soll aufgebohrt werden und ein REST API bereistellen durch den man Backups triggern kann und

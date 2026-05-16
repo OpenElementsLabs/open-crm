@@ -1,6 +1,6 @@
 package com.openelements.crm.security;
 
-import com.openelements.spring.base.security.user.Roles;
+import com.openelements.spring.base.security.roles.Roles;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

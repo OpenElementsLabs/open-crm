@@ -1,9 +1,9 @@
 package com.openelements.crm.auditlog;
 
-import com.openelements.spring.base.security.user.UserEntity;
-import com.openelements.spring.base.security.user.UserRepository;
 import com.openelements.spring.base.services.audit.AuditAction;
 import com.openelements.spring.base.services.audit.AuditLogDataService;
+import com.openelements.spring.base.services.user.UserEntity;
+import com.openelements.spring.base.services.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
 package com.openelements.crm.user;
 
-import com.openelements.spring.base.security.user.UserEntity;
-import com.openelements.spring.base.security.user.UserRepository;
+import com.openelements.spring.base.services.user.UserEntity;
+import com.openelements.spring.base.services.user.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

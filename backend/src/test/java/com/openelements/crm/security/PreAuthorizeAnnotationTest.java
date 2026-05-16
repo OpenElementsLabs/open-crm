@@ -8,8 +8,8 @@ import com.openelements.crm.contact.ContactController;
 import com.openelements.crm.tag.TagController;
 import com.openelements.crm.user.UserController;
 import com.openelements.crm.webhook.WebhookController;
-import com.openelements.spring.base.security.NeedsAppAdminRole;
-import com.openelements.spring.base.security.NeedsItAdminRole;
+import com.openelements.spring.base.security.roles.RequiresAppAdmin;
+import com.openelements.spring.base.security.roles.RequiresItAdmin;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
@@ -99,23 +99,23 @@ class PreAuthorizeAnnotationTest {
     }
 
     private static void assertHasRequiresAdmin(Method method) {
-        final NeedsAppAdminRole annotation = method.getAnnotation(NeedsAppAdminRole.class);
+        final RequiresAppAdmin annotation = method.getAnnotation(RequiresAppAdmin.class);
         assertNotNull(annotation,
-            "Missing @NeedsAppAdminRole on " + method.getDeclaringClass().getSimpleName()
+            "Missing @RequiresAppAdmin on " + method.getDeclaringClass().getSimpleName()
                 + "." + method.getName());
     }
 
     private static void assertHasRequiresItAdmin(Method method) {
-        final NeedsItAdminRole annotation = method.getAnnotation(NeedsItAdminRole.class);
+        final RequiresItAdmin annotation = method.getAnnotation(RequiresItAdmin.class);
         assertNotNull(annotation,
-            "Missing @NeedsItAdminRole on " + method.getDeclaringClass().getSimpleName()
+            "Missing @RequiresItAdmin on " + method.getDeclaringClass().getSimpleName()
                 + "." + method.getName());
     }
 
     private static void assertClassHasRequiresItAdmin(Class<?> controller) {
-        final NeedsItAdminRole annotation = controller.getAnnotation(NeedsItAdminRole.class);
+        final RequiresItAdmin annotation = controller.getAnnotation(RequiresItAdmin.class);
         assertNotNull(annotation,
-            "Missing class-level @NeedsItAdminRole on " + controller.getSimpleName());
+            "Missing class-level @RequiresItAdmin on " + controller.getSimpleName());
     }
 
     @Test

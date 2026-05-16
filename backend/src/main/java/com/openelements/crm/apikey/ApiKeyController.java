@@ -1,6 +1,6 @@
 package com.openelements.crm.apikey;
 
-import com.openelements.spring.base.security.NeedsItAdminRole;
+import com.openelements.spring.base.security.roles.RequiresItAdmin;
 import com.openelements.spring.base.services.apikey.ApiKeyCreateDto;
 import com.openelements.spring.base.services.apikey.ApiKeyCreatedDto;
 import com.openelements.spring.base.services.apikey.ApiKeyDataService;
@@ -35,7 +35,7 @@ import java.util.UUID;
 @RequestMapping("/api/api-keys")
 @Tag(name = "API Keys", description = "API key management operations")
 @SecurityRequirement(name = "oidc")
-@NeedsItAdminRole
+@RequiresItAdmin
 public class ApiKeyController {
 
     private final ApiKeyDataService apiKeyService;

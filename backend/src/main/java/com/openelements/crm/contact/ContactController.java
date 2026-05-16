@@ -1,6 +1,6 @@
 package com.openelements.crm.contact;
 
-import com.openelements.spring.base.security.NeedsAppAdminRole;
+import com.openelements.spring.base.security.roles.RequiresAppAdmin;
 import com.openelements.spring.base.services.comment.CommentCreateDto;
 import com.openelements.spring.base.services.comment.CommentDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -174,7 +174,7 @@ public class ContactController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Delete a contact", description = "Permanently deletes the contact and all associated comments")
     @ApiResponse(responseCode = "204", description = "Contact deleted")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")
@@ -209,7 +209,7 @@ public class ContactController {
 
     @DeleteMapping("/{id}/photo")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Remove contact photo")
     @ApiResponse(responseCode = "204", description = "Photo removed")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")
@@ -254,7 +254,7 @@ public class ContactController {
 
     @DeleteMapping("/{id}/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Delete a comment of a contact")
     @ApiResponse(responseCode = "204", description = "Comment deleted")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")

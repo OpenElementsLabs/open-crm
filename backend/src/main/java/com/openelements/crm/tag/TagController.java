@@ -2,7 +2,7 @@ package com.openelements.crm.tag;
 
 import com.openelements.crm.company.CompanyService;
 import com.openelements.crm.contact.ContactService;
-import com.openelements.spring.base.security.NeedsAppAdminRole;
+import com.openelements.spring.base.security.roles.RequiresAppAdmin;
 import com.openelements.spring.base.services.tag.TagDataService;
 import com.openelements.spring.base.services.tag.TagDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -107,7 +107,7 @@ public class TagController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Delete a tag")
     @ApiResponse(responseCode = "204", description = "Tag deleted")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")

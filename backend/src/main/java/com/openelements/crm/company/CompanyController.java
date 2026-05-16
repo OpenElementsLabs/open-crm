@@ -2,7 +2,7 @@ package com.openelements.crm.company;
 
 import com.openelements.crm.contact.ContactService;
 import com.openelements.spring.base.data.image.ImageData;
-import com.openelements.spring.base.security.NeedsAppAdminRole;
+import com.openelements.spring.base.security.roles.RequiresAppAdmin;
 import com.openelements.spring.base.services.comment.CommentCreateDto;
 import com.openelements.spring.base.services.comment.CommentDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -174,7 +174,7 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Delete a company")
     @ApiResponse(responseCode = "204", description = "Company deleted")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")
@@ -215,7 +215,7 @@ public class CompanyController {
 
     @DeleteMapping("/{id}/logo")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Remove company logo")
     @ApiResponse(responseCode = "204", description = "Logo removed")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")
@@ -269,7 +269,7 @@ public class CompanyController {
      */
     @DeleteMapping("/{id}/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @NeedsAppAdminRole
+    @RequiresAppAdmin
     @Operation(summary = "Delete a comment of a company")
     @ApiResponse(responseCode = "204", description = "Comment deleted")
     @ApiResponse(responseCode = "403", description = "Missing ADMIN role")
