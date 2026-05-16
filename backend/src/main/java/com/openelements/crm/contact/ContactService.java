@@ -6,7 +6,8 @@ import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
 import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.services.audit.AuditAction;
-import com.openelements.spring.base.services.audit.AuditLogDataService;
+import com.openelements.spring.base.services.audit.AuditLogEntity;
+import com.openelements.spring.base.services.audit.AuditLogRepository;
 import com.openelements.spring.base.services.comment.CommentCreateDto;
 import com.openelements.spring.base.services.comment.CommentDto;
 import com.openelements.spring.base.services.comment.CommentEntity;
@@ -50,7 +51,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
     private final CommentService commentService;
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
-    private final AuditLogDataService auditLogDataService;
+    private final AuditLogRepository auditLogRepository;
     private final UserService userService;
 
     public ContactService(final ContactRepository contactRepository,
@@ -58,7 +59,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
                           final CommentService commentService,
                           final CommentRepository commentRepository,
                           final TagRepository tagRepository,
-                          final AuditLogDataService auditLogDataService,
+                          final AuditLogRepository auditLogRepository,
                           final UserService userService,
                           final ApplicationEventPublisher eventPublisher) {
         super((eventPublisher));
@@ -67,7 +68,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
-        this.auditLogDataService = Objects.requireNonNull(auditLogDataService, "auditLogDataService must not be null");
+        this.auditLogRepository = Objects.requireNonNull(auditLogRepository, "auditLogRepository must not be null");
         this.userService = Objects.requireNonNull(userService, "userService must not be null");
     }
 
@@ -306,8 +307,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         final CommentEntity entity = commentRepository.findByIdOrThrow(saved.id());
         contact.getComments().add(entity);
         contactRepository.save(contact);
-        auditLogDataService.createEntry(COMMENT_ENTITY_TYPE, contactId, AuditAction.INSERT,
-            userService.getCurrentUserEntity());
+        recordCommentAudit(contactId, AuditAction.INSERT);
         return saved;
     }
 
@@ -320,8 +320,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
         final CommentDto saved = commentService.save(
             new CommentDto(commentId, request.text(), current.author(), current.createdAt(), current.updatedAt()));
-        auditLogDataService.createEntry(COMMENT_ENTITY_TYPE, contactId, AuditAction.UPDATE,
-            userService.getCurrentUserEntity());
+        recordCommentAudit(contactId, AuditAction.UPDATE);
         return saved;
     }
 
@@ -333,8 +332,16 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         contact.getComments().removeIf(c -> c.getId().equals(commentId));
         contactRepository.saveAndFlush(contact);
         commentService.delete(commentId);
-        auditLogDataService.createEntry(COMMENT_ENTITY_TYPE, contactId, AuditAction.DELETE,
-            userService.getCurrentUserEntity());
+        recordCommentAudit(contactId, AuditAction.DELETE);
+    }
+
+    private void recordCommentAudit(final UUID contactId, final AuditAction action) {
+        final AuditLogEntity entry = new AuditLogEntity();
+        entry.setEntityType(COMMENT_ENTITY_TYPE);
+        entry.setEntityId(contactId);
+        entry.setAction(action);
+        entry.setUser(userService.getCurrentUserEntity());
+        auditLogRepository.save(entry);
     }
 
     private void assertCommentBelongsToContact(final UUID contactId, final UUID commentId) {

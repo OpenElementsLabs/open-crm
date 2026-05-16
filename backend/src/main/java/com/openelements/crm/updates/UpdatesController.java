@@ -62,9 +62,24 @@ public class UpdatesController {
         }
         final PageRequest pageRequest = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (page > 0) {
-            return new PageImpl<>(List.of(), pageRequest, 0);
+            return new FixedSinglePage<>(List.of(), pageRequest);
         }
-        final List<UpdateEntryDto> content = updatesService.load(size);
-        return new PageImpl<>(content, pageRequest, content.size());
+        return new FixedSinglePage<>(updatesService.load(size), pageRequest);
+    }
+
+    /**
+     * Page wrapper that always reports {@code totalPages = 1}. This endpoint is a "latest N" feed
+     * with no pagination, but reuses the {@code Page<T>} shape for consistency with other list
+     * endpoints (see design.md).
+     */
+    private static final class FixedSinglePage<T> extends PageImpl<T> {
+        FixedSinglePage(final List<T> content, final PageRequest pageRequest) {
+            super(content, pageRequest, content.size());
+        }
+
+        @Override
+        public int getTotalPages() {
+            return 1;
+        }
     }
 }
