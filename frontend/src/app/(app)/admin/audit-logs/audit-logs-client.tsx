@@ -29,7 +29,6 @@ export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200] as const;
 export const DEFAULT_PAGE_SIZE = 20;
 export const PAGE_SIZE_STORAGE_KEY = "pageSize.auditLogs";
 export const ALL_VALUE = "__all__";
-export const SYSTEM_USER = "System";
 
 function readStoredPageSize(): number {
   if (typeof window === "undefined") return DEFAULT_PAGE_SIZE;
@@ -47,7 +46,7 @@ export function AuditLogsClient() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState<number>(() => readStoredPageSize());
   const [entityType, setEntityType] = useState<string | undefined>(undefined);
-  const [user, setUser] = useState<string | undefined>(undefined);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
   const [entityTypes, setEntityTypes] = useState<readonly string[]>([]);
   const [users, setUsers] = useState<readonly UserDto[]>([]);
 
@@ -66,7 +65,7 @@ export function AuditLogsClient() {
     setLoading(true);
     setError(null);
     try {
-      const result = await getAuditLogs({ page, size: pageSize, entityType, user });
+      const result = await getAuditLogs({ page, size: pageSize, entityType, user: userId });
       setData(result);
     } catch (err: unknown) {
       console.error("Failed to load audit logs", err);
@@ -75,7 +74,7 @@ export function AuditLogsClient() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, entityType, user, t.auditLog.loadError]);
+  }, [page, pageSize, entityType, userId, t.auditLog.loadError]);
 
   useEffect(() => {
     fetchAuditLogs();
@@ -83,8 +82,6 @@ export function AuditLogsClient() {
 
   const totalElements = data?.page.totalElements ?? 0;
   const totalPages = data?.page.totalPages ?? 0;
-
-  const userDropdownOptions = users.filter((u) => u.name !== SYSTEM_USER);
 
   return (
     <div>
@@ -127,9 +124,9 @@ export function AuditLogsClient() {
         <div className="flex items-center gap-2">
           <span className="text-sm text-oe-gray">{t.auditLog.filter.user}</span>
           <Select
-            value={user ?? ALL_VALUE}
+            value={userId ?? ALL_VALUE}
             onValueChange={(v) => {
-              setUser(v === ALL_VALUE ? undefined : v);
+              setUserId(v === ALL_VALUE ? undefined : v);
               setPage(0);
             }}
           >
@@ -144,8 +141,8 @@ export function AuditLogsClient() {
               <SelectItem value={ALL_VALUE}>
                 {t.auditLog.filter.userAll}
               </SelectItem>
-              {userDropdownOptions.map((u) => (
-                <SelectItem key={u.id} value={u.name}>
+              {users.map((u) => (
+                <SelectItem key={u.id} value={u.id}>
                   {u.name}
                 </SelectItem>
               ))}
@@ -200,7 +197,7 @@ export function AuditLogsClient() {
                       {entry.entityId}
                     </TableCell>
                     <TableCell className="text-oe-dark">{entry.action}</TableCell>
-                    <TableCell className="text-oe-gray">{entry.user}</TableCell>
+                    <TableCell className="text-oe-gray">{entry.user.name}</TableCell>
                     <TableCell className="text-oe-gray">
                       {new Date(entry.createdAt).toLocaleString()}
                     </TableCell>

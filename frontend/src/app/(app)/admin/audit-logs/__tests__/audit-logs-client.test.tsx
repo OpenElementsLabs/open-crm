@@ -46,18 +46,6 @@ vi.mock("@/lib/api", () => ({
   getUsers: (...args: unknown[]) => mockGetUsers(...args),
 }));
 
-function makeEntry(overrides: Partial<AuditLogDto> = {}): AuditLogDto {
-  return {
-    id: "log-1",
-    entityType: "CompanyDto",
-    entityId: "550e8400-e29b-41d4-a716-446655440000",
-    action: "INSERT",
-    user: "Max Mustermann",
-    createdAt: "2026-04-25T14:30:00Z",
-    ...overrides,
-  };
-}
-
 function makeUser(overrides: Partial<UserDto> = {}): UserDto {
   return {
     id: "u-1",
@@ -66,6 +54,18 @@ function makeUser(overrides: Partial<UserDto> = {}): UserDto {
     avatarUrl: null,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+function makeEntry(overrides: Partial<AuditLogDto> = {}): AuditLogDto {
+  return {
+    id: "log-1",
+    entityType: "CompanyDto",
+    entityId: "550e8400-e29b-41d4-a716-446655440000",
+    action: "INSERT",
+    user: makeUser(),
+    createdAt: "2026-04-25T14:30:00Z",
     ...overrides,
   };
 }
@@ -163,7 +163,7 @@ describe("AuditLogsClient", () => {
             entityType: "CompanyDto",
             entityId: "550e8400-e29b-41d4-a716-446655440000",
             action: "INSERT",
-            user: "Max Mustermann",
+            user: makeUser({ name: "Max Mustermann" }),
           }),
         ]),
       );
@@ -178,7 +178,7 @@ describe("AuditLogsClient", () => {
 
     it("renders System-user entries in the table", async () => {
       mockGetAuditLogs.mockResolvedValue(
-        makePage([makeEntry({ id: "log-sys", user: "System" })]),
+        makePage([makeEntry({ id: "log-sys", user: makeUser({ id: "u-sys", name: "System" }) })]),
       );
       renderClient();
       await waitFor(() => {
@@ -348,5 +348,16 @@ describe("AuditLogsClient", () => {
         expect(mockGetUsers).toHaveBeenCalledWith({ size: 200 });
       });
     });
+
+    it("does not crash when the user list is empty", async () => {
+      mockGetUsers.mockResolvedValue(makePage<UserDto>([]));
+      mockGetAuditLogs.mockResolvedValue(makePage([makeEntry()]));
+      renderClient();
+      await waitFor(() => {
+        expect(mockGetUsers).toHaveBeenCalledWith({ size: 200 });
+      });
+      expect(screen.getByTestId("audit-logs-user-filter")).toBeInTheDocument();
+    });
   });
+
 });

@@ -1,5 +1,7 @@
 package com.openelements.crm.auditlog;
 
+import com.openelements.spring.base.security.user.UserEntity;
+import com.openelements.spring.base.security.user.UserRepository;
 import com.openelements.spring.base.services.audit.AuditAction;
 import com.openelements.spring.base.services.audit.AuditLogDataService;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -43,7 +46,17 @@ class AuditLogControllerTest {
 
     @Autowired
     private AuditLogDataService auditLogDataService;
-    
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private UserEntity alice;
+    private UserEntity bob;
+    private UserEntity charlie;
+
     private static MockHttpServletRequestBuilder asItAdmin(MockHttpServletRequestBuilder builder) {
         final List<String> roles = List.of("IT-ADMIN");
         final Jwt jwt = Jwt.withTokenValue("token")
@@ -62,7 +75,19 @@ class AuditLogControllerTest {
 
     @BeforeEach
     void cleanAuditLog() {
-        auditLogDataService.getAll().forEach(entry -> auditLogDataService.delete(entry.id()));
+        jdbcTemplate.update("DELETE FROM audit_log");
+        alice = ensureUser("alice", "Alice");
+        bob = ensureUser("bob", "Bob");
+        charlie = ensureUser("charlie", "Charlie");
+    }
+
+    private UserEntity ensureUser(final String sub, final String name) {
+        return userRepository.findBySub(sub).orElseGet(() -> {
+            final UserEntity entity = new UserEntity();
+            entity.setSub(sub);
+            entity.setName(name);
+            return userRepository.saveAndFlush(entity);
+        });
     }
 
     @Test
@@ -95,9 +120,9 @@ class AuditLogControllerTest {
 
     @Test
     void listAuditLogsFiltersByEntityType() throws Exception {
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, "Bob");
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
 
         mockMvc.perform(asItAdmin(get("/api/audit-logs").param("entityType", "CompanyDto")))
             .andExpect(status().isOk())
@@ -108,40 +133,69 @@ class AuditLogControllerTest {
 
     @Test
     void listAuditLogsFiltersByUser() throws Exception {
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, "Bob");
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
 
-        mockMvc.perform(asItAdmin(get("/api/audit-logs").param("user", "Alice")))
+        mockMvc.perform(asItAdmin(get("/api/audit-logs").param("user", alice.id().toString())))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.page.totalElements").value(2))
-            .andExpect(jsonPath("$.content[0].user").value("Alice"))
-            .andExpect(jsonPath("$.content[1].user").value("Alice"));
+            .andExpect(jsonPath("$.content[0].user.name").value("Alice"))
+            .andExpect(jsonPath("$.content[1].user.name").value("Alice"));
     }
 
     @Test
     void listAuditLogsFiltersByEntityTypeAndUser() throws Exception {
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, "Bob");
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
 
         mockMvc.perform(asItAdmin(get("/api/audit-logs")
                 .param("entityType", "CompanyDto")
-                .param("user", "Alice")))
+                .param("user", alice.id().toString())))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.page.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].entityType").value("CompanyDto"))
-            .andExpect(jsonPath("$.content[0].user").value("Alice"));
+            .andExpect(jsonPath("$.content[0].user.id").value(alice.id().toString()))
+            .andExpect(jsonPath("$.content[0].user.name").value("Alice"));
+    }
+
+    @Test
+    void listAuditLogsFiltersByUserAssertsId() throws Exception {
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
+
+        mockMvc.perform(asItAdmin(get("/api/audit-logs").param("user", alice.id().toString())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].user.id").value(alice.id().toString()));
+    }
+
+    @Test
+    void listAuditLogsReturnsBadRequestForInvalidUserUuid() throws Exception {
+        mockMvc.perform(asItAdmin(get("/api/audit-logs").param("user", "not-a-uuid")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listAuditLogsReturnsEmptyPageForUnknownUserUuid() throws Exception {
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+
+        mockMvc.perform(asItAdmin(get("/api/audit-logs").param("user", UUID.randomUUID().toString())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(0))
+            .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
     @Test
     void listAuditLogsSortsByCreatedAtDescending() throws Exception {
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
         Thread.sleep(5L);
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, "Bob");
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
         Thread.sleep(5L);
         final UUID newestId = auditLogDataService
-            .createEntry("CompanyDto", UUID.randomUUID(), AuditAction.DELETE, "Charlie")
+            .createEntry("CompanyDto", UUID.randomUUID(), AuditAction.DELETE, charlie)
             .id();
 
         mockMvc.perform(asItAdmin(get("/api/audit-logs")))
@@ -151,9 +205,9 @@ class AuditLogControllerTest {
 
     @Test
     void entityTypesReturnsDistinctSortedValues() throws Exception {
-        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, "Alice");
-        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.UPDATE, "Bob");
+        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.INSERT, alice);
+        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.UPDATE, bob);
 
         mockMvc.perform(asItAdmin(get("/api/audit-logs/entity-types")))
             .andExpect(status().isOk())
