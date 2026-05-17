@@ -2,15 +2,15 @@
 
 ## Step 1: Extend `UpdateEntryDto` with two additive boolean fields
 
-- [ ] Modify `backend/src/main/java/com/openelements/crm/updates/UpdateEntryDto.java` to add two
+- [x] Modify `backend/src/main/java/com/openelements/crm/updates/UpdateEntryDto.java` to add two
       new boolean fields: `entityHasLogo` and `entityHasPhoto`. Update the Javadoc to describe
       what they mean and when they are `false`.
 
 **Acceptance criteria:**
 
-- [ ] Record compiles with the new fields.
-- [ ] Existing callers fail to compile (good — they will be fixed in Step 2).
-- [ ] `mvn -pl backend -am compile` succeeds after Step 2 lands.
+- [x] Record compiles with the new fields.
+- [x] Existing callers fail to compile (good — they will be fixed in Step 2).
+- [x] `mvn -pl backend -am compile` succeeds after Step 2 lands.
 
 **Related behaviors:** Backwards compatibility (the DTO change is additive).
 
@@ -18,7 +18,7 @@
 
 ## Step 2: Derive flags in `UpdatesService.resolveNames`
 
-- [ ] Modify `backend/src/main/java/com/openelements/crm/updates/UpdatesService.java`:
+- [x] Modify `backend/src/main/java/com/openelements/crm/updates/UpdatesService.java`:
   - In `resolveNames`, additionally collect `Map<UUID, Boolean>` for `companyHasLogo` and
     `contactHasPhoto`, populated from the same `findAllById` iterations already used to compute
     names.
@@ -29,8 +29,8 @@
 
 **Acceptance criteria:**
 
-- [ ] `mvn -pl backend -am compile` succeeds.
-- [ ] The two existing iterations over companies/contacts are reused — no extra repository calls.
+- [x] `mvn -pl backend -am compile` succeeds.
+- [x] The two existing iterations over companies/contacts are reused — no extra repository calls.
 
 **Related behaviors:**
 - Company event with logo / Company event without logo
@@ -43,21 +43,21 @@
 
 ## Step 3: Extend backend tests for the new DTO fields
 
-- [ ] Modify `backend/src/test/java/com/openelements/crm/updates/UpdatesServiceTest.java` to
+- [x] Modify `backend/src/test/java/com/openelements/crm/updates/UpdatesServiceTest.java` to
       verify `entityHasLogo` / `entityHasPhoto` for: companies with and without logo, contacts
       with and without photo, `COMPANY_DELETED`, `CONTACT_DELETED`, `COMPANY_COMMENT_*` (parent
       with and without logo), `CONTACT_COMMENT_*` (parent with and without photo), and the race
       case where an entity vanished.
-- [ ] Add helper methods to set `logo` / `photo` bytes on the entities under test (use a small
+- [x] Add helper methods to set `logo` / `photo` bytes on the entities under test (use a small
       stub byte array — the field only needs to be non-null for the flag to flip).
-- [ ] Modify `backend/src/test/java/com/openelements/crm/updates/UpdatesControllerTest.java` to
+- [x] Modify `backend/src/test/java/com/openelements/crm/updates/UpdatesControllerTest.java` to
       assert that the JSON response includes the two new fields with the expected values for at
       least one company-with-logo and one delete event.
 
 **Acceptance criteria:**
 
-- [ ] `mvn -pl backend -am test -Dtest='UpdatesServiceTest'` passes.
-- [ ] `mvn -pl backend -am test -Dtest='UpdatesControllerTest'` passes.
+- [x] `mvn -pl backend -am test -Dtest='UpdatesServiceTest'` passes.
+- [x] `mvn -pl backend -am test -Dtest='UpdatesControllerTest'` passes.
 
 **Related behaviors:**
 - Company event with logo / without logo
@@ -70,14 +70,14 @@
 
 ## Step 4: Frontend type — extend `UpdateEntryDto`
 
-- [ ] Modify `frontend/src/lib/types.ts` and add `readonly entityHasLogo: boolean;` and
+- [x] Modify `frontend/src/lib/types.ts` and add `readonly entityHasLogo: boolean;` and
       `readonly entityHasPhoto: boolean;` to the `UpdateEntryDto` interface.
 
 **Acceptance criteria:**
 
-- [ ] `pnpm --filter frontend type-check` (or equivalent) passes after the consumer updates in
+- [x] `pnpm --filter frontend type-check` (or equivalent) passes after the consumer updates in
       Steps 5–7.
-- [ ] Test fixtures that build `UpdateEntryDto` are updated to provide the new fields.
+- [x] Test fixtures that build `UpdateEntryDto` are updated to provide the new fields.
 
 **Related behaviors:** Backwards compatibility.
 
@@ -85,13 +85,13 @@
 
 ## Step 5: Index redirect — `/` → `/updates`
 
-- [ ] Modify `frontend/src/app/(app)/page.tsx` to call `redirect("/updates")` instead of
+- [x] Modify `frontend/src/app/(app)/page.tsx` to call `redirect("/updates")` instead of
       `redirect("/companies")`.
 
 **Acceptance criteria:**
 
-- [ ] File compiles.
-- [ ] Step 8 adds a test that pins the redirect target.
+- [x] File compiles.
+- [x] Step 8 adds a test that pins the redirect target.
 
 **Related behaviors:** Redirect target / Authenticated user opens the app root / Unauthenticated
 user opens the app root.
@@ -100,7 +100,7 @@ user opens the app root.
 
 ## Step 6: Frontend — `EntityImage` and `UserAvatar` helpers in `updates-client.tsx`
 
-- [ ] Modify `frontend/src/app/(app)/updates/updates-client.tsx`:
+- [x] Modify `frontend/src/app/(app)/updates/updates-client.tsx`:
   - Import `getCompanyLogoUrl`, `getContactPhotoUrl` from `@/lib/api`.
   - Import `Trash2`, `Building2`, `User as UserIcon` from `lucide-react`.
   - Add a local `EntityImage` component that consumes `{ entry }` and returns the 32×32 leading
@@ -121,8 +121,8 @@ user opens the app root.
 
 **Acceptance criteria:**
 
-- [ ] Type-check passes.
-- [ ] Components are pure and rely only on props (no extra fetches).
+- [x] Type-check passes.
+- [x] Components are pure and rely only on props (no extra fetches).
 
 **Related behaviors:**
 - Company with logo / Company without logo
@@ -137,7 +137,7 @@ user opens the app root.
 
 ## Step 7: Frontend — three-region row layout & bold name
 
-- [ ] In `frontend/src/app/(app)/updates/updates-client.tsx`, restructure the `<li>` in the
+- [x] In `frontend/src/app/(app)/updates/updates-client.tsx`, restructure the `<li>` in the
       mapping over `entries`:
   - Use `flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:gap-3`.
   - Region 1: `<EntityImage entry={entry} />`.
@@ -153,13 +153,13 @@ user opens the app root.
     is null" from "template had no `{name}` at all" — either by returning an explicit
     `plainName: string | null` field, or by exposing whether the template contained `{name}`.
     Adjust the existing logic minimally; do not change the German/English copy.
-- [ ] Confirm the page-size selector label still reads `t.updates.perPage`. Make no rename.
+- [x] Confirm the page-size selector label still reads `t.updates.perPage`. Make no rename.
 
 **Acceptance criteria:**
 
-- [ ] Type-check passes.
-- [ ] The page-size combobox label is unchanged.
-- [ ] Loading skeleton mimics the three-region layout (32×32 placeholder + horizontal bar +
+- [x] Type-check passes.
+- [x] The page-size combobox label is unchanged.
+- [x] Loading skeleton mimics the three-region layout (32×32 placeholder + horizontal bar +
       right metadata skeleton) so the layout does not jump on load.
 
 **Related behaviors:**
@@ -179,12 +179,12 @@ user opens the app root.
 
 ## Step 8: Test — `/` redirects to `/updates`
 
-- [ ] Add `frontend/src/app/(app)/__tests__/page.test.tsx` that imports the page component and
+- [x] Add `frontend/src/app/(app)/__tests__/page.test.tsx` that imports the page component and
       asserts that calling it triggers `redirect("/updates")` via a mocked `next/navigation`.
 
 **Acceptance criteria:**
 
-- [ ] Test passes via `pnpm --filter frontend test`.
+- [x] Test passes via `pnpm --filter frontend test`.
 
 **Related behaviors:** Redirect target.
 
@@ -192,7 +192,7 @@ user opens the app root.
 
 ## Step 9: Frontend tests — row layout, image slot, avatar, bold name
 
-- [ ] Extend `frontend/src/app/(app)/updates/__tests__/updates-client.test.tsx`:
+- [x] Extend `frontend/src/app/(app)/updates/__tests__/updates-client.test.tsx`:
   - Update the `makeEntry` helper to default `entityHasLogo: false` and `entityHasPhoto: false`.
   - Add a test that `COMPANY_UPDATED` with `entityHasLogo: true` renders an `<img>` with `src`
     equal to `getCompanyLogoUrl(entityId)` (mock the helper to return a deterministic URL) and
@@ -224,8 +224,8 @@ user opens the app root.
 
 **Acceptance criteria:**
 
-- [ ] `pnpm --filter frontend test --run updates-client` passes.
-- [ ] No `console.error` from network/onError fallbacks (the design uses backend flags, not
+- [x] `pnpm --filter frontend test --run updates-client` passes.
+- [x] No `console.error` from network/onError fallbacks (the design uses backend flags, not
       `<img onError>`).
 
 **Related behaviors:** all scenarios under "Frontend — row leading image slot", "Frontend —
@@ -236,17 +236,17 @@ label".
 
 ## Step 10: Update project documentation
 
-- [ ] `.claude/conventions/project-specific/project-features.md` — note the enriched Updates
+- [x] `.claude/conventions/project-specific/project-features.md` — note the enriched Updates
       view rows and the `/ → /updates` default landing route, if a corresponding entry from
       spec 096 is present.
-- [ ] `.claude/conventions/project-specific/project-architecture.md` — no architectural change;
+- [x] `.claude/conventions/project-specific/project-architecture.md` — no architectural change;
       only update if the existing description of the Updates feed mentions row layout.
-- [ ] `README.md` — only if the default landing route was previously documented.
-- [ ] No new dependencies; `project-tech.md` and `project-structure.md` need no changes.
+- [x] `README.md` — only if the default landing route was previously documented.
+- [x] No new dependencies; `project-tech.md` and `project-structure.md` need no changes.
 
 **Acceptance criteria:**
 
-- [ ] Affected docs reflect the new behaviour.
+- [x] Affected docs reflect the new behaviour.
 
 ---
 
