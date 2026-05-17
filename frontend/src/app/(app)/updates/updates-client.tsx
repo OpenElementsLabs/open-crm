@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, Bell } from "lucide-react";
+import {
+  AlertCircle,
+  Bell,
+  Building2,
+  Trash2,
+  User as UserIcon,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,8 +18,12 @@ import {
   Skeleton,
 } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
-import { getUpdates } from "@/lib/api";
-import type { UpdateEntryDto, UpdateType } from "@/lib/types";
+import {
+  getCompanyLogoUrl,
+  getContactPhotoUrl,
+  getUpdates,
+} from "@/lib/api";
+import type { UpdateEntryDto, UpdateType, UserDto } from "@/lib/types";
 
 export const PAGE_SIZE_OPTIONS = [20, 50, 100, 200] as const;
 export const DEFAULT_PAGE_SIZE = 20;
@@ -45,14 +55,17 @@ interface MessageContext {
   };
 }
 
-/**
- * Returns `{ before, link, after }` where `link.text` is the entity-name slot of the message,
- * or null when the message should be plain text (deleted entity, or unresolved name).
- */
-function renderTemplate(ctx: MessageContext): { before: string; link: { text: string; href: string } | null; after: string } {
+interface RenderedMessage {
+  readonly before: string;
+  readonly link: { readonly text: string; readonly href: string } | null;
+  readonly plainName: string | null;
+  readonly after: string;
+}
+
+function renderTemplate(ctx: MessageContext): RenderedMessage {
   const template = pickTemplate(ctx);
   if (!template.includes("{name}")) {
-    return { before: template, link: null, after: "" };
+    return { before: template, link: null, plainName: null, after: "" };
   }
   const idx = template.indexOf("{name}");
   const before = template.slice(0, idx);
@@ -60,9 +73,14 @@ function renderTemplate(ctx: MessageContext): { before: string; link: { text: st
   const displayName = ctx.entityName ?? "—";
   const target = entityTarget(ctx.type);
   if (ctx.entityId === null || target === null) {
-    return { before: before + displayName + after, link: null, after: "" };
+    return { before, link: null, plainName: displayName, after };
   }
-  return { before, link: { text: displayName, href: `${target}/${ctx.entityId}` }, after };
+  return {
+    before,
+    link: { text: displayName, href: `${target}/${ctx.entityId}` },
+    plainName: null,
+    after,
+  };
 }
 
 function pickTemplate(ctx: MessageContext): string {
@@ -92,6 +110,100 @@ function entityTarget(type: UpdateType): "/companies" | "/contacts" | null {
 
 function formatBy(template: string, userName: string): string {
   return template.replace("{user}", userName);
+}
+
+function EntityImage({ entry }: { readonly entry: UpdateEntryDto }) {
+  if (entry.type === "COMPANY_DELETED" || entry.type === "CONTACT_DELETED") {
+    return (
+      <Trash2
+        className="h-8 w-8 shrink-0 text-oe-gray-mid"
+        aria-hidden="true"
+        data-testid="updates-row-deleted-icon"
+      />
+    );
+  }
+
+  const isCompany = entry.type.startsWith("COMPANY_");
+  const isContact = entry.type.startsWith("CONTACT_");
+
+  if (isCompany && entry.entityHasLogo && entry.entityId) {
+    return (
+      <Link
+        href={`/companies/${entry.entityId}`}
+        aria-hidden="true"
+        tabIndex={-1}
+        className="shrink-0"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getCompanyLogoUrl(entry.entityId)}
+          alt=""
+          className="h-8 w-8 rounded object-contain"
+          data-testid="updates-row-company-logo"
+        />
+      </Link>
+    );
+  }
+
+  if (isCompany) {
+    return (
+      <Building2
+        className="h-8 w-8 shrink-0 text-oe-gray-mid"
+        aria-hidden="true"
+        data-testid="updates-row-company-placeholder"
+      />
+    );
+  }
+
+  if (isContact && entry.entityHasPhoto && entry.entityId) {
+    return (
+      <Link
+        href={`/contacts/${entry.entityId}`}
+        aria-hidden="true"
+        tabIndex={-1}
+        className="shrink-0"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getContactPhotoUrl(entry.entityId)}
+          alt=""
+          className="h-8 w-8 rounded-full object-cover"
+          data-testid="updates-row-contact-photo"
+        />
+      </Link>
+    );
+  }
+
+  return (
+    <UserIcon
+      className="h-8 w-8 shrink-0 text-oe-gray-mid"
+      aria-hidden="true"
+      data-testid="updates-row-contact-placeholder"
+    />
+  );
+}
+
+function UserAvatar({ user }: { readonly user: UserDto }) {
+  if (user.avatarUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={user.avatarUrl}
+        alt=""
+        className="h-5 w-5 rounded-full object-cover"
+        data-testid="updates-author-avatar"
+      />
+    );
+  }
+  return (
+    <div
+      className="flex h-5 w-5 items-center justify-center rounded-full bg-oe-gray-lightest text-oe-gray"
+      data-testid="updates-author-avatar-fallback"
+      aria-hidden="true"
+    >
+      <UserIcon className="h-3 w-3" />
+    </div>
+  );
 }
 
 export function UpdatesClient() {
@@ -157,7 +269,14 @@ export function UpdatesClient() {
       {loading ? (
         <div className="space-y-3" data-testid="updates-loading">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <div
+              key={i}
+              className="flex items-center gap-3 rounded-lg border border-oe-gray-light bg-white px-4 py-3"
+            >
+              <Skeleton className="h-8 w-8 shrink-0 rounded" />
+              <Skeleton className="h-4 flex-1" />
+              <Skeleton className="h-4 w-32 shrink-0" />
+            </div>
           ))}
         </div>
       ) : error ? (
@@ -189,25 +308,32 @@ export function UpdatesClient() {
             return (
               <li
                 key={entry.id}
-                className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:gap-3"
                 data-testid="updates-row"
               >
-                <span className="text-oe-dark">
-                  {rendered.before}
-                  {rendered.link ? (
-                    <Link
-                      href={rendered.link.href}
-                      className="font-medium text-oe-blue underline-offset-2 hover:underline"
-                    >
-                      {rendered.link.text}
-                    </Link>
-                  ) : null}
-                  {rendered.after}
-                </span>
-                <span className="text-sm text-oe-gray">
-                  {formatBy(t.updates.by, entry.user.name)} ·{" "}
-                  {new Date(entry.createdAt).toLocaleString()}
-                </span>
+                <EntityImage entry={entry} />
+                <div className="min-w-0 flex-1">
+                  <span className="text-oe-dark">
+                    {rendered.before}
+                    {rendered.link ? (
+                      <Link
+                        href={rendered.link.href}
+                        className="font-bold text-oe-blue underline-offset-2 hover:underline"
+                      >
+                        {rendered.link.text}
+                      </Link>
+                    ) : rendered.plainName ? (
+                      <span className="font-bold">{rendered.plainName}</span>
+                    ) : null}
+                    {rendered.after}
+                  </span>
+                </div>
+                <div className="flex shrink-0 items-center gap-2 text-sm text-oe-gray">
+                  <UserAvatar user={entry.user} />
+                  <span>{formatBy(t.updates.by, entry.user.name)}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{new Date(entry.createdAt).toLocaleString()}</span>
+                </div>
               </li>
             );
           })}

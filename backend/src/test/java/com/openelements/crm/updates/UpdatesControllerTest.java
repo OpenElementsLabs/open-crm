@@ -180,6 +180,30 @@ class UpdatesControllerTest {
             .andExpect(jsonPath("$.page.totalElements").value(2));
     }
 
+    @Test
+    void companyEntryExposesEntityHasLogoFlag() throws Exception {
+        final CompanyEntity company = newCompany("Acme");
+        company.setLogo(new byte[]{1, 2, 3});
+        company.setLogoContentType("image/png");
+        companyRepository.saveAndFlush(company);
+        auditLogDataService.createEntry("CompanyDto", company.getId(), AuditAction.UPDATE, alice);
+
+        mockMvc.perform(asUser(get("/api/updates"), List.of()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].entityHasLogo").value(true))
+            .andExpect(jsonPath("$.content[0].entityHasPhoto").value(false));
+    }
+
+    @Test
+    void deletedCompanyEntryExposesBothFlagsFalse() throws Exception {
+        auditLogDataService.createEntry("CompanyDto", java.util.UUID.randomUUID(), AuditAction.DELETE, alice);
+
+        mockMvc.perform(asUser(get("/api/updates"), List.of()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].entityHasLogo").value(false))
+            .andExpect(jsonPath("$.content[0].entityHasPhoto").value(false));
+    }
+
     private CompanyEntity newCompany(final String name) {
         final CompanyEntity company = new CompanyEntity();
         company.setName(name);

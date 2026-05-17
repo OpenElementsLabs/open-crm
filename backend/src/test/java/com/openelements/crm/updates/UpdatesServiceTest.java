@@ -1,6 +1,7 @@
 package com.openelements.crm.updates;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,10 +80,27 @@ class UpdatesServiceTest {
         return companyRepository.saveAndFlush(company);
     }
 
+    private CompanyEntity newCompanyWithLogo(final String name) {
+        final CompanyEntity company = new CompanyEntity();
+        company.setName(name);
+        company.setLogo(new byte[]{1, 2, 3});
+        company.setLogoContentType("image/png");
+        return companyRepository.saveAndFlush(company);
+    }
+
     private ContactEntity newContact(final String firstName, final String lastName) {
         final ContactEntity contact = new ContactEntity();
         contact.setFirstName(firstName);
         contact.setLastName(lastName);
+        return contactRepository.saveAndFlush(contact);
+    }
+
+    private ContactEntity newContactWithPhoto(final String firstName, final String lastName) {
+        final ContactEntity contact = new ContactEntity();
+        contact.setFirstName(firstName);
+        contact.setLastName(lastName);
+        contact.setPhoto(new byte[]{4, 5, 6});
+        contact.setPhotoContentType("image/png");
         return contactRepository.saveAndFlush(contact);
     }
 
@@ -395,6 +413,126 @@ class UpdatesServiceTest {
 
         final List<UpdateEntryDto> result = updatesService.load(20);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void companyEventWithLogoSetsEntityHasLogoTrue() {
+        final CompanyEntity company = newCompanyWithLogo("Open Elements GmbH");
+        auditLogDataService.createEntry("CompanyDto", company.getId(), AuditAction.UPDATE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).entityHasLogo());
+        assertFalse(result.get(0).entityHasPhoto());
+    }
+
+    @Test
+    void companyEventWithoutLogoSetsEntityHasLogoFalse() {
+        final CompanyEntity company = newCompany("Acme");
+        auditLogDataService.createEntry("CompanyDto", company.getId(), AuditAction.UPDATE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertFalse(result.get(0).entityHasLogo());
+        assertFalse(result.get(0).entityHasPhoto());
+    }
+
+    @Test
+    void contactEventWithPhotoSetsEntityHasPhotoTrue() {
+        final ContactEntity contact = newContactWithPhoto("John", "Doe");
+        auditLogDataService.createEntry("ContactDto", contact.getId(), AuditAction.UPDATE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).entityHasPhoto());
+        assertFalse(result.get(0).entityHasLogo());
+    }
+
+    @Test
+    void contactEventWithoutPhotoSetsEntityHasPhotoFalse() {
+        final ContactEntity contact = newContact("Jane", "Doe");
+        auditLogDataService.createEntry("ContactDto", contact.getId(), AuditAction.UPDATE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertFalse(result.get(0).entityHasPhoto());
+        assertFalse(result.get(0).entityHasLogo());
+    }
+
+    @Test
+    void companyDeletedHasBothFlagsFalse() {
+        auditLogDataService.createEntry("CompanyDto", UUID.randomUUID(), AuditAction.DELETE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertFalse(result.get(0).entityHasLogo());
+        assertFalse(result.get(0).entityHasPhoto());
+    }
+
+    @Test
+    void contactDeletedHasBothFlagsFalse() {
+        auditLogDataService.createEntry("ContactDto", UUID.randomUUID(), AuditAction.DELETE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertFalse(result.get(0).entityHasLogo());
+        assertFalse(result.get(0).entityHasPhoto());
+    }
+
+    @Test
+    void companyCommentEventInheritsParentLogoFlag() {
+        final CompanyEntity company = newCompanyWithLogo("Open Elements GmbH");
+        auditLogDataService.createEntry("CompanyComment", company.getId(), AuditAction.INSERT, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).entityHasLogo());
+        assertFalse(result.get(0).entityHasPhoto());
+    }
+
+    @Test
+    void companyCommentDeletedKeepsParentLogoFlag() {
+        final CompanyEntity company = newCompanyWithLogo("Open Elements GmbH");
+        auditLogDataService.createEntry("CompanyComment", company.getId(), AuditAction.DELETE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertEquals(UpdateType.COMPANY_COMMENT_DELETED, result.get(0).type());
+        assertTrue(result.get(0).entityHasLogo());
+    }
+
+    @Test
+    void contactCommentEventInheritsParentPhotoFlag() {
+        final ContactEntity contact = newContactWithPhoto("Jane", "Doe");
+        auditLogDataService.createEntry("ContactComment", contact.getId(), AuditAction.INSERT, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).entityHasPhoto());
+        assertFalse(result.get(0).entityHasLogo());
+    }
+
+    @Test
+    void unresolvedEntityHasBothFlagsFalse() {
+        final UUID unknownId = UUID.randomUUID();
+        auditLogDataService.createEntry("CompanyDto", unknownId, AuditAction.UPDATE, alice);
+
+        final List<UpdateEntryDto> result = updatesService.load(20);
+
+        assertEquals(1, result.size());
+        assertEquals(unknownId, result.get(0).entityId());
+        assertNull(result.get(0).entityName());
+        assertFalse(result.get(0).entityHasLogo());
+        assertFalse(result.get(0).entityHasPhoto());
     }
 
     @Test

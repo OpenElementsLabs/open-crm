@@ -158,12 +158,16 @@ public class UpdatesService {
         }
 
         final Map<UUID, String> companyNames = new HashMap<>();
+        final Map<UUID, Boolean> companyHasLogo = new HashMap<>();
         for (final CompanyEntity c : companyRepository.findAllById(companyIds)) {
             companyNames.put(c.getId(), c.getName());
+            companyHasLogo.put(c.getId(), c.getLogo() != null);
         }
         final Map<UUID, String> contactNames = new HashMap<>();
+        final Map<UUID, Boolean> contactHasPhoto = new HashMap<>();
         for (final ContactEntity c : contactRepository.findAllById(contactIds)) {
             contactNames.put(c.getId(), buildContactDisplayName(c));
+            contactHasPhoto.put(c.getId(), c.getPhoto() != null);
         }
 
         final List<UpdateEntryDto> result = new ArrayList<>(entries.size());
@@ -171,9 +175,13 @@ public class UpdatesService {
             final UpdateType type = toUpdateType(e);
             final UUID entityId;
             final String entityName;
+            final boolean hasLogo;
+            final boolean hasPhoto;
             if (type == UpdateType.COMPANY_DELETED || type == UpdateType.CONTACT_DELETED) {
                 entityId = null;
                 entityName = null;
+                hasLogo = false;
+                hasPhoto = false;
             } else if (type == UpdateType.COMPANY_CREATED
                 || type == UpdateType.COMPANY_UPDATED
                 || type == UpdateType.COMPANY_COMMENT_CREATED
@@ -181,11 +189,16 @@ public class UpdatesService {
                 || type == UpdateType.COMPANY_COMMENT_DELETED) {
                 entityId = e.entityId();
                 entityName = companyNames.get(e.entityId());
+                hasLogo = Boolean.TRUE.equals(companyHasLogo.get(e.entityId()));
+                hasPhoto = false;
             } else {
                 entityId = e.entityId();
                 entityName = contactNames.get(e.entityId());
+                hasLogo = false;
+                hasPhoto = Boolean.TRUE.equals(contactHasPhoto.get(e.entityId()));
             }
-            result.add(new UpdateEntryDto(e.id(), type, entityId, entityName, e.user(), e.createdAt()));
+            result.add(new UpdateEntryDto(e.id(), type, entityId, entityName,
+                hasLogo, hasPhoto, e.user(), e.createdAt()));
         }
         return result;
     }
