@@ -39,6 +39,8 @@ const mockGetUpdates = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getUpdates: (...args: unknown[]) => mockGetUpdates(...args),
+  getCompanyLogoUrl: (id: string) => `/api/companies/${id}/logo`,
+  getContactPhotoUrl: (id: string) => `/api/contacts/${id}/photo`,
 }));
 
 function makeUser(overrides: Partial<UserDto> = {}): UserDto {
@@ -59,6 +61,8 @@ function makeEntry(overrides: Partial<UpdateEntryDto> = {}): UpdateEntryDto {
     type: "COMPANY_CREATED",
     entityId: "550e8400-e29b-41d4-a716-446655440000",
     entityName: "Open Elements GmbH",
+    entityHasLogo: false,
+    entityHasPhoto: false,
     user: makeUser(),
     createdAt: "2026-04-25T14:30:00Z",
     ...overrides,
@@ -326,6 +330,265 @@ describe("UpdatesClient", () => {
       const row = await screen.findByTestId("updates-row");
       expect(within(row).getByText(/New company/)).toBeInTheDocument();
       expect(within(row).getByText(/was created/)).toBeInTheDocument();
+    });
+  });
+
+  describe("leading entity image slot", () => {
+    it("renders the company logo image wrapped in an aria-hidden link when entityHasLogo is true", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_UPDATED",
+            entityId: "c-1",
+            entityName: "Acme",
+            entityHasLogo: true,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const logo = within(row).getByTestId("updates-row-company-logo");
+      expect(logo).toHaveAttribute("src", "/api/companies/c-1/logo");
+      expect(logo).toHaveAttribute("alt", "");
+      expect(logo).toHaveClass("h-8", "w-8");
+      const wrapper = logo.closest("a");
+      expect(wrapper).not.toBeNull();
+      expect(wrapper).toHaveAttribute("href", "/companies/c-1");
+      expect(wrapper).toHaveAttribute("aria-hidden", "true");
+      expect(wrapper).toHaveAttribute("tabIndex", "-1");
+    });
+
+    it("renders the Building2 placeholder when a company event has no logo", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_UPDATED",
+            entityId: "c-1",
+            entityName: "Acme",
+            entityHasLogo: false,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const placeholder = within(row).getByTestId("updates-row-company-placeholder");
+      expect(placeholder.tagName.toLowerCase()).toBe("svg");
+      expect(placeholder.closest("a")).toBeNull();
+    });
+
+    it("renders the contact photo wrapped in an aria-hidden link when entityHasPhoto is true", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "CONTACT_UPDATED",
+            entityId: "p-1",
+            entityName: "John Doe",
+            entityHasPhoto: true,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const photo = within(row).getByTestId("updates-row-contact-photo");
+      expect(photo).toHaveAttribute("src", "/api/contacts/p-1/photo");
+      expect(photo).toHaveClass("rounded-full");
+      const wrapper = photo.closest("a");
+      expect(wrapper).toHaveAttribute("href", "/contacts/p-1");
+      expect(wrapper).toHaveAttribute("aria-hidden", "true");
+      expect(wrapper).toHaveAttribute("tabIndex", "-1");
+    });
+
+    it("renders the UserIcon placeholder when a contact event has no photo", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "CONTACT_UPDATED",
+            entityId: "p-1",
+            entityName: "John Doe",
+            entityHasPhoto: false,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const placeholder = within(row).getByTestId("updates-row-contact-placeholder");
+      expect(placeholder.tagName.toLowerCase()).toBe("svg");
+      expect(placeholder.closest("a")).toBeNull();
+    });
+
+    it("uses the parent company logo for a COMPANY_COMMENT_CREATED row", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_COMMENT_CREATED",
+            entityId: "c-9",
+            entityName: "Open Elements GmbH",
+            entityHasLogo: true,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const logo = within(row).getByTestId("updates-row-company-logo");
+      expect(logo).toHaveAttribute("src", "/api/companies/c-9/logo");
+      expect(logo.closest("a")).toHaveAttribute("href", "/companies/c-9");
+    });
+
+    it("uses the parent contact photo for a CONTACT_COMMENT_CREATED row", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "CONTACT_COMMENT_CREATED",
+            entityId: "p-9",
+            entityName: "Jane Doe",
+            entityHasPhoto: true,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const photo = within(row).getByTestId("updates-row-contact-photo");
+      expect(photo).toHaveAttribute("src", "/api/contacts/p-9/photo");
+      expect(photo.closest("a")).toHaveAttribute("href", "/contacts/p-9");
+    });
+
+    it("renders a Trash2 icon for COMPANY_DELETED with no link", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_DELETED",
+            entityId: null,
+            entityName: null,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const trash = within(row).getByTestId("updates-row-deleted-icon");
+      expect(trash.tagName.toLowerCase()).toBe("svg");
+      expect(trash).toHaveAttribute("aria-hidden", "true");
+      expect(trash.closest("a")).toBeNull();
+    });
+
+    it("renders a Trash2 icon for CONTACT_DELETED with no link", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "CONTACT_DELETED",
+            entityId: null,
+            entityName: null,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const trash = within(row).getByTestId("updates-row-deleted-icon");
+      expect(trash).toBeInTheDocument();
+      expect(trash.closest("a")).toBeNull();
+    });
+
+    it("keeps the parent company logo for COMPANY_COMMENT_DELETED (not a Trash2 icon)", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_COMMENT_DELETED",
+            entityId: "c-9",
+            entityName: "Open Elements GmbH",
+            entityHasLogo: true,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      expect(within(row).queryByTestId("updates-row-deleted-icon")).toBeNull();
+      const logo = within(row).getByTestId("updates-row-company-logo");
+      expect(logo.closest("a")).toHaveAttribute("href", "/companies/c-9");
+    });
+  });
+
+  describe("entity name styling", () => {
+    it("renders the entity-name link as font-bold text-oe-blue when linkable", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_UPDATED",
+            entityId: "c-1",
+            entityName: "Acme",
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const link = within(row).getByRole("link", { name: "Acme" });
+      expect(link).toHaveClass("font-bold", "text-oe-blue");
+    });
+
+    it("renders the fallback dash as bold non-link when the entity cannot be resolved", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            type: "COMPANY_UPDATED",
+            entityId: null,
+            entityName: null,
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      expect(within(row).queryByRole("link")).toBeNull();
+      const dash = within(row).getByText("—");
+      expect(dash.tagName.toLowerCase()).toBe("span");
+      expect(dash).toHaveClass("font-bold");
+    });
+  });
+
+  describe("author avatar slot", () => {
+    it("renders an <img> with the avatarUrl when set", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({
+            user: makeUser({ avatarUrl: "https://example.com/avatar.png" }),
+          }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const avatar = within(row).getByTestId("updates-author-avatar");
+      expect(avatar).toHaveAttribute("src", "https://example.com/avatar.png");
+      expect(avatar).toHaveAttribute("alt", "");
+      expect(avatar).toHaveClass("h-5", "w-5", "rounded-full", "object-cover");
+      expect(within(row).queryByTestId("updates-author-avatar-fallback")).toBeNull();
+    });
+
+    it("renders a fallback circle with UserIcon when avatarUrl is null", async () => {
+      mockGetUpdates.mockResolvedValue(
+        makePage([
+          makeEntry({ user: makeUser({ avatarUrl: null }) }),
+        ]),
+      );
+      renderClient("en");
+      const row = await screen.findByTestId("updates-row");
+      const fallback = within(row).getByTestId("updates-author-avatar-fallback");
+      expect(fallback).toHaveClass("h-5", "w-5", "rounded-full", "bg-oe-gray-lightest");
+      expect(fallback).toHaveAttribute("aria-hidden", "true");
+      expect(within(row).queryByTestId("updates-author-avatar")).toBeNull();
+    });
+  });
+
+  describe("page-size label", () => {
+    it("uses updates.perPage as the combobox label (de)", async () => {
+      mockGetUpdates.mockResolvedValue(makePage([makeEntry()]));
+      renderClient("de");
+      await screen.findByTestId("updates-row");
+      expect(screen.getByText(de.updates.perPage)).toBeInTheDocument();
+      expect(screen.getByTestId("updates-page-size")).toHaveAttribute("aria-label", de.updates.perPage);
+    });
+
+    it("uses updates.perPage as the combobox label (en)", async () => {
+      mockGetUpdates.mockResolvedValue(makePage([makeEntry()]));
+      renderClient("en");
+      await screen.findByTestId("updates-row");
+      expect(screen.getByText(en.updates.perPage)).toBeInTheDocument();
     });
   });
 });

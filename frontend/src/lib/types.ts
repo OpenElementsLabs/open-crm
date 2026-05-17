@@ -192,6 +192,8 @@ export interface UpdateEntryDto {
   readonly type: UpdateType;
   readonly entityId: string | null;
   readonly entityName: string | null;
+  readonly entityHasLogo: boolean;
+  readonly entityHasPhoto: boolean;
   readonly user: UserDto;
   readonly createdAt: string;
 }
