@@ -1,0 +1,33 @@
+{
+  "name": "@open-elements/nextjs-app-layer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./server/next-auth.d": "./src/server/next-auth.d.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "@open-elements/ui": "^0.6.0",
+    "lucide-react": "^0.513.0",
+    "next": "^15.3.3",
+    "next-auth": "5.0.0-beta.30",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^29.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.2"
+  }
+}
