@@ -2,6 +2,7 @@ import { render, type RenderOptions } from "@testing-library/react";
 import { SessionProvider } from "next-auth/react";
 import { TooltipProvider, LanguageProvider } from "@open-elements/ui";
 import type { Language } from "@open-elements/ui";
+import { AppLayerTranslationProvider } from "@open-elements/nextjs-app-layer";
 import { translations } from "@/lib/i18n";
 import type { Session } from "next-auth";
 
@@ -30,7 +31,9 @@ function renderWithProviders(ui: React.ReactElement, options?: TestRenderOptions
     return (
       <SessionProvider session={session}>
         <TooltipProvider>
-          <LanguageProvider translations={translations} defaultLanguage={language}>{children}</LanguageProvider>
+          <LanguageProvider translations={translations} defaultLanguage={language}>
+            <AppLayerTranslationProvider>{children}</AppLayerTranslationProvider>
+          </LanguageProvider>
         </TooltipProvider>
       </SessionProvider>
     );

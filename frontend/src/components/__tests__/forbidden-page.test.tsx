@@ -16,7 +16,7 @@ describe("ForbiddenPage", () => {
     expect(screen.getByText(de.errors.forbidden.title)).toBeInTheDocument();
     expect(screen.getByText(de.errors.forbidden.description)).toBeInTheDocument();
     const backLink = screen.getByRole("link", { name: de.errors.forbidden.backToHome });
-    expect(backLink).toHaveAttribute("href", "/companies");
+    expect(backLink).toHaveAttribute("href", "/");
   });
 
   it("renders English translations when language is en", () => {
