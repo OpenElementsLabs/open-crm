@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Lato } from "next/font/google";
 import { SessionProvider } from "@/components/session-provider";
 import { LanguageProvider } from "@open-elements/ui";
+import { AppLayerTranslationProvider, ApiClientProvider } from "@open-elements/nextjs-app-layer";
 import { translations } from "@/lib/i18n";
 import "./globals.css";
 
@@ -29,7 +30,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="antialiased">
         <SessionProvider>
           <LanguageProvider translations={translations}>
-            {children}
+            <AppLayerTranslationProvider>
+              <ApiClientProvider>
+                {children}
+              </ApiClientProvider>
+            </AppLayerTranslationProvider>
           </LanguageProvider>
         </SessionProvider>
       </body>
