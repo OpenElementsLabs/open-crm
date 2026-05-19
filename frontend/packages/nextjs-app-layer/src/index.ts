@@ -45,6 +45,9 @@ export { createWebhooksPage } from "./pages/webhooks/page";
 export { WebhooksClient } from "./pages/webhooks/webhooks-client";
 export { webhooksPageMeta } from "./pages/webhooks/meta";
 
+export { createLoginPage } from "./pages/login/page";
+export { LoginClient } from "./pages/login/login-client";
+
 export type {
   Page,
   UserDto,
