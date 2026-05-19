@@ -12,8 +12,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@open-elements/nextjs-app-layer':
-        specifier: workspace:*
-        version: link:packages/nextjs-app-layer
+        specifier: ^0.1.0
+        version: 0.1.0(@open-elements/ui@0.6.0(@base-ui/react@1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@floating-ui/dom@1.7.6)(@tiptap/extensions@3.22.5(@tiptap/core@3.22.5(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@0.513.0(react@19.2.4))(radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(lucide-react@0.513.0(react@19.2.4))(next-auth@5.0.0-beta.30(next@15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(next@15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@open-elements/ui':
         specifier: ^0.6.0
         version: 0.6.0(@base-ui/react@1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@floating-ui/dom@1.7.6)(@tiptap/extensions@3.22.5(@tiptap/core@3.22.5(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@0.513.0(react@19.2.4))(radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -81,52 +81,6 @@ importers:
       tailwindcss:
         specifier: ^4.1.8
         version: 4.2.2
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
-      vitest:
-        specifier: ^4.1.2
-        version: 4.1.2(@types/node@22.19.15)(jsdom@29.0.1)(vite@8.0.3(@types/node@22.19.15)(jiti@2.6.1))
-
-  packages/nextjs-app-layer:
-    dependencies:
-      '@open-elements/ui':
-        specifier: ^0.6.0
-        version: 0.6.0(@base-ui/react@1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@floating-ui/dom@1.7.6)(@tiptap/extensions@3.22.5(@tiptap/core@3.22.5(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@0.513.0(react@19.2.4))(radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      lucide-react:
-        specifier: ^0.513.0
-        version: 0.513.0(react@19.2.4)
-      next:
-        specifier: ^15.3.3
-        version: 15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      next-auth:
-        specifier: 5.0.0-beta.30
-        version: 5.0.0-beta.30(next@15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
-      react:
-        specifier: ^19.1.0
-        version: 19.2.4
-      react-dom:
-        specifier: ^19.1.0
-        version: 19.2.4(react@19.2.4)
-    devDependencies:
-      '@testing-library/jest-dom':
-        specifier: ^6.9.1
-        version: 6.9.1
-      '@testing-library/react':
-        specifier: ^16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@types/react':
-        specifier: ^19.1.6
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.1.5
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: ^6.0.1
-        version: 6.0.1(vite@8.0.3(@types/node@22.19.15)(jiti@2.6.1))
-      jsdom:
-        specifier: ^29.0.1
-        version: 29.0.1
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -579,6 +533,16 @@ packages:
   '@nolyfill/is-core-module@1.0.39':
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
+
+  '@open-elements/nextjs-app-layer@0.1.0':
+    resolution: {integrity: sha512-+LuivV5/Zaj6N+zaHb5F4i9LhQm8f6iTv4PKQnLTLXXLOAq/M+j2eORBdf3xRZxXU0lPh/eVWad69l5a8JKQwQ==}
+    peerDependencies:
+      '@open-elements/ui': ^0.6.0
+      lucide-react: ^0.500.0
+      next: ^15.3.0
+      next-auth: 5.0.0-beta.30
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   '@open-elements/ui@0.6.0':
     resolution: {integrity: sha512-E9OrzU2+Zvsrak8a/N7efPM/FFtQRp5X0fOHdxJnx4QJyAqC/QgW+7oJT56tXqzBuLrjLlKBHCS6x2TKNnmdXw==}
@@ -4041,6 +4005,15 @@ snapshots:
       fastq: 1.20.1
 
   '@nolyfill/is-core-module@1.0.39': {}
+
+  '@open-elements/nextjs-app-layer@0.1.0(@open-elements/ui@0.6.0(@base-ui/react@1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@floating-ui/dom@1.7.6)(@tiptap/extensions@3.22.5(@tiptap/core@3.22.5(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@0.513.0(react@19.2.4))(radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(lucide-react@0.513.0(react@19.2.4))(next-auth@5.0.0-beta.30(next@15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4))(next@15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@open-elements/ui': 0.6.0(@base-ui/react@1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@floating-ui/dom@1.7.6)(@tiptap/extensions@3.22.5(@tiptap/core@3.22.5(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@0.513.0(react@19.2.4))(radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      lucide-react: 0.513.0(react@19.2.4)
+      next: 15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next-auth: 5.0.0-beta.30(next@15.5.14(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@open-elements/ui@0.6.0(@base-ui/react@1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@floating-ui/dom@1.7.6)(@tiptap/extensions@3.22.5(@tiptap/core@3.22.5(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5))(@tiptap/pm@3.22.5)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@0.513.0(react@19.2.4))(radix-ui@1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
