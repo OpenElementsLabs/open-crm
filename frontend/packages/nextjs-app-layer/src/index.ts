@@ -48,6 +48,8 @@ export { webhooksPageMeta } from "./pages/webhooks/meta";
 export { createLoginPage } from "./pages/login/page";
 export { LoginClient } from "./pages/login/login-client";
 
+export { OERootLayout } from "./layout/root-layout";
+
 export type {
   Page,
   UserDto,
