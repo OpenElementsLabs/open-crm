@@ -5,6 +5,13 @@
 export { ROLE_ADMIN, ROLE_IT_ADMIN, hasRole } from "./lib/roles";
 export { ForbiddenError } from "./lib/forbidden-error";
 
+export {
+  AppLayerTranslationProvider,
+  useAppLayerTranslations,
+  appLayerTranslations,
+} from "./translations/provider";
+export type { AppLayerTranslations } from "./translations/provider";
+
 export type {
   Page,
   UserDto,
