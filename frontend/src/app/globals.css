@@ -1,7 +1,7 @@
 @import "@open-elements/ui/styles/brand.css";
 @import "tailwindcss";
 @source "../../node_modules/@open-elements/ui/src";
-@source "../../packages/nextjs-app-layer/src/**/*.{ts,tsx}";
+@source "../../node_modules/@open-elements/nextjs-app-layer/src";
 
 body {
   font-family: var(--font-body);
