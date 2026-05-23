@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.openelements.crm.AbstractDbTest;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
 import com.openelements.crm.contact.ContactEntity;
@@ -20,13 +21,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class UpdatesServiceTest {
+class UpdatesServiceTest extends AbstractDbTest {
 
     @Autowired
     private UpdatesService updatesService;
@@ -55,14 +52,6 @@ class UpdatesServiceTest {
         seedSystemUser();
         alice = ensureUser("alice", "Alice");
         bob = ensureUser("bob", "Bob");
-    }
-
-    private void seedSystemUser() {
-        if (userRepository.findBySub(SystemUser.SUB).isEmpty()) {
-            jdbcTemplate.update(
-                "INSERT INTO users (id, sub, name, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-                SystemUser.ID, SystemUser.SUB, SystemUser.NAME);
-        }
     }
 
     private UserEntity ensureUser(final String sub, final String name) {
