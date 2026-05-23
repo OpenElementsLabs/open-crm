@@ -11,22 +11,9 @@ The contact list should fully synchronize URL parameters with the filter UI:
 **Context:** Deferred from spec 009 (contact-company cross-navigation). Currently, only `companyId` is read from the URL
 on initial load, and the filter dropdown does not reflect the URL-driven filter value.
 
-## H2 Tests: Switch to Flyway + validate
-
-Switch H2-based tests from `ddl-auto: create-drop` (Flyway disabled) to Flyway-managed schema creation with
-`ddl-auto: validate`. This would catch migration/entity mismatches without needing Testcontainers. Requires adding
-`flyway-database-h2` as a test dependency. All 5 existing migrations are H2-compatible.
-
-**Context:** Identified during the grill session for Spec 018. Prerequisite: Spec 018 (component tests) should be
-completed first.
-
-## Testcontainers Integration Tests
-
-Add Testcontainers-based integration tests that run against a real PostgreSQL database via a separate Spring profile.
-This catches PostgreSQL-specific issues that H2 cannot reproduce.
-
-**Context:** Identified during the grill sessions for Spec 017 and 018. Prerequisite: H2 Flyway + validate switch should
-be done first.
+_Note: the two previous test-infrastructure TODO entries ("H2 Tests: Switch to Flyway + validate" and
+"Testcontainers Integration Tests") have been consolidated into **Spec 103 — Tests on Postgres via Testcontainers**.
+See `specs/103-tests-postgres-testcontainers/`._
 
 ## Company Duplicate Merging
 
@@ -44,6 +31,53 @@ are part of the initial implementation — these integration tests go beyond tha
 
 **Context:** Identified during the grill session for Spec 075 (Webhook Support). Prerequisite: Spec 075 must be
 implemented first.
+
+## Cmd-K-Shortcut für globale Suche
+
+Add a `Cmd+K` / `Ctrl+K` keyboard shortcut that opens the global search from anywhere in the app — either as
+a fast-path navigation to the `/search` view or as an in-place command palette overlay. The decision between
+the two UX variants is part of this future spec.
+
+**Context:** Deferred from the Meilisearch global search initiative (see `meilisearch.md`). v1 ships only the
+dedicated `/search` view with sidebar menu entry; the keyboard shortcut is a separate later spec.
+
+**Prerequisite:** Meilisearch global search v1 must ship first (third of the three currently planned spec
+initiatives — see `meilisearch.md`).
+
+## Synchroner Fan-Out für Company- und Tag-Umbenennungen in der globalen Suche
+
+Add listeners on `OnObjectUpdate<CompanyDto>` and `OnObjectUpdate<TagDto>` (plus the corresponding delete events)
+that immediately re-index all affected contact documents in Meilisearch via a batch
+`POST /indexes/crm_contacts/documents`. This eliminates the stale `companyName` / `tagNames` values in contact
+search results between renames and the next backend restart.
+
+v1 of the global search deliberately ships without this — renames are rare, deploys happen regularly, and the
+auto-bootstrap on startup repairs the staleness. Implement this hardening only once operational data shows the
+staleness actually bothers users (e.g. complaints, support tickets, missed search hits after a rename).
+
+**Context:** Deferred from the Meilisearch global search initiative (see `meilisearch.md` § 6.3). v1 uses
+defer-to-reindex; this entry tracks the synchronous fan-out as the later hardening so it does not get lost.
+
+**Prerequisite:** Meilisearch global search v1 must ship first (third of the three currently planned spec
+initiatives — see `meilisearch.md`).
+
+## Auslagerung der globalen Suche in die Open-Elements-Libs
+
+Move the reusable parts of the global search stack out of `open-crm` and into the shared libraries, so other
+Open-Elements applications can adopt the same pattern with minimal code:
+
+- **Backend** (`spring-services`): `MeilisearchClient`, the `SearchIndexEventListener` pattern based on
+  `GenericDataEvent`, `SearchSettingsConfigurer`, and a generic indexer framework where each application only
+  contributes a mapping function and the index settings per entity type.
+- **Frontend** (`@open-elements/ui` / `@open-elements/nextjs-app-layer`): the `/search` page shell, the
+  grouped-results component, the highlight renderer, and the sidebar menu entry as prop-driven, reusable parts.
+
+**Context:** Deferred from the Meilisearch global search initiative (see `meilisearch.md`). v1 keeps everything
+local to `open-crm` to keep the initial scope manageable. Extraction happens once the implementation has settled
+and the abstraction boundary is clear.
+
+**Prerequisite:** Meilisearch global search v1 must ship first (third of the three currently planned spec
+initiatives — see `meilisearch.md`).
 
 ## GDPR-Abdeckung für Updates-View (Mitarbeiter-Aktivitätstransparenz)
 
@@ -66,6 +100,67 @@ werden.
 
 Das Backjend kann dann darauf zugreifen und im Frontend kann man im Admin Bereich funktionen zum triggern von Backups
 und den Download des letzten backups bereitstellen.
+
+## HEIC- und WebP-Support für Company-Logos
+
+Extend the company-logo upload pipeline (`CompanyController.uploadLogo` / `CompanyService.updateLogo` via
+`ImageData.of(file)`) to also accept HEIC and WebP uploads, transcoded to JPEG. Spec 102 deliberately ships
+HEIC/WebP only for contact photos because the logo pipeline uses a different code path (`ImageData.of` helper
+instead of manual content-type handling in the service) and bundling the change would have inflated spec 102's
+scope.
+
+Result is an inconsistent v1 UX: a user uploading their company logo from an iPhone (HEIC) sees an
+"invalid format" error, even though uploading their own contact photo from the same iPhone works. This
+TODO closes that gap. As part of the work, consider extracting the transcode logic from
+`ContactPhotoTranscoder` into a shared helper so both pipelines share one source of truth instead of
+diverging.
+
+**Context:** Deferred from spec 102 (HEIC & WebP image format support). The decision to defer was a
+scope-vs-consistency trade-off; logo uploads are far less frequent than contact-photo uploads, so the
+inconsistency is bearable until this spec lands.
+
+**Prerequisite:** Spec 102 (HEIC & WebP image format support) must be merged.
+
+## HEIC-Support-Status im Admin-Bereich anzeigen
+
+Add a visual indicator in the admin section showing whether HEIC decoding is currently available
+(i.e. whether `libheif` / `libheif-plugin-libde265` are present in the running container). Surfaces the
+result of the `HeicSupportCheck` bean so operators detect at a glance after a deploy whether the native
+dependency shipped correctly — without having to read startup logs.
+
+Suggested UX: a small status row in the existing admin/status page (similar to the DB / Brevo health
+panels), with a green check if `heicAvailable == true` and a red warning with tooltip ("HEIC uploads will
+be rejected with 415 — check Dockerfile") if false. Could later be expanded into a generic
+"optional-features" status panel for similar runtime-detected capabilities (WebP, PDF rendering, ...).
+
+**Context:** Deferred from spec 102 (HEIC & WebP image format support). v1 ships with logs-only detection
+— the visual admin indicator is the operational hardening so silent deploy regressions (forgotten
+`libheif` install, base-image update stripping the package) are caught immediately rather than only when
+the first user hits a 415.
+
+**Prerequisite:** Spec 102 (HEIC & WebP image format support) must be merged.
+
+## HEIC- und WebP-Testfixtures bereitstellen + Tests aktivieren
+
+Provide real-world binary test fixtures for the HEIC/WebP image upload tests added in spec 102, then remove the
+`@Disabled` annotations on those tests. Required artifacts under `backend/src/test/resources/contact-photo/`:
+
+- A tiny opaque HEIC sample (a few KB, ideally a real iPhone HEIC, not a renamed JPEG).
+- `heic-probe/sample.heic` — a deliberately tiny HEIC (< 1 KB) bundled into the production JAR for the startup
+  `HeicSupportCheck` probe (see TODO entry "HEIC & WebP → JPEG Conversion in Java" below, section 2.).
+- A small WebP (lossy, opaque).
+- A small WebP (lossless, with alpha channel) to exercise the white-background flatten path.
+- Oversized fixtures (> 2 MB) of each type to exercise the size-cap rejection — can be produced by upscaling
+  the small fixtures.
+
+Generation tools: `heif-enc` (libheif), `cwebp` (Google libwebp).
+
+**Context:** Deferred from spec 102 (HEIC & WebP image format support). The spec ships with the test code in
+place but `@Disabled` — the binary fixtures are produced separately so the implementation can land without being
+blocked on artifact production. Implementation correctness is verified manually during spec 102; the disabled
+tests become the safety net once fixtures are provided.
+
+**Prerequisite:** Spec 102 (HEIC & WebP image format support) must be merged.
 
 # HEIC & WebP → JPEG Conversion in Java (ImageIO + Docker)
 
@@ -481,3 +576,11 @@ use **bytedeco `libheif-platform`** instead of NightMonkeys for HEIC. It ships t
 precompiled native library inside the JAR (per-platform), so no `apt-get`/`apk`
 is needed — at the cost of a larger JAR and a less elegant API than standard
 ImageIO.
+
+**Context:** Extension of the existing contact-photo upload pipeline (specs 013, 017, 101). Currently the
+backend accepts JPEG and PNG; HEIC (iPhone) and WebP (modern browsers) uploads fail. The entry above is the
+technical reference for the future spec that adds these formats.
+
+**Prerequisite:** none — this is self-contained and can start immediately. Recommended as the **first** of the
+three currently planned spec initiatives (image formats → test migration → Meilisearch), because it has the
+smallest scope, the highest user-visible value per effort, and blocks no other work.
