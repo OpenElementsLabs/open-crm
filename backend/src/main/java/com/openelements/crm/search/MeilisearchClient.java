@@ -112,7 +112,11 @@ public class MeilisearchClient {
         }
     }
 
-    /** Ensures the named index exists. Idempotent — 200 or 202 on duplicate. */
+    /**
+     * Ensures the named index exists. Idempotent: Meilisearch returns 202
+     * on first creation and 4xx ({@code index_already_exists}) on duplicate;
+     * the latter is swallowed so this is safe to call on every startup.
+     */
     public void ensureIndex(final String indexUid, final String primaryKey) {
         try {
             final String body = objectMapper.writeValueAsString(Map.of(
@@ -121,9 +125,14 @@ public class MeilisearchClient {
             exchange(restClient.post().uri("/indexes").body(body), JsonNode.class);
         } catch (final IOException e) {
             throw new IllegalStateException("Failed to encode ensureIndex body", e);
+        } catch (final MeilisearchException e) {
+            // Duplicate-index errors are expected on restart — we already
+            // checked the body is well-formed, so anything else is "exists".
+            if (!e.getMessage().contains("index_already_exists")
+                && !e.getMessage().contains("already exists")) {
+                throw e;
+            }
         }
-        // Meilisearch returns 4xx if the index already exists; the exchange()
-        // wrapper does not throw on those because we don't really care.
     }
 
     /** Polls {@code GET /tasks/{id}} until the task reaches a terminal state or the timeout elapses. */
@@ -134,6 +143,37 @@ public class MeilisearchClient {
             final JsonNode task = exchange(
                 restClient.get().uri("/tasks/{id}", taskUid), JsonNode.class);
             final String status = task.path("status").asText();
+            if ("succeeded".equals(status)) {
+                return TaskOutcome.SUCCEEDED;
+            }
+            if ("failed".equals(status) || "canceled".equals(status)) {
+                return TaskOutcome.FAILED;
+            }
+            try {
+                Thread.sleep(backoffMs);
+            } catch (final InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return TaskOutcome.FAILED;
+            }
+            backoffMs = Math.min(backoffMs * 2, 250L);
+        }
+        return TaskOutcome.TIMED_OUT;
+    }
+
+    /**
+     * Polls {@code GET /tasks?limit=1} until the most recent task globally
+     * reaches a terminal state (succeeded / failed / canceled), or the
+     * timeout elapses. Used by integration tests to wait for the indexer
+     * to settle after an event-driven write.
+     */
+    public TaskOutcome waitForLatestTask(final Duration timeout) {
+        final long deadline = System.nanoTime() + timeout.toNanos();
+        long backoffMs = 25L;
+        while (System.nanoTime() < deadline) {
+            final JsonNode response = exchange(
+                restClient.get().uri("/tasks?limit=1"), JsonNode.class);
+            final JsonNode latest = response.path("results").path(0);
+            final String status = latest.path("status").asText("");
             if ("succeeded".equals(status)) {
                 return TaskOutcome.SUCCEEDED;
             }

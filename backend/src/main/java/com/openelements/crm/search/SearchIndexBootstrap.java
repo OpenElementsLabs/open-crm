@@ -136,7 +136,12 @@ public class SearchIndexBootstrap implements ApplicationRunner {
         final int n = batch.size();
         final long taskUid = client.addDocuments(indexUid, List.copyOf(batch));
         batch.clear();
-        client.waitForTask(taskUid, TASK_WAIT);
+        final MeilisearchClient.TaskOutcome outcome = client.waitForTask(taskUid, TASK_WAIT);
+        if (outcome != MeilisearchClient.TaskOutcome.SUCCEEDED) {
+            log.warn("Meilisearch addDocuments task {} for {} ended with status {} — "
+                + "batch of {} documents may not be searchable until next restart.",
+                taskUid, indexUid, outcome, n);
+        }
         return n;
     }
 

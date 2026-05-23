@@ -12,8 +12,7 @@ public record MeilisearchProperties(
     String host,
     String masterKey,
     String indexPrefix,
-    Duration requestTimeout,
-    Sync sync) {
+    Duration requestTimeout) {
 
     public MeilisearchProperties {
         if (host == null || host.isBlank()) {
@@ -24,9 +23,6 @@ public record MeilisearchProperties(
         }
         if (requestTimeout == null) {
             requestTimeout = Duration.ofSeconds(5);
-        }
-        if (sync == null) {
-            sync = new Sync(true, 3);
         }
     }
 
@@ -44,8 +40,5 @@ public record MeilisearchProperties(
 
     public String commentsIndex() {
         return indexPrefix + "comments";
-    }
-
-    public record Sync(boolean enabled, int retryAttempts) {
     }
 }

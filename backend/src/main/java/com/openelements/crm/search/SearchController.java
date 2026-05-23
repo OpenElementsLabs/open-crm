@@ -38,6 +38,16 @@ public class SearchController {
     private static final int MAX_LIMIT = 20;
     private static final int RETRY_AFTER_SECONDS = 30;
 
+    // Private-use Unicode marks so we can detect Meilisearch's highlight
+    // boundary inside otherwise HTML-escaped text. Meilisearch returns the
+    // _formatted field as raw text with the configured pre/post tags around
+    // matched fragments — if we left those as "<em>" / "</em>" the field
+    // would mix unescaped HTML with user-typed text (XSS vector). Instead
+    // we configure Meilisearch to emit these markers, escape the whole
+    // string defensively, then replace the markers with literal <em> tags.
+    static final String PRE_MARK = "";
+    static final String POST_MARK = "";
+
     private final MeilisearchClient client;
     private final MeilisearchProperties props;
     private final SearchIndexState state;
@@ -74,7 +84,6 @@ public class SearchController {
         if (query.length() < MIN_QUERY_LENGTH) {
             return ResponseEntity.ok(GlobalSearchResultDto.empty(query));
         }
-        final int effectiveLimit = Math.max(1, Math.min(limit, MAX_LIMIT == 0 ? DEFAULT_LIMIT : MAX_LIMIT));
         final int sectionLimit = limit <= 0 ? DEFAULT_LIMIT : Math.min(limit, MAX_LIMIT);
 
         final JsonNode response = client.multiSearch(Map.of("queries", List.of(
@@ -90,13 +99,10 @@ public class SearchController {
 
         final GlobalSearchResultDto result = new GlobalSearchResultDto(
             query,
-            extractHits(response, 0, this::companyHit),
-            extractHits(response, 1, this::contactHit),
-            extractHits(response, 2, this::tagHit),
-            extractHits(response, 3, this::commentHit));
-        // Suppress unused warning on `effectiveLimit` while keeping the
-        // server-cap parameter expressive — the cap is `sectionLimit`.
-        assert effectiveLimit > 0;
+            extractHits(response, props.companiesIndex(), this::companyHit),
+            extractHits(response, props.contactsIndex(), this::contactHit),
+            extractHits(response, props.tagsIndex(), this::tagHit),
+            extractHits(response, props.commentsIndex(), this::commentHit));
         return ResponseEntity.ok(result);
     }
 
@@ -108,16 +114,52 @@ public class SearchController {
             "indexUid", indexUid,
             "q", q,
             "limit", limit,
-            "attributesToHighlight", highlightAttrs);
+            "attributesToHighlight", highlightAttrs,
+            "highlightPreTag", PRE_MARK,
+            "highlightPostTag", POST_MARK);
     }
 
-    private List<SearchHitDto> extractHits(final JsonNode response, final int sectionIndex,
+    /**
+     * Escapes HTML special characters in user-typed text, then turns the
+     * Meilisearch boundary markers back into {@code <em>} / {@code </em>}.
+     * The result is safe to render with {@code dangerouslySetInnerHTML}.
+     */
+    static String safeHighlight(final String raw) {
+        if (raw == null) {
+            return "";
+        }
+        final String escaped = raw
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#39;");
+        return escaped.replace(PRE_MARK, "<em>").replace(POST_MARK, "</em>");
+    }
+
+    /**
+     * Pulls hits for a specific index from the multi-search response by
+     * matching {@code indexUid} rather than relying on positional order —
+     * Meilisearch may reorder errored sections, so positional access is
+     * brittle.
+     */
+    private List<SearchHitDto> extractHits(final JsonNode response, final String indexUid,
                                            final HitMapper mapper) {
         final JsonNode results = response.path("results");
-        if (!results.isArray() || sectionIndex >= results.size()) {
+        if (!results.isArray()) {
             return List.of();
         }
-        final JsonNode hits = results.get(sectionIndex).path("hits");
+        JsonNode section = null;
+        for (final JsonNode r : results) {
+            if (indexUid.equals(r.path("indexUid").asText())) {
+                section = r;
+                break;
+            }
+        }
+        if (section == null) {
+            return List.of();
+        }
+        final JsonNode hits = section.path("hits");
         if (!hits.isArray()) {
             return List.of();
         }
@@ -137,7 +179,7 @@ public class SearchController {
             return null;
         }
         final String name = hit.path("name").asText("");
-        final String highlight = hit.path("_formatted").path("name").asText(name);
+        final String highlight = safeHighlight(hit.path("_formatted").path("name").asText(name));
         final String snippet = hit.path("email").asText("");
         return new SearchHitDto(id, name, snippet, highlight, scoreOf(hit), null, null);
     }
@@ -151,8 +193,8 @@ public class SearchController {
         final String last = hit.path("lastName").asText("");
         final String label = (first + " " + last).trim();
         final JsonNode fmt = hit.path("_formatted");
-        final String highlightFirst = fmt.path("firstName").asText(first);
-        final String highlightLast = fmt.path("lastName").asText(last);
+        final String highlightFirst = safeHighlight(fmt.path("firstName").asText(first));
+        final String highlightLast = safeHighlight(fmt.path("lastName").asText(last));
         final String highlight = (highlightFirst + " " + highlightLast).trim();
         final String snippet = hit.path("email").asText("");
         return new SearchHitDto(id, label, snippet, highlight, scoreOf(hit), null, null);
@@ -164,7 +206,7 @@ public class SearchController {
             return null;
         }
         final String name = hit.path("name").asText("");
-        final String highlight = hit.path("_formatted").path("name").asText(name);
+        final String highlight = safeHighlight(hit.path("_formatted").path("name").asText(name));
         final String snippet = hit.path("description").asText("");
         return new SearchHitDto(id, name, snippet, highlight, scoreOf(hit), null, null);
     }
@@ -175,7 +217,7 @@ public class SearchController {
             return null;
         }
         final String text = hit.path("text").asText("");
-        final String highlight = hit.path("_formatted").path("text").asText(text);
+        final String highlight = safeHighlight(hit.path("_formatted").path("text").asText(text));
         final String ownerType = hit.path("ownerType").asText(null);
         final String ownerIdStr = hit.path("ownerId").asText(null);
         UUID ownerId = null;

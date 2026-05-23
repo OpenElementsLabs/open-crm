@@ -33,21 +33,14 @@ public class SearchIndexEventListener {
     private static final Logger log = LoggerFactory.getLogger(SearchIndexEventListener.class);
 
     private final SearchIndexService indexService;
-    private final SearchIndexState state;
 
-    public SearchIndexEventListener(final SearchIndexService indexService,
-                                    final SearchIndexState state) {
+    public SearchIndexEventListener(final SearchIndexService indexService) {
         this.indexService = indexService;
-        this.state = state;
     }
 
     @Async("searchIndexExecutor")
     @EventListener
     public void onObjectCreate(final OnObjectCreate<?> event) {
-        if (state.isBootstrapping()) {
-            // The bootstrap will pick this up; skipping avoids racing with it.
-            return;
-        }
         try {
             dispatchUpsert(event);
         } catch (final RuntimeException e) {
@@ -59,9 +52,6 @@ public class SearchIndexEventListener {
     @Async("searchIndexExecutor")
     @EventListener
     public void onObjectUpdate(final OnObjectUpdate<?> event) {
-        if (state.isBootstrapping()) {
-            return;
-        }
         try {
             dispatchUpsert(event);
         } catch (final RuntimeException e) {
@@ -73,9 +63,6 @@ public class SearchIndexEventListener {
     @Async("searchIndexExecutor")
     @EventListener
     public void onObjectDelete(final OnObjectDelete<?> event) {
-        if (state.isBootstrapping()) {
-            return;
-        }
         try {
             final Class<?> type = event.getType();
             if (CompanyDto.class.isAssignableFrom(type)) {

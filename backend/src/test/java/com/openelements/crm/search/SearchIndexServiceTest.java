@@ -39,7 +39,7 @@ class SearchIndexServiceTest {
     void setUp() {
         final MeilisearchClient client = Mockito.mock(MeilisearchClient.class);
         final MeilisearchProperties props =
-            new MeilisearchProperties("http://localhost:7700", "k", "crm_", null, null);
+            new MeilisearchProperties("http://localhost:7700", "k", "crm_", null);
         tagRepository = Mockito.mock(TagRepository.class);
         companyRepository = Mockito.mock(CompanyRepository.class);
         contactRepository = Mockito.mock(ContactRepository.class);

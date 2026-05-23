@@ -110,11 +110,48 @@ class SearchIntegrationTest extends AbstractSearchTest {
         assertNotNull(created.id());
 
         waitForIndex();
-        waitForIndex();
 
         mockMvc.perform(asUser(get("/api/search").param("q", "Hendrik")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.contacts").isArray());
+            .andExpect(jsonPath("$.contacts.length()").value(1))
+            .andExpect(jsonPath("$.contacts[0].id").value(created.id().toString()))
+            .andExpect(jsonPath("$.contacts[0].label").value("Hendrik Ebbers"));
+    }
+
+    @Test
+    void typoToleranceFindsContactWithMisspelledQuery() throws Exception {
+        contactService.save(new ContactDto(
+            null, null, "Hendrik", "Ebbers", "hendrik@example.com",
+            "Founder", null, List.of(), null, null, null, null,
+            0L, false, null, false, false, null, List.of(),
+            Instant.now(), Instant.now()));
+
+        waitForIndex();
+
+        // "hendirk" → should find "Hendrik" via Meilisearch's default typo tolerance.
+        mockMvc.perform(asUser(get("/api/search").param("q", "hendirk")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.contacts.length()").value(1))
+            .andExpect(jsonPath("$.contacts[0].label").value("Hendrik Ebbers"));
+    }
+
+    @Test
+    void deletedContactDisappearsFromSearch() throws Exception {
+        final ContactDto created = contactService.save(new ContactDto(
+            null, null, "Zenith", "Disappear", "zenith@example.com",
+            null, null, List.of(), null, null, null, null,
+            0L, false, null, false, false, null, List.of(),
+            Instant.now(), Instant.now()));
+        waitForIndex();
+
+        mockMvc.perform(asUser(get("/api/search").param("q", "Zenith")))
+            .andExpect(jsonPath("$.contacts.length()").value(1));
+
+        contactService.delete(created.id());
+        waitForIndex();
+
+        mockMvc.perform(asUser(get("/api/search").param("q", "Zenith")))
+            .andExpect(jsonPath("$.contacts.length()").value(0));
     }
 
     @Test
@@ -140,10 +177,38 @@ class SearchIntegrationTest extends AbstractSearchTest {
         assertNotNull(created.id());
 
         waitForIndex();
-        waitForIndex();
 
         mockMvc.perform(asUser(get("/api/search").param("q", "Open")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.companies").isArray());
+            .andExpect(jsonPath("$.companies.length()").value(1))
+            .andExpect(jsonPath("$.companies[0].id").value(created.id().toString()))
+            .andExpect(jsonPath("$.companies[0].label").value("Open Elements GmbH"))
+            // The highlight is HTML-safe — must contain literal <em> around the match,
+            // not raw markup. Asserts the XSS-safe wrapping path.
+            .andExpect(jsonPath("$.companies[0].highlight",
+                org.hamcrest.Matchers.containsString("<em>Open</em>")));
+    }
+
+    @Test
+    void htmlSpecialCharsInCompanyNameAreEscapedInHighlight() throws Exception {
+        // A company named with HTML-like text must not produce raw markup
+        // in the highlight (XSS guard regression test).
+        final CompanyDto created = companyService.save(new CompanyDto(
+            null, "<script>alert(1)</script> Co", null, null,
+            null, null, null, null, null, null, null, null, null, null, null,
+            false, false, 0L, 0L, List.of(),
+            Instant.now(), Instant.now()));
+        waitForIndex();
+
+        mockMvc.perform(asUser(get("/api/search").param("q", "script")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.companies.length()").value(1))
+            .andExpect(jsonPath("$.companies[0].id").value(created.id().toString()))
+            // Highlight must never contain a literal "<script>" — only the
+            // escaped form "&lt;script&gt;".
+            .andExpect(jsonPath("$.companies[0].highlight",
+                org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("<script>"))))
+            .andExpect(jsonPath("$.companies[0].highlight",
+                org.hamcrest.Matchers.containsString("&lt;script&gt;")));
     }
 }

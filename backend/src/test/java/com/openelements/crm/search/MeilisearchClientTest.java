@@ -31,7 +31,7 @@ class MeilisearchClientTest {
         server = new MockWebServer();
         server.start();
         final MeilisearchProperties props = new MeilisearchProperties(
-            server.url("/").toString(), "master-key", "crm_", null, null);
+            server.url("/").toString(), "master-key", "crm_", null);
         client = new MeilisearchClient(props, new ObjectMapper());
     }
 

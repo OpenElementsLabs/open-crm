@@ -76,15 +76,14 @@ public abstract class AbstractSearchTest extends AbstractDbTest {
         }
     }
 
-    /** Blocks until the latest Meilisearch task reaches a terminal state. */
+    /**
+     * Blocks until the latest Meilisearch task reaches a terminal state, or
+     * the timeout elapses. Delegates to
+     * {@link MeilisearchClient#waitForLatestTask(Duration)} — a deterministic
+     * poll of {@code /tasks?limit=1} rather than a fixed sleep.
+     */
     protected void waitForIndex() {
-        // We poll the global tasks endpoint and wait for the latest task to
-        // finish. A short sleep here amortizes well across the suite.
-        try {
-            Thread.sleep(Duration.ofMillis(150).toMillis());
-        } catch (final InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
+        meilisearchClient.waitForLatestTask(Duration.ofSeconds(5));
     }
 
     protected MeilisearchClient meilisearchClient() {

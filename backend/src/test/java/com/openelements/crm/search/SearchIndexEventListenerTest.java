@@ -2,9 +2,7 @@ package com.openelements.crm.search;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.contact.ContactDto;
@@ -27,15 +25,12 @@ import org.mockito.Mockito;
 class SearchIndexEventListenerTest {
 
     private SearchIndexService indexService;
-    private SearchIndexState state;
     private SearchIndexEventListener listener;
 
     @BeforeEach
     void setUp() {
         indexService = Mockito.mock(SearchIndexService.class);
-        state = Mockito.mock(SearchIndexState.class);
-        when(state.isBootstrapping()).thenReturn(false);
-        listener = new SearchIndexEventListener(indexService, state);
+        listener = new SearchIndexEventListener(indexService);
     }
 
     @Test
@@ -68,14 +63,10 @@ class SearchIndexEventListenerTest {
     }
 
     @Test
-    void bootstrappingFlagSuppressesAllDispatch() {
-        when(state.isBootstrapping()).thenReturn(true);
-        listener.onObjectCreate(new OnObjectCreate<>(contactDto()));
-        listener.onObjectUpdate(new OnObjectUpdate<>(companyDto()));
-        listener.onObjectDelete(new OnObjectDelete<>(contactDto()));
-        verify(indexService, times(0)).upsertContact(any());
-        verify(indexService, times(0)).upsertCompany(any());
-        verify(indexService, times(0)).deleteContact(any());
+    void commentCreateDispatchesToUpsertComment() {
+        final CommentDto dto = new CommentDto(UUID.randomUUID(), "t", null, Instant.now(), Instant.now());
+        listener.onObjectCreate(new OnObjectCreate<>(dto));
+        verify(indexService).upsertComment(dto);
     }
 
     @Test
