@@ -36,23 +36,6 @@ acceptable during import. A separate merge feature will allow cleaning these up 
 
 **Context:** Deferred from the Brevo import integration spec.
 
-## Admin-View mit Bearer Token für Swagger
-
-Eine Admin-Seite im Frontend, die den aktuellen Bearer Token (Access Token) des eingeloggten Users anzeigt. So kann man
-den Token einfach kopieren und in Swagger UIs "Authorize"-Dialog einfügen, ohne die Browser-DevTools bemühen zu müssen.
-
-**Context:** Identifiziert nach Implementierung von Specs 048/049. Swagger UI nutzt einen manuellen
-Bearer-Token-Paste-Workflow.
-
-## Comment Author: Umstellung auf User-FK
-
-Das `author`-Feld (String) in Kommentaren soll durch einen Fremdschlüssel auf die neue User-Entity ersetzt werden. Damit
-werden Kommentare einem konkreten User zugeordnet, Namensänderungen automatisch reflektiert und GDPR-Löschanträge sauber
-umsetzbar.
-
-**Context:** Identifiziert während der Grill-Session für Spec 065 (User Entity). Voraussetzung: Spec 065 muss zuerst
-implementiert sein.
-
 ## Webhook Integration Tests
 
 Add integration tests for webhook firing that use an embedded HTTP server (e.g. MockWebServer or WireMock) to verify
@@ -61,11 +44,6 @@ are part of the initial implementation — these integration tests go beyond tha
 
 **Context:** Identified during the grill session for Spec 075 (Webhook Support). Prerequisite: Spec 075 must be
 implemented first.
-
-## Move topics to frontend lib
-
-- User Table
-- Audit table
 
 ## GDPR-Abdeckung für Updates-View (Mitarbeiter-Aktivitätstransparenz)
 
@@ -119,6 +97,7 @@ HEVC decoder plugin) must be present in the runtime image.
 ## 1. Maven dependency
 
 ```xml
+
 <dependency>
     <groupId>com.github.gotson.nightmonkeys</groupId>
     <artifactId>imageio-heif</artifactId>
@@ -153,7 +132,7 @@ public final class ImageToJpegConverter {
      * @return true on success, false if no decoder could read the input
      */
     public static boolean convertToJpeg(InputStream input, OutputStream jpegOutput)
-            throws IOException {
+        throws IOException {
         BufferedImage image = ImageIO.read(input);
         if (image == null) {
             // No registered reader could decode the input.
@@ -219,11 +198,11 @@ public class HeicSupportCheck {
     void verifyHeicSupport() {
         // Level 1: is a reader registered at all?
         boolean readerRegistered = Arrays.stream(ImageIO.getReaderFormatNames())
-                .anyMatch(n -> n.equalsIgnoreCase("heif") || n.equalsIgnoreCase("heic"));
+            .anyMatch(n -> n.equalsIgnoreCase("heif") || n.equalsIgnoreCase("heic"));
 
         if (!readerRegistered) {
             log.warn("HEIC: no ImageIO reader registered — check JDK 21 and the "
-                    + "imageio-heif dependency. HEIC conversion disabled.");
+                + "imageio-heif dependency. HEIC conversion disabled.");
             return;
         }
 
@@ -237,17 +216,17 @@ public class HeicSupportCheck {
             if (img != null) {
                 heicAvailable = true;
                 log.info("HEIC: support verified (decoded {}x{} probe image).",
-                        img.getWidth(), img.getHeight());
+                    img.getWidth(), img.getHeight());
             } else {
                 log.error("HEIC: reader registered but decode returned null — "
-                        + "native libheif or the libde265 decoder plugin is missing.");
+                    + "native libheif or the libde265 decoder plugin is missing.");
             }
         } catch (UnsatisfiedLinkError | Exception e) {
             // UnsatisfiedLinkError: native libheif cannot be loaded at all.
             // Exception: library present but decoder plugin (libde265) missing
             //            -> "No decoder available".
             log.error("HEIC: support check failed — {}. Install libheif1 + "
-                    + "libheif-plugin-libde265 in the runtime image.", e.toString());
+                + "libheif-plugin-libde265 in the runtime image.", e.toString());
         }
     }
 }
@@ -296,8 +275,8 @@ public class HeicHealthIndicator implements HealthIndicator {
     @Override
     public Health health() {
         return check.isHeicAvailable()
-                ? Health.up().withDetail("heic", "decodable").build()
-                : Health.down().withDetail("heic", "native libheif/decoder missing").build();
+            ? Health.up().withDetail("heic", "decodable").build()
+            : Health.down().withDetail("heic", "native libheif/decoder missing").build();
     }
 }
 ```
@@ -424,6 +403,7 @@ native library**, runs on **any JDK**, and therefore requires **no Dockerfile
 change at all**.
 
 ```xml
+
 <dependency>
     <groupId>com.twelvemonkeys.imageio</groupId>
     <artifactId>imageio-webp</artifactId>
@@ -444,6 +424,7 @@ NightMonkeys WebP plugin. It works like `imageio-heif`: JDK 21+, FFM API, and th
 native `libwebp` must be present in the image.
 
 ```xml
+
 <dependency>
     <groupId>com.github.gotson.nightmonkeys</groupId>
     <artifactId>imageio-webp</artifactId>
