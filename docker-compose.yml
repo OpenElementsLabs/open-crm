@@ -14,6 +14,11 @@ services:
       retries: 5
 
   meilisearch:
+    # NOTE: no healthcheck is configured here because the official meilisearch
+    # image (since v1.6+) ships without wget/curl/nc, so the typical HTTP
+    # healthcheck patterns cannot run inside the container. The backend uses
+    # `condition: service_started` below and retries connections on bootstrap,
+    # which keeps startup robust without a Docker-level healthcheck.
     image: getmeili/meilisearch:v1.10
     environment:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
@@ -21,11 +26,6 @@ services:
       MEILI_NO_ANALYTICS: "true"
     volumes:
       - meili-data:/meili_data
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:7700/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   backend:
     build: ./backend
@@ -44,7 +44,7 @@ services:
       db:
         condition: service_healthy
       meilisearch:
-        condition: service_healthy
+        condition: service_started
 
   frontend:
     build: ./frontend

@@ -281,11 +281,28 @@
 - **Then** Meilisearch is reachable at `http://localhost:7700`
 - **And** the web dashboard responds (because `MEILI_ENV=development`)
 
-### Backend depends on Meilisearch healthcheck
+### Backend waits for `db` health and Meilisearch start
 
 - **Given** a fresh stack start
 - **When** `docker compose up` runs
-- **Then** the backend container does not start until both `db` and `meilisearch` healthchecks pass
+- **Then** the backend container does not start until the `db` healthcheck passes
+- **And** the backend container starts as soon as the `meilisearch` container has *started* (no Docker-level healthcheck on meilisearch — the upstream image lacks the probe utilities; the backend's bootstrap retries the connection internally instead)
+
+### Backend bootstrap retries the Meilisearch connection
+
+- **Given** Meilisearch is slow to become reachable after container start
+- **When** `SearchIndexBootstrap` runs
+- **Then** it polls `GET /health` on Meilisearch with 1 s backoff up to a 60 s budget
+- **And** as soon as `/health` returns 200, the bootstrap proceeds to push documents
+- **And** while the connect-retry loop runs, `/api/search` returns 503
+
+### Backend stays up if Meilisearch never comes online
+
+- **Given** Meilisearch is unreachable for longer than the 60 s connect-retry budget
+- **When** `SearchIndexBootstrap` exhausts the budget
+- **Then** the bootstrap logs `ERROR` with the connection failure
+- **And** `bootstrapping` stays `true`, so `/api/search` continues to return 503
+- **And** all other backend endpoints (CRUD, auth, etc.) remain responsive
 
 ## Test infrastructure
 

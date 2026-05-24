@@ -50,6 +50,11 @@ Meilisearch becomes a sidecar in `docker-compose.yml`, alongside `db`, `backend`
 ```yaml
 services:
   meilisearch:
+    # No healthcheck: the official meilisearch image (v1.6+) ships without
+    # wget/curl/nc, so the typical HTTP healthcheck patterns cannot run inside
+    # the container. The backend uses `condition: service_started` and retries
+    # connections on bootstrap (see § 7), which keeps startup robust without a
+    # Docker-level healthcheck.
     image: getmeili/meilisearch:v1.10
     environment:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
@@ -57,11 +62,6 @@ services:
       MEILI_NO_ANALYTICS: "true"
     volumes:
       - meili-data:/meili_data
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7700/health"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   backend:
     environment:
@@ -73,11 +73,13 @@ services:
       db:
         condition: service_healthy
       meilisearch:
-        condition: service_healthy
+        condition: service_started
 
 volumes:
   meili-data:
 ```
+
+**Why no healthcheck on meilisearch:** the upstream Docker image strips utility binaries (`wget`, `curl`, `nc`) to keep the image small. A Docker `HEALTHCHECK` therefore cannot HTTP-probe `/health` from inside the container. Adding one anyway makes the container permanently unhealthy and breaks any dependent service that uses `condition: service_healthy`. The two robust alternatives — building a custom image with a probe utility, or running a sidecar probe container — are out of proportion for the actual risk (Meilisearch is ready within seconds and the backend handles transient unavailability via bootstrap retries). A re-evaluation TODO is tracked in `TODO.md` for when upstream ships a probe-friendly utility.
 
 **`docker-compose.override.yml` (dev only):**
 
@@ -268,11 +270,12 @@ The async executor is small (e.g. core size 2, max 8) to bound concurrent writes
 `SearchIndexBootstrap` runs as a Spring `ApplicationRunner` on backend startup:
 
 1. Set `bootstrapping = true` (volatile flag on a bean shared with `SearchController`).
-2. For each of the four entities, stream the rows from Postgres in batches of 500, map to documents, push via `POST /indexes/{u}/documents` (which is upsert by primary key).
-3. Wait for the corresponding Meilisearch `tasks` to reach `succeeded` (poll `GET /tasks/{id}` with backoff).
-4. Set `bootstrapping = false`.
+2. **Connect-retry loop:** call `GET /health` on Meilisearch until it returns 200, with 1 s backoff between attempts and a 60 s overall budget. Required because there is no Docker healthcheck (see § 1) — Meilisearch is typically ready within ≤ 3 s of container start, but the backend may race ahead.
+3. For each of the four entities, stream the rows from Postgres in batches of 500, map to documents, push via `POST /indexes/{u}/documents` (which is upsert by primary key).
+4. Wait for the corresponding Meilisearch `tasks` to reach `succeeded` (poll `GET /tasks/{id}` with backoff).
+5. Set `bootstrapping = false`.
 
-Step 1–4 runs in an `@Async` background executor so the backend's HTTP listener is up immediately. While `bootstrapping == true`, `/api/search` returns 503.
+Steps 1–5 run in an `@Async` background executor so the backend's HTTP listener is up immediately. While `bootstrapping == true`, `/api/search` returns 503. If step 2 exhausts its 60 s budget without reaching Meilisearch, the bootstrap logs `ERROR`, leaves `bootstrapping = true` (search remains 503), and emits a one-shot metric — the backend itself stays up so non-search endpoints continue to work.
 
 This is the **full reindex on every startup** chosen in `meilisearch.md` — guarantees consistency after every deploy and absorbs Meilisearch snapshot loss / version upgrades without ceremony.
 
