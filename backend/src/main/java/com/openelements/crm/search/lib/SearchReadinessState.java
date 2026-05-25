@@ -1,15 +1,15 @@
-package com.openelements.crm.search;
+package com.openelements.crm.search.lib;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.stereotype.Component;
 
 /**
- * Shared mutable flag indicating whether {@link SearchIndexBootstrap} has
- * finished the initial reindex. The bootstrap runs asynchronously and the
- * search controller short-circuits to 503 while this is {@code true}.
+ * Shared mutable flag indicating whether {@link MeilisearchBootstrapRunner} has
+ * finished the initial reindex. The bootstrap runs asynchronously and search
+ * endpoints short-circuit (e.g. to 503) while this is {@code true}.
  */
 @Component
-public class SearchIndexState {
+public class SearchReadinessState {
 
     private final AtomicBoolean bootstrapping = new AtomicBoolean(true);
 
