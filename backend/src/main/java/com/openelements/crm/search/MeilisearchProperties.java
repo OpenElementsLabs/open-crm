@@ -1,7 +1,8 @@
 package com.openelements.crm.search;
 
-import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.time.Duration;
 
 /**
  * Configuration for the Meilisearch sidecar. Bound from
