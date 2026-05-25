@@ -7,7 +7,9 @@ FROM base AS deps
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+# pnpm-workspace.yaml carries minimumReleaseAgeExclude + allowBuilds, which the
+# install must honor (and which the committed lockfile was resolved against).
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM base AS build
