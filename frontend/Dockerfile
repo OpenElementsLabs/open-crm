@@ -1,6 +1,7 @@
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
-RUN corepack enable && corepack prepare pnpm@10.6.5 --activate
+# Corepack resolves the pnpm version from package.json -> packageManager (single source of truth)
+RUN corepack enable
 
 FROM base AS deps
 
