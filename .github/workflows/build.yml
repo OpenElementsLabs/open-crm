@@ -57,10 +57,20 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs: [backend, frontend]
+    env:
+      # Forwarded into the backend Docker build so Maven can resolve
+      # com.open-elements:spring-services:1.0.0-SNAPSHOT from GitHub
+      # Packages (spec 107). docker-compose.yml reads the same vars.
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v6
       - name: Build backend Docker image
-        run: docker build -t crm-backend ./backend
+        run: |
+          docker build \
+            --build-arg GITHUB_ACTOR \
+            --build-arg GITHUB_TOKEN \
+            -t crm-backend ./backend
       - name: Build frontend Docker image
         run: docker build -t crm-frontend ./frontend
       - name: Test Docker Compose

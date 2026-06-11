@@ -1,13 +1,23 @@
 FROM eclipse-temurin:21-jdk AS build
 
+# Credentials for the 'github' Maven repository declared in pom.xml.
+# Used to resolve com.open-elements:spring-services:1.0.0-SNAPSHOT from
+# GitHub Packages (spec 107). Pass via:
+#   docker build --build-arg GITHUB_ACTOR=$USER --build-arg GITHUB_TOKEN=$TOKEN ...
+# Defaults are empty so cached builds that don't need the snapshot keep working.
+ARG GITHUB_ACTOR=""
+ARG GITHUB_TOKEN=""
+ENV GITHUB_ACTOR=${GITHUB_ACTOR}
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+
 WORKDIR /app
 
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline -B
+RUN ./mvnw -s .mvn/settings.xml dependency:go-offline -B
 
 COPY src/ src/
-RUN ./mvnw clean package -DskipTests -B
+RUN ./mvnw -s .mvn/settings.xml clean package -DskipTests -B
 
 # Debian-based runtime (eclipse-temurin:21-jre) because libheif is required for
 # HEIC decoding (spec 102). Alpine does not ship libheif-plugin-libde265 in a
