@@ -1,14 +1,21 @@
 package com.openelements.crm.brevo;
 
+import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
+import com.openelements.crm.company.CompanyService;
+import com.openelements.crm.contact.ContactDto;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
+import com.openelements.crm.contact.ContactService;
 import com.openelements.crm.contact.Language;
 import com.openelements.crm.contact.SocialLinkEntity;
 import com.openelements.crm.contact.SocialNetworkType;
+import com.openelements.spring.base.events.OnObjectCreate;
+import com.openelements.spring.base.events.OnObjectUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -22,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -37,6 +45,9 @@ public class BrevoSyncService {
     private final BrevoApiClient brevoApiClient;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final CompanyService companyService;
+    private final ContactService contactService;
+    private final ApplicationEventPublisher eventPublisher;
     private final TransactionTemplate transactionTemplate;
     private final AtomicBoolean syncInProgress = new AtomicBoolean(false);
 
@@ -44,17 +55,28 @@ public class BrevoSyncService {
      * Creates a new BrevoSyncService.
      *
      * @param brevoApiClient      the Brevo API client
-     * @param companyRepository   the company repository
-     * @param contactRepository   the contact repository
+     * @param companyRepository   the company repository (used for Brevo-specific finders)
+     * @param contactRepository   the contact repository (used for Brevo-specific finders)
+     * @param companyService      used to fetch CompanyDto after each save so the same events
+     *                            an ordinary {@code save()} would emit can be published
+     * @param contactService      same role as {@code companyService}, for contacts
+     * @param eventPublisher      publishes OnObjectCreate / OnObjectUpdate so audit, search
+     *                            and webhook listeners pick the sync up automatically
      * @param transactionTemplate the transaction template for per-entity transactions
      */
     public BrevoSyncService(final BrevoApiClient brevoApiClient,
                             final CompanyRepository companyRepository,
                             final ContactRepository contactRepository,
+                            final CompanyService companyService,
+                            final ContactService contactService,
+                            final ApplicationEventPublisher eventPublisher,
                             final TransactionTemplate transactionTemplate) {
         this.brevoApiClient = Objects.requireNonNull(brevoApiClient, "brevoApiClient must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.companyService = Objects.requireNonNull(companyService, "companyService must not be null");
+        this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
+        this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher must not be null");
         this.transactionTemplate = Objects.requireNonNull(transactionTemplate, "transactionTemplate must not be null");
     }
 
@@ -189,6 +211,7 @@ public class BrevoSyncService {
                 transactionTemplate.executeWithoutResult(status -> {
                     company.setBrevoCompanyId(null);
                     companyRepository.save(company);
+                    publishCompanyEvent(company.getId(), false);
                 });
                 companiesUnlinked++;
                 LOG.info("Unlinked company '{}' (former Brevo ID removed)", company.getName());
@@ -203,6 +226,7 @@ public class BrevoSyncService {
                     contact.setBrevoId(null);
                     contact.setReceivesNewsletter(false);
                     contactRepository.save(contact);
+                    publishContactEvent(contact.getId(), false);
                 });
                 contactsUnlinked++;
                 LOG.info("Unlinked contact '{} {}' (former Brevo ID removed)",
@@ -252,6 +276,7 @@ public class BrevoSyncService {
             entity.setWebsite(brevoCompany.domain());
             entity.setBrevoCompanyId(brevoCompany.id());
             companyRepository.saveAndFlush(entity);
+            publishCompanyEvent(entity.getId(), created);
             return created;
         });
         return Boolean.TRUE.equals(isNew);
@@ -324,6 +349,7 @@ public class BrevoSyncService {
             }
 
             contactRepository.saveAndFlush(entity);
+            publishContactEvent(entity.getId(), created);
             return created;
         });
         return Boolean.TRUE.equals(isNew);
@@ -356,7 +382,9 @@ public class BrevoSyncService {
             newCompany.setName(firmaManuell);
             LOG.debug("Contact {} created new company '{}' from FIRMA_MANUELL",
                 brevoContactId, firmaManuell);
-            return companyRepository.saveAndFlush(newCompany);
+            final CompanyEntity saved = companyRepository.saveAndFlush(newCompany);
+            publishCompanyEvent(saved.getId(), true);
+            return saved;
         }
 
         LOG.debug("Contact {} has no company association", brevoContactId);
@@ -413,5 +441,30 @@ public class BrevoSyncService {
 
     private boolean isBlank(final String value) {
         return value == null || value.isBlank();
+    }
+
+    /**
+     * Publishes the same OnObjectCreate / OnObjectUpdate event a regular
+     * {@code companyService.save(dto)} would publish, so audit, search-index
+     * and webhook listeners pick up the Brevo sync automatically.
+     */
+    private void publishCompanyEvent(final UUID companyId, final boolean created) {
+        final CompanyDto dto = companyService.findById(companyId).orElseThrow(
+            () -> new IllegalStateException("Company " + companyId + " disappeared mid-sync"));
+        if (created) {
+            eventPublisher.publishEvent(new OnObjectCreate<>(dto));
+        } else {
+            eventPublisher.publishEvent(new OnObjectUpdate<>(dto));
+        }
+    }
+
+    private void publishContactEvent(final UUID contactId, final boolean created) {
+        final ContactDto dto = contactService.findById(contactId).orElseThrow(
+            () -> new IllegalStateException("Contact " + contactId + " disappeared mid-sync"));
+        if (created) {
+            eventPublisher.publishEvent(new OnObjectCreate<>(dto));
+        } else {
+            eventPublisher.publishEvent(new OnObjectUpdate<>(dto));
+        }
     }
 }
