@@ -75,6 +75,8 @@ public class BrevoApiClient {
         final List<BrevoCompany> result = new ArrayList<>();
         final int limit = 50;
         int offset = 0;
+        final long startNanos = System.nanoTime();
+        LOG.info("Fetching companies from Brevo (page size {})", limit);
 
         while (true) {
             final JsonNode body = executeWithRetry(
@@ -83,6 +85,8 @@ public class BrevoApiClient {
             if (items == null || !items.isArray() || items.isEmpty()) {
                 break;
             }
+            LOG.info("Fetched Brevo companies page: offset={}, size={}, running total={}",
+                    offset, items.size(), result.size() + items.size());
             for (final JsonNode item : items) {
                 final String id = item.get("id").asText();
                 final JsonNode attrs = item.get("attributes");
@@ -104,6 +108,8 @@ public class BrevoApiClient {
             }
             offset += limit;
         }
+        LOG.info("Finished fetching {} companies from Brevo in {} ms",
+                result.size(), (System.nanoTime() - startNanos) / 1_000_000);
         return result;
     }
 
@@ -118,6 +124,8 @@ public class BrevoApiClient {
         final List<BrevoContact> result = new ArrayList<>();
         final int limit = 1000;
         int offset = 0;
+        final long startNanos = System.nanoTime();
+        LOG.info("Fetching contacts from Brevo (page size {})", limit);
 
         while (true) {
             final JsonNode body = executeWithRetry(
@@ -126,6 +134,8 @@ public class BrevoApiClient {
             if (contacts == null || !contacts.isArray() || contacts.isEmpty()) {
                 break;
             }
+            LOG.info("Fetched Brevo contacts page: offset={}, size={}, running total={}",
+                    offset, contacts.size(), result.size() + contacts.size());
             for (final JsonNode contact : contacts) {
                 final long id = contact.get("id").asLong();
                 final String email = contact.has("email") ? contact.get("email").asText(null) : null;
@@ -145,6 +155,8 @@ public class BrevoApiClient {
             }
             offset += limit;
         }
+        LOG.info("Finished fetching {} contacts from Brevo in {} ms",
+                result.size(), (System.nanoTime() - startNanos) / 1_000_000);
         return result;
     }
 
