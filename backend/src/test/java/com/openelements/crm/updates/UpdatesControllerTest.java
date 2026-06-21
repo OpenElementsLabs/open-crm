@@ -56,6 +56,7 @@ class UpdatesControllerTest extends AbstractDbTest {
         return userRepository.findBySub(sub).orElseGet(() -> {
             final UserEntity entity = new UserEntity();
             entity.setSub(sub);
+            entity.setUserName(sub);
             entity.setName(name);
             return userRepository.saveAndFlush(entity);
         });

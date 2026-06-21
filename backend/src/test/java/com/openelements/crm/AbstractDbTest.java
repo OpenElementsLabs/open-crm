@@ -90,9 +90,9 @@ public abstract class AbstractDbTest {
     protected void seedSystemUser() {
         if (userRepository.findBySub(SystemUser.SUB).isEmpty()) {
             jdbcTemplate.update(
-                "INSERT INTO users (id, sub, name, created_at, updated_at) "
-                    + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-                SystemUser.ID, SystemUser.SUB, SystemUser.NAME);
+                "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+                    + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                SystemUser.ID, SystemUser.SUB, SystemUser.SUB, SystemUser.NAME);
         }
     }
 }
