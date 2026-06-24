@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Mail, Pencil, Trash2, User } from "lucide-react";
+import { Contact, Mail, Pencil, Trash2, User } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, DetailField, Separator, Tooltip, TooltipContent, TooltipTrigger, TagChips, MarkdownView, TranslateButton } from "@open-elements/ui";
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations, useLanguage } from "@/lib/i18n";
 import { ContactComments } from "@/components/contact-comments";
 import { useTranslationConfig } from "@/lib/use-translation-config";
-import { deleteContact, ForbiddenError, getContactPhotoUrl, getTag, translateText } from "@/lib/api";
+import { deleteContact, ForbiddenError, getContactPhotoUrl, getContactVCardUrl, getTag, translateText } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@open-elements/nextjs-app-layer";
 
@@ -121,6 +121,13 @@ export function ContactDetail({ contact }: ContactDetailProps) {
               <Pencil className="mr-2 h-4 w-4" />
               {S.detail.edit}
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => window.open(getContactVCardUrl(contact.id), "_blank")}
+          >
+            <Contact className="mr-2 h-4 w-4" />
+            {t.vcardExport.single}
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>

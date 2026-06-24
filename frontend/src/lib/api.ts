@@ -341,6 +341,26 @@ export function getContactExportUrl(params: ContactListParams, columns: string[]
   return `${baseUrl()}/api/contacts/export?${searchParams.toString()}`;
 }
 
+export function getContactVCardExportUrl(params: ContactListParams): string {
+  const searchParams = new URLSearchParams();
+  if (params.search) searchParams.set("search", params.search);
+  if (params.companyId) searchParams.set("companyId", params.companyId);
+  if (params.noCompany) searchParams.set("noCompany", "true");
+  if (params.language) searchParams.set("language", params.language);
+  if (params.brevo !== undefined) searchParams.set("brevo", String(params.brevo));
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
+  const query = searchParams.toString();
+  return `${baseUrl()}/api/contacts/export/vcard${query ? `?${query}` : ""}`;
+}
+
+export function getContactVCardUrl(id: string): string {
+  return `${baseUrl()}/api/contacts/${id}/vcard`;
+}
+
 export async function getCompaniesForSelect(): Promise<CompanyDto[]> {
   const data = await getCompanies({ size: 1000 });
   return data.content as CompanyDto[];

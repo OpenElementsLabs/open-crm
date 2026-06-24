@@ -378,6 +378,10 @@ export const en: Translations = {
       updatedAt: "Updated At",
     },
   },
+  vcardExport: {
+    button: "vCard",
+    single: "Download vCard",
+  },
   tags: {
     title: "Tags",
     newTag: "New Tag",

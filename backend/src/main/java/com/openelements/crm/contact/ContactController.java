@@ -99,6 +99,40 @@ public class ContactController {
         }
     }
 
+    @GetMapping(value = "/export/vcard", produces = "text/vcard")
+    @Operation(summary = "Export contacts as vCard",
+        description = "Exports all matching contacts as a vCard 3.0 file (.vcf), including photos. "
+            + "Suitable for importing into address-book apps such as macOS/iOS Contacts, Outlook, or Google Contacts.")
+    @ApiResponse(responseCode = "200", description = "vCard file downloaded")
+    public void exportVCard(
+        @Parameter(description = "Multi-word search filter") @RequestParam(required = false) final String search,
+        @Parameter(description = "Filter by company ID") @RequestParam(required = false) final UUID companyId,
+        @Parameter(description = "Filter by language code") @RequestParam(required = false) final String language,
+        @Parameter(description = "Filter for contacts without a company") @RequestParam(defaultValue = "false") final boolean noCompany,
+        @Parameter(description = "Filter by Brevo origin") @RequestParam(required = false) final Boolean brevo,
+        @Parameter(description = "Filter by tag IDs") @RequestParam(required = false) final List<UUID> tagIds,
+        final HttpServletResponse response) throws IOException {
+        response.setContentType("text/vcard; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"contacts.vcf\"");
+        response.getWriter().write(
+            contactService.exportAllAsVCard(search, companyId, noCompany, language, brevo, tagIds));
+    }
+
+    @GetMapping(value = "/{id}/vcard", produces = "text/vcard")
+    @Operation(summary = "Export a single contact as vCard",
+        description = "Exports the contact as a vCard 3.0 file (.vcf), including its photo.")
+    @ApiResponse(responseCode = "200", description = "vCard file downloaded")
+    @ApiResponse(responseCode = "404", description = "Contact not found")
+    public ResponseEntity<String> exportContactVCard(
+        @Parameter(description = "The contact ID") @PathVariable final UUID id) {
+        final String vcard = contactService.exportAsVCard(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok()
+            .header("Content-Disposition", "attachment; filename=\"contact-" + id + ".vcf\"")
+            .contentType(MediaType.parseMediaType("text/vcard; charset=UTF-8"))
+            .body(vcard);
+    }
+
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get contact by ID")
     @ApiResponse(responseCode = "200", description = "Contact found")
