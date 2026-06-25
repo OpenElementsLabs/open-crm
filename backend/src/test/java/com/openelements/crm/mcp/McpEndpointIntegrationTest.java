@@ -14,11 +14,8 @@ import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
 import io.modelcontextprotocol.json.jackson2.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.spec.McpSchema;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +62,7 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
         jdbcTemplate.update(
             "INSERT INTO api_keys (id, name, key_hash, key_prefix, created_by, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            UUID.randomUUID(), "onyx-e2e", sha256Hex(rawKey), rawKey.substring(0, 11), "test",
+            UUID.randomUUID(), "onyx-e2e", McpTestSupport.sha256Hex(rawKey), rawKey.substring(0, 11), "test",
             java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
 
         final ContactEntity contact = new ContactEntity();
@@ -175,14 +172,5 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
         assertFalse(Boolean.TRUE.equals(result.isError()), "tool " + tool + " unexpectedly errored");
         final McpSchema.TextContent text = (McpSchema.TextContent) result.content().get(0);
         return MAPPER.readTree(text.text());
-    }
-
-    private static String sha256Hex(final String value) {
-        try {
-            return HexFormat.of().formatHex(
-                MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
     }
 }

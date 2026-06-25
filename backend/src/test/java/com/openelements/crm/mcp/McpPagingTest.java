@@ -44,9 +44,10 @@ class McpPagingTest {
 
     @Test
     void toPageableUsesResolvedValues() {
-        final var pageable = paging.toPageable(2, 100);
+        final var pageable = paging.toPageable(2, 100, org.springframework.data.domain.Sort.by("name"));
         assertEquals(2, pageable.getPageNumber());
         assertEquals(50, pageable.getPageSize());
+        assertEquals(org.springframework.data.domain.Sort.by("name"), pageable.getSort());
     }
 
     @Test

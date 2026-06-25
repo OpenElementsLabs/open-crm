@@ -58,17 +58,6 @@ public class McpPaging {
     }
 
     /**
-     * Builds an unsorted {@link Pageable} from the requested parameters.
-     *
-     * @param page the requested page, or {@code null}
-     * @param size the requested size, or {@code null}
-     * @return the resolved pageable
-     */
-    public Pageable toPageable(final Integer page, final Integer size) {
-        return PageRequest.of(resolvePage(page), resolveSize(size));
-    }
-
-    /**
      * Builds a sorted {@link Pageable} from the requested parameters.
      *
      * @param page the requested page, or {@code null}

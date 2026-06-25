@@ -7,10 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.openelements.crm.AbstractDbTest;
 import com.openelements.spring.base.services.apikey.ApiKeyDataService;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +50,7 @@ class McpSecurityIntegrationTest extends AbstractDbTest {
         // security context. The hash must match what ApiKeyDataService computes;
         // the assertion below verifies that via the real authenticate() path.
         rawKey = "crm_" + "mcptestkey".repeat(4) + "abcdefgh";
-        final String keyHash = sha256Hex(rawKey);
+        final String keyHash = McpTestSupport.sha256Hex(rawKey);
         final java.sql.Timestamp now = java.sql.Timestamp.from(Instant.now());
         jdbcTemplate.update(
             "INSERT INTO api_keys (id, name, key_hash, key_prefix, created_by, created_at, updated_at) "
@@ -87,15 +84,5 @@ class McpSecurityIntegrationTest extends AbstractDbTest {
             .andReturn().getResponse().getStatus();
         assertNotEquals(401, statusCode, "valid key must not be rejected as unauthorized");
         assertNotEquals(403, statusCode, "CSRF must be disabled on the /mcp chain");
-    }
-
-    private static String sha256Hex(final String value) {
-        try {
-            final byte[] digest = MessageDigest.getInstance("SHA-256")
-                .digest(value.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (final Exception e) {
-            throw new IllegalStateException(e);
-        }
     }
 }
