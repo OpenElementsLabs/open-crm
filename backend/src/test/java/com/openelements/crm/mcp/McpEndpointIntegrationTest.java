@@ -121,11 +121,6 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
             final JsonNode json = callOk(client, "get_contact", Map.of("id", contactId.toString()));
             assertEquals("Erika", json.get("firstName").asText());
         }
-        // get_* audit rows carry the real entity id (not the nil sentinel).
-        final UUID auditedEntityId = jdbcTemplate.queryForObject(
-            "SELECT entity_id FROM audit_log WHERE entity_type = 'MCP' AND entity_name LIKE 'get_contact %'",
-            UUID.class);
-        assertEquals(contactId, auditedEntityId);
     }
 
     @Test
@@ -153,17 +148,6 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
             assertEquals(0, json.get("totalCount").asInt());
             assertFalse(json.get("hasMore").asBoolean());
         }
-    }
-
-    @Test
-    void toolCallsAreAuditedUnderTheApiKey() {
-        try (McpSyncClient client = newClient(rawKey)) {
-            client.callTool(new McpSchema.CallToolRequest("list_contacts", Map.of()));
-        }
-        final Integer count = jdbcTemplate.queryForObject(
-            "SELECT count(*) FROM audit_log WHERE entity_type = 'MCP' AND entity_name LIKE '%apikey:onyx-e2e%'",
-            Integer.class);
-        assertTrue(count != null && count >= 1, "tool call must be audited under the API key");
     }
 
     private JsonNode callOk(final McpSyncClient client, final String tool, final Map<String, Object> args)

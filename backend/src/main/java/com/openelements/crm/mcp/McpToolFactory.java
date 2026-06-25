@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +24,14 @@ import org.springframework.stereotype.Component;
  * Builds the read-only MCP tool catalog (spec 108, Phase 1) over the existing
  * CRM services. Each tool validates and parses its arguments, calls a backing
  * service, wraps collections in the {@link McpPage} envelope, serializes the
- * payload to JSON, records one audit entry, and maps failures to JSON-RPC error
+ * payload to JSON, logs one access line, and maps failures to JSON-RPC error
  * results.
+ *
+ * <p>MCP reads are <em>not</em> written to the {@code audit_log}: that table
+ * records mutations, and read access (like viewing a record in the frontend) is
+ * not audited. Access is recorded only as a structured INFO log line
+ * ({@code tool=… actor=…}, never the arguments). See {@code docs/TODO.md} for a
+ * possible future read-access audit.
  */
 @Component
 public class McpToolFactory {
@@ -32,13 +39,13 @@ public class McpToolFactory {
     private static final String PAGINATION_HINT =
         " Results are paginated; when the response field hasMore is true, fetch the next page by increasing page.";
 
+    private static final Logger log = LoggerFactory.getLogger(McpToolFactory.class);
+
     private final ContactService contactService;
     private final CompanyService companyService;
     private final TagDataService tagService;
     private final CrmSearchService searchService;
     private final McpPaging paging;
-    private final McpAuditService audit;
-    private final McpActorResolver actorResolver;
     private final ObjectMapper objectMapper;
 
     public McpToolFactory(final ContactService contactService,
@@ -46,16 +53,12 @@ public class McpToolFactory {
                           final TagDataService tagService,
                           final CrmSearchService searchService,
                           final McpPaging paging,
-                          final McpAuditService audit,
-                          final McpActorResolver actorResolver,
                           final ObjectMapper objectMapper) {
         this.contactService = Objects.requireNonNull(contactService);
         this.companyService = Objects.requireNonNull(companyService);
         this.tagService = Objects.requireNonNull(tagService);
         this.searchService = Objects.requireNonNull(searchService);
         this.paging = Objects.requireNonNull(paging);
-        this.audit = Objects.requireNonNull(audit);
-        this.actorResolver = Objects.requireNonNull(actorResolver);
         this.objectMapper = Objects.requireNonNull(objectMapper);
     }
 
@@ -116,7 +119,7 @@ public class McpToolFactory {
             final UUID id = requiredUuid(args, "id");
             return companyService.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Company not found: " + id));
-        }, args -> uuid(args, "id"));
+        });
     }
 
     private SyncToolSpecification listContactsTool() {
@@ -143,7 +146,7 @@ public class McpToolFactory {
             final UUID id = requiredUuid(args, "id");
             return contactService.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Contact not found: " + id));
-        }, args -> uuid(args, "id"));
+        });
     }
 
     private SyncToolSpecification listTagsTool() {
@@ -162,7 +165,7 @@ public class McpToolFactory {
             final UUID id = requiredUuid(args, "id");
             return tagService.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Tag not found: " + id));
-        }, args -> uuid(args, "id"));
+        });
     }
 
     private SyncToolSpecification listCompanyCommentsTool() {
@@ -195,41 +198,28 @@ public class McpToolFactory {
     }
 
     private SyncToolSpecification spec(final McpSchema.Tool tool, final ToolLogic logic) {
-        return spec(tool, logic, null);
-    }
-
-    /**
-     * @param entityIdExtractor extracts the targeted entity id from the (already validated)
-     *                          arguments for single-entity {@code get_*} tools, so the audit
-     *                          entry records which record was read; {@code null} for
-     *                          collection/search tools (which audit the nil sentinel)
-     */
-    private SyncToolSpecification spec(final McpSchema.Tool tool, final ToolLogic logic,
-                                       final Function<Map<String, Object>, UUID> entityIdExtractor) {
         return new SyncToolSpecification(tool, (exchange, args) ->
-            invoke(tool.name(), logic, entityIdExtractor, args, actorResolver.resolve(exchange.transportContext())));
+            invoke(tool.name(), logic, args, McpActorLabel.from(exchange.transportContext())));
     }
 
     private McpSchema.CallToolResult invoke(final String name, final ToolLogic logic,
-                                            final Function<Map<String, Object>, UUID> entityIdExtractor,
-                                            final Map<String, Object> rawArgs, final McpActor actor) {
+                                            final Map<String, Object> rawArgs, final String actor) {
         final Map<String, Object> args = rawArgs == null ? Map.of() : rawArgs;
         try {
             final Object payload = logic.run(args);
-            final UUID entityId = entityIdExtractor == null ? null : entityIdExtractor.apply(args);
-            audit.recordSuccess(name, entityId, actor);
+            log.info("MCP tool call tool={} actor={}", name, actor);
             return new McpSchema.CallToolResult(json(payload), false);
         } catch (final IllegalArgumentException e) {
-            audit.recordFailure(name, "invalid argument", actor);
+            log.info("MCP tool call rejected tool={} actor={} reason=invalid-argument", name, actor);
             return new McpSchema.CallToolResult("Invalid argument: " + e.getMessage(), true);
         } catch (final NoSuchElementException e) {
-            audit.recordFailure(name, "not found", actor);
+            log.info("MCP tool call not-found tool={} actor={}", name, actor);
             return new McpSchema.CallToolResult(e.getMessage(), true);
         } catch (final McpUnavailableException e) {
-            audit.recordFailure(name, "unavailable", actor);
+            log.info("MCP tool call unavailable tool={} actor={}", name, actor);
             return new McpSchema.CallToolResult(e.getMessage(), true);
         } catch (final Exception e) {
-            audit.recordFailure(name, e.getClass().getSimpleName(), actor);
+            log.warn("MCP tool call errored tool={} actor={} error={}", name, actor, e.getClass().getSimpleName());
             return new McpSchema.CallToolResult("Internal error executing tool " + name, true);
         }
     }

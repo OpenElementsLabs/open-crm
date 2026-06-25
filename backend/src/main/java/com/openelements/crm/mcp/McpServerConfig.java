@@ -53,7 +53,7 @@ public class McpServerConfig {
                 }
                 return apiKeyDataService.authenticate(apiKey)
                     .map(entity -> McpTransportContext.create(
-                        Map.of(McpActorResolver.ACTOR_LABEL_KEY, "apikey:" + entity.getName())))
+                        Map.of(McpActorLabel.ACTOR_LABEL_KEY, "apikey:" + entity.getName())))
                     .orElse(McpTransportContext.EMPTY);
             })
             .build();

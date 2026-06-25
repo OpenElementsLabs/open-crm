@@ -47,7 +47,7 @@ flowchart LR
     A -. "actor abstraction<br/>extended, not rewritten" .-> B
 ```
 
-Phase 1 delivers the core + Profile A. Phase 2 adds Profile B. The seam between them is the **actor abstraction** (see *Audit & actor model*): Phase 1 resolves an actor from the API-key authentication; Phase 2 additionally resolves it from the JWT subject. No Phase-1 code is rewritten for Phase 2.
+Phase 1 delivers the core + Profile A. Phase 2 adds Profile B. The seam between them is the **actor label** (see *Access logging*): Phase 1 derives an `apikey:<name>` label from the API key; Phase 2 additionally derives a per-user label/identity from the JWT subject. No Phase-1 code is rewritten for Phase 2.
 
 ## Technical approach
 
@@ -57,7 +57,7 @@ Phase 1 delivers the core + Profile A. Phase 2 adds Profile B. The seam between 
   - **Rationale (Spring AI rejected):** the Spring AI MCP starter wraps the *same* official SDK but transitively pulls ~12–15 MCP-irrelevant jars (StringTemplate/ANTLR prompt templating, a `victools` JSON-schema-generator stack, the `jtokkit` LLM tokenizer, and an outdated `javax.validation:validation-api:1.1.0` that risks clashing with the project's Jakarta validation). The only upside is `@McpTool` annotation sugar. The official SDK keeps the footprint to the two MCP jars + `reactor-core` + Jackson (already present). Measured during this spec's grill session.
 - **Transport:** Streamable HTTP. Stateful vs. stateless mode and exact interop with Onyx's MCP client are verified at implementation time (see *Open questions*).
 - **Read backend:** existing services (`CompanyService`, `ContactService`, `TagService`, `CommentService`, `SearchService`) are reused as-is. The MCP layer is a thin adapter — it does not duplicate filtering or query logic.
-- **Tool dispatch:** each tool method resolves the current **actor**, calls the backing service, records one audit entry, and returns the mapped payload.
+- **Tool dispatch:** each tool method calls the backing service, emits one structured access log line (`tool=… actor=…`), and returns the mapped payload (or a mapped JSON-RPC error).
 
 ### Auth profiles
 
@@ -81,26 +81,24 @@ sequenceDiagram
     participant SEC as /mcp SecurityFilterChain
     participant T as Tool handler
     participant S as Existing service
-    participant A as AuditLogRepository
 
     O->>E: POST /mcp { tools/call list_contacts ... }<br/>X-API-Key: crm_…
     E->>SEC: ApiKeyAuthenticationFilter validates key
-    SEC->>T: dispatch (actor = api-key principal)
+    SEC->>T: dispatch (actor label from transport context)
     T->>S: list(filter, pageable)
     S-->>T: Page<ContactDto>
-    T->>A: audit(MCP, "list_contacts [apikey:<name>]", SYSTEM user)
+    T->>T: log.info("tool=list_contacts actor=apikey:<name>")
     T-->>E: { items, page, size, totalCount, hasMore }
     E-->>O: JSON-RPC response
 ```
 
-### Audit & actor model
+### Access logging (not audit)
 
-Every tool call records exactly one `AuditLogEntity` (`entityType="MCP"`, `action=INSERT` — a read over MCP is a transmission event worth logging). The actor is resolved behind a small abstraction so Phase 2 is additive:
+MCP tool calls are **reads**. The CRM `audit_log` records **mutations** (`INSERT`/`UPDATE`/`DELETE`), and read access — like viewing a record in the frontend — is **not** audited there. MCP reads are treated the same way: they are **not** written to `audit_log`. Forcing them in would be both inconsistent (the frontend isn't audited) and semantically wrong (there is no read action in the audit model — an `INSERT` for a read is a misnomer).
 
-- **Phase 1 (Profile A):** there is no per-user identity. `audit_log.user` is a NOT-NULL FK to `users`, so the audit row references the existing **SYSTEM user** (`SystemUser.ID`, already used by spec 094's backfill), and the **API-key identity is encoded in the audit `name`**, e.g. `name = "list_contacts [apikey:onyx-prod]"`. Per-human accountability in Phase 1 therefore lives in **Onyx's own logs** (which record which employee asked which question), not in the CRM — an accepted trade-off.
-- **Phase 2 (Profile B):** the actor resolves to the JWT subject's `UserEntity` (auto-provisioned on first call via `UserService.getCurrentUserEntity()`, same path as frontend login), and the audit row references that real user.
+Instead, each tool call emits one **structured INFO log line** for operational visibility: `tool=<name> actor=<label>` — never the arguments (search queries / ids can be sensitive). The actor label is `apikey:<key-name>` for the Phase 1 API-key profile, captured on the request thread by the transport context extractor (see below) and read in the tool dispatcher via `McpActorLabel`.
 
-The actor abstraction (`McpActor` → `{ auditUser, displayLabel }`) is introduced in Phase 1 with the API-key implementation and gains the JWT implementation in Phase 2 without touching the tool layer.
+> A future, queryable **read-access audit** for machine consumers (MCP and API-key clients) is intentionally deferred and tracked in `docs/TODO.md`. It should be a dedicated access log hung off API keys / controller endpoints — not the mutation `audit_log` — and is best built together with scoped API keys (which give per-key identity). Phase 2 (Claude) additionally introduces per-user identity, at which point per-employee access logging becomes meaningful.
 
 ## API design
 
@@ -161,7 +159,7 @@ Retained for the later increment: `list_tasks`, `get_task` (over `TaskService`),
 No schema changes. Purely additive:
 
 - No new entities, tables, or Flyway migration.
-- Audit entries reuse `audit_log` with `entity_type = "MCP"`; `user` references the SYSTEM user in Phase 1 and the real user in Phase 2.
+- MCP reads write nothing to the database — access is recorded only as structured INFO logs. (A future read-access log would add its own table; see `docs/TODO.md`.)
 
 ## Configuration
 
@@ -215,7 +213,7 @@ A dedicated confidential OAuth client `open-crm-mcp` (scopes `openid`, `profile`
 - **Authentication:** Phase 1 — `X-API-Key` validated against `api_keys`; Phase 2 — JWT signature via Authentik JWKS. The `/mcp/**` chain is CRM-owned and separate from the spring-services chains.
 - **Privilege expansion (must be owned by operators):** enabling MCP expands the effective reach of **every existing API key** from "GET `/api/external`" to "all personal CRM data via MCP", because keys have no scopes yet. This is mitigated **organizationally**, not technically: MCP stays **internal-only** until scoped keys exist, and broad production rollout is gated on them. The README must warn operators to review/rotate existing keys before enabling MCP.
 - **Authorization:** v1 tools require any authenticated caller (matches the existing read policy). `@PreAuthorize` hooks remain available for future tools.
-- **Audit:** one audit row per tool call (success and failure). Phase 1 attributes to the SYSTEM user + API-key name; Phase 2 to the real user.
+- **Access logging:** one structured INFO line per tool call (success and failure), `tool=<name> actor=<label>`, never the arguments. MCP reads are not written to `audit_log` (consistent with unaudited frontend reads). A queryable read-access audit is deferred (see `docs/TODO.md`).
 - **Data minimization:** administrative entities are never exposed; the deferred `list_users` is a reduced projection. Page size is hard-capped.
 - **Most-sensitive data:** comment **full text** is exposed in Phase 1 by explicit decision — it is the most sensitive, least-structured data. Mitigated by the self-hosted EU Onyx + EU GDPR-compliant LLM + signed AVV (pending) + internal-only use.
 - **Logging:** tool arguments (search queries, IDs) must **not** be logged at INFO. INFO logs only `tool=<name> actor=<label>`; argument-level logging is behind an explicit debug flag.
@@ -232,7 +230,7 @@ CRM personal data (names, e-mail, addresses, phone, birthdays, **free-text comme
 2. **Legal basis documented** — typically Art. 6 (1) lit. f (internal CRM use) with a balancing test; lit. b for prospect/customer data.
 3. **Privacy notice updated** — public policy and internal employee notice mention that CRM data may be sent to the LLM provider on request.
 4. **Onyx chat-log retention** — Onyx persists chat history including retrieved CRM data in its own datastore; a retention/deletion policy for those logs must exist (data-subject erasure must reach them).
-5. **Works council** — Onyx logs which employee asked what; if a works council exists, an agreement on this monitoring may be required (the CRM-side audit in Phase 1 is key-level, not per-employee).
+5. **Works council** — Onyx logs which employee asked what; if a works council exists, an agreement on this monitoring may be required (the CRM side only logs key-level access, not per-employee).
 
 ### Phase 2 — Claude (Anthropic, USA)
 
@@ -252,6 +250,6 @@ Both checklists are reproduced in `behaviors.md` as manual production-readiness 
 - **Why one client-agnostic server with two auth profiles instead of two servers?** MCP tools, transport, and audit are identical for every client; only auth differs. A single core with a pluggable auth profile avoids duplicating the tool layer and keeps behavior consistent across clients.
 - **Why API key first (Onyx) and OIDC later (Claude)?** Onyx is the immediate need, self-hosted EU keeps GDPR light, and the API-key path reuses existing infrastructure with no OAuth-metadata work — the smallest viable slice. OIDC is heavier (RFC 9728 + a second Authentik client) and serves the later Claude use case.
 - **Why a dedicated `/mcp` security chain instead of extending the spring-services external chain?** The spring-services external chain is locked to GET on `/api/external/**`. A CRM-owned chain for `/mcp/**` cleanly allows POST and composes both auth profiles without forking the library.
-- **Why attribute Phase-1 audit to the SYSTEM user?** `audit_log.user` is a NOT-NULL FK; there is no real user behind an API key. Recording SYSTEM + the key name keeps the schema unchanged and is honest about the accountability level, which lives in Onyx's logs until Phase 2.
+- **Why not audit MCP reads in `audit_log`?** That table records mutations; reads (including frontend record views) are not audited. Logging MCP reads there would be inconsistent and would require a non-existent "read" action (an `INSERT` for a read is wrong). Access is logged operationally instead; a proper read-access audit is deferred to a dedicated mechanism (see `docs/TODO.md`).
 - **Why the official Java MCP SDK and not Spring AI?** Measured: Spring AI adds ~12–15 MCP-irrelevant transitive jars (templating, tokenizer, JSON-schema stack, a stale validation API) for only annotation sugar. The official SDK keeps the footprint minimal.
 - **Why page-based pagination with an explicit `hasMore`?** All services already return `Page<T>`; reusing it costs nothing, and the explicit envelope prevents the model from answering off a silently truncated first page.

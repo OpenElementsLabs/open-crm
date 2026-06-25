@@ -159,26 +159,21 @@ Scenarios are grouped by phase. **Phase 1** (Profile A — API key, Onyx) is the
 - **Then** no tool references API keys, webhooks, or the audit log
 - **And** no `task` or `user` tool is present in Phase 1
 
-## Phase 1 — Audit logging
+## Phase 1 — Access logging (no DB audit)
 
-### Every successful tool call records an audit entry attributed to the key
+MCP reads are not written to `audit_log` (that table records mutations; reads — like a frontend record view — are not audited). Access is recorded only as structured INFO log lines. A queryable read-access audit is deferred (see `docs/TODO.md`).
+
+### Tool calls do not write to the audit log
 
 - **Given** a request authenticated with API key named `onyx-prod`
 - **When** the client calls `list_contacts`
-- **Then** exactly one `AuditLogEntity` is persisted with `entityType="MCP"`, `action=INSERT`, `user=<SYSTEM user>`, and `name` encoding the tool and key, e.g. `"list_contacts [apikey:onyx-prod]"`
-- **And** `createdAt` is the time of the call
+- **Then** no `audit_log` row with `entity_type = "MCP"` is created (the mutation audit log is untouched by reads)
 
-### Failed tool calls still record an audit entry
+### Each tool call emits one structured access log line
 
-- **Given** a request authenticated with API key named `onyx-prod`
-- **When** the client calls `get_contact` with a malformed id
-- **Then** an `AuditLogEntity` is persisted referencing the tool, the failure, and the key name
-- **And** the response remains the JSON-RPC error
-
-### Unauthenticated requests are not audited
-
-- **When** `POST /mcp` is called without a valid key
-- **Then** the response is `401 Unauthorized` and no `AuditLogEntity` is created
+- **Given** a tool call (success or failure)
+- **Then** exactly one INFO line is emitted as `tool=<name> actor=apikey:<key-name>` (or a `reason=`/`error=` variant on failure)
+- **And** the tool arguments are never logged (search queries / ids can be sensitive)
 
 ## Phase 1 — Configuration
 

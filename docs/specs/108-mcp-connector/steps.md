@@ -38,17 +38,16 @@ Backend module: `backend/` (Spring Boot 3.5, Java 21). New code under `com.opene
 
 ---
 
-## Step 3: Actor + audit abstraction ✅
+## Step 3: Access logging + actor label ✅
 
-- [x] Create `McpActor` (record `{ UserEntity auditUser, String label }`) + `McpActorResolver`: Phase 1 → SYSTEM user + `label="apikey:<keyName>"` from the `ApiKeyEntity` principal. Seam designed so Phase 2 adds a JWT branch without changing callers.
-- [x] Create `McpAuditService` writing one `AuditLogEntity` (`entityType="MCP"`, `action=INSERT`, `user=auditUser`, `name="<tool> [<label>]"`, `entityId` = target id or nil sentinel). Success + failure variants.
-- [x] INFO logging records only `tool=<name> actor=<label>` (no arguments).
+> Revised after review: MCP reads are **not** written to `audit_log` (that table records mutations; reads — like a frontend record view — are not audited). The earlier `McpActor`/`McpActorResolver`/`McpAuditService` were replaced by a tiny `McpActorLabel` and structured INFO logging in the dispatcher. A future read-access audit is captured in `docs/TODO.md`.
+
+- [x] `McpActorLabel` — holds `ACTOR_LABEL_KEY` and reads the `apikey:<name>` label from the transport context (captured on the request thread by the context extractor; see step 6).
+- [x] The tool dispatcher (`McpToolFactory`) emits one INFO line per call (`tool=<name> actor=<label>`), never the arguments; success/failure variants.
 
 **Acceptance criteria:**
-- [x] A tool call writes exactly one `MCP` audit row attributed to SYSTEM + key name.
-- [x] A failed tool call writes a failure audit row encoding tool + error.
-- [x] Actor resolves API-key principal → SYSTEM user. (`McpAuditIntegrationTest`, 3/3.)
-- [ ] (Unauthenticated → no audit row: covered end-to-end in step 7 once the handler exists.)
+- [x] No `audit_log` writes for MCP reads (consistent with unaudited frontend reads).
+- [x] Access label captured per call; covered indirectly by the step 7 e2e tests.
 
 **Related behaviors:** Phase 1 — Audit logging.
 
