@@ -20,19 +20,19 @@ Backend module: `backend/` (Spring Boot 3.5, Java 21). New code under `com.opene
 
 ---
 
-## Step 2: `/mcp` security filter chain
+## Step 2: `/mcp` security filter chain ✅
 
-- [ ] Create `McpSecurityConfig` with a `SecurityFilterChain` bean `@Order` ahead of the spring-services default chain, `securityMatcher("/mcp/**")`.
-- [ ] Reuse the spring-services `ApiKeyAuthenticationFilter` bean (validates `X-API-Key` via `ApiKeyDataService`); add it to the chain. Confirm the filter is method-agnostic (allows POST) — the GET-only rule lives only in the spring-services external chain.
-- [ ] Chain config: `authorizeHttpRequests` → all `/mcp/**` `authenticated()`; `csrf().disable()`; `sessionManagement` stateless.
-- [ ] Gate the whole config on `@ConditionalOnProperty("openelements.mcp.enabled")` and `auth.api-key.enabled`.
-- [ ] Verify chain precedence so `/mcp` is not swallowed by the spring-services default JWT chain (check `@Order` values of the library chains at implementation time).
+- [x] Create `McpSecurityConfig` with a `SecurityFilterChain` bean `@Order(0)` (ahead of spring-services `externalApiFilterChain` `@Order(1)` / `defaultFilterChain` `@Order(2)`), `securityMatcher("/mcp", "/mcp/**")`.
+- [x] Reuse the spring-services `ApiKeyAuthenticationFilter` (constructed fresh from the `ApiKeyDataService` bean + the `apiKeyAuthenticationEntryPoint`) — confirmed method-agnostic via bytecode, so POST works; the GET-only rule lives only in the library's external chain.
+- [x] Chain config: `anyRequest().authenticated()`; `csrf().disable()`; stateless session; `exceptionHandling` → JSON 401 entry point.
+- [x] Gate on `@ConditionalOnProperty("openelements.mcp.enabled")` (class) + `auth.api-key.enabled` (bean, matchIfMissing).
+- [x] Precedence verified: `@Order(0)` + `/mcp`-only matcher cannot swallow `/api/**`.
 
 **Acceptance criteria:**
-- [ ] `POST /mcp` without `X-API-Key` → `401`.
-- [ ] `POST /mcp` with a valid key passes authentication (POST allowed).
-- [ ] An invalid/revoked key → `401`.
-- [ ] No CSRF token required.
+- [x] `POST /mcp` without `X-API-Key` → `401`.
+- [x] `POST /mcp` with a valid key passes authentication (not 401/403; 404 until step 6 adds the handler).
+- [x] An invalid/revoked key → `401`.
+- [x] No CSRF token required. (`McpSecurityIntegrationTest`, 3/3.)
 
 **Related behaviors:** Phase 1 — Authentication (all scenarios).
 
