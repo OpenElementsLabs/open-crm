@@ -114,13 +114,13 @@ Backend module: `backend/` (Spring Boot 3.5, Java 21). New code under `com.opene
 
 ---
 
-## Step 8: Documentation
+## Step 8: Documentation ✅
 
-- [ ] README: add "MCP Server (Onyx)" section — enabling the master switch, creating an API key, Onyx Shared-Key config sending `X-API-Key`, the tool list, and the **privilege-expansion warning** (enabling MCP grants every existing API key full read access; review/rotate keys first; internal-only until scoped keys exist).
-- [ ] Note the Phase-1 GDPR checklist pointer (AVV with the EU LLM provider, etc.) from `design.md`.
+- [x] README: added "MCP Server (Onyx AI)" section — master switch, API-key auth, Onyx Shared-Key config sending `X-API-Key`, tool list + paginated envelope, audit behavior, and the **privilege-expansion warning** (every existing key gains MCP read access; internal-only until scoped keys; review/rotate first).
+- [x] GDPR pointer to `design.md` checklist; added a Key Features bullet.
 
 **Acceptance criteria:**
-- [ ] README documents setup + the privilege-expansion warning.
+- [x] README documents setup + the privilege-expansion warning.
 
 **Related behaviors:** Phase 1 — production-readiness checks.
 
