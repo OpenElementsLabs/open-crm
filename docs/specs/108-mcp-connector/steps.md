@@ -5,16 +5,16 @@ Backend module: `backend/` (Spring Boot 3.5, Java 21). New code under `com.opene
 
 ---
 
-## Step 1: Dependency + configuration properties
+## Step 1: Dependency + configuration properties ✅
 
-- [ ] Add `io.modelcontextprotocol.sdk:mcp-spring-webmvc` **pinned to `0.18.3`** to `backend/pom.xml` (version property `mcp-sdk.version`). Pulls `mcp-core:0.18.3` + `reactor-core`.
-- [ ] Create `McpProperties` (`@ConfigurationProperties("openelements.mcp")`): `enabled` (default `false`), `serverName` (default `"Open CRM"`), `serverVersion`, `maxPageSize` (default `50`), `defaultPageSize` (default `20`), nested `auth.apiKey.enabled` (default `true`), `auth.oidc.enabled` (default `false`).
-- [ ] Register the properties in `application.yml` with documented defaults; keep `enabled: false` as the safe default.
+- [x] Add `io.modelcontextprotocol.sdk:mcp-spring-webmvc` **pinned to `0.18.3`** to `backend/pom.xml` (version property `mcp-sdk.version`). Pulls `mcp-core:0.18.3` + `reactor-core`.
+- [x] Create `McpProperties` (`@ConfigurationProperties("openelements.mcp")`): `enabled` (default `false`), `serverName` (default `"Open CRM"`), `serverVersion`, `maxPageSize` (default `50`), `defaultPageSize` (default `20`), nested `auth.apiKey.enabled` (default `true`), `auth.oidc.enabled` (default `false`). Registered via always-on `McpConfiguration`.
+- [x] Register the properties in `application.yml` with documented defaults; keep `enabled: false` as the safe default.
 
 **Acceptance criteria:**
-- [ ] Project compiles with the new dependency resolved.
-- [ ] `McpProperties` binds from YAML; a context test confirms defaults.
-- [ ] Reproducible-builds: version is pinned, no floating range.
+- [x] Project compiles with the new dependency resolved.
+- [x] `McpProperties` binds from YAML; `McpPropertiesTest` confirms defaults + override binding.
+- [x] Reproducible-builds: version is pinned, no floating range.
 
 **Related behaviors:** Configuration switch; page-size config.
 
