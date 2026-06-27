@@ -1,6 +1,7 @@
 package com.openelements.crm;
 
 import com.openelements.spring.base.FullSpringServiceConfig;
+import com.openelements.spring.base.mcp.McpConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -25,7 +26,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
 @EntityScan(basePackages = "com.openelements")
 @EnableJpaRepositories(basePackages = "com.openelements")
-@Import(FullSpringServiceConfig.class)
+@Import({FullSpringServiceConfig.class, McpConfiguration.class})
 public class CrmApplication {
 
     public static void main(final String[] args) {

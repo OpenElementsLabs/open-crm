@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
  * Integration tests for the {@code /mcp} security chain (spec 108, step 2).
  *
  * <p>Runs with {@code openelements.mcp.enabled=true} so the
- * {@link McpSecurityConfig} chain is active. The MCP request handler itself does
+ * {@link com.openelements.spring.base.mcp.McpSecurityConfig} chain is active. The MCP request handler itself does
  * not exist yet (step 6), so an authenticated call falls through to a 404 — the
  * tests therefore assert on the security outcome (401 / not-401), not on a tool
  * response.
