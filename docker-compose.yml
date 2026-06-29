@@ -68,28 +68,21 @@ services:
       - backend
 
   db-backup:
-    # OpenElementsLabs db-backup-service (spec 107): an HTTP API in front of
-    # pg_dump + S3 upload that the backend's DbBackupClient talks to. It
-    # replaces the previous cron-only ./scripts container. Pinned by tag +
-    # digest for reproducible deployments.
-    image: ghcr.io/openelementslabs/db-backup-service:0.1.1@sha256:1c331a1f33f6003e709e7166ad9d2908a370d514a13325972bfc167e10566548
+    build: ./scripts
     environment:
       DB_HOST: db
-      DB_PORT: 5432
+      DB_INTERNAL_PORT: 5432
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      STORAGE_BACKEND: s3
       S3_BUCKET: ${S3_BUCKET}
       S3_ENDPOINT: ${S3_ENDPOINT}
       S3_PREFIX: ${S3_PREFIX:-backups}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-eu-central-1}
-      # Bearer token shared with the backend (DB_BACKUP_API_TOKEN below).
-      API_TOKEN: ${DB_BACKUP_API_TOKEN}
-      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-24h}
-      RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_CRON: ${BACKUP_CRON:-0 2 * * *}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
     depends_on:
       db:
         condition: service_healthy
