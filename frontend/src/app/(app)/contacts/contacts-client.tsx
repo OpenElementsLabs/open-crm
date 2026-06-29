@@ -4,13 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink } from "lucide-react";
+import { Plus, Trash2, User, Printer, Pencil, MessageSquarePlus, FileDown, ExternalLink, Contact } from "lucide-react";
 import { Button, DeleteConfirmDialog, Input, TagMultiSelect, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { ActionIconButton, CopyToClipboardButton, MailtoButton, TablePagination, TooltipIconButton } from "@open-elements/ui";
 import { AddCommentDialog } from "@open-elements/nextjs-app-layer";
 import { CsvExportDialog } from "@/components/csv-export-dialog";
-import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getTags, ForbiddenError } from "@/lib/api";
+import { getContacts, deleteContact, getCompaniesForSelect, getContactPhotoUrl, createContactComment, getContactExportUrl, getContactVCardExportUrl, getTags, ForbiddenError } from "@/lib/api";
 import type { ContactDto, CompanyDto, Page } from "@/lib/types";
 import { hasRole, ROLE_ADMIN } from "@open-elements/nextjs-app-layer";
 
@@ -169,6 +169,24 @@ export function ContactsClient() {
           >
             <FileDown className="mr-2 h-4 w-4" />
             {t.csvExport.button}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!data || data.page.totalElements === 0}
+            onClick={() => {
+              const url = getContactVCardExportUrl({
+                search: searchFilter || undefined,
+                companyId: companyIdFilter && companyIdFilter !== "all" && companyIdFilter !== "none" ? companyIdFilter : undefined,
+                noCompany: companyIdFilter === "none" ? true : undefined,
+                language: languageFilter && languageFilter !== "all" ? languageFilter : undefined,
+                brevo: brevoFilter === "all" ? undefined : brevoFilter === "true",
+                tagIds: tagIds.length > 0 ? tagIds : undefined,
+              });
+              window.open(url, "_blank");
+            }}
+          >
+            <Contact className="mr-2 h-4 w-4" />
+            {t.vcardExport.button}
           </Button>
           <Button asChild>
             <Link href="/contacts/new">

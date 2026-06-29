@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Bootstrap step that streams all contacts into the contacts index.
@@ -39,10 +40,13 @@ public class ContactsBootstrapStep implements SearchIndexBootstrapStep {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Stream<Map<String, Object>> documents() {
         return contactRepository.findAll().stream()
             .map(ContactsBootstrapStep::mapContact)
-            .map(indexService::contactDocument);
+            .map(indexService::contactDocument)
+            .toList()
+            .stream();
     }
 
     private static ContactDto mapContact(final ContactEntity entity) {

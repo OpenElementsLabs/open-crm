@@ -417,6 +417,10 @@ export const de = {
       updatedAt: "Aktualisiert am",
     },
   },
+  vcardExport: {
+    button: "vCard",
+    single: "vCard herunterladen",
+  },
   tags: {
     title: "Tags",
     newTag: "Neuer Tag",

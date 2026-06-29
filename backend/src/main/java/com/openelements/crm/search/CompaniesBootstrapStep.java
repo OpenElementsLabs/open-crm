@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Bootstrap step that streams all companies into the companies index. Maps
@@ -39,10 +40,13 @@ public class CompaniesBootstrapStep implements SearchIndexBootstrapStep {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Stream<Map<String, Object>> documents() {
         return companyRepository.findAll().stream()
             .map(CompaniesBootstrapStep::mapCompany)
-            .map(indexService::companyDocument);
+            .map(indexService::companyDocument)
+            .toList()
+            .stream();
     }
 
     private static CompanyDto mapCompany(final CompanyEntity entity) {

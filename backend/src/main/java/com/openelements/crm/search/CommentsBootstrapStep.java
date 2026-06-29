@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Bootstrap step that streams all comments into the comments index. Comments
@@ -39,10 +40,13 @@ public class CommentsBootstrapStep implements SearchIndexBootstrapStep {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Stream<Map<String, Object>> documents() {
         return commentRepository.findAll().stream()
             .map(this::toDocumentOrNull)
-            .filter(Objects::nonNull);
+            .filter(Objects::nonNull)
+            .toList()
+            .stream();
     }
 
     private Map<String, Object> toDocumentOrNull(final CommentEntity entity) {

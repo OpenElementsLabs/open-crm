@@ -94,6 +94,30 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
                                  final List<UUID> tagIds,
                                  final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable must not be null");
+        final Specification<ContactEntity> spec =
+            buildSpecification(search, companyId, noCompany, language, brevo, tagIds);
+        return contactRepository.findAll(spec, pageable).map(this::toData);
+    }
+
+    /**
+     * Builds the JPA {@link Specification} shared by the paginated list, the
+     * full-list, and the entity-level export queries.
+     *
+     * @param search    multi-word search across title, firstName, lastName, email, company name, and social links
+     * @param companyId exact company ID filter
+     * @param noCompany filter for contacts without a company association
+     * @param language  exact language filter ({@code "UNKNOWN"} matches a null language)
+     * @param brevo     filter by Brevo origin (true = only Brevo, false = only non-Brevo, null = all)
+     * @param tagIds    tag IDs that must all be present (AND semantics)
+     * @return the composed specification
+     * @throws ResponseStatusException 400 if {@code companyId} and {@code noCompany} are combined
+     */
+    private Specification<ContactEntity> buildSpecification(final String search,
+                                                            final UUID companyId,
+                                                            final boolean noCompany,
+                                                            final String language,
+                                                            final Boolean brevo,
+                                                            final List<UUID> tagIds) {
         if (companyId != null && noCompany) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Cannot combine companyId and noCompany filters");
@@ -153,8 +177,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
                 return cb.conjunction();
             });
         }
-
-        return contactRepository.findAll(spec, pageable).map(e -> toData(e));
+        return spec;
     }
 
     /**
@@ -173,69 +196,65 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
                                     final String language,
                                     final Boolean brevo,
                                     final List<UUID> tagIds) {
-        if (companyId != null && noCompany) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Cannot combine companyId and noCompany filters");
-        }
-        Specification<ContactEntity> spec = Specification.where(null);
-
-        if (search != null && !search.isBlank()) {
-            final String[] words = search.trim().split("\\s+");
-            for (final String word : words) {
-                final String pattern = "%" + word.toLowerCase() + "%";
-                spec = spec.and((root, query, cb) -> {
-                    final Join<ContactEntity, CompanyEntity> companyJoin = root.join("company", JoinType.LEFT);
-                    final Join<ContactEntity, SocialLinkEntity> socialLinksJoin = root.join("socialLinks", JoinType.LEFT);
-                    query.distinct(true);
-                    return cb.or(
-                        cb.like(cb.lower(root.get("title")), pattern),
-                        cb.like(cb.lower(root.get("firstName")), pattern),
-                        cb.like(cb.lower(root.get("lastName")), pattern),
-                        cb.like(cb.lower(root.get("email")), pattern),
-                        cb.like(cb.lower(companyJoin.get("name")), pattern),
-                        cb.like(cb.lower(socialLinksJoin.get("value")), pattern)
-                    );
-                });
-            }
-        }
-        if (companyId != null) {
-            spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("company").get("id"), companyId));
-        }
-        if (noCompany) {
-            spec = spec.and((root, query, cb) -> cb.isNull(root.get("company")));
-        }
-        if (language != null && !language.isBlank()) {
-            if ("UNKNOWN".equalsIgnoreCase(language)) {
-                spec = spec.and((root, query, cb) -> cb.isNull(root.get("language")));
-            } else {
-                final Language lang = Language.valueOf(language.toUpperCase());
-                spec = spec.and((root, query, cb) -> cb.equal(root.get("language"), lang));
-            }
-        }
-        if (brevo != null) {
-            if (brevo) {
-                spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("brevoId")));
-            } else {
-                spec = spec.and((root, query, cb) -> cb.isNull(root.get("brevoId")));
-            }
-        }
-        if (tagIds != null && !tagIds.isEmpty()) {
-            for (final UUID tagId : tagIds) {
-                spec = spec.and((root, query, cb) -> {
-                    final var tagsJoin = root.join("tags");
-                    return cb.equal(tagsJoin.get("id"), tagId);
-                });
-            }
-            spec = spec.and((root, query, cb) -> {
-                query.distinct(true);
-                return cb.conjunction();
-            });
-        }
-
-        return contactRepository.findAll(spec, Sort.by("lastName", "firstName")).stream()
-            .map(e -> toData(e))
+        return listAllEntities(search, companyId, noCompany, language, brevo, tagIds).stream()
+            .map(this::toData)
             .toList();
+    }
+
+    /**
+     * Lists all contact entities matching the given filters without pagination,
+     * sorted by last then first name. Unlike {@link #listAll}, this returns the
+     * managed entities so callers within the transaction can access lazily
+     * fetched state such as {@link ContactEntity#getPhoto()}.
+     *
+     * @return list of all matching contact entities
+     * @see #buildSpecification
+     */
+    @Transactional(readOnly = true)
+    public List<ContactEntity> listAllEntities(final String search,
+                                               final UUID companyId,
+                                               final boolean noCompany,
+                                               final String language,
+                                               final Boolean brevo,
+                                               final List<UUID> tagIds) {
+        final Specification<ContactEntity> spec =
+            buildSpecification(search, companyId, noCompany, language, brevo, tagIds);
+        return contactRepository.findAll(spec, Sort.by("lastName", "firstName"));
+    }
+
+    /**
+     * Exports all contacts matching the given filters as a single vCard 3.0
+     * document, one card per contact, including photos.
+     *
+     * <p>Runs in a read-only transaction so the lazily fetched photo bytes are
+     * available to {@link ContactVCardMapper} while the persistence context is
+     * still open.
+     *
+     * @return the vCard document as a string
+     */
+    @Transactional(readOnly = true)
+    public String exportAllAsVCard(final String search,
+                                   final UUID companyId,
+                                   final boolean noCompany,
+                                   final String language,
+                                   final Boolean brevo,
+                                   final List<UUID> tagIds) {
+        final List<ContactEntity> entities =
+            listAllEntities(search, companyId, noCompany, language, brevo, tagIds);
+        return ContactVCardMapper.toVCardString(entities);
+    }
+
+    /**
+     * Exports a single contact as a vCard 3.0 document, including its photo.
+     *
+     * @param id the contact ID
+     * @return the vCard document, or empty if no contact with that ID exists
+     */
+    @Transactional(readOnly = true)
+    public Optional<String> exportAsVCard(final UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        return contactRepository.findById(id)
+            .map(entity -> ContactVCardMapper.toVCardString(List.of(entity)));
     }
 
     /**
