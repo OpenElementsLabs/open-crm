@@ -28,16 +28,7 @@ services:
       - meili-data:/meili_data
 
   backend:
-    build:
-      context: ./backend
-      args:
-        # Forwarded into the Dockerfile so the backend image build can
-        # resolve com.open-elements:spring-services:1.0.0-SNAPSHOT from
-        # GitHub Packages (spec 107). Defaults to empty so local
-        # `docker compose build` without these env vars still works for
-        # cached builds; CI sets them in the workflow's job env.
-        GITHUB_ACTOR: ${GITHUB_ACTOR:-}
-        GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    build: ./backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
