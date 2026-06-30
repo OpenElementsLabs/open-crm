@@ -437,8 +437,6 @@ export const en: Translations = {
       chooseFile: "Choose File",
       noFileChosen: "No file chosen",
       encoding: "Encoding",
-      encodingUtf8: "UTF-8",
-      encodingWindows1252: "Windows-1252",
       hasHeader: "First row is header",
       rowsDetected: "{count} rows detected",
     },

@@ -28,9 +28,12 @@ import java.util.Objects;
 @SecurityRequirement(name = "oidc")
 public class ContactImportController {
 
+    private final ContactImportCsvParser csvParser;
     private final ContactImportService importService;
 
-    public ContactImportController(final ContactImportService importService) {
+    public ContactImportController(final ContactImportCsvParser csvParser,
+                                   final ContactImportService importService) {
+        this.csvParser = Objects.requireNonNull(csvParser, "csvParser must not be null");
         this.importService = Objects.requireNonNull(importService, "importService must not be null");
     }
 
@@ -44,7 +47,7 @@ public class ContactImportController {
     public ContactImportPreviewResponse preview(
         @RequestPart("file") final MultipartFile file,
         @RequestPart("request") final ContactImportRequest request) {
-        return importService.preview(file, request);
+        return importService.preview(csvParser.parse(file, request), request);
     }
 
     @PostMapping(value = "/commit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -57,7 +60,7 @@ public class ContactImportController {
     public ImportResult commit(
         @RequestPart("file") final MultipartFile file,
         @RequestPart("request") final ContactImportRequest request) {
-        return importService.commit(file, request);
+        return importService.commit(csvParser.parse(file, request), request);
     }
 
     @RestControllerAdvice(assignableTypes = ContactImportController.class)

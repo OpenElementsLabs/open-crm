@@ -436,8 +436,6 @@ export const de = {
       chooseFile: "Datei wählen",
       noFileChosen: "Keine Datei ausgewählt",
       encoding: "Zeichenkodierung",
-      encodingUtf8: "UTF-8",
-      encodingWindows1252: "Windows-1252",
       hasHeader: "Erste Zeile ist Kopfzeile",
       rowsDetected: "{count} Zeilen erkannt",
     },

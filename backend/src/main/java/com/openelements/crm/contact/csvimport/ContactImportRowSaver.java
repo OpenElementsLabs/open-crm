@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 
 /**
- * Commits a single imported contact in its own transaction for partial-success imports.
+ * Persists imported contacts one row at a time with partial-success semantics.
  */
 @Service
 public class ContactImportRowSaver {
@@ -20,6 +20,11 @@ public class ContactImportRowSaver {
         this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
     }
 
+    /**
+     * Saves a single contact in a new transaction so one failed row does not roll back rows that
+     * were already imported. {@link Propagation#REQUIRES_NEW} suspends any outer transaction and
+     * commits each save independently.
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ContactDto save(final ContactDto contact) {
         return contactService.save(contact);

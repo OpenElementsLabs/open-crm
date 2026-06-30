@@ -282,8 +282,8 @@ export function CsvImportDialog({ open, onOpenChange, onComplete }: CsvImportDia
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="UTF-8">{I.upload.encodingUtf8}</SelectItem>
-                    <SelectItem value="Windows-1252">{I.upload.encodingWindows1252}</SelectItem>
+                    <SelectItem value="UTF-8">UTF-8</SelectItem>
+                    <SelectItem value="Windows-1252">Windows-1252</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
