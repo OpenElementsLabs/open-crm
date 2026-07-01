@@ -19,6 +19,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,13 +120,23 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
     @Test
     void listToolsReturnsThePhase1Catalog() {
         try (McpSyncClient client = newClient(rawKey)) {
-            final var names = client.listTools().tools().stream().map(McpSchema.Tool::name).toList();
+            final var tools = client.listTools().tools();
+            final var names = tools.stream().map(McpSchema.Tool::name).toList();
             assertEquals(11, names.size());
             assertTrue(names.contains("search"));
             assertTrue(names.contains("list_contacts"));
             assertTrue(names.contains("list_company_comments"));
             assertTrue(names.contains("get_contact_photo"));
             assertTrue(names.contains("get_company_logo"));
+
+            for (final String imageTool : List.of("get_contact_photo", "get_company_logo")) {
+                final McpSchema.Tool tool = tools.stream()
+                    .filter(t -> t.name().equals(imageTool)).findFirst().orElseThrow();
+                assertTrue(tool.inputSchema().required().contains("id"),
+                    imageTool + " must declare a required id property");
+                assertTrue(tool.inputSchema().properties().containsKey("id"),
+                    imageTool + " must expose an id input property");
+            }
         }
     }
 
@@ -222,6 +233,15 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
     }
 
     @Test
+    void getContactPhotoErrorsOnMissingId() {
+        try (McpSyncClient client = newClient(rawKey)) {
+            final McpSchema.CallToolResult result = client.callTool(
+                new McpSchema.CallToolRequest("get_contact_photo", Map.of()));
+            assertTrue(Boolean.TRUE.equals(result.isError()), "missing id must be a tool error");
+        }
+    }
+
+    @Test
     void getCompanyLogoPreservesStoredPngContentType() {
         try (McpSyncClient client = newClient(rawKey)) {
             final McpSchema.CallToolResult result = client.callTool(
@@ -249,6 +269,37 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
                 new McpSchema.CallToolRequest("get_company_logo", Map.of("id", UUID.randomUUID().toString())));
             assertTrue(Boolean.TRUE.equals(result.isError()), "unknown company must be a tool error");
         }
+    }
+
+    @Test
+    void getCompanyLogoErrorsOnMissingId() {
+        try (McpSyncClient client = newClient(rawKey)) {
+            final McpSchema.CallToolResult result = client.callTool(
+                new McpSchema.CallToolRequest("get_company_logo", Map.of()));
+            assertTrue(Boolean.TRUE.equals(result.isError()), "missing id must be a tool error");
+        }
+    }
+
+    @Test
+    void getCompanyLogoErrorsOnMalformedId() {
+        try (McpSyncClient client = newClient(rawKey)) {
+            final McpSchema.CallToolResult result = client.callTool(
+                new McpSchema.CallToolRequest("get_company_logo", Map.of("id", "not-a-uuid")));
+            assertTrue(Boolean.TRUE.equals(result.isError()), "malformed id must be a tool error");
+        }
+    }
+
+    @Test
+    void imageToolsDoNotWriteAnAuditLogRow() {
+        final long before = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_log", Long.class);
+        try (McpSyncClient client = newClient(rawKey)) {
+            client.callTool(new McpSchema.CallToolRequest(
+                "get_contact_photo", Map.of("id", contactWithPhotoId.toString())));   // success
+            client.callTool(new McpSchema.CallToolRequest(
+                "get_company_logo", Map.of("id", UUID.randomUUID().toString())));      // error
+        }
+        final long after = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_log", Long.class);
+        assertEquals(before, after, "MCP image reads must not write an audit-log row");
     }
 
     private JsonNode callOk(final McpSyncClient client, final String tool, final Map<String, Object> args)
