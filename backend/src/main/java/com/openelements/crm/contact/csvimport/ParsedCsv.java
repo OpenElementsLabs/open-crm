@@ -1,7 +1,11 @@
 package com.openelements.crm.contact.csvimport;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Parsed CSV content ready for import preview or commit.
@@ -14,9 +18,14 @@ import java.util.Map;
  */
 public record ParsedCsv(
     char delimiter,
-    List<String> columns,
+    @NonNull List<String> columns,
     int totalRows,
-    List<Map<String, String>> rows,
-    List<Map<String, String>> sampleRows
+    @NonNull List<@Nullable Map<String, String>> rows,
+    @NonNull List<Map<String, String>> sampleRows
 ) {
+    public ParsedCsv {
+        columns = List.copyOf(Objects.requireNonNullElse(columns, List.of()));
+        rows = List.copyOf(Objects.requireNonNullElse(rows, List.of()));
+        sampleRows = List.copyOf(Objects.requireNonNullElse(sampleRows, List.of()));
+    }
 }

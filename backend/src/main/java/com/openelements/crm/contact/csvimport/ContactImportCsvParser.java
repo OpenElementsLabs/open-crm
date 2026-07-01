@@ -28,9 +28,11 @@ public class ContactImportCsvParser {
     static final long MAX_FILE_SIZE_BYTES = 20L * 1024L * 1024L;
 
     private static final Charset CHARSET_WINDOWS_1252 = Charset.forName("windows-1252");
+    private static final String NORMALIZED_UTF_8 = normalizeEncodingName(StandardCharsets.UTF_8.name());
+    private static final String NORMALIZED_WINDOWS_1252 = normalizeEncodingName(CHARSET_WINDOWS_1252.name());
     private static final Set<String> SUPPORTED_ENCODING_NAMES = Set.of(
-        StandardCharsets.UTF_8.name(),
-        "WINDOWS-1252"
+        NORMALIZED_UTF_8,
+        NORMALIZED_WINDOWS_1252
     );
 
     public ParsedCsv parse(final MultipartFile file, final ContactImportRequest request) {
@@ -158,11 +160,15 @@ public class ContactImportCsvParser {
         if (encoding == null || encoding.isBlank()) {
             throw unsupportedEncoding("Encoding is required");
         }
-        final String normalized = encoding.trim().toUpperCase().replace('_', '-');
+        final String normalized = normalizeEncodingName(encoding);
         if (!SUPPORTED_ENCODING_NAMES.contains(normalized)) {
             throw unsupportedEncoding("Unsupported encoding: " + encoding);
         }
-        return "WINDOWS-1252".equals(normalized) ? CHARSET_WINDOWS_1252 : StandardCharsets.UTF_8;
+        return NORMALIZED_WINDOWS_1252.equals(normalized) ? CHARSET_WINDOWS_1252 : StandardCharsets.UTF_8;
+    }
+
+    private static String normalizeEncodingName(final String encoding) {
+        return encoding.trim().toUpperCase().replace('_', '-');
     }
 
     private static String stripBomIfUtf8(final String content) {
@@ -181,7 +187,7 @@ public class ContactImportCsvParser {
         return content;
     }
 
-    static char detectDelimiter(final String line) {
+    private static char detectDelimiter(final String line) {
         int commas = 0;
         int semicolons = 0;
         boolean inQuotes = false;
