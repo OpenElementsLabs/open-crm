@@ -203,6 +203,9 @@ public class ContactEnrichmentApplier {
         } catch (final IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid photo data");
         }
+        if (raw.length > ImageData.MAX_IMAGE_SIZE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Photo exceeds the maximum size");
+        }
         final String contentType = isBlank(payload.photoContentType()) ? "image/jpeg" : payload.photoContentType();
         try {
             entity.setPhoto(ImageData.of(raw, contentType).asJpeg().data());
