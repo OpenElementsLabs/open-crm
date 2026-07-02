@@ -9,6 +9,7 @@ import { Button, Card, CardContent, CardHeader, CardTitle, DeleteConfirmDialog, 
 import type { TagDto } from "@open-elements/ui";
 import { useTranslations, useLanguage } from "@/lib/i18n";
 import { ContactComments } from "@/components/contact-comments";
+import { ContactEnrichButton } from "@/components/contact-enrich";
 import { useTranslationConfig } from "@/lib/use-translation-config";
 import { deleteContact, ForbiddenError, getContactPhotoUrl, getContactVCardUrl, getTag, translateText } from "@/lib/api";
 import type { ContactDto } from "@/lib/types";
@@ -60,6 +61,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const canDelete = hasRole(session, ROLE_ADMIN);
+  const canEnrich = hasRole(session, ROLE_ADMIN);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [tags, setTags] = useState<TagDto[]>([]);
@@ -129,6 +131,9 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <Contact className="mr-2 h-4 w-4" />
             {t.vcardExport.single}
           </Button>
+          {canEnrich && (
+            <ContactEnrichButton contact={contact} onApplied={() => router.refresh()} />
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <span>

@@ -25,6 +25,7 @@ vi.mock("@/lib/api", () => ({
   deleteContactComment: vi.fn(),
   getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
   getTranslationSettings: () => Promise.resolve({ configured: false }),
+  getEnrichmentSettings: () => Promise.resolve({ configured: false }),
   translateText: vi.fn(),
 }));
 
