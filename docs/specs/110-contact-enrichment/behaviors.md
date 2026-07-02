@@ -36,8 +36,13 @@
 
 ### Non-IT-admin cannot manage keys
 - **Given** an APP-ADMIN who is not an IT-admin
-- **When** they call any `/api/{service}/settings` endpoint
+- **When** they PUT or DELETE `/api/{service}/settings` (key management)
 - **Then** the response is 403
+
+### Admins can read the settings status for menu gating
+- **Given** an APP-ADMIN who is not an IT-admin
+- **When** they GET `/api/{service}/settings`
+- **Then** the response is 200 with only a `configured` boolean (so the menu can gate the entry)
 
 ### Removing a key disables the service
 - **Given** a configured Dropcontact key

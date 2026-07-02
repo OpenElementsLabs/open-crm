@@ -25,6 +25,11 @@ import type {
   BackupItemDto,
   TranslationConfigDto,
   TranslateResponseDto,
+  EnrichmentService,
+  EnrichmentResultDto,
+  EnrichmentApplyResultDto,
+  EnrichmentPayloadDto,
+  EnrichmentSettingsDto,
   ContactImportRequest,
   ContactImportPreviewResponse,
   ContactImportResult,
@@ -1149,6 +1154,82 @@ export async function translateText(
     throw new Error(`Failed to translate: ${response.status}`);
   }
 
+  return response.json();
+}
+
+// Contact enrichment API (Gravatar / Dropcontact / Cognism)
+
+export async function getEnrichmentSettings(
+  service: Exclude<EnrichmentService, "gravatar">,
+): Promise<EnrichmentSettingsDto> {
+  const url = `${baseUrl()}/api/${service}/settings`;
+  const response = await apiFetch(url, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${service} settings: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function updateEnrichmentSettings(
+  service: Exclude<EnrichmentService, "gravatar">,
+  apiKey: string,
+): Promise<EnrichmentSettingsDto> {
+  const url = `${baseUrl()}/api/${service}/settings`;
+  const response = await apiFetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ apiKey }),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to update ${service} settings: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function deleteEnrichmentSettings(
+  service: Exclude<EnrichmentService, "gravatar">,
+): Promise<void> {
+  const url = `${baseUrl()}/api/${service}/settings`;
+  const response = await apiFetch(url, { method: "DELETE" });
+  if (!response.ok) {
+    throw new Error(`Failed to delete ${service} settings: ${response.status}`);
+  }
+}
+
+export async function searchEnrichment(
+  contactId: string,
+  service: EnrichmentService,
+): Promise<EnrichmentResultDto> {
+  const url = `${baseUrl()}/api/contacts/${contactId}/enrich/${service}/search`;
+  const response = await apiFetch(url, { method: "POST" });
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
+  if (!response.ok) {
+    throw new Error(`Enrichment search failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function applyEnrichment(
+  contactId: string,
+  service: EnrichmentService,
+  payload: EnrichmentPayloadDto,
+  createCompany: boolean,
+): Promise<EnrichmentApplyResultDto> {
+  const url = `${baseUrl()}/api/contacts/${contactId}/enrich/${service}/apply`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ payload, createCompany }),
+  });
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
+  if (!response.ok) {
+    throw new Error(`Enrichment apply failed: ${response.status}`);
+  }
   return response.json();
 }
 

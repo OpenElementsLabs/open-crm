@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Activity, Bell, Building2, DatabaseBackup, FileText, KeyRound, RefreshCw, Search, Settings, Tag, Users, Webhook } from "lucide-react";
+import { Activity, Bell, Building2, DatabaseBackup, FileText, KeyRound, RefreshCw, Search, Settings, Sparkles, Tag, Users, Webhook } from "lucide-react";
 import { Sidebar, NavItem, CollapsibleGroup, TooltipProvider } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/api";
@@ -54,6 +54,7 @@ function CrmSidebar() {
               <NavItem href="/admin/status" icon={<Activity className="h-5 w-5" />} label={t.nav.serverStatus} active={pathname.startsWith("/admin/status")} indented />
               <NavItem href="/admin/token" icon={<KeyRound className="h-5 w-5" />} label={t.nav.bearerToken} active={pathname.startsWith("/admin/token")} indented />
               <NavItem href="/admin/brevo" icon={<RefreshCw className="h-5 w-5" />} label={t.nav.brevo} active={pathname.startsWith("/admin/brevo")} indented />
+              <NavItem href="/admin/enrichment" icon={<Sparkles className="h-5 w-5" />} label={t.nav.enrichment} active={pathname.startsWith("/admin/enrichment")} indented />
               <NavItem href="/admin/api-keys" icon={<KeyRound className="h-5 w-5" />} label={t.nav.apiKeys} active={pathname.startsWith("/admin/api-keys")} indented />
               <NavItem href="/admin/webhooks" icon={<Webhook className="h-5 w-5" />} label={t.nav.webhooks} active={pathname.startsWith("/admin/webhooks")} indented />
               <NavItem href="/admin/users" icon={<Users className="h-5 w-5" />} label={t.nav.users} active={pathname.startsWith("/admin/users")} indented />

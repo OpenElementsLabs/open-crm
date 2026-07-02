@@ -188,6 +188,55 @@ export interface BrevoSettingsDto {
   readonly apiKeyConfigured: boolean;
 }
 
+// Contact enrichment (Gravatar / Dropcontact / Cognism)
+
+export type EnrichmentService = "gravatar" | "dropcontact" | "cognism";
+
+export interface EnrichmentPayloadDto {
+  readonly email: string | null;
+  readonly position: string | null;
+  readonly phoneNumber: string | null;
+  readonly socialLinks: Readonly<Record<string, string>> | null;
+  readonly companyName: string | null;
+  readonly photoBase64: string | null;
+  readonly photoContentType: string | null;
+}
+
+export interface EnrichmentChangeDto {
+  readonly field: string;
+  readonly currentValue: string | null;
+  readonly proposedValue: string | null;
+}
+
+export interface CompanyResolutionDto {
+  readonly kind: "MATCHED" | "NEW" | "NONE";
+  readonly companyId: string | null;
+  readonly companyName: string | null;
+}
+
+export interface EnrichmentCandidateDto {
+  readonly candidateId: string;
+  readonly label: string;
+  readonly changes: readonly EnrichmentChangeDto[];
+  readonly companyResolution: CompanyResolutionDto;
+  readonly nothingToEnrich: boolean;
+  readonly payload: EnrichmentPayloadDto;
+}
+
+export interface EnrichmentResultDto {
+  readonly status: "MATCH" | "NO_MATCH";
+  readonly candidates: readonly EnrichmentCandidateDto[];
+}
+
+export interface EnrichmentApplyResultDto {
+  readonly contact: ContactDto;
+  readonly gdprNotice: string;
+}
+
+export interface EnrichmentSettingsDto {
+  readonly configured: boolean;
+}
+
 export interface TranslateResponseDto {
   readonly translatedText: string;
 }
