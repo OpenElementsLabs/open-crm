@@ -231,3 +231,28 @@ stay consistent with the unaudited frontend reads; access is recorded only as st
 
 **Prerequisite:** Best designed together with the planned scoped API keys (per-key identity makes the access log
 meaningful).
+
+## Software-side GDPR support for contact enrichment (Art. 14 information)
+
+Contact enrichment (spec 110) pulls personal data from external sources (Dropcontact/Cognism). Step 1 only shows a
+manual reminder notice after applying. The software could do more to support the Art. 14 information obligation:
+trigger an information email to the data subject, set a reminder/deadline, and/or flag enriched contacts as
+"pending information". This would turn the operational GDPR duty into a tracked, semi-automated workflow.
+
+**Context:** Deferred from the grill session for spec 110 (contact enrichment). Step 1 deliberately ships only a
+post-apply notice to keep scope manageable.
+
+**Prerequisite:** Spec 110 (contact enrichment) must be merged.
+
+## Provenance tracking for enriched contact fields (Art. 14(2)(f) source disclosure)
+
+Persist, per enriched field, which external service it came from and when (e.g. "position via Cognism on
+2026-07-02"). This is needed to answer a data subject's request about the **source** of their data
+(Art. 14(2)(f) / Art. 15). The existing mutation audit log (spec 090) records that a field changed but not the
+enrichment source. A dedicated provenance record (or an enrichment-source annotation on the audit entry) is the
+right model — step 1 stores no source at all.
+
+**Context:** Deferred from the grill session for spec 110 (contact enrichment). Step 1 consciously stores no
+provenance.
+
+**Prerequisite:** Spec 110 (contact enrichment) must be merged.
