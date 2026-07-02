@@ -162,6 +162,47 @@ describe("ContactEnrichButton", () => {
     );
   });
 
+  it("shows a selection list for multiple candidates, then the preview", async () => {
+    mockSearch.mockResolvedValue({
+      status: "MATCH",
+      candidates: [
+        {
+          candidateId: "c0", label: "Max @ Acme",
+          changes: [{ field: "position", currentValue: null, proposedValue: "CTO" }],
+          companyResolution: { kind: "NONE", companyId: null, companyName: null },
+          nothingToEnrich: false,
+          payload: { email: null, position: "CTO", phoneNumber: null, socialLinks: null, companyName: null, photoBase64: null, photoContentType: null },
+        },
+        {
+          candidateId: "c1", label: "Max @ Beta",
+          changes: [{ field: "position", currentValue: null, proposedValue: "CEO" }],
+          companyResolution: { kind: "NONE", companyId: null, companyName: null },
+          nothingToEnrich: false,
+          payload: { email: null, position: "CEO", phoneNumber: null, socialLinks: null, companyName: null, photoBase64: null, photoContentType: null },
+        },
+      ],
+    } satisfies EnrichmentResultDto);
+
+    renderWithProviders(<ContactEnrichButton contact={makeContact()} onApplied={() => {}} />);
+    await waitFor(() => expect(mockGetSettings).toHaveBeenCalled());
+    openMenu();
+    fireEvent.click(screen.getByText(S.enrichment.services.gravatar));
+
+    await waitFor(() => expect(screen.getByText(S.enrichment.dialog.selectCandidate)).toBeInTheDocument());
+    fireEvent.click(screen.getByText("Max @ Beta"));
+    await waitFor(() => expect(screen.getByText("CEO")).toBeInTheDocument());
+  });
+
+  it("shows the generic error state when the search fails", async () => {
+    mockSearch.mockRejectedValue(new Error("boom"));
+    renderWithProviders(<ContactEnrichButton contact={makeContact()} onApplied={() => {}} />);
+    await waitFor(() => expect(mockGetSettings).toHaveBeenCalled());
+    openMenu();
+    fireEvent.click(screen.getByText(S.enrichment.services.gravatar));
+
+    await waitFor(() => expect(screen.getByText(S.enrichment.dialog.error)).toBeInTheDocument());
+  });
+
   it("offers the create-company checkbox for a new company", async () => {
     mockSearch.mockResolvedValue({
       status: "MATCH",
