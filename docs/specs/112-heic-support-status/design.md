@@ -1,6 +1,6 @@
 # Design: HEIC support status indicator in the admin area
 
-**GitHub Issues:** _to be created — one for the library, one for open-crm (drafts prepared in the `/spec-create` session)_
+**GitHub Issues:** open-crm [#49](https://github.com/OpenElementsLabs/open-crm/issues/49) · library [OpenElementsLabs/nextjs-app-layer#6](https://github.com/OpenElementsLabs/nextjs-app-layer/issues/6) (also covers the `open-elements-ui` `CapabilityStatus` component)
 **Source TODO:** `docs/TODO.md` → "HEIC-Support-Status im Admin-Bereich anzeigen"
 **Prerequisite:** Spec 102 (HEIC & WebP image format support) must be merged.
 
