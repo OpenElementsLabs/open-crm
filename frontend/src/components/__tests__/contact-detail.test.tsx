@@ -25,6 +25,7 @@ vi.mock("@/lib/api", () => ({
   deleteContactComment: vi.fn(),
   getContactPhotoUrl: (...args: unknown[]) => mockGetContactPhotoUrl(...args),
   getTranslationSettings: () => Promise.resolve({ configured: false }),
+  getEnrichmentSettings: () => Promise.resolve({ configured: false }),
   translateText: vi.fn(),
 }));
 
@@ -268,5 +269,21 @@ describe("ContactDetail — Social Links", () => {
     expect(screen.getByText("octocat")).toBeInTheDocument();
     // LinkedIn label should not appear (no linkedin links)
     expect(screen.queryByText(S.form.networkLinkedin)).not.toBeInTheDocument();
+  });
+
+  it("should show the enrichment button for admins", () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />);
+    expect(screen.getByText(de.enrichment.button)).toBeInTheDocument();
+  });
+
+  it("should not show the enrichment button for non-admins", () => {
+    renderWithProviders(<ContactDetail contact={makeContact()} />, {
+      session: {
+        user: { name: "User", email: "u@example.com", image: null },
+        expires: new Date(Date.now() + 3600_000).toISOString(),
+        roles: [],
+      },
+    });
+    expect(screen.queryByText(de.enrichment.button)).not.toBeInTheDocument();
   });
 });

@@ -128,17 +128,24 @@ controllers/services), but share a uniform URL shape.
 
 ### Settings (Dropcontact & Cognism only — Gravatar is keyless)
 
-Mirrors the Brevo settings controller; class-level `@RequiresItAdmin`. Keys stored in
-`SettingsDataService` under `dropcontact.api-key` / `cognism.api-key` (DB only, no env override).
+Mirrors the Brevo settings controller. Keys stored in `SettingsDataService` under
+`dropcontact.api-key` / `cognism.api-key` (DB only, no env override).
 
-| Method | Path | Body / Result |
-|--------|------|---------------|
-| `GET`  | `/api/{service}/settings` | → `{ configured: boolean }` |
-| `PUT`  | `/api/{service}/settings` | `{ apiKey }` → validates key against the service, stores it, → `{ configured: true }`; `400` on invalid key |
-| `DELETE` | `/api/{service}/settings` | → `204`, removes the key |
+| Method | Path | Auth | Body / Result |
+|--------|------|------|---------------|
+| `GET`  | `/api/{service}/settings` | APP-ADMIN or IT-ADMIN | → `{ configured: boolean }` |
+| `PUT`  | `/api/{service}/settings` | IT-ADMIN | `{ apiKey }` → validates key against the service, stores it, → `{ configured: true }`; `400` on invalid key |
+| `DELETE` | `/api/{service}/settings` | IT-ADMIN | → `204`, removes the key |
 
 The frontend uses `GET /api/{service}/settings` to gate the menu entries (like the translate button
 uses `GET /api/translate/settings`). Gravatar has no settings and is always available.
+
+> **Auth split (resolved during implementation):** the settings *status* (`GET`) must be readable by
+> any admin who can trigger enrichment — otherwise an APP-ADMIN (who may enrich but is not an
+> IT-ADMIN) could never see whether Dropcontact/Cognism are configured, and the menu-gating behavior
+> would be impossible. Only *managing* the key (`PUT`/`DELETE`) is restricted to IT admins. This
+> supersedes the earlier "class-level `@RequiresItAdmin`" wording, which would have made even the
+> status unreadable to APP-ADMINs.
 
 ### Enrichment action (contact sub-resource)
 
