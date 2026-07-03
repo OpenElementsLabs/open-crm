@@ -772,5 +772,9 @@ export const de = {
       errorGeneric: "Ein Fehler ist aufgetreten. Bitte erneut versuchen.",
     },
   },
+  pwa: {
+    install: "App installieren",
+    iosHint: "Zum Installieren: Teilen → Zum Home-Bildschirm",
+  },
   ...uiDe,
 } as const;

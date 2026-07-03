@@ -8,6 +8,7 @@ import { Sidebar, NavItem, CollapsibleGroup, TooltipProvider } from "@open-eleme
 import { useTranslations } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/api";
 import { hasRole, ROLE_IT_ADMIN } from "@open-elements/nextjs-app-layer";
+import { SidebarInstallAffordance } from "@/components/pwa/sidebar-install-affordance";
 
 function isAdminRoute(pathname: string): boolean {
   return pathname.startsWith("/admin");
@@ -44,24 +45,27 @@ function CrmSidebar() {
           },
         }}
         bottomChildren={
-          canSeeAdmin ? (
-            <CollapsibleGroup
-              icon={<Settings className="h-5 w-5" />}
-              label={t.nav.admin}
-              defaultOpen={isAdminRoute(pathname)}
-              active={isAdminRoute(pathname)}
-            >
-              <NavItem href="/admin/status" icon={<Activity className="h-5 w-5" />} label={t.nav.serverStatus} active={pathname.startsWith("/admin/status")} indented />
-              <NavItem href="/admin/token" icon={<KeyRound className="h-5 w-5" />} label={t.nav.bearerToken} active={pathname.startsWith("/admin/token")} indented />
-              <NavItem href="/admin/brevo" icon={<RefreshCw className="h-5 w-5" />} label={t.nav.brevo} active={pathname.startsWith("/admin/brevo")} indented />
-              <NavItem href="/admin/enrichment" icon={<Sparkles className="h-5 w-5" />} label={t.nav.enrichment} active={pathname.startsWith("/admin/enrichment")} indented />
-              <NavItem href="/admin/api-keys" icon={<KeyRound className="h-5 w-5" />} label={t.nav.apiKeys} active={pathname.startsWith("/admin/api-keys")} indented />
-              <NavItem href="/admin/webhooks" icon={<Webhook className="h-5 w-5" />} label={t.nav.webhooks} active={pathname.startsWith("/admin/webhooks")} indented />
-              <NavItem href="/admin/users" icon={<Users className="h-5 w-5" />} label={t.nav.users} active={pathname.startsWith("/admin/users")} indented />
-              <NavItem href="/admin/audit-logs" icon={<FileText className="h-5 w-5" />} label={t.nav.auditLogs} active={pathname.startsWith("/admin/audit-logs")} indented />
-              <NavItem href="/admin/backup" icon={<DatabaseBackup className="h-5 w-5" />} label={t.nav.backup} active={pathname.startsWith("/admin/backup")} indented />
-            </CollapsibleGroup>
-          ) : undefined
+          <>
+            <SidebarInstallAffordance />
+            {canSeeAdmin ? (
+              <CollapsibleGroup
+                icon={<Settings className="h-5 w-5" />}
+                label={t.nav.admin}
+                defaultOpen={isAdminRoute(pathname)}
+                active={isAdminRoute(pathname)}
+              >
+                <NavItem href="/admin/status" icon={<Activity className="h-5 w-5" />} label={t.nav.serverStatus} active={pathname.startsWith("/admin/status")} indented />
+                <NavItem href="/admin/token" icon={<KeyRound className="h-5 w-5" />} label={t.nav.bearerToken} active={pathname.startsWith("/admin/token")} indented />
+                <NavItem href="/admin/brevo" icon={<RefreshCw className="h-5 w-5" />} label={t.nav.brevo} active={pathname.startsWith("/admin/brevo")} indented />
+                <NavItem href="/admin/enrichment" icon={<Sparkles className="h-5 w-5" />} label={t.nav.enrichment} active={pathname.startsWith("/admin/enrichment")} indented />
+                <NavItem href="/admin/api-keys" icon={<KeyRound className="h-5 w-5" />} label={t.nav.apiKeys} active={pathname.startsWith("/admin/api-keys")} indented />
+                <NavItem href="/admin/webhooks" icon={<Webhook className="h-5 w-5" />} label={t.nav.webhooks} active={pathname.startsWith("/admin/webhooks")} indented />
+                <NavItem href="/admin/users" icon={<Users className="h-5 w-5" />} label={t.nav.users} active={pathname.startsWith("/admin/users")} indented />
+                <NavItem href="/admin/audit-logs" icon={<FileText className="h-5 w-5" />} label={t.nav.auditLogs} active={pathname.startsWith("/admin/audit-logs")} indented />
+                <NavItem href="/admin/backup" icon={<DatabaseBackup className="h-5 w-5" />} label={t.nav.backup} active={pathname.startsWith("/admin/backup")} indented />
+              </CollapsibleGroup>
+            ) : null}
+          </>
         }
       >
         <NavItem href="/updates" icon={<Bell className="h-5 w-5" />} label={t.nav.updates} active={pathname.startsWith("/updates")} />
