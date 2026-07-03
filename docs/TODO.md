@@ -4,12 +4,15 @@
 
 The contact list should fully synchronize URL parameters with the filter UI:
 
-- All filter values (firstName, lastName, email, companyId, language, sort) should be readable from URL parameters
+- All filter values (`search`, `companyId`, `language`, `brevo`, `tagIds`) should be readable from URL parameters
 - Filter changes by the user should update the URL in real-time
 - This enables sharing filtered views via URL
 
-**Context:** Deferred from spec 009 (contact-company cross-navigation). Currently, only `companyId` is read from the URL
-on initial load, and the filter dropdown does not reflect the URL-driven filter value.
+**Context:** Deferred from spec 009 (contact-company cross-navigation). Current state (verified 2026-07-03,
+`frontend/src/app/(app)/contacts/contacts-client.tsx`): only `companyId` and `tagIds` are read from the URL on
+initial load; the unified `search` field (spec 031, which replaced the former firstName/lastName/email filters),
+`language`, and the Brevo filter are **not** read from the URL, and **no** filter change is written back to the URL.
+So filtered views still cannot be shared via URL — full bidirectional sync is still open.
 
 _Note: the two previous test-infrastructure TODO entries ("H2 Tests: Switch to Flyway + validate" and
 "Testcontainers Integration Tests") have been consolidated into **Spec 103 — Tests on Postgres via Testcontainers**.
@@ -31,28 +34,6 @@ are part of the initial implementation — these integration tests go beyond tha
 
 **Context:** Identified during the grill session for Spec 075 (Webhook Support). Prerequisite: Spec 075 must be
 implemented first.
-
-## Meilisearch Docker-Healthcheck reaktivieren
-
-The `meilisearch` service in `docker-compose.yml` deliberately ships **without** a Docker healthcheck because the
-official meilisearch image (since v1.6+) strips `wget`, `curl`, and `nc` from the base — none of the usual HTTP
-healthcheck patterns can run inside the container. Configuring one anyway breaks any dependent service that uses
-`condition: service_healthy` (Coolify deploys fail with "container meilisearch is unhealthy"). The backend works
-around this with `condition: service_started` and an in-process connect-retry loop (60 s budget) at bootstrap.
-
-This TODO re-evaluates the situation periodically:
-
-- If upstream re-introduces a probe utility (`meilisearch healthcheck` subcommand, or wget/curl back in the
-  image), switch back to a real Docker healthcheck and flip the backend's `depends_on` to `service_healthy`.
-- Alternatively, build a thin custom Docker image (`FROM getmeili/meilisearch:vX.Y` + `apt-get install -y wget`)
-  and use that — pay a few MB image size and a base-image maintenance burden for a proper healthcheck.
-
-Re-evaluation cadence: each time meilisearch is upgraded.
-
-**Context:** Surfaced by the first production deploy of spec 104. See `meilisearch.md` § 1 and
-`specs/104-meilisearch-global-search/design.md` § 1 for the architectural reasoning.
-
-**Prerequisite:** Spec 104 (Meilisearch global search) must be merged.
 
 ## Cmd-K-Shortcut für globale Suche
 
@@ -108,20 +89,10 @@ Person/Kommentar erstellt, geändert oder gelöscht hat. Das ist eine personenbe
 Mitarbeitenden durch andere Mitarbeitende und benötigt eine saubere rechtliche Grundlage — z. B. eine
 Betriebsvereinbarung oder eine entsprechende Klausel im AV-Vertrag, die diese Transparenz abdeckt.
 
-**Context:** Offene Frage aus der Grill-Session zur Updates-View-Spec. Die Spec wird mit der Annahme erstellt, dass
-diese Grundlage geschaffen wird; das eigentliche Dokument/Vereinbarung ist ein separater organisatorischer Schritt.
-
-## Awesome DB Backup
-
-der DB_Backup Container soll aufgebohrt werden und ein REST API bereistellen durch den man Backups triggern kann und
-sich Backups runterladen kann.
-Es soll keine FUnktionalität geben um Backups zu löschen, da die Backups automatisch nach 7 Tagen gelöscht werden.
-Alles soll additiv sein.
-Es soll auch keine Funktionalität geben um Backups zu planen, da die Backups automatisch alle 24 Stunden erstellt
-werden.
-
-Das Backjend kann dann darauf zugreifen und im Frontend kann man im Admin Bereich funktionen zum triggern von Backups
-und den Download des letzten backups bereitstellen.
+**Context:** Offene Frage aus der Grill-Session zur Updates-View-Spec. Die Updates-View selbst ist inzwischen
+umgesetzt (Specs 096/097, Status `done`) — offen bleibt **nur** die rechtliche/organisatorische Grundlage
+(Betriebsvereinbarung bzw. AV-Vertrags-Klausel). Das ist kein Code-Thema, sondern ein separater organisatorischer
+Schritt und bleibt daher als stehender rechtlicher Hinweis bestehen.
 
 ## HEIC- und WebP-Support für Company-Logos
 
@@ -190,7 +161,7 @@ once produced.
 
 **Prerequisite:** Spec 102 (HEIC & WebP image format support) must be merged.
 
-# Frontend mit PWA erweitern
+## Frontend mit PWA erweitern
 
 Es soll einfach möglich sein, das Frontend als PWA zu installieren.
 
