@@ -773,5 +773,9 @@ export const en: Translations = {
       errorGeneric: "An error occurred. Please try again.",
     },
   },
+  pwa: {
+    install: "Install app",
+    iosHint: "To install: Share → Add to Home Screen",
+  },
   ...uiEn,
 } as const;
