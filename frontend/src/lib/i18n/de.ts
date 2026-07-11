@@ -54,6 +54,14 @@ export const de = {
       expired: "Abgelaufen",
       noToken: "Kein Token verfügbar",
     },
+    capabilities: {
+      heic: {
+        label: "HEIC-Bilddecodierung",
+        available: "Verfügbar",
+        unavailable: "Nicht verfügbar",
+        hint: "HEIC-Uploads werden mit 415 abgelehnt – Dockerfile prüfen",
+      },
+    },
   },
   health: {
     title: "Systemstatus",

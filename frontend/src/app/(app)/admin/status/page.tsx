@@ -1,4 +1,11 @@
 import { auth } from "@/auth";
-import { createServerStatusPage } from "@open-elements/nextjs-app-layer";
+import { ForbiddenPage, ROLE_IT_ADMIN } from "@open-elements/nextjs-app-layer";
+import { StatusPageClient } from "./status-page-client";
 
-export default createServerStatusPage({ auth });
+export default async function StatusPage() {
+  const session = await auth();
+  if (!session?.roles?.includes(ROLE_IT_ADMIN)) {
+    return <ForbiddenPage />;
+  }
+  return <StatusPageClient />;
+}
