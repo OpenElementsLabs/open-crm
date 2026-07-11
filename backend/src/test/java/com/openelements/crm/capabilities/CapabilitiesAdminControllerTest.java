@@ -1,5 +1,6 @@
 package com.openelements.crm.capabilities;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -10,6 +11,7 @@ import com.openelements.crm.contact.CrmHeicSupportCheck;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +20,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import static org.mockito.Mockito.when;
 
 /**
  * Behaviour tests for the spec-112 {@link CapabilitiesAdminController}.
@@ -53,6 +54,8 @@ class CapabilitiesAdminControllerTest extends AbstractDbTest {
     }
 
     @Test
+    @DisplayName("GET /api/admin/capabilities returns heicAvailable=true for an IT-admin when the "
+        + "bean reports HEIC decoding is available")
     void returnsHeicAvailableTrueForItAdmin() throws Exception {
         when(heicSupportCheck.isHeicAvailable()).thenReturn(true);
 
@@ -62,6 +65,8 @@ class CapabilitiesAdminControllerTest extends AbstractDbTest {
     }
 
     @Test
+    @DisplayName("GET /api/admin/capabilities returns heicAvailable=false when HEIC decoding is "
+        + "unavailable in the runtime")
     void returnsHeicAvailableFalseWhenDecodingUnavailable() throws Exception {
         when(heicSupportCheck.isHeicAvailable()).thenReturn(false);
 
@@ -71,12 +76,16 @@ class CapabilitiesAdminControllerTest extends AbstractDbTest {
     }
 
     @Test
+    @DisplayName("GET /api/admin/capabilities returns 403 for a logged-in user without the "
+        + "IT-admin role")
     void forbiddenForNonItAdmin() throws Exception {
         mockMvc.perform(withRoles(get("/api/admin/capabilities"), List.of("APP-ADMIN")))
             .andExpect(status().isForbidden());
     }
 
     @Test
+    @DisplayName("GET /api/admin/capabilities returns the startup-cached value consistently "
+        + "across repeated calls (no live re-probe)")
     void reflectsStartupCachedValueConsistentlyAcrossCalls() throws Exception {
         when(heicSupportCheck.isHeicAvailable()).thenReturn(true);
 
