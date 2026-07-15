@@ -55,6 +55,14 @@ export const en: Translations = {
       expired: "Expired",
       noToken: "No token available",
     },
+    capabilities: {
+      heic: {
+        label: "HEIC image decoding",
+        available: "Available",
+        unavailable: "Not available",
+        hint: "HEIC uploads will be rejected with 415 — check Dockerfile",
+      },
+    },
   },
   health: {
     title: "System Status",
