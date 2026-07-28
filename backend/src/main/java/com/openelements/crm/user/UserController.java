@@ -11,12 +11,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -47,6 +49,16 @@ public class UserController {
         @PageableDefault(size = 20) final Pageable pageable) {
         return adminUserRepository.findBySubNot(SystemUser.SUB, pageable)
             .map(this::toDto);
+    }
+
+    @GetMapping(value = "/options", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "List user options",
+        description = "Returns a reduced list of all registered users (id, name, avatarUrl) for owner "
+            + "selection, excluding the SYSTEM-USER. Available to any authenticated user.")
+    public List<UserOptionDto> listUserOptions() {
+        return adminUserRepository.findBySubNot(SystemUser.SUB, Sort.by("name")).stream()
+            .map(entity -> new UserOptionDto(entity.getId(), entity.getName(), entity.getAvatarUrl()))
+            .toList();
     }
 
     private UserDto toDto(final UserEntity entity) {

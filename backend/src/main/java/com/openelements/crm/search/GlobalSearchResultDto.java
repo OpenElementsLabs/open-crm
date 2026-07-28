@@ -15,10 +15,11 @@ public record GlobalSearchResultDto(
     @Schema(description = "Matching contacts", requiredMode = Schema.RequiredMode.REQUIRED) List<SearchHitDto> contacts,
     @Schema(description = "Matching tags", requiredMode = Schema.RequiredMode.REQUIRED) List<SearchHitDto> tags,
     @Schema(description = "Matching comments (each carries owner reference)",
-        requiredMode = Schema.RequiredMode.REQUIRED) List<SearchHitDto> comments
+        requiredMode = Schema.RequiredMode.REQUIRED) List<SearchHitDto> comments,
+    @Schema(description = "Matching opportunities", requiredMode = Schema.RequiredMode.REQUIRED) List<SearchHitDto> opportunities
 ) {
     public static GlobalSearchResultDto empty(final String query) {
         return new GlobalSearchResultDto(query == null ? "" : query,
-            List.of(), List.of(), List.of(), List.of());
+            List.of(), List.of(), List.of(), List.of(), List.of());
     }
 }

@@ -83,4 +83,12 @@ public class SearchConfiguration {
             List.of("ownerType"),
             List.of());
     }
+
+    @Bean
+    public IndexSettings opportunitiesSettings(final CrmIndexNames names) {
+        return new IndexSettings(names.opportunities(), "id",
+            List.of("title", "stage", "product", "companyName", "mainContactName", "ownerName", "tagNames"),
+            List.of("status", "tagNames"),
+            List.of());
+    }
 }

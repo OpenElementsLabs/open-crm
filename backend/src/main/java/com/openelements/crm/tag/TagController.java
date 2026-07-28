@@ -2,6 +2,7 @@ package com.openelements.crm.tag;
 
 import com.openelements.crm.company.CompanyService;
 import com.openelements.crm.contact.ContactService;
+import com.openelements.crm.opportunity.OpportunityService;
 import com.openelements.spring.base.security.roles.RequiresAppAdmin;
 import com.openelements.spring.base.services.tag.TagDataService;
 import com.openelements.spring.base.services.tag.TagDto;
@@ -41,11 +42,15 @@ public class TagController {
 
     private final ContactService contactService;
 
+    private final OpportunityService opportunityService;
 
-    public TagController(final TagDataService tagService, CompanyService companyService, ContactService contactService) {
+
+    public TagController(final TagDataService tagService, CompanyService companyService, ContactService contactService,
+                         OpportunityService opportunityService) {
         this.tagService = tagService;
         this.companyService = companyService;
         this.contactService = contactService;
+        this.opportunityService = opportunityService;
     }
 
     @GetMapping
@@ -61,7 +66,8 @@ public class TagController {
             tag.color(),
             companyService.countWithTag(tag.id()),
             contactService.countWithTag(tag.id()),
-            0));
+            0,
+            opportunityService.countWithTag(tag.id())));
     }
 
     @GetMapping("/{id}")
@@ -78,7 +84,8 @@ public class TagController {
                 tag.color(),
                 companyService.countWithTag(tag.id()),
                 contactService.countWithTag(tag.id()),
-                0
+                0,
+                opportunityService.countWithTag(tag.id())
             )).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
     }
 

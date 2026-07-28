@@ -122,10 +122,13 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
         try (McpSyncClient client = newClient(rawKey)) {
             final var tools = client.listTools().tools();
             final var names = tools.stream().map(McpSchema.Tool::name).toList();
-            assertEquals(11, names.size());
+            assertEquals(14, names.size());
             assertTrue(names.contains("search"));
             assertTrue(names.contains("list_contacts"));
             assertTrue(names.contains("list_company_comments"));
+            assertTrue(names.contains("list_opportunities"));
+            assertTrue(names.contains("get_opportunity"));
+            assertTrue(names.contains("list_opportunity_comments"));
             assertTrue(names.contains("get_contact_photo"));
             assertTrue(names.contains("get_company_logo"));
 
@@ -173,6 +176,49 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
                 new McpSchema.CallToolRequest("get_contact", Map.of("id", UUID.randomUUID().toString())));
             assertTrue(Boolean.TRUE.equals(result.isError()), "unknown id must be a tool error");
         }
+    }
+
+    @Test
+    void listOpportunitiesReturnsEnvelopeAndGetReturnsIt() throws Exception {
+        final UUID opportunityId = seedOpportunity("MCP Deal");
+        try (McpSyncClient client = newClient(rawKey)) {
+            final JsonNode list = callOk(client, "list_opportunities", Map.of());
+            assertTrue(list.has("items") && list.get("items").isArray());
+            assertTrue(list.get("totalCount").asInt() >= 1, "seeded opportunity must be counted");
+
+            final JsonNode single = callOk(client, "get_opportunity", Map.of("id", opportunityId.toString()));
+            assertEquals("MCP Deal", single.get("title").asText());
+
+            final JsonNode comments = callOk(client, "list_opportunity_comments",
+                Map.of("opportunityId", opportunityId.toString()));
+            assertEquals(0, comments.get("totalCount").asInt());
+        }
+    }
+
+    @Test
+    void getOpportunityWithUnknownIdIsError() {
+        try (McpSyncClient client = newClient(rawKey)) {
+            final McpSchema.CallToolResult result = client.callTool(
+                new McpSchema.CallToolRequest("get_opportunity", Map.of("id", UUID.randomUUID().toString())));
+            assertTrue(Boolean.TRUE.equals(result.isError()), "unknown id must be a tool error");
+        }
+    }
+
+    private UUID seedOpportunity(final String title) {
+        final UUID ownerId = UUID.randomUUID();
+        final Instant now = Instant.now();
+        jdbcTemplate.update(
+            "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?)",
+            ownerId, "mcp-owner", "mcp-owner", "MCP Owner",
+            java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
+        final UUID id = UUID.randomUUID();
+        jdbcTemplate.update(
+            "INSERT INTO opportunities (id, title, status, company_id, main_contact_id, owner_id, created_at, updated_at) "
+                + "VALUES (?, ?, 'OPEN', ?, ?, ?, ?, ?)",
+            id, title, companyNoLogoId, contactId, ownerId,
+            java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
+        return id;
     }
 
     @Test

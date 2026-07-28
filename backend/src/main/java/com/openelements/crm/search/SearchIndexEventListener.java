@@ -2,6 +2,7 @@ package com.openelements.crm.search;
 
 import com.openelements.crm.company.CompanyDto;
 import com.openelements.crm.contact.ContactDto;
+import com.openelements.crm.opportunity.OpportunityDto;
 import com.openelements.spring.base.events.GenericDataEvent;
 import com.openelements.spring.base.events.OnObjectCreate;
 import com.openelements.spring.base.events.OnObjectDelete;
@@ -71,6 +72,8 @@ public class SearchIndexEventListener {
                 indexService.deleteContact(event.entityId());
             } else if (TagDto.class.isAssignableFrom(type)) {
                 indexService.deleteTag(event.entityId());
+            } else if (OpportunityDto.class.isAssignableFrom(type)) {
+                indexService.deleteOpportunity(event.entityId());
             } else if (CommentDto.class.isAssignableFrom(type)) {
                 indexService.deleteComment(event.entityId());
             }
@@ -89,6 +92,8 @@ public class SearchIndexEventListener {
             indexService.upsertContact(dto);
         } else if (TagDto.class.isAssignableFrom(type) && data instanceof TagDto dto) {
             indexService.upsertTag(dto);
+        } else if (OpportunityDto.class.isAssignableFrom(type) && data instanceof OpportunityDto dto) {
+            indexService.upsertOpportunity(dto);
         } else if (CommentDto.class.isAssignableFrom(type) && data instanceof CommentDto dto) {
             indexService.upsertComment(dto);
         }
