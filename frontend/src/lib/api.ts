@@ -33,6 +33,11 @@ import type {
   ContactImportRequest,
   ContactImportPreviewResponse,
   ContactImportResult,
+  OpportunityDto,
+  OpportunityCreateDto,
+  OpportunityUpdateDto,
+  OpportunityStatus,
+  UserOptionDto,
   Page,
 } from "./types";
 import type { TagDto } from "@open-elements/ui";
@@ -560,6 +565,173 @@ export async function deleteContactComment(contactId: string, commentId: string)
   if (!response.ok) {
     throw new Error(`Failed to delete contact comment: ${response.status}`);
   }
+}
+
+// Opportunity API
+
+export interface OpportunityListParams {
+  readonly page?: number;
+  readonly size?: number;
+  readonly search?: string;
+  readonly status?: OpportunityStatus;
+  readonly stage?: string;
+  readonly companyId?: string;
+  readonly contactId?: string;
+  readonly ownerId?: string;
+  readonly tagIds?: readonly string[];
+}
+
+export async function getOpportunities(
+  params: OpportunityListParams = {},
+): Promise<Page<OpportunityDto>> {
+  const searchParams = new URLSearchParams();
+  if (params.page !== undefined) searchParams.set("page", String(params.page));
+  if (params.size !== undefined) searchParams.set("size", String(params.size));
+  if (params.search) searchParams.set("search", params.search);
+  if (params.status) searchParams.set("status", params.status);
+  if (params.stage) searchParams.set("stage", params.stage);
+  if (params.companyId) searchParams.set("companyId", params.companyId);
+  if (params.contactId) searchParams.set("contactId", params.contactId);
+  if (params.ownerId) searchParams.set("ownerId", params.ownerId);
+  if (params.tagIds) {
+    for (const id of params.tagIds) {
+      searchParams.append("tagIds", id);
+    }
+  }
+
+  const query = searchParams.toString();
+  const url = `${baseUrl()}/api/opportunities${query ? `?${query}` : ""}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunities: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getOpportunity(id: string): Promise<OpportunityDto> {
+  const url = `${baseUrl()}/api/opportunities/${id}`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Opportunity not found");
+    }
+    throw new Error(`Failed to fetch opportunity: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createOpportunity(data: OpportunityCreateDto): Promise<OpportunityDto> {
+  const url = `${baseUrl()}/api/opportunities`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create opportunity: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function updateOpportunity(
+  id: string,
+  data: OpportunityUpdateDto,
+): Promise<OpportunityDto> {
+  const url = `${baseUrl()}/api/opportunities/${id}`;
+  const response = await apiFetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to update opportunity: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteOpportunity(id: string): Promise<void> {
+  const url = `${baseUrl()}/api/opportunities/${id}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to delete opportunity: ${response.status}`);
+  }
+}
+
+// Opportunity Comment API
+
+export async function getOpportunityComments(opportunityId: string): Promise<CommentDto[]> {
+  const url = `${baseUrl()}/api/opportunities/${opportunityId}/comments`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunity comments: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createOpportunityComment(
+  opportunityId: string,
+  data: CommentCreateDto,
+): Promise<CommentDto> {
+  const url = `${baseUrl()}/api/opportunities/${opportunityId}/comments`;
+  const response = await apiFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Failed to create opportunity comment: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteOpportunityComment(
+  opportunityId: string,
+  commentId: string,
+): Promise<void> {
+  const url = `${baseUrl()}/api/opportunities/${opportunityId}/comments/${commentId}`;
+  const response = await apiFetch(url, { method: "DELETE" });
+
+  if (response.status === 404) {
+    return;
+  }
+  if (response.status === 403) {
+    throw new ForbiddenError();
+  }
+  if (!response.ok) {
+    throw new Error(`Failed to delete opportunity comment: ${response.status}`);
+  }
+}
+
+// User options (reduced list for owner selection; any authenticated user)
+
+export async function getUserOptions(): Promise<UserOptionDto[]> {
+  const url = `${baseUrl()}/api/users/options`;
+  const response = await apiFetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user options: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 // Brevo Sync API
@@ -1241,7 +1413,7 @@ export interface SearchHit {
   snippet: string | null;
   highlight: string | null;
   score: number;
-  ownerType?: "company" | "contact" | "task" | null;
+  ownerType?: "company" | "contact" | "task" | "opportunity" | null;
   ownerId?: string | null;
 }
 
@@ -1251,6 +1423,7 @@ export interface GlobalSearchResult {
   contacts: SearchHit[];
   tags: SearchHit[];
   comments: SearchHit[];
+  opportunities: SearchHit[];
 }
 
 export class SearchUnavailableError extends Error {

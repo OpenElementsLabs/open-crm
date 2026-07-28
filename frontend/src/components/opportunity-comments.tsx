@@ -1,0 +1,226 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { MessageSquarePlus, X } from "lucide-react";
+import {
+  Button,
+  DeleteConfirmDialog,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Skeleton,
+  MarkdownView,
+  TranslateButton,
+} from "@open-elements/ui";
+import { useTranslations } from "@/lib/i18n";
+import { AddCommentDialog } from "@open-elements/nextjs-app-layer";
+import { useTranslationConfig } from "@/lib/use-translation-config";
+import {
+  getOpportunityComments,
+  createOpportunityComment,
+  deleteOpportunityComment,
+  ForbiddenError,
+  translateText,
+} from "@/lib/api";
+import type { CommentDto } from "@/lib/types";
+import { hasAppAdmin } from "@/lib/roles";
+
+function formatDate(dateString: string, language: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleString(language === "de" ? "de-DE" : "en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+interface OpportunityCommentsProps {
+  readonly opportunityId: string;
+  readonly totalCount?: number;
+}
+
+export function OpportunityComments({ opportunityId, totalCount }: OpportunityCommentsProps) {
+  const t = useTranslations();
+  const S = t.companies.comments;
+  const { configured } = useTranslationConfig();
+  const { data: session } = useSession();
+  const canDelete = hasAppAdmin(session);
+
+  const [displayCount, setDisplayCount] = useState(totalCount);
+  const [comments, setComments] = useState<CommentDto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const fetchComments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getOpportunityComments(opportunityId);
+      setComments(result);
+    } catch {
+      setComments([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [opportunityId]);
+
+  useEffect(() => {
+    setDisplayCount(totalCount);
+  }, [totalCount]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+
+  const handleSend = async (text: string) => {
+    setSending(true);
+    try {
+      const newComment = await createOpportunityComment(opportunityId, { text });
+      setComments((prev) => [newComment, ...prev]);
+      setDisplayCount((prev) => (prev !== undefined ? prev + 1 : undefined));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteOpportunityComment(opportunityId, deleteTarget);
+      setComments((prev) => prev.filter((c) => c.id !== deleteTarget));
+      setDisplayCount((prev) => (prev !== undefined && prev > 0 ? prev - 1 : prev));
+      setDeleteTarget(null);
+      setDeleteError(null);
+    } catch (e) {
+      if (e instanceof ForbiddenError) {
+        setDeleteError(t.errors.forbidden.deleteNoPermission);
+      } else {
+        setDeleteError(S.deleteDialog.title);
+      }
+    }
+  };
+
+  return (
+    <Card className="border-oe-gray-light">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="font-heading text-lg text-oe-dark">
+          {S.title}
+          {displayCount !== undefined ? ` (${displayCount})` : ""}
+        </CardTitle>
+        <Button onClick={() => setDialogOpen(true)} size="sm">
+          <MessageSquarePlus className="mr-2 h-4 w-4" />
+          {S.add}
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {loading && (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && comments.length === 0 && <p className="text-sm text-oe-gray-mid">{S.empty}</p>}
+
+        {!loading && comments.length > 0 && (
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="border-b border-oe-gray-light pb-4 last:border-b-0">
+                <div className="flex items-start justify-between">
+                  <p className="text-xs text-oe-gray-mid">
+                    {comment.author?.name ?? "—"} &middot; {formatDate(comment.createdAt, "de")}
+                  </p>
+                  <div className="flex items-center">
+                    <TranslateButton
+                      text={comment.text}
+                      size="md"
+                      configured={configured}
+                      onTranslate={(text, lang) => translateText(text, lang as "de" | "en")}
+                      translations={{
+                        button: t.translation.translate,
+                        dialog: {
+                          title: t.translation.title,
+                          loading: t.translation.loading,
+                          error: t.translation.error,
+                          copy: t.translation.copy,
+                          copied: t.translation.copied,
+                          close: t.translation.close,
+                        },
+                      }}
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <button
+                            type="button"
+                            disabled={!canDelete}
+                            onClick={() => {
+                              setDeleteTarget(comment.id);
+                              setDeleteError(null);
+                            }}
+                            className="ml-2 shrink-0 text-oe-red hover:text-oe-red-dark disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {canDelete ? S.deleteDialog.title : t.errors.roleRequired.admin}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+                <div className="mt-1 text-sm">
+                  <MarkdownView content={comment.text} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+
+      <AddCommentDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSubmit={handleSend}
+        sending={sending}
+        title={S.addTitle}
+        placeholder={S.placeholder}
+        sendLabel={S.send}
+        sendingLabel={S.sending}
+        errorTitle={S.errorTitle}
+        errorMessage={S.errorGeneric}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setDeleteError(null);
+          }
+        }}
+        title={S.deleteDialog.title}
+        description={S.deleteDialog.description}
+        confirmLabel={S.deleteDialog.confirm}
+        cancelLabel={S.deleteDialog.cancel}
+        onConfirm={handleDelete}
+        error={deleteError}
+      />
+    </Card>
+  );
+}
