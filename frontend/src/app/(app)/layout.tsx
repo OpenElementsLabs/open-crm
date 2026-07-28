@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Activity, Bell, Building2, DatabaseBackup, FileText, KeyRound, RefreshCw, Search, Settings, Sparkles, Tag, Users, Webhook } from "lucide-react";
+import { Activity, Bell, Building2, DatabaseBackup, FileText, Handshake, KeyRound, RefreshCw, Search, Settings, Sparkles, Tag, Users, Webhook } from "lucide-react";
 import { Sidebar, NavItem, CollapsibleGroup, TooltipProvider } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/api";
@@ -72,6 +72,7 @@ function CrmSidebar() {
         <NavItem href="/search" icon={<Search className="h-5 w-5" />} label={t.nav.search} active={pathname.startsWith("/search")} />
         <NavItem href="/companies" icon={<Building2 className="h-5 w-5" />} label={t.nav.companies} active={pathname.startsWith("/companies")} />
         <NavItem href="/contacts" icon={<Users className="h-5 w-5" />} label={t.nav.contacts} active={pathname.startsWith("/contacts")} />
+        <NavItem href="/opportunities" icon={<Handshake className="h-5 w-5" />} label={t.nav.opportunities} active={pathname.startsWith("/opportunities")} />
         <NavItem href="/tags" icon={<Tag className="h-5 w-5" />} label={t.nav.tags} active={pathname.startsWith("/tags")} />
       </Sidebar>
   );

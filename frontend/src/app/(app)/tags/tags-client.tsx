@@ -132,6 +132,7 @@ export function TagsClient() {
                   className="px-4 py-3 text-left font-medium text-oe-gray hidden md:table-cell">{t.tags.columns.description}</th>
                 <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.companies}</th>
                 <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.contacts}</th>
+                <th className="px-4 py-3 text-center font-medium text-oe-gray w-24">{t.nav.opportunities}</th>
                 <th className="px-4 py-3 text-right font-medium text-oe-gray w-24">{t.tags.columns.actions}</th>
               </tr>
               </thead>
@@ -166,6 +167,20 @@ export function TagsClient() {
                       {(tag.contactCount ?? 0) > 0 && (
                         <TooltipIconButton tooltip={t.nav.contacts} asChild>
                           <Link href={`/contacts?tagIds=${tag.id}`}>
+                            <ArrowUpRight/>
+                          </Link>
+                        </TooltipIconButton>
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="inline-flex items-center justify-center gap-1">
+                      <span className="text-oe-dark">
+                        {(tag as { opportunityCount?: number | null }).opportunityCount ?? 0}
+                      </span>
+                      {((tag as { opportunityCount?: number | null }).opportunityCount ?? 0) > 0 && (
+                        <TooltipIconButton tooltip={t.nav.opportunities} asChild>
+                          <Link href={`/opportunities?tagIds=${tag.id}`}>
                             <ArrowUpRight/>
                           </Link>
                         </TooltipIconButton>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, Building2, MessageSquare, Search as SearchIcon, Tag as TagIcon, User as UserIcon } from "lucide-react";
+import { AlertCircle, Building2, Handshake, MessageSquare, Search as SearchIcon, Tag as TagIcon, User as UserIcon } from "lucide-react";
 import { Input } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { globalSearch, SearchUnavailableError } from "@/lib/api";
@@ -110,16 +110,27 @@ export function SearchClient() {
       showAllHref: (q) => `/tags?search=${encodeURIComponent(q)}`,
     },
     {
+      key: "opportunities",
+      title: S.sectionOpportunities,
+      href: (id) => `/opportunities/${id}`,
+      icon: <Handshake className="h-4 w-4 text-oe-gray-mid" />,
+      showAllHref: (q) => `/opportunities?search=${encodeURIComponent(q)}`,
+    },
+    {
       key: "comments",
       title: S.sectionComments,
       href: () => "#",
       icon: <MessageSquare className="h-4 w-4 text-oe-gray-mid" />,
       showAllHref: (q) => `/updates?search=${encodeURIComponent(q)}`,
     },
-  ], [S.sectionCompanies, S.sectionContacts, S.sectionTags, S.sectionComments]);
+  ], [S.sectionCompanies, S.sectionContacts, S.sectionTags, S.sectionComments, S.sectionOpportunities]);
 
   const totalHits = result
-    ? result.companies.length + result.contacts.length + result.tags.length + result.comments.length
+    ? result.companies.length +
+      result.contacts.length +
+      result.tags.length +
+      result.comments.length +
+      result.opportunities.length
     : 0;
 
   return (
@@ -192,6 +203,7 @@ function hrefForHit(
     if (hit.ownerType === "company") return `/companies/${hit.ownerId}`;
     if (hit.ownerType === "contact") return `/contacts/${hit.ownerId}`;
     if (hit.ownerType === "task") return `/tasks/${hit.ownerId}`;
+    if (hit.ownerType === "opportunity") return `/opportunities/${hit.ownerId}`;
   }
   return defaultHref(hit.id);
 }

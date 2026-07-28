@@ -6,6 +6,7 @@ import {
   AlertCircle,
   Bell,
   Building2,
+  Handshake,
   Trash2,
   User as UserIcon,
 } from "lucide-react";
@@ -50,8 +51,10 @@ interface MessageContext {
   readonly templates: {
     readonly company: EventTemplates;
     readonly contact: EventTemplates;
+    readonly opportunity: EventTemplates;
     readonly companyComment: EventTemplates;
     readonly contactComment: EventTemplates;
+    readonly opportunityComment: EventTemplates;
   };
 }
 
@@ -92,20 +95,28 @@ function pickTemplate(ctx: MessageContext): string {
     case "CONTACT_CREATED": return t.contact.created;
     case "CONTACT_UPDATED": return t.contact.updated;
     case "CONTACT_DELETED": return t.contact.deleted;
+    case "OPPORTUNITY_CREATED": return t.opportunity.created;
+    case "OPPORTUNITY_UPDATED": return t.opportunity.updated;
+    case "OPPORTUNITY_DELETED": return t.opportunity.deleted;
     case "COMPANY_COMMENT_CREATED": return t.companyComment.created;
     case "COMPANY_COMMENT_UPDATED": return t.companyComment.updated;
     case "COMPANY_COMMENT_DELETED": return t.companyComment.deleted;
     case "CONTACT_COMMENT_CREATED": return t.contactComment.created;
     case "CONTACT_COMMENT_UPDATED": return t.contactComment.updated;
     case "CONTACT_COMMENT_DELETED": return t.contactComment.deleted;
+    case "OPPORTUNITY_COMMENT_CREATED": return t.opportunityComment.created;
+    case "OPPORTUNITY_COMMENT_UPDATED": return t.opportunityComment.updated;
+    case "OPPORTUNITY_COMMENT_DELETED": return t.opportunityComment.deleted;
   }
 }
 
-function entityTarget(type: UpdateType): "/companies" | "/contacts" | null {
-  if (type.startsWith("COMPANY_DELETED") || type.startsWith("CONTACT_DELETED")) {
+function entityTarget(type: UpdateType): "/companies" | "/contacts" | "/opportunities" | null {
+  if (type === "COMPANY_DELETED" || type === "CONTACT_DELETED" || type === "OPPORTUNITY_DELETED") {
     return null;
   }
-  return type.startsWith("COMPANY_") ? "/companies" : "/contacts";
+  if (type.startsWith("OPPORTUNITY_")) return "/opportunities";
+  if (type.startsWith("CONTACT_")) return "/contacts";
+  return "/companies";
 }
 
 function formatBy(template: string, userName: string): string {
@@ -113,7 +124,11 @@ function formatBy(template: string, userName: string): string {
 }
 
 function EntityImage({ entry }: { readonly entry: UpdateEntryDto }) {
-  if (entry.type === "COMPANY_DELETED" || entry.type === "CONTACT_DELETED") {
+  if (
+    entry.type === "COMPANY_DELETED" ||
+    entry.type === "CONTACT_DELETED" ||
+    entry.type === "OPPORTUNITY_DELETED"
+  ) {
     return (
       <Trash2
         className="h-8 w-8 shrink-0 text-oe-gray-mid"
@@ -125,6 +140,17 @@ function EntityImage({ entry }: { readonly entry: UpdateEntryDto }) {
 
   const isCompany = entry.type.startsWith("COMPANY_");
   const isContact = entry.type.startsWith("CONTACT_");
+  const isOpportunity = entry.type.startsWith("OPPORTUNITY_");
+
+  if (isOpportunity) {
+    return (
+      <Handshake
+        className="h-8 w-8 shrink-0 text-oe-gray-mid"
+        aria-hidden="true"
+        data-testid="updates-row-opportunity-placeholder"
+      />
+    );
+  }
 
   if (isCompany && entry.entityHasLogo && entry.entityId) {
     return (

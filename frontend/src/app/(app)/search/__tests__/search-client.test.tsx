@@ -44,6 +44,7 @@ describe("SearchClient", () => {
       contacts: [],
       tags: [],
       comments: [],
+      opportunities: [],
     });
   });
 
@@ -97,6 +98,7 @@ describe("SearchClient", () => {
       ],
       tags: [],
       comments: [],
+      opportunities: [],
     });
 
     renderWithProviders(<SearchClient />);
@@ -133,6 +135,7 @@ describe("SearchClient", () => {
         contacts: [],
         tags: [],
         comments: [],
+        opportunities: [],
       });
 
     renderWithProviders(<SearchClient />);

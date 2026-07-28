@@ -159,6 +159,61 @@ export interface TaskUpdateDto {
   readonly tagIds?: readonly string[] | null;
 }
 
+// Opportunity (Deal) — spec 114
+
+export type OpportunityStatus = "OPEN" | "WON" | "LOST";
+
+export interface UserOptionDto {
+  readonly id: string;
+  readonly name: string;
+  readonly avatarUrl: string | null;
+}
+
+export interface OpportunityDto {
+  readonly id: string;
+  readonly title: string;
+  readonly stage: string | null;
+  readonly status: OpportunityStatus;
+  readonly product: string | null;
+  readonly estimatedValue: number | null;
+  readonly companyId: string;
+  readonly companyName: string | null;
+  readonly mainContactId: string;
+  readonly mainContactName: string | null;
+  readonly additionalContactIds: readonly string[];
+  readonly owner: UserDto;
+  readonly tagIds: readonly string[];
+  readonly commentCount: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface OpportunityCreateDto {
+  readonly title: string;
+  readonly stage?: string | null;
+  readonly status?: OpportunityStatus | null;
+  readonly product?: string | null;
+  readonly estimatedValue?: number | null;
+  readonly companyId: string;
+  readonly mainContactId: string;
+  readonly additionalContactIds?: readonly string[] | null;
+  readonly ownerId?: string | null;
+  readonly tagIds?: readonly string[] | null;
+}
+
+export interface OpportunityUpdateDto {
+  readonly title: string;
+  readonly stage?: string | null;
+  readonly status: OpportunityStatus;
+  readonly product?: string | null;
+  readonly estimatedValue?: number | null;
+  readonly companyId: string;
+  readonly mainContactId: string;
+  readonly additionalContactIds?: readonly string[] | null;
+  readonly ownerId: string;
+  readonly tagIds?: readonly string[] | null;
+}
+
 export type UpdateType =
   | "COMPANY_CREATED"
   | "COMPANY_UPDATED"
@@ -166,12 +221,18 @@ export type UpdateType =
   | "CONTACT_CREATED"
   | "CONTACT_UPDATED"
   | "CONTACT_DELETED"
+  | "OPPORTUNITY_CREATED"
+  | "OPPORTUNITY_UPDATED"
+  | "OPPORTUNITY_DELETED"
   | "COMPANY_COMMENT_CREATED"
   | "COMPANY_COMMENT_UPDATED"
   | "COMPANY_COMMENT_DELETED"
   | "CONTACT_COMMENT_CREATED"
   | "CONTACT_COMMENT_UPDATED"
-  | "CONTACT_COMMENT_DELETED";
+  | "CONTACT_COMMENT_DELETED"
+  | "OPPORTUNITY_COMMENT_CREATED"
+  | "OPPORTUNITY_COMMENT_UPDATED"
+  | "OPPORTUNITY_COMMENT_DELETED";
 
 export interface UpdateEntryDto {
   readonly id: string;
