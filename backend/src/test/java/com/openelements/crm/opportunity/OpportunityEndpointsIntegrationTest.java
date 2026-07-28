@@ -355,6 +355,59 @@ class OpportunityEndpointsIntegrationTest extends AbstractDbTest {
             .andExpect(jsonPath("$.page.totalElements").value(2));
     }
 
+    @Test
+    void listFiltersBySearchStageCompanyOwnerAndTag() throws Exception {
+        final CompanyEntity companyA = newCompany("Alpha AG");
+        final CompanyEntity companyB = newCompany("Beta AG");
+        final ContactEntity main = newContact("Max", "Muster");
+        final UUID ownerA = newUser("owner-a", "Owner A");
+        final UUID tag = newTag("Prio");
+
+        final Map<String, Object> p1 = minimalPayload(companyA.getId(), main.getId());
+        p1.put("title", "Muster deal");
+        p1.put("stage", "Angebot");
+        p1.put("ownerId", ownerA.toString());
+        p1.put("tagIds", List.of(tag.toString()));
+        createOk(p1);
+
+        final Map<String, Object> p2 = minimalPayload(companyB.getId(), main.getId());
+        p2.put("title", "Other deal");
+        p2.put("stage", "Lead");
+        createOk(p2);
+
+        mockMvc.perform(asUser(get("/api/opportunities?search=muster"), List.of()))
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Muster deal"));
+        mockMvc.perform(asUser(get("/api/opportunities?stage=Angebot"), List.of()))
+            .andExpect(jsonPath("$.page.totalElements").value(1));
+        mockMvc.perform(asUser(get("/api/opportunities?companyId=" + companyB.getId()), List.of()))
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Other deal"));
+        mockMvc.perform(asUser(get("/api/opportunities?ownerId=" + ownerA), List.of()))
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Muster deal"));
+        mockMvc.perform(asUser(get("/api/opportunities?tagIds=" + tag), List.of()))
+            .andExpect(jsonPath("$.page.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Muster deal"));
+    }
+
+    @Test
+    void deletingTagDetachesItFromOpportunities() throws Exception {
+        final CompanyEntity company = newCompany("Acme");
+        final ContactEntity main = newContact("Max", "Muster");
+        final UUID tag = newTag("Temp");
+        final Map<String, Object> payload = minimalPayload(company.getId(), main.getId());
+        payload.put("tagIds", List.of(tag.toString()));
+        final UUID id = UUID.fromString(createOk(payload).get("id").asText());
+
+        mockMvc.perform(asUser(delete("/api/tags/" + tag), List.of(Roles.ROLE_APP_ADMIN)))
+            .andExpect(status().isNoContent());
+
+        mockMvc.perform(asUser(get("/api/opportunities/" + id), List.of()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tagIds.length()").value(0));
+    }
+
     // -- Update --------------------------------------------------------------
 
     @Test
@@ -658,6 +711,23 @@ class OpportunityEndpointsIntegrationTest extends AbstractDbTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content[?(@.type == 'OPPORTUNITY_CREATED')].entityName").value(
                 org.hamcrest.Matchers.hasItem("Feed deal")));
+    }
+
+    @Test
+    void opportunityCommentActivityAppearsInUpdatesFeed() throws Exception {
+        final CompanyEntity company = newCompany("Acme");
+        final ContactEntity main = newContact("Max", "Muster");
+        final UUID id = createOpportunity("Comment feed deal", company.getId(), main.getId());
+        mockMvc.perform(asUser(
+                post("/api/opportunities/" + id + "/comments")
+                    .contentType(MediaType.APPLICATION_JSON).content("{\"text\":\"note\"}"),
+                List.of()))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(asUser(get("/api/updates?size=50"), List.of()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[?(@.type == 'OPPORTUNITY_COMMENT_CREATED')].entityName").value(
+                org.hamcrest.Matchers.hasItem("Comment feed deal")));
     }
 
     private int auditCount(final String entityType, final UUID entityId, final String action) {
