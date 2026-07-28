@@ -15,6 +15,8 @@ import static com.openelements.spring.base.mcp.McpTools.uuidProp;
 
 import com.openelements.crm.company.CompanyService;
 import com.openelements.crm.contact.ContactService;
+import com.openelements.crm.opportunity.OpportunityService;
+import com.openelements.crm.opportunity.OpportunityStatus;
 import com.openelements.crm.search.CrmSearchService;
 import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.mcp.McpPage;
@@ -61,6 +63,7 @@ public class McpToolFactory implements McpToolProvider {
 
     private final ContactService contactService;
     private final CompanyService companyService;
+    private final OpportunityService opportunityService;
     private final TagDataService tagService;
     private final CrmSearchService searchService;
     private final McpPaging paging;
@@ -68,12 +71,14 @@ public class McpToolFactory implements McpToolProvider {
 
     public McpToolFactory(final ContactService contactService,
                           final CompanyService companyService,
+                          final OpportunityService opportunityService,
                           final TagDataService tagService,
                           final CrmSearchService searchService,
                           final McpPaging paging,
                           final McpToolSupport support) {
         this.contactService = Objects.requireNonNull(contactService);
         this.companyService = Objects.requireNonNull(companyService);
+        this.opportunityService = Objects.requireNonNull(opportunityService);
         this.tagService = Objects.requireNonNull(tagService);
         this.searchService = Objects.requireNonNull(searchService);
         this.paging = Objects.requireNonNull(paging);
@@ -95,6 +100,9 @@ public class McpToolFactory implements McpToolProvider {
             getTagTool(),
             listCompanyCommentsTool(),
             listContactCommentsTool(),
+            listOpportunitiesTool(),
+            getOpportunityTool(),
+            listOpportunityCommentsTool(),
             getContactPhotoTool(),
             getCompanyLogoTool()
         );
@@ -209,6 +217,53 @@ public class McpToolFactory implements McpToolProvider {
         return support.spec(tool, args -> support.paginate(
             contactService.listCommentsOfContact(requiredUuid(args, "contactId")),
             integer(args, "page"), integer(args, "size")));
+    }
+
+    private SyncToolSpecification listOpportunitiesTool() {
+        final Map<String, Object> props = paginationProps();
+        props.put("search", prop("string", "Filter by title (case-insensitive contains)."));
+        props.put("status", prop("string", "Filter by status (OPEN, WON, or LOST)."));
+        props.put("stage", prop("string", "Filter by exact stage value."));
+        props.put("companyId", uuidProp("Filter by company ID."));
+        props.put("contactId", uuidProp("Filter by contact ID (main or additional contact)."));
+        props.put("ownerId", uuidProp("Filter by owner user ID."));
+        props.put("tagIds", uuidArray("Filter by tag IDs (all must be present)."));
+        final McpSchema.Tool tool = tool("list_opportunities",
+            "List sales opportunities with optional search/status/stage/company/contact/owner/tag filters."
+                + PAGINATION_HINT, props, List.of());
+        return support.spec(tool, args -> McpPage.from(opportunityService.list(
+            string(args, "search"), parseStatus(string(args, "status")), string(args, "stage"),
+            uuid(args, "companyId"), uuid(args, "contactId"), uuid(args, "ownerId"), uuidList(args, "tagIds"),
+            paging.toPageable(integer(args, "page"), integer(args, "size"), Sort.by("updatedAt")))));
+    }
+
+    private SyncToolSpecification getOpportunityTool() {
+        final Map<String, Object> props = new LinkedHashMap<>();
+        props.put("id", uuidProp("The opportunity ID."));
+        final McpSchema.Tool tool = tool("get_opportunity", "Get a single opportunity by ID.", props, List.of("id"));
+        return support.spec(tool, args -> {
+            final UUID id = requiredUuid(args, "id");
+            return opportunityService.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Opportunity not found: " + id));
+        });
+    }
+
+    private SyncToolSpecification listOpportunityCommentsTool() {
+        final Map<String, Object> props = paginationProps();
+        props.put("opportunityId", uuidProp("The opportunity ID."));
+        final McpSchema.Tool tool = tool("list_opportunity_comments",
+            "List the comments (full text) attached to an opportunity." + PAGINATION_HINT,
+            props, List.of("opportunityId"));
+        return support.spec(tool, args -> support.paginate(
+            opportunityService.listCommentsOfOpportunity(requiredUuid(args, "opportunityId")),
+            integer(args, "page"), integer(args, "size")));
+    }
+
+    private static OpportunityStatus parseStatus(final String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return OpportunityStatus.valueOf(value.trim().toUpperCase());
     }
 
     private SyncToolSpecification getContactPhotoTool() {

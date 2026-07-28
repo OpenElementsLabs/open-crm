@@ -1,6 +1,5 @@
 package com.openelements.crm.company;
 
-import com.openelements.crm.contact.ContactService;
 import com.openelements.spring.base.data.image.ImageData;
 import com.openelements.spring.base.security.roles.RequiresAppAdmin;
 import com.openelements.spring.base.services.comment.CommentCreateDto;
@@ -48,11 +47,9 @@ import java.util.UUID;
 public class CompanyController {
 
     private final CompanyService companyService;
-    private final ContactService contactService;
 
-    public CompanyController(final CompanyService companyService, final ContactService contactService) {
+    public CompanyController(final CompanyService companyService) {
         this.companyService = Objects.requireNonNull(companyService, "companyService must not be null");
-        this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
     }
 
     /**
@@ -182,10 +179,7 @@ public class CompanyController {
     public void delete(@Parameter(description = "The company ID") @PathVariable final UUID id,
                        @Parameter(description = "Whether to also delete all associated contacts")
                        @RequestParam(defaultValue = "false") final boolean deleteContacts) {
-        if (deleteContacts) {
-            contactService.getForCompany(id).forEach(contact -> contactService.delete(contact.id()));
-        }
-        companyService.delete(id);
+        companyService.deleteWithContacts(id, deleteContacts);
     }
 
     @PostMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

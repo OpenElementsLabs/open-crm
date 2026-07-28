@@ -33,4 +33,8 @@ public class CrmIndexNames {
     public String comments() {
         return props.resolveIndex("comments");
     }
+
+    public String opportunities() {
+        return props.resolveIndex("opportunities");
+    }
 }

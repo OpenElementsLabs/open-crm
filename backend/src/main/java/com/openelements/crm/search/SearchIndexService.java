@@ -7,6 +7,9 @@ import com.openelements.crm.contact.ContactDto;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.SocialLinkDto;
+import com.openelements.crm.opportunity.OpportunityDto;
+import com.openelements.crm.opportunity.OpportunityEntity;
+import com.openelements.crm.opportunity.OpportunityRepository;
 import com.openelements.spring.base.services.search.MeilisearchClient;
 import com.openelements.spring.base.services.comment.CommentDto;
 import com.openelements.spring.base.services.tag.TagDto;
@@ -44,6 +47,7 @@ public class SearchIndexService {
     private final TagRepository tagRepository;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final OpportunityRepository opportunityRepository;
     private final JdbcTemplate jdbcTemplate;
 
     public SearchIndexService(final MeilisearchClient client,
@@ -51,12 +55,14 @@ public class SearchIndexService {
                               final TagRepository tagRepository,
                               final CompanyRepository companyRepository,
                               final ContactRepository contactRepository,
+                              final OpportunityRepository opportunityRepository,
                               final JdbcTemplate jdbcTemplate) {
         this.client = client;
         this.indexNames = indexNames;
         this.tagRepository = tagRepository;
         this.companyRepository = companyRepository;
         this.contactRepository = contactRepository;
+        this.opportunityRepository = opportunityRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -163,6 +169,30 @@ public class SearchIndexService {
         return doc;
     }
 
+    // -- Opportunities --
+
+    public void upsertOpportunity(final OpportunityDto dto) {
+        client.addDocuments(indexNames.opportunities(), List.of(opportunityDocument(dto)));
+    }
+
+    public void deleteOpportunity(final UUID id) {
+        client.deleteDocument(indexNames.opportunities(), id.toString());
+    }
+
+    public Map<String, Object> opportunityDocument(final OpportunityDto dto) {
+        final Map<String, Object> doc = new LinkedHashMap<>();
+        doc.put("id", dto.id().toString());
+        doc.put("title", nullSafe(dto.title()));
+        doc.put("stage", nullSafe(dto.stage()));
+        doc.put("product", nullSafe(dto.product()));
+        doc.put("status", dto.status() == null ? "" : dto.status().name());
+        doc.put("companyName", nullSafe(dto.companyName()));
+        doc.put("mainContactName", nullSafe(dto.mainContactName()));
+        doc.put("ownerName", dto.owner() == null ? "" : nullSafe(dto.owner().name()));
+        doc.put("tagNames", resolveTagNames(dto.tagIds()));
+        return doc;
+    }
+
     // -- Comments --
 
     public void upsertComment(final CommentDto dto) {
@@ -219,6 +249,15 @@ public class SearchIndexService {
             // local to this service; the label is left to the bare ID for v1.
             // The frontend uses ownerType + ownerId to navigate.
             return Optional.of(new OwnerRef("task", taskOwner.get(0), ""));
+        }
+        final List<UUID> opportunityOwner = jdbcTemplate.queryForList(
+            "SELECT opportunity_id FROM opportunity_comments WHERE comment_id = ?",
+            UUID.class, commentId);
+        if (!opportunityOwner.isEmpty()) {
+            final UUID opportunityId = opportunityOwner.get(0);
+            final String label = opportunityRepository.findById(opportunityId)
+                .map(OpportunityEntity::getTitle).orElse("");
+            return Optional.of(new OwnerRef("opportunity", opportunityId, label));
         }
         return Optional.empty();
     }

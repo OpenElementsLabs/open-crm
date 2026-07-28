@@ -2,6 +2,7 @@ package com.openelements.crm.contact;
 
 import com.openelements.crm.company.CompanyEntity;
 import com.openelements.crm.company.CompanyRepository;
+import com.openelements.crm.opportunity.OpportunityRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
 import com.openelements.spring.base.data.image.ImageData;
@@ -54,6 +55,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
     private final AuditLogRepository auditLogRepository;
     private final UserService userService;
     private final CrmHeicSupportCheck crmHeicSupportCheck;
+    private final OpportunityRepository opportunityRepository;
 
     public ContactService(final ContactRepository contactRepository,
                           final CompanyRepository companyRepository,
@@ -63,6 +65,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
                           final AuditLogRepository auditLogRepository,
                           final UserService userService,
                           final CrmHeicSupportCheck crmHeicSupportCheck,
+                          final OpportunityRepository opportunityRepository,
                           final ApplicationEventPublisher eventPublisher) {
         super((eventPublisher));
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
@@ -73,6 +76,7 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
         this.auditLogRepository = Objects.requireNonNull(auditLogRepository, "auditLogRepository must not be null");
         this.userService = Objects.requireNonNull(userService, "userService must not be null");
         this.crmHeicSupportCheck = Objects.requireNonNull(crmHeicSupportCheck, "crmHeicSupportCheck must not be null");
+        this.opportunityRepository = Objects.requireNonNull(opportunityRepository, "opportunityRepository must not be null");
     }
 
     /**
@@ -444,6 +448,12 @@ public class ContactService extends AbstractDbBackedDataService<ContactEntity, C
     @Override
     public void delete(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
+        // Interim veto (spec 113): a contact that is the main contact of an opportunity must not be
+        // deleted. Additional-contact links do not block; the DB cascade removes those join rows.
+        if (opportunityRepository.existsByMainContactId(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Contact is the main contact of an opportunity");
+        }
         final ContactEntity contact = contactRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Contact not found: " + id));
         final List<UUID> commentIds = new ArrayList<>(

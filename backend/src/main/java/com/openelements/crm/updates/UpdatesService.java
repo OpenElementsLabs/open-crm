@@ -6,6 +6,9 @@ import com.openelements.crm.company.CompanyService;
 import com.openelements.crm.contact.ContactEntity;
 import com.openelements.crm.contact.ContactRepository;
 import com.openelements.crm.contact.ContactService;
+import com.openelements.crm.opportunity.OpportunityEntity;
+import com.openelements.crm.opportunity.OpportunityRepository;
+import com.openelements.crm.opportunity.OpportunityService;
 import com.openelements.spring.base.services.audit.AuditAction;
 import com.openelements.spring.base.services.audit.AuditLogDataService;
 import com.openelements.spring.base.services.audit.AuditLogDto;
@@ -37,12 +40,15 @@ public class UpdatesService {
 
     private static final String COMPANY_ENTITY_TYPE = "CompanyDto";
     private static final String CONTACT_ENTITY_TYPE = "ContactDto";
+    private static final String OPPORTUNITY_ENTITY_TYPE = "OpportunityDto";
 
     private static final Set<String> RELEVANT_ENTITY_TYPES = Set.of(
         COMPANY_ENTITY_TYPE,
         CONTACT_ENTITY_TYPE,
+        OPPORTUNITY_ENTITY_TYPE,
         CompanyService.COMMENT_ENTITY_TYPE,
-        ContactService.COMMENT_ENTITY_TYPE
+        ContactService.COMMENT_ENTITY_TYPE,
+        OpportunityService.COMMENT_ENTITY_TYPE
     );
 
     private static final int MIN_FETCH_PAGE_SIZE = 50;
@@ -51,13 +57,16 @@ public class UpdatesService {
     private final AuditLogDataService auditLogDataService;
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final OpportunityRepository opportunityRepository;
 
     public UpdatesService(final AuditLogDataService auditLogDataService,
                           final CompanyRepository companyRepository,
-                          final ContactRepository contactRepository) {
+                          final ContactRepository contactRepository,
+                          final OpportunityRepository opportunityRepository) {
         this.auditLogDataService = Objects.requireNonNull(auditLogDataService, "auditLogDataService must not be null");
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.opportunityRepository = Objects.requireNonNull(opportunityRepository, "opportunityRepository must not be null");
     }
 
     /**
@@ -132,6 +141,7 @@ public class UpdatesService {
     private List<UpdateEntryDto> resolveNames(final List<AuditLogDto> entries) {
         final Set<UUID> companyIds = new HashSet<>();
         final Set<UUID> contactIds = new HashSet<>();
+        final Set<UUID> opportunityIds = new HashSet<>();
         for (final AuditLogDto e : entries) {
             if (e.entityId() == null) {
                 continue;
@@ -147,11 +157,18 @@ public class UpdatesService {
                         contactIds.add(e.entityId());
                     }
                 }
+                case OPPORTUNITY_ENTITY_TYPE -> {
+                    if (e.action() != AuditAction.DELETE) {
+                        opportunityIds.add(e.entityId());
+                    }
+                }
                 default -> {
                     if (CompanyService.COMMENT_ENTITY_TYPE.equals(e.entityType())) {
                         companyIds.add(e.entityId());
                     } else if (ContactService.COMMENT_ENTITY_TYPE.equals(e.entityType())) {
                         contactIds.add(e.entityId());
+                    } else if (OpportunityService.COMMENT_ENTITY_TYPE.equals(e.entityType())) {
+                        opportunityIds.add(e.entityId());
                     }
                 }
             }
@@ -169,6 +186,10 @@ public class UpdatesService {
             contactNames.put(c.getId(), buildContactDisplayName(c));
             contactHasPhoto.put(c.getId(), c.getPhoto() != null);
         }
+        final Map<UUID, String> opportunityNames = new HashMap<>();
+        for (final OpportunityEntity o : opportunityRepository.findAllById(opportunityIds)) {
+            opportunityNames.put(o.getId(), o.getTitle());
+        }
 
         final List<UpdateEntryDto> result = new ArrayList<>(entries.size());
         for (final AuditLogDto e : entries) {
@@ -177,7 +198,9 @@ public class UpdatesService {
             final String entityName;
             final boolean hasLogo;
             final boolean hasPhoto;
-            if (type == UpdateType.COMPANY_DELETED || type == UpdateType.CONTACT_DELETED) {
+            if (type == UpdateType.COMPANY_DELETED
+                || type == UpdateType.CONTACT_DELETED
+                || type == UpdateType.OPPORTUNITY_DELETED) {
                 entityId = null;
                 entityName = null;
                 hasLogo = false;
@@ -190,6 +213,15 @@ public class UpdatesService {
                 entityId = e.entityId();
                 entityName = companyNames.get(e.entityId());
                 hasLogo = Boolean.TRUE.equals(companyHasLogo.get(e.entityId()));
+                hasPhoto = false;
+            } else if (type == UpdateType.OPPORTUNITY_CREATED
+                || type == UpdateType.OPPORTUNITY_UPDATED
+                || type == UpdateType.OPPORTUNITY_COMMENT_CREATED
+                || type == UpdateType.OPPORTUNITY_COMMENT_UPDATED
+                || type == UpdateType.OPPORTUNITY_COMMENT_DELETED) {
+                entityId = e.entityId();
+                entityName = opportunityNames.get(e.entityId());
+                hasLogo = false;
                 hasPhoto = false;
             } else {
                 entityId = e.entityId();
@@ -232,6 +264,11 @@ public class UpdatesService {
                 case UPDATE -> UpdateType.CONTACT_UPDATED;
                 case DELETE -> UpdateType.CONTACT_DELETED;
             };
+            case OPPORTUNITY_ENTITY_TYPE -> switch (action) {
+                case INSERT -> UpdateType.OPPORTUNITY_CREATED;
+                case UPDATE -> UpdateType.OPPORTUNITY_UPDATED;
+                case DELETE -> UpdateType.OPPORTUNITY_DELETED;
+            };
             default -> {
                 if (CompanyService.COMMENT_ENTITY_TYPE.equals(entityType)) {
                     yield switch (action) {
@@ -245,6 +282,13 @@ public class UpdatesService {
                         case INSERT -> UpdateType.CONTACT_COMMENT_CREATED;
                         case UPDATE -> UpdateType.CONTACT_COMMENT_UPDATED;
                         case DELETE -> UpdateType.CONTACT_COMMENT_DELETED;
+                    };
+                }
+                if (OpportunityService.COMMENT_ENTITY_TYPE.equals(entityType)) {
+                    yield switch (action) {
+                        case INSERT -> UpdateType.OPPORTUNITY_COMMENT_CREATED;
+                        case UPDATE -> UpdateType.OPPORTUNITY_COMMENT_UPDATED;
+                        case DELETE -> UpdateType.OPPORTUNITY_COMMENT_DELETED;
                     };
                 }
                 throw new IllegalStateException("Unexpected entityType: " + entityType);

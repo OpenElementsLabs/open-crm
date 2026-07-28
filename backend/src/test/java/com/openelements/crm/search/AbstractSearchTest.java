@@ -69,7 +69,8 @@ public abstract class AbstractSearchTest extends AbstractDbTest {
             crmIndexNames.companies(),
             crmIndexNames.contacts(),
             crmIndexNames.tags(),
-            crmIndexNames.comments())) {
+            crmIndexNames.comments(),
+            crmIndexNames.opportunities())) {
             deleteAllDocuments(idx);
         }
     }

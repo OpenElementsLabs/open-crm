@@ -1,6 +1,8 @@
 package com.openelements.crm.company;
 
 import com.openelements.crm.contact.ContactRepository;
+import com.openelements.crm.contact.ContactService;
+import com.openelements.crm.opportunity.OpportunityRepository;
 import com.openelements.spring.base.data.AbstractDbBackedDataService;
 import com.openelements.spring.base.data.EntityRepository;
 import com.openelements.spring.base.data.image.ImageData;
@@ -44,28 +46,34 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
 
     private final CompanyRepository companyRepository;
     private final ContactRepository contactRepository;
+    private final ContactService contactService;
     private final CommentService commentService;
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
     private final AuditLogRepository auditLogRepository;
     private final UserService userService;
+    private final OpportunityRepository opportunityRepository;
 
     public CompanyService(final CompanyRepository companyRepository,
                           final ContactRepository contactRepository,
+                          final ContactService contactService,
                           final CommentService commentService,
                           final CommentRepository commentRepository,
                           final TagRepository tagRepository,
                           final AuditLogRepository auditLogRepository,
                           final UserService userService,
+                          final OpportunityRepository opportunityRepository,
                           final ApplicationEventPublisher eventPublisher) {
         super(eventPublisher);
         this.companyRepository = Objects.requireNonNull(companyRepository, "companyRepository must not be null");
         this.contactRepository = Objects.requireNonNull(contactRepository, "contactRepository must not be null");
+        this.contactService = Objects.requireNonNull(contactService, "contactService must not be null");
         this.commentService = Objects.requireNonNull(commentService, "commentService must not be null");
         this.commentRepository = Objects.requireNonNull(commentRepository, "commentRepository must not be null");
         this.tagRepository = Objects.requireNonNull(tagRepository, "tagRepository must not be null");
         this.auditLogRepository = Objects.requireNonNull(auditLogRepository, "auditLogRepository must not be null");
         this.userService = Objects.requireNonNull(userService, "userService must not be null");
+        this.opportunityRepository = Objects.requireNonNull(opportunityRepository, "opportunityRepository must not be null");
     }
 
     /**
@@ -279,9 +287,32 @@ public class CompanyService extends AbstractDbBackedDataService<CompanyEntity, C
         }
     }
 
+    /**
+     * Deletes a company, optionally deleting its contacts first. The whole operation runs in a
+     * single transaction so any {@code 409 CONFLICT} veto (raised here for an opportunity that
+     * references the company, or by {@link ContactService#delete} for a contact that is the main
+     * contact of an opportunity) rolls back the entire deletion — nothing is deleted.
+     *
+     * @param id             the company ID
+     * @param deleteContacts whether to also delete all of the company's contacts
+     */
+    @Transactional
+    public void deleteWithContacts(final UUID id, final boolean deleteContacts) {
+        Objects.requireNonNull(id, "id must not be null");
+        if (deleteContacts) {
+            contactService.getForCompany(id).forEach(contact -> contactService.delete(contact.id()));
+        }
+        delete(id);
+    }
+
     @Override
     public void delete(final UUID id) {
         Objects.requireNonNull(id, "id must not be null");
+        // Interim veto (spec 113): a company referenced by any opportunity must not be deleted.
+        if (opportunityRepository.existsByCompanyId(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Company is referenced by opportunities");
+        }
         final CompanyEntity company = companyRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Company not found: " + id));
         final List<UUID> commentIds = new ArrayList<>(

@@ -71,7 +71,9 @@ public class CrmSearchService {
             queryForIndex(indexNames.tags(), query, sectionLimit,
                 List.of("name", "description")),
             queryForIndex(indexNames.comments(), query, sectionLimit,
-                List.of("text", "ownerLabel"))
+                List.of("text", "ownerLabel")),
+            queryForIndex(indexNames.opportunities(), query, sectionLimit,
+                List.of("title", "companyName", "mainContactName"))
         )));
 
         return new GlobalSearchResultDto(
@@ -79,7 +81,8 @@ public class CrmSearchService {
             extractHits(response, indexNames.companies(), this::companyHit),
             extractHits(response, indexNames.contacts(), this::contactHit),
             extractHits(response, indexNames.tags(), this::tagHit),
-            extractHits(response, indexNames.comments(), this::commentHit));
+            extractHits(response, indexNames.comments(), this::commentHit),
+            extractHits(response, indexNames.opportunities(), this::opportunityHit));
     }
 
     private static Map<String, Object> queryForIndex(final String indexUid,
@@ -166,6 +169,17 @@ public class CrmSearchService {
         final String highlight = Highlighter.safeHighlight(hit.path("_formatted").path("name").asText(name));
         final String snippet = hit.path("description").asText("");
         return new SearchHitDto(id, name, snippet, highlight, scoreOf(hit), null, null);
+    }
+
+    private SearchHitDto opportunityHit(final JsonNode hit) {
+        final UUID id = readId(hit);
+        if (id == null) {
+            return null;
+        }
+        final String title = hit.path("title").asText("");
+        final String highlight = Highlighter.safeHighlight(hit.path("_formatted").path("title").asText(title));
+        final String snippet = hit.path("companyName").asText("");
+        return new SearchHitDto(id, title, snippet, highlight, scoreOf(hit), null, null);
     }
 
     private SearchHitDto commentHit(final JsonNode hit) {
