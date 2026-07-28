@@ -203,6 +203,45 @@ stay consistent with the unaudited frontend reads; access is recorded only as st
 **Prerequisite:** Best designed together with the planned scoped API keys (per-key identity makes the access log
 meaningful).
 
+## CSV export and print view for opportunities
+
+Extend the opportunity list with the CSV export (column-selection dialog, like companies/contacts, spec 038) and
+the print-optimized table view (spec 032/037). Both are established per-entity integrations that were deliberately
+cut from the initial opportunity specs to keep their scope manageable.
+
+**Context:** Deferred during the grill session for spec 113 (opportunity backend) / 114 (opportunity frontend).
+
+**Prerequisite:** Specs 113 and 114 must be merged.
+
+## Kanban integration for opportunity stage and status
+
+Connect the opportunity `stage` and `status` fields to the external Open Elements Kanban app, which will become
+the leading source for both values. The groundwork is already in place: `stage` is a free-text string (no enum,
+any value accepted by the backend) and `status` is manually maintained until Kanban sets it. The integration
+itself — sync direction, matching, API, and whether webhook events on stage/status changes are needed — is
+undesigned and will be its own GitHub issue and spec.
+
+**Context:** Deferred during the grill session for spec 113 (opportunity backend). Explicitly no preparation
+beyond the string-typed stage was wanted in 113 (no external Kanban ID field, no guaranteed webhook events).
+
+**Prerequisite:** Specs 113 and 114 must be merged.
+
+## Anonymization instead of hard delete for contacts and companies
+
+Replace (or complement) the current hard-delete of contacts and companies with an anonymization flow so that
+GDPR Art. 17 erasure requests can be fulfilled even when the record is referenced by other entities. This became
+pressing with spec 113: deleting a company or a contact is now **blocked** (409) while it is referenced as the
+company or main contact of an opportunity — the interim workaround for an erasure request is manual (delete or
+re-assign the opportunity first). Anonymization resolves this properly by scrubbing personal data while keeping
+referential integrity.
+
+**This must land before the system goes into production operation** (decision from the spec-113 grill session).
+
+**Context:** Decided during the grill session for spec 113 (opportunity backend) as the successor to the
+delete-blocking interim rule.
+
+**Prerequisite:** Spec 113 must be merged.
+
 ## Software-side GDPR support for contact enrichment (Art. 14 information)
 
 Contact enrichment (spec 110) pulls personal data from external sources (Dropcontact/Cognism). Step 1 only shows a
