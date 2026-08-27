@@ -266,3 +266,28 @@ right model — step 1 stores no source at all.
 provenance.
 
 **Prerequisite:** Spec 110 (contact enrichment) must be merged.
+
+## Adopt the `spring-services-mcp` module and delete CRM's local MCP classes
+
+`spring-services` 1.3.1 ships a `spring-services-mcp` module containing twelve classes in
+`com.openelements.spring.base.mcp` — `McpConfiguration`, `McpPage`, `McpPaging`, `McpProperties`,
+`McpSecurityConfig`, `McpServerConfig`, `McpToolLogic`, `McpToolProvider`, `McpTools`,
+`McpToolSupport`, `McpActorLabel`, `McpUnavailableException` — every one of which also exists under
+`backend/src/main/java/com/openelements/spring/base/mcp/`. Spec 108 wrote CRM's MCP implementation
+into the library's package precisely as an extraction target, so the intended end state is to consume
+the module and delete the local copies.
+
+This is blocked on two things: `McpImageLogic` (spec 109) exists only in CRM and is **not** in the
+library jar, so it must either stay behind or be contributed upstream first; and any behavioural drift
+between the two copies has to be reconciled before switching. Note that MCP is enabled in production,
+so this is not a low-stakes swap.
+
+Until it happens there is **no automated protection** — no enforcer rule, no guard test — against
+someone adding `spring-services-mcp` to `backend/pom.xml` and silently shadowing the local classes with
+identically-named ones from the jar. Adding a banned-dependency enforcer rule is a cheaper interim
+option if the adoption slips.
+
+**Context:** Deferred from spec 115 (dependency updates); the reason that spec takes the à-la-carte
+Path B (`spring-services-bom` + `-core` + `-search` + `-dbbackup`) instead of `spring-services-all`.
+
+**Prerequisite:** Spec 115 must land first.
