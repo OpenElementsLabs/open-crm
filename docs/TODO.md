@@ -307,3 +307,76 @@ the application it depicts.
 
 **Context:** Found while designing spec 116 (page metadata), which deliberately uses `ImageResponse`'s
 default font for exactly this reason.
+
+## Show the running application version at runtime
+
+Make the deployed version observable from a running instance: expose it from the backend (e.g. a version
+field on an existing admin/status endpoint, fed from the Maven build via `build-info` / `@project.version@`)
+and display it on the `/admin/status` page next to the existing health and capability rows. The frontend
+should surface its own `package.json` version too, so a mismatch between the two containers is visible.
+
+Why it matters: the dev environment in Coolify continuously deploys `main` (an `A.B.C-SNAPSHOT` version)
+while production is deployed from a concrete `vA.B.C` tag. Without a runtime indicator, an operator looking
+at an instance cannot tell which of the two they are on, and a third-party self-hoster cannot tell which
+release they are running when filing a bug report.
+
+**Context:** Deferred during the grill session for the app release process spec (117). That spec establishes
+the version as correct build-file metadata only; making it observable is explicitly out of scope.
+
+**Prerequisite:** Spec 117 (app release process) must land first, so the build files actually carry a
+truthful version.
+
+## Hotfix releases from a branch off a released tag
+
+Allow cutting a patch release (e.g. `v1.11.1`) from a hotfix branch based on the `v1.11.0` tag, instead of
+only from `main`. Today `release.sh` refuses to run anywhere but `main`, and the release workflow enforces
+the same via an ancestor check — so the only way to ship an urgent production fix is to cut from `main`,
+which also ships whatever half-finished work has landed there since the last release.
+
+Open design questions: how the hotfix commit gets back onto `main` (cherry-pick vs. merge), how the
+`-SNAPSHOT` bump behaves on a hotfix branch (it must not push `main` forward), whether the release-notes
+file for a hotfix lives on the branch or on `main`, and how the ancestor check is relaxed without opening
+the door to tagging arbitrary feature branches.
+
+**Context:** Deferred during the grill session for the app release process spec (117) — "erstmal geht nur
+main". Accepted risk: an urgent fix currently drags unreleased `main` content into production with it.
+
+**Prerequisite:** Spec 117 (app release process) must land first.
+
+## Publish versioned container images for self-hosters
+
+Publish pullable backend and frontend container images (e.g. `ghcr.io/openelementslabs/open-crm-backend:1.11.0`)
+as part of a release, and offer a `docker-compose.yml` variant that references those tags instead of building
+from source. Today a third-party operator has to clone the repository at the tag and let `docker compose`
+build both images locally, which requires a full JDK/Maven and Node/pnpm toolchain build on their machine
+and takes minutes rather than seconds.
+
+This is the one piece the app release process deliberately leaves out ("no deployment, nothing published to
+a registry"). Adding it later means deciding on image naming, whether images are also published for `main`
+(dev), how digests are pinned in the shipped compose file, and how the reproducible-builds convention applies
+to the published images.
+
+**Context:** Deferred during the grill session for the app release process spec (117) — "clone the tag and
+build locally is fine for now".
+
+**Prerequisite:** Spec 117 (app release process) must land first.
+
+## Generic `app-release-process.md` for infrastructure-docs
+
+Write the org-wide convention document for **application** releases as a sibling to the existing
+`java-release-process.md` and `npm-release-process.md` in
+`~/git/open-elements/infrastructure-docs/docs/releases/`. It should describe the *pattern* — one app version
+kept in sync across all build files, `A.B.C-SNAPSHOT` between releases, per-PR version-consistency gate,
+locally-verified cut, tag-triggered full rebuild, auto-published GitHub Release whose body is the committed
+release-notes file, "tag without release = not approved" — and point at `open-crm` as the reference
+implementation, the way `java-parent` is the reference for libraries.
+
+Deliberately **not** a copy-paste script: unlike the library pipelines, `release.sh` is app-specific
+(open-crm has `backend/` + `frontend/`; another app may have one module or three services). The doc carries
+the pattern, each app writes its own script.
+
+**Context:** The generic doc was split off from the app release process spec (117), which is scoped to the
+concrete implementation in this repository.
+
+**Prerequisite:** Spec 117 (app release process) must be implemented, so the doc describes something that
+actually exists and has been used at least once.
