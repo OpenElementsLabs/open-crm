@@ -202,6 +202,20 @@ After deployment:
 - Frontend: `https://crm.example.com`
 - Backend / Swagger UI: `https://crm-backend.example.com/swagger-ui.html`
 
+## Releases
+
+Open CRM publishes nothing to a registry: a release is a git tag (`vA.B.C`) plus a published GitHub
+Release whose body is the release notes in [`docs/releases/`](docs/releases/). The application version
+is kept identical in `backend/pom.xml` and `frontend/package.json`, and `main` carries
+`A.B.C-SNAPSHOT` between releases; CI fails any pull request whose versions drift or downgrade.
+
+**For self-hosters:** deploy a **tag that has a published GitHub Release** — never `main`, and never a
+tag without a Release. A tag without a published Release is not approved for deployment; use the
+previous release instead. Clone at the tag and let `docker compose build` build the images.
+
+Maintainers: the full process (version model, `release.sh`, what CI verifies, and recovery) is in
+[`docs/release.md`](docs/release.md).
+
 ## Authentication
 
 Open CRM uses OpenID Connect (OIDC) for authentication. Locally,
