@@ -70,7 +70,7 @@ class AuditLogControllerTest extends AbstractDbTest {
 
     @BeforeEach
     void cleanAuditLog() {
-        jdbcTemplate.update("DELETE FROM audit_log");
+        jdbcTemplate.update("DELETE FROM oe_spring_services.audit_log");
         alice = ensureUser("alice", "Alice");
         bob = ensureUser("bob", "Bob");
         charlie = ensureUser("charlie", "Charlie");

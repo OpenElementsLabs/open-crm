@@ -58,7 +58,7 @@ class OpportunityRepositoryTest extends AbstractDbTest {
     private UserEntity newOwner() {
         final UUID id = UUID.randomUUID();
         jdbcTemplate.update(
-            "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.users (id, sub, user_name, name, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             id, "owner", "owner", "Owner");
         return userRepository.findById(id).orElseThrow();

@@ -36,12 +36,15 @@ public abstract class AbstractDbTest {
 
     /**
      * Tables truncated between tests. Order is irrelevant because
-     * {@code CASCADE} drops dependent rows.
+     * {@code CASCADE} drops dependent rows. The seven spring-services library
+     * tables live in the {@code oe_spring_services} schema (migration V36) and
+     * are named with that qualifier; a single {@code TRUNCATE} statement may span
+     * both schemas.
      */
     private static final String TABLES_TO_TRUNCATE = String.join(", ",
-        "api_keys",
-        "audit_log",
-        "comments",
+        "oe_spring_services.api_keys",
+        "oe_spring_services.audit_log",
+        "oe_spring_services.comments",
         "company_comments",
         "company_tags",
         "contact_comments",
@@ -53,13 +56,13 @@ public abstract class AbstractDbTest {
         "opportunity_contacts",
         "opportunity_tags",
         "opportunities",
-        "settings",
+        "oe_spring_services.settings",
         "task_comments",
         "task_tags",
         "tasks",
-        "tags",
-        "users",
-        "webhooks"
+        "oe_spring_services.tags",
+        "oe_spring_services.users",
+        "oe_spring_services.webhooks"
     );
 
     @ServiceConnection
@@ -94,7 +97,7 @@ public abstract class AbstractDbTest {
     protected void seedSystemUser() {
         if (userRepository.findBySub(SystemUser.SUB).isEmpty()) {
             jdbcTemplate.update(
-                "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+                "INSERT INTO oe_spring_services.users (id, sub, user_name, name, created_at, updated_at) "
                     + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
                 SystemUser.ID, SystemUser.SUB, SystemUser.SUB, SystemUser.NAME);
         }

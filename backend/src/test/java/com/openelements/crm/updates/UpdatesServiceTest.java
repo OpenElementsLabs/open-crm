@@ -48,7 +48,7 @@ class UpdatesServiceTest extends AbstractDbTest {
 
     @BeforeEach
     void resetAuditLog() {
-        jdbcTemplate.update("DELETE FROM audit_log");
+        jdbcTemplate.update("DELETE FROM oe_spring_services.audit_log");
         seedSystemUser();
         alice = ensureUser("alice", "Alice");
         bob = ensureUser("bob", "Bob");
