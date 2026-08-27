@@ -191,6 +191,41 @@ export function getCompanyLogoUrl(id: string): string {
   return `${baseUrl()}/api/companies/${id}/logo`;
 }
 
+/**
+ * Server-side fetch of an image (photo/logo) as a `data:` URI, authenticated the same way as any
+ * other backend call. `next/og`'s `ImageResponse` cannot follow a relative URL or carry the
+ * caller's credentials, so the Open Graph image routes embed the bytes inline instead.
+ *
+ * Returns `null` when the request fails, is not OK, or does not return an `image/*` body — the
+ * callers fall back to the initials variant, so a broken or missing image never throws.
+ */
+async function fetchImageAsDataUri(url: string): Promise<string | null> {
+  try {
+    const response = await apiFetch(url, { cache: "no-store" });
+    if (!response.ok) {
+      return null;
+    }
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) {
+      return null;
+    }
+    const base64 = Buffer.from(await response.arrayBuffer()).toString("base64");
+    return `data:${contentType};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
+/** The contact's photo as a `data:` URI for server-side rendering, or `null`. See {@link fetchImageAsDataUri}. */
+export async function getContactPhotoDataUri(id: string): Promise<string | null> {
+  return fetchImageAsDataUri(`${baseUrl()}/api/contacts/${id}/photo`);
+}
+
+/** The company's logo as a `data:` URI for server-side rendering, or `null`. See {@link fetchImageAsDataUri}. */
+export async function getCompanyLogoDataUri(id: string): Promise<string | null> {
+  return fetchImageAsDataUri(`${baseUrl()}/api/companies/${id}/logo`);
+}
+
 export async function deleteCompanyLogo(id: string): Promise<void> {
   const url = `${baseUrl()}/api/companies/${id}/logo`;
   const response = await apiFetch(url, { method: "DELETE" });
