@@ -53,7 +53,7 @@ class McpSecurityIntegrationTest extends AbstractDbTest {
         final String keyHash = McpTestSupport.sha256Hex(rawKey);
         final java.sql.Timestamp now = java.sql.Timestamp.from(Instant.now());
         jdbcTemplate.update(
-            "INSERT INTO api_keys (id, name, key_hash, key_prefix, created_by, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.api_keys (id, name, key_hash, key_prefix, created_by, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)",
             UUID.randomUUID(), "onyx-test", keyHash, rawKey.substring(0, 11), "test", now, now);
         assertTrue(apiKeyDataService.authenticate(rawKey).isPresent(),

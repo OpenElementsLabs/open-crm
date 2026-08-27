@@ -73,7 +73,7 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
         rawKey = "crm_" + "e2ekey".repeat(6) + "tail1234";
         final Instant now = Instant.now();
         jdbcTemplate.update(
-            "INSERT INTO api_keys (id, name, key_hash, key_prefix, created_by, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.api_keys (id, name, key_hash, key_prefix, created_by, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)",
             UUID.randomUUID(), "onyx-e2e", McpTestSupport.sha256Hex(rawKey), rawKey.substring(0, 11), "test",
             java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
@@ -208,7 +208,7 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
         final UUID ownerId = UUID.randomUUID();
         final Instant now = Instant.now();
         jdbcTemplate.update(
-            "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.users (id, sub, user_name, name, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?)",
             ownerId, "mcp-owner", "mcp-owner", "MCP Owner",
             java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
@@ -337,14 +337,14 @@ class McpEndpointIntegrationTest extends AbstractDbTest {
 
     @Test
     void imageToolsDoNotWriteAnAuditLogRow() {
-        final long before = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_log", Long.class);
+        final long before = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM oe_spring_services.audit_log", Long.class);
         try (McpSyncClient client = newClient(rawKey)) {
             client.callTool(new McpSchema.CallToolRequest(
                 "get_contact_photo", Map.of("id", contactWithPhotoId.toString())));   // success
             client.callTool(new McpSchema.CallToolRequest(
                 "get_company_logo", Map.of("id", UUID.randomUUID().toString())));      // error
         }
-        final long after = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_log", Long.class);
+        final long after = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM oe_spring_services.audit_log", Long.class);
         assertEquals(before, after, "MCP image reads must not write an audit-log row");
     }
 

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.open-elements</groupId>
         <artifactId>java-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.2.1</version>
     </parent>
 
     <artifactId>open-crm-backend</artifactId>
@@ -32,7 +32,6 @@
     </developers>
 
     <properties>
-        <springdoc.version>2.8.17</springdoc.version>
         <commons-csv.version>1.12.0</commons-csv.version>
         <ez-vcard.version>0.12.1</ez-vcard.version>
         <mcp-sdk.version>0.18.3</mcp-sdk.version>
@@ -41,6 +40,18 @@
         <mockwebserver.version>4.12.0</mockwebserver.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Manages the versions of all spring-services-* modules consumed below. -->
+            <dependency>
+                <groupId>com.open-elements</groupId>
+                <artifactId>spring-services-bom</artifactId>
+                <version>1.3.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -97,13 +108,27 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc.version}</version>
         </dependency>
 
+        <!-- spring-services 1.3.x is a Maven reactor: the bare coordinate is a
+             reactor pom with no classes. Consume the à la carte modules whose
+             versions come from spring-services-bom (imported below). The MCP
+             module is deliberately NOT added — CRM ships its own copy of those
+             classes under com.openelements.spring.base.mcp (spec 108/109), and
+             pulling spring-services-mcp would shadow them on the classpath. The
+             slack and email modules are unused and omitted, keeping
+             slack-api-client and spring-boot-starter-mail off the classpath. -->
         <dependency>
             <groupId>com.open-elements</groupId>
-            <artifactId>spring-services</artifactId>
-            <version>1.2.0</version>
+            <artifactId>spring-services-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.open-elements</groupId>
+            <artifactId>spring-services-search</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.open-elements</groupId>
+            <artifactId>spring-services-dbbackup</artifactId>
         </dependency>
 
         <!-- Official Java MCP SDK with Spring WebMVC Streamable HTTP transport.

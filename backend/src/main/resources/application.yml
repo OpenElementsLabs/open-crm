@@ -31,6 +31,11 @@ translation:
 
 openelements:
   meilisearch:
+    # spring-services 1.3.x gates its SearchConfig on this flag (@ConditionalOnProperty,
+    # no matchIfMissing). In 1.2.0 the config was imported unconditionally via
+    # FullSpringServiceConfig, so no flag was needed; the starter-only wiring in 1.3.x
+    # requires it to be set explicitly. Default true keeps global search active.
+    enabled: ${MEILI_ENABLED:true}
     host: ${MEILI_HOST:http://localhost:7700}
     master-key: ${MEILI_MASTER_KEY:local-dev-master-key}
     index-prefix: ${MEILI_INDEX_PREFIX:crm_}
@@ -51,6 +56,12 @@ openelements:
       oidc:
         enabled: ${MCP_AUTH_OIDC_ENABLED:false}      # Phase 2 — Claude via Authentik OIDC
   db-backup:
+    # spring-services 1.3.x gates its DbBackupConfig on this flag (@ConditionalOnProperty,
+    # no matchIfMissing). In 1.2.0 the config was imported unconditionally via
+    # FullSpringServiceConfig, so no flag was needed. Default true so the DbBackupClient bean
+    # always exists and /admin/backup can report status; a blank api-token still reports
+    # "not configured" (the token, not this flag, drives configured/not-configured).
+    enabled: ${DB_BACKUP_ENABLED:true}
     base-url: ${DB_BACKUP_BASE_URL:http://localhost:8081}
     api-token: ${DB_BACKUP_API_TOKEN:}
     request-timeout: 30s
