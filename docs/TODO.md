@@ -380,3 +380,14 @@ concrete implementation in this repository.
 
 **Prerequisite:** Spec 117 (app release process) must be implemented, so the doc describes something that
 actually exists and has been used at least once.
+
+## Brand fonts in the app and the Open Graph preview image
+
+`@open-elements/ui`'s `brand.css` declares `--font-heading: "Montserrat"` and `--font-body: "Lato"` but
+ships **no `@font-face` rule**, so no web font is loaded — the UI renders in the platform `sans-serif`, and
+the `next/og` preview image (spec 116) deliberately uses satori's bundled default font to match. If brand
+fonts are introduced later, they must land in **both** places together: an `@font-face` in `brand.css` for the
+app, and a font passed to `ImageResponse` in `src/app/(app)/{contacts,companies}/[id]/opengraph-image.tsx`
+so the preview image does not diverge from the app it depicts.
+
+**Context:** Deferred from spec 116 (per-page metadata). See `specs/116-page-metadata/design.md` → _Typography_.
