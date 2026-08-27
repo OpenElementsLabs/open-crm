@@ -291,3 +291,19 @@ option if the adoption slips.
 Path B (`spring-services-bom` + `-core` + `-search` + `-dbbackup`) instead of `spring-services-all`.
 
 **Prerequisite:** Spec 115 must land first.
+
+## Brand fonts are declared but never loaded
+
+`@open-elements/ui`'s `brand.css` declares `--font-heading: "Montserrat", sans-serif` and
+`--font-body: "Lato", sans-serif`, but contains **no `@font-face` rule** and nothing in the frontend
+loads either family. The entire UI therefore renders in the platform's default `sans-serif`, and the
+brand typography is effectively decorative CSS.
+
+Either the fonts should be shipped properly (self-hosted in `@open-elements/ui`, not fetched from
+Google Fonts, so the standalone build stays self-contained), or the declarations should be corrected
+to name what is actually rendered. If they are introduced, the `next/og` preview image from spec 116
+has to receive the same font data in the same change — otherwise the generated image diverges from
+the application it depicts.
+
+**Context:** Found while designing spec 116 (page metadata), which deliberately uses `ImageResponse`'s
+default font for exactly this reason.
