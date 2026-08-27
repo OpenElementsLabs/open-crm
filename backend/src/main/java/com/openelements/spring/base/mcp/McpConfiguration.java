@@ -14,9 +14,10 @@ import org.springframework.context.annotation.Import;
  *
  * <p>Because these classes live outside an application's component-scan base
  * package, the application wires the feature in with
- * {@code @Import(McpConfiguration.class)} (mirroring how
- * {@code com.openelements.spring.base.FullSpringServiceConfig} pulls in the rest
- * of the library). Domain modules contribute tools by exposing
+ * {@code @Import(McpConfiguration.class)}. Unlike the rest of spring-services,
+ * which auto-configures itself via the {@code spring-services-core} starter, this
+ * MCP wiring is CRM's own local copy (spec 108/109) and is not auto-configured.
+ * Domain modules contribute tools by exposing
  * {@link McpToolProvider} beans, which {@code McpServerConfig} discovers and
  * aggregates.
  */

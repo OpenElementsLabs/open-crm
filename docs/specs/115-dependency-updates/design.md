@@ -182,13 +182,27 @@ This cleanup is optional per the upstream guide, which warns against bundling cl
 upgrade. It is taken deliberately, with the trade-off accepted: it widens the blast radius of a
 boot-time wiring failure, which the rollback plan already covers.
 
-`SearchAutoConfiguration` and `DbBackupAutoConfiguration` carry **no `@ConditionalOnProperty`** —
-verified on the bytecode. Module presence alone activates them, so no new `enabled` flags are needed
-and the existing `openelements.meilisearch.*` / `openelements.db-backup.*` configuration keeps working
-unchanged. `FullSpringServiceConfig` in 1.3.x imports only the core configurations; the search and
-db-backup configurations arrive through their modules' auto-configurations instead. CRM's
-`SearchConfiguration` javadoc, which currently claims `FullSpringServiceConfig` activates the
-Meilisearch lib, needs correcting.
+The `SearchAutoConfiguration` and `DbBackupAutoConfiguration` **classes** carry no
+`@ConditionalOnProperty`, but each `@Import`s a config that **does**: `SearchConfig` is gated on
+`openelements.meilisearch.enabled=true` and `DbBackupConfig` on `openelements.db-backup.enabled=true`,
+both with **no `matchIfMissing`** (so they default off). This was only caught at build time — the
+original bytecode check looked at the auto-configuration classes, not the configs they import.
+
+> **Correction (verified during implementation).** In 1.2.0 these two configs had **no**
+> `@ConditionalOnProperty` and were pulled in unconditionally via `@Import(FullSpringServiceConfig)`,
+> so CRM never set an `enabled` flag. 1.3.x moved them behind `enabled=true` gates. The starter-only
+> wiring therefore **requires two new flags** that the earlier draft said were unnecessary:
+> `application.yml` now sets `openelements.meilisearch.enabled=true` (`MEILI_ENABLED`, default true)
+> and `openelements.db-backup.enabled=true` (`DB_BACKUP_ENABLED`, default true), reproducing the old
+> always-on import. Without them the `MeilisearchClient` and `DbBackupClient` beans are absent and the
+> context fails (`BackupAdminController` cannot be constructed). The `db-backup` flag does not change
+> the "configured/not-configured" behaviour — a blank `api-token` still reports not-configured; the
+> flag only controls whether the client bean exists.
+
+`FullSpringServiceConfig` in 1.3.x imports only the core configurations; the search and db-backup
+configurations arrive through their modules' auto-configurations instead. CRM's `SearchConfiguration`
+javadoc, which currently claims `FullSpringServiceConfig` activates the Meilisearch lib, needs
+correcting.
 
 The `LanguageConfig` → `TranslationConfig` rename has no impact: CRM never imported `LanguageConfig`
 directly.
@@ -280,9 +294,12 @@ statement.
 #### Migration guard test
 
 A new test enforces the convention for the future: it reads every file in
-`backend/src/main/resources/db/migration`, and for any migration with **version > 35** fails if the SQL
-references one of the seven library table names without the `oe_spring_services.` qualifier. `V1`–`V35`
-are exempt — they legitimately created and manipulated those tables in `public` before the move.
+`backend/src/main/resources/db/migration`, and for any migration with **version > 36** fails if the SQL
+references one of the seven library table names without the `oe_spring_services.` qualifier. `V1`–`V36`
+are exempt — `V1`–`V35` legitimately created and manipulated those tables in `public` before the move,
+and `V36` **is** the move (`ALTER TABLE users SET SCHEMA …`), which necessarily names the bare tables
+while they are still in `public`. (The earlier draft said "> 35"; that would have flagged the move
+migration itself — the boundary is the move's own version, `36`.)
 
 **Rationale.** Without it, the failure mode of the schema split is a migration that runs green on a
 fresh database (where `public` may still be on the `search_path`) and fails or silently targets the

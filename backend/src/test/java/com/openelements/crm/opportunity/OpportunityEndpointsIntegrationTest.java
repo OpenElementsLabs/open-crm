@@ -104,7 +104,7 @@ class OpportunityEndpointsIntegrationTest extends AbstractDbTest {
     private UUID newUser(final String userName, final String name) {
         final UUID id = UUID.randomUUID();
         jdbcTemplate.update(
-            "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.users (id, sub, user_name, name, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             id, userName, userName, name);
         return id;
@@ -113,7 +113,7 @@ class OpportunityEndpointsIntegrationTest extends AbstractDbTest {
     private UUID newTag(final String name) {
         final UUID id = UUID.randomUUID();
         jdbcTemplate.update(
-            "INSERT INTO tags (id, name, color, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.tags (id, name, color, created_at, updated_at) "
                 + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             id, name, "#112233");
         return id;
@@ -732,7 +732,7 @@ class OpportunityEndpointsIntegrationTest extends AbstractDbTest {
 
     private int auditCount(final String entityType, final UUID entityId, final String action) {
         final Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM audit_log WHERE entity_type = ? AND entity_id = ? AND action = ?",
+            "SELECT COUNT(*) FROM oe_spring_services.audit_log WHERE entity_type = ? AND entity_id = ? AND action = ?",
             Integer.class, entityType, entityId, action);
         return count == null ? 0 : count;
     }

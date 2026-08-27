@@ -82,7 +82,7 @@ class OpportunityServiceTest extends AbstractDbTest {
         final UUID id = UUID.randomUUID();
         final String sub = "owner-" + id;
         jdbcTemplate.update(
-            "INSERT INTO users (id, sub, user_name, name, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.users (id, sub, user_name, name, created_at, updated_at) "
                 + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             id, sub, sub, "Owner");
         return id;
@@ -124,7 +124,7 @@ class OpportunityServiceTest extends AbstractDbTest {
     void countWithTagCountsOnlyMatchingOpportunities() {
         final UUID tagId = UUID.randomUUID();
         jdbcTemplate.update(
-            "INSERT INTO tags (id, name, color, created_at, updated_at) "
+            "INSERT INTO oe_spring_services.tags (id, name, color, created_at, updated_at) "
                 + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             tagId, "Shared", "#112233");
         final UUID company = newCompany().getId();
@@ -148,7 +148,7 @@ class OpportunityServiceTest extends AbstractDbTest {
         assertTrue(opportunityService.findById(id).isEmpty());
         // the comment join owner is gone; the standalone comment row was deleted too
         assertEquals(0, jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM comments WHERE id = ?", Integer.class, comment.id()));
+            "SELECT COUNT(*) FROM oe_spring_services.comments WHERE id = ?", Integer.class, comment.id()));
     }
 
     @Test
