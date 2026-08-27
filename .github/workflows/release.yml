@@ -1,0 +1,90 @@
+name: Release
+
+# Cutting a release: release.sh pushes a vA.B.C tag, which triggers this workflow. It re-builds the
+# tagged tree from a clean checkout and, only on success, publishes a GitHub Release whose body is the
+# committed release-notes file. A tag without a published Release is NOT approved for deployment.
+on:
+  push:
+    tags: [ "v*.*.*" ]
+
+# Only the token needed to create the Release, declared explicitly so the run does not inherit the
+# repository default permissions.
+permissions:
+  contents: write
+
+# A second push of the same tag queues behind the first rather than cancelling a publish mid-flight.
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  # Cheap gates first, before any build time is spent.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # tags for check-versions.sh; history for the ancestor check
+
+      - name: Tag is vA.B.C (reject release candidates and partial versions)
+        run: |
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag '$GITHUB_REF_NAME' is not vA.B.C — release candidates and partial versions are not releasable"
+            exit 1
+          fi
+
+      - name: Tagged commit is on main
+        run: |
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+            echo "::error::tag '$GITHUB_REF_NAME' does not point at a commit on main"
+            exit 1
+          fi
+
+      - name: Build files equal the tag
+        run: ./check-versions.sh --expect "${GITHUB_REF_NAME#v}"
+
+      - name: Release notes present and non-empty
+        run: |
+          notes="docs/releases/${GITHUB_REF_NAME}.md"
+          if [[ ! -f "$notes" ]] || ! grep -q '[^[:space:]]' "$notes"; then
+            echo "::error::release notes '$notes' are missing or empty — there is no auto-generated fallback"
+            exit 1
+          fi
+
+  # Re-run the complete PR build (backend verify, frontend test+build, all Docker builds, and the
+  # version gate) against the tagged tree from a clean checkout — the exact tree production and every
+  # self-hoster will build.
+  build:
+    needs: verify
+    uses: ./.github/workflows/build.yml
+
+  # Assemble the body and publish. Reached only when verify and build both passed: green CI is the
+  # approval gate, so the Release is published immediately, not as a draft.
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Assemble release body
+        run: |
+          notes="docs/releases/${GITHUB_REF_NAME}.md"
+          # Strip a single leading H1 line (GitHub renders the release title already); a notes file
+          # that starts with anything else is used verbatim.
+          awk 'NR==1 && /^# / { next } { print }' "$notes" > body.md
+          {
+            echo
+            echo "---"
+            echo
+            echo "Full release notes: https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/releases/${GITHUB_REF_NAME}.md"
+          } >> body.md
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Open CRM $GITHUB_REF_NAME" \
+            --notes-file body.md \
+            --verify-tag
