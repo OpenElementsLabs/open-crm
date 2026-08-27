@@ -1,12 +1,9 @@
 package com.openelements.crm;
 
-import com.openelements.spring.base.FullSpringServiceConfig;
 import com.openelements.spring.base.mcp.McpConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -14,19 +11,23 @@ import org.springframework.scheduling.annotation.EnableAsync;
 /**
  * Main entry point for the Open CRM backend application.
  *
- * <p>As of spring-services 1.1.0 the library's feature configurations are plain
- * {@code @Configuration} classes (no longer Spring Boot auto-configurations), so their
- * JPA entities and repositories under {@code com.openelements.spring.base} are no longer
- * registered automatically. {@link EntityScan} and {@link EnableJpaRepositories} therefore
- * scan the common {@code com.openelements} root so both the CRM's own and the library's
- * entities/repositories share one persistence unit.
+ * <p>As of spring-services 1.3.0 the library is a Spring Boot starter again:
+ * {@code spring-services-core} registers {@code SpringServicesCoreAutoConfiguration}, which
+ * imports the library's feature configurations and additively registers its entity and
+ * repository packages under {@code com.openelements.spring.base} onto Boot's default scan. No
+ * {@code @EntityScan}, {@code @EnableJpaRepositories} or {@code @Import(FullSpringServiceConfig)}
+ * is therefore needed — an explicit {@code @EntityScan} would in fact suppress the additive
+ * default scan. All CRM entities and repositories live under {@code com.openelements.crm}, so
+ * Boot's default component scan of this package's tree covers them.
+ *
+ * <p>{@code @Import(McpConfiguration.class)} stays: that class is CRM's own MCP wiring under
+ * {@code com.openelements.spring.base.mcp} (see spec 108/109), not the library's, and nothing
+ * auto-configures it.
  */
 @SpringBootApplication
 @EnableAsync
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
-@EntityScan(basePackages = "com.openelements")
-@EnableJpaRepositories(basePackages = "com.openelements")
-@Import({FullSpringServiceConfig.class, McpConfiguration.class})
+@Import(McpConfiguration.class)
 public class CrmApplication {
 
     public static void main(final String[] args) {

@@ -10,8 +10,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- * CRM-side wiring for global search. The Meilisearch lib itself is activated by
- * {@link com.openelements.spring.base.FullSpringServiceConfig} via {@code SearchConfig}; this class
+ * CRM-side wiring for global search. As of spring-services 1.3.0 the Meilisearch lib is activated by
+ * the {@code spring-services-search} module's own {@code SearchAutoConfiguration}, triggered by the
+ * module's presence on the classpath alone (it carries no {@code @ConditionalOnProperty}); this class
  * supplies what the lib leaves to the application: the {@code searchIndexExecutor} thread pool, the
  * scoped-key specification, and the per-index settings for the four CRM indexes.
  *
