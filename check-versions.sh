@@ -115,10 +115,13 @@ HAS_SNAPSHOT=0
 [[ "$VERSION" == *-SNAPSHOT ]] && HAS_SNAPSHOT=1
 
 # Rule 2 — no downgrade below the highest released tag. Legacy two-component tags (v1.4) are ignored;
-# ordering is numeric, not lexicographic; if no vA.B.C tag exists the rule is skipped. All of that is
-# done in one python pass to keep the numeric comparison correct and portable across bash/sort variants.
-mapfile -t TAGS < <(git -C "$ROOT" tag --list 2>/dev/null || true)
-python3 - "$BASE" "$HAS_SNAPSHOT" "${TAGS[@]}" <<'PY'
+# ordering is numeric, not lexicographic; if no vA.B.C tag exists the rule is skipped. Tags are passed
+# as positional args (word-split from newline-separated `git tag`; tags never contain spaces) rather
+# than an array, so the script stays portable to macOS' bash 3.2. An empty tag list expands to no
+# extra args. The numeric comparison is done in python to avoid depending on `sort -V`.
+TAGS="$(git -C "$ROOT" tag --list 2>/dev/null || true)"
+# shellcheck disable=SC2086 # deliberate word-splitting of the newline-separated tag list
+python3 - "$BASE" "$HAS_SNAPSHOT" $TAGS <<'PY'
 import re
 import sys
 
