@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>open-crm-backend</artifactId>
-    <version>1.11.0-SNAPSHOT</version>
+    <version>1.11.0</version>
     <name>Open CRM Backend</name>
     <description>Backend service for Open CRM — a CRM system by Open Elements</description>
     <url>https://github.com/OpenElementsLabs/open-crm</url>

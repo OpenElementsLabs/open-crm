@@ -1,6 +1,6 @@
 {
   "name": "open-crm-frontend",
-  "version": "1.11.0-SNAPSHOT",
+  "version": "1.11.0",
   "private": true,
   "packageManager": "pnpm@11.3.0",
   "engines": {
