@@ -391,3 +391,134 @@ app, and a font passed to `ImageResponse` in `src/app/(app)/{contacts,companies}
 so the preview image does not diverge from the app it depicts.
 
 **Context:** Deferred from spec 116 (per-page metadata). See `specs/116-page-metadata/design.md` → _Typography_.
+
+Frage 9: Setzt die Spec Speicher-Limits (mem_limit bzw. deploy.resources.limits.memory) plus ein JAVA_TOOL_OPTIONS=-XX:
+MaxRAMPercentage=75 — oder bleibt es unbegrenzt wie bei
+den Schwester-Projekten, mit dem Risiko, dass ein Bootstrap-Lauf die Nachbar-Apps auf demselben Host verdrängt?                                                               
+ 
+
+## Enforcer pinning rules in `java-parent` instead of per-project
+
+The `maven-enforcer-plugin` rules that forbid dynamic versions and SNAPSHOT dependencies in the resolved
+dependency graph (`banDynamicVersions` / `requireReleaseDeps`) are added locally to `backend/pom.xml` by the
+version-pinning spec. They belong org-wide in `java-parent`, next to the existing
+`enforce-build-environment` execution — every Open Elements Java project needs the same guarantee, and today
+each one would have to repeat the configuration.
+
+Moving them upstream also removes the risk that the local rule is silently dropped during a future pom
+cleanup, since nothing outside this repository would notice.
+
+**Context:** Deferred during the grill session for the version-pinning spec. The rule was placed locally
+because `java-parent` had no release carrying it, and blocking the spec on an unreleased parent was not
+wanted.
+
+**Prerequisite:** A `java-parent` release that contains the rules, plus the separate dependency-update spec
+that bumps `backend/pom.xml` onto it.
+
+## Exact base-image tags and a `.nvmrc` ↔ Dockerfile equality check
+
+The version-pinning spec requires Docker base images to carry `tag + digest` but leaves the *granularity of
+the tag* free — `node:24-alpine@sha256:…` satisfies it just as `node:24.9.0-alpine@sha256:…` does. As a
+result the Node version is declared in three places (`frontend/.nvmrc`, `frontend/package.json` → `engines`,
+`frontend/Dockerfile`) with nothing enforcing that they agree, so `.nvmrc` and the image can drift apart
+silently.
+
+Requiring the *exact* patch tag alongside the digest would make the drift mechanically detectable: the gate
+could compare `.nvmrc` against the tag in `frontend/Dockerfile` and fail when they diverge. The cost is a
+second value to update on every base-image bump.
+
+**Context:** Raised during the grill session for the version-pinning spec and explicitly deferred — "muss
+später entschieden werden". The spec ships with tag granularity free.
+
+**Prerequisite:** The version-pinning spec must land first (it introduces the gate this check would extend).
+
+## Deterministic Next.js `buildId`
+
+`frontend/next.config.ts` sets no `generateBuildId`, so Next.js generates a random id on every build. That
+id ends up in the `/_next/static/<buildId>/…` paths and in `__NEXT_DATA__.buildId`, which makes the frontend
+build output differ between two builds of the same commit — one of the two concrete blockers for
+byte-identical rebuilds.
+
+The fix is not a one-liner, because the id has to satisfy **two** constraints at once:
+
+1. **Deterministic per commit** — otherwise it does not solve the problem.
+2. **Different between commits** — the client compares `__NEXT_DATA__.buildId` to detect that a new version
+   was deployed and to force a hard reload. A constant id means clients never notice a deploy and keep
+   referencing chunks that no longer exist on the server.
+
+The obvious candidate, the Git commit SHA, is **not available inside the Docker build**: the build context
+is `./frontend`, while `.git` lives in the repository root and is therefore never copied into the image —
+and it is exactly the Docker build that produces the shipped artifact. Deriving the id from the application
+version violates constraint 2, because every commit on `main` between two releases carries the same
+`A.B.C-SNAPSHOT`.
+
+So the realistic option is passing the commit SHA in as a build `ARG`, which means CI (`build.yml`),
+`release.sh` and plain `docker compose build` must all set it, plus a defined fallback for when it is unset.
+That fallback is the actual design question: it must not silently reintroduce either a random or a constant
+id.
+
+**Context:** Deferred during the grill session for the version-pinning spec, which is scoped to pinning and
+deliberately contains no byte-identity work.
+
+## Test suite for the pinning gate
+
+The pinning gate introduced by the version-pinning spec ships without tests, unlike `check-versions.sh`
+which has `test/check-versions.test.sh`. The gate is the more complex of the two: it parses three
+Dockerfiles, two Compose files and two workflow files, each with its own syntax.
+
+A false-negative parser is worse than no gate — it claims protection that does not exist, and nobody notices
+when it misses something. The concrete trap is multi-stage builds: `frontend/Dockerfile` contains
+`FROM base AS deps`, an internal stage reference and not an image, which a naive regex reports as an
+unpinned image. Fixtures should cover at minimum: pinned, unpinned, internal stage reference, digest without
+tag, and an image reference with no tag at all.
+
+**Context:** Raised during the grill session for the version-pinning spec and consciously accepted as a
+risk — "ein TODO dass ein check hierfür in Zukunft sinnvoll ist".
+
+**Prerequisite:** The version-pinning spec must land first.
+
+## Automated digest and action-SHA updates (Dependabot/Renovate)
+
+After the version-pinning spec, base images are pinned by digest and GitHub Actions by commit SHA. Nothing
+updates either. Both therefore go stale silently: a pinned digest keeps pulling a base image whose CVEs were
+fixed upstream months ago, and a pinned action SHA never picks up its own security fixes. Pinning converts a
+reproducibility problem into a maintenance obligation, and right now that obligation has no owner and no
+automation.
+
+Dependabot supports both (`docker` and `github-actions` ecosystems) and rewrites `tag@sha256:…` pairs
+correctly. The open questions are update cadence, whether Compose files are covered alongside Dockerfiles,
+and how the resulting PRs are reviewed given that a digest bump is unreviewable by reading the diff.
+
+**Context:** Raised during the grill session for the version-pinning spec, where the deliberate decision was
+that the gate checks *pinning* (syntactic, offline) and never *freshness* — "das wird ja später etwas wie
+Dependabot leisten müssen".
+
+**Prerequisite:** The version-pinning spec must land first.
+
+## Byte-identical builds (the actual reproducible-builds goal)
+
+The version-pinning spec establishes that nothing floats, which is the precondition for reproducibility but
+not reproducibility itself. Building the same tag twice still produces different artifacts. Closing that gap
+needs three separate pieces:
+
+- **`project.build.outputTimestamp`** — currently set nowhere, so JAR entries carry the build time and the
+  backend JAR can never be byte-identical. The fix already exists upstream in `java-parent` but is not
+  released yet; it arrives via the separate dependency-update spec, not through any change in this
+  repository.
+- **Deterministic Next.js `buildId`** — see the dedicated TODO above.
+- **OS packages in the container images** — `backend/Dockerfile` runs `apt-get update && apt-get install`
+  and `db-backup/Dockerfile` runs `apk add`, both unversioned. The base-image digest does **not** cover
+  this: `apt-get update` fetches the package index at build time, so what gets installed depends on the
+  build date. Pinning exact package versions is not the answer — Debian and Alpine drop superseded versions
+  from their production mirrors, so an exact pin makes the build *fail* within weeks instead of making it
+  reproducible. The real solution is a snapshot mirror (`snapshot.debian.org` and an equivalent for Alpine),
+  which is a substantial change to how the images are built.
+
+Only once all three land does a `verify-reproducible-build` job (build twice, compare SHA-256, fail on
+difference) become meaningful; adding it earlier would just be permanently red.
+
+**Context:** Split off from the version-pinning spec during its grill session. The explicit decision there
+was that a differing SHA-256 between a local build and CI is currently **expected, not a bug** — "am Ende
+muss es byte-gleich sein, aber für diese Spec wollen wir erst einmal Version-Pinning betreiben".
+
+**Prerequisite:** The version-pinning spec, plus the dependency-update spec that bumps `java-parent`.
