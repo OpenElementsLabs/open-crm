@@ -502,9 +502,9 @@ not reproducibility itself. Building the same tag twice still produces different
 needs three separate pieces:
 
 - **`project.build.outputTimestamp`** — currently set nowhere, so JAR entries carry the build time and the
-  backend JAR can never be byte-identical. The fix already exists upstream in `java-parent` but is not
-  released yet; it arrives via the separate dependency-update spec, not through any change in this
-  repository.
+  backend JAR can never be byte-identical. The fix exists upstream in `java-parent` and was released as
+  1.3.0 on 2026-09-10; it arrives via spec 119 (Open Elements dependency updates), not through any change
+  in this repository.
 - **Deterministic Next.js `buildId`** — see the dedicated TODO above.
 - **OS packages in the container images** — `backend/Dockerfile` runs `apt-get update && apt-get install`
   and `db-backup/Dockerfile` runs `apk add`, both unversioned. The base-image digest does **not** cover
@@ -522,3 +522,66 @@ was that a differing SHA-256 between a local build and CI is currently **expecte
 muss es byte-gleich sein, aber für diese Spec wollen wir erst einmal Version-Pinning betreiben".
 
 **Prerequisite:** The version-pinning spec, plus the dependency-update spec that bumps `java-parent`.
+
+## `@tailwindcss/typography` is required by `@open-elements/ui` but missing
+
+`MarkdownView` and `MarkdownEditor` hardcode `class="prose prose-sm max-w-none"` on the editor element, but
+`frontend/src/app/globals.css` never loads the plugin that defines `prose`, and `@tailwindcss/typography` is
+not a dependency of `frontend/package.json`. The only stylesheet the library exports is `dist/brand.css`,
+which contains no `prose` rules. The result is that headings, bullet and ordered lists, blockquotes and code
+blocks render with nothing but the Tailwind preflight reset: lists without markers or indentation, headings
+at body-text size.
+
+The README of `@open-elements/ui` 0.10.0 states the requirement explicitly (`@plugin "@tailwindcss/typography";`
+alongside the existing `@source` line); the 0.9.0 README did not mention it at all. The same section names a
+second missing piece: `tw-animate-css`, which the seven overlay components (`Dialog`, `AlertDialog`, `Sheet`,
+`Popover`, `Select`, `Combobox`, `Tooltip`) need for their `animate-in` / `fade-in-0` / `zoom-in-95` enter and
+exit states. Both gaps predate 0.10.0 — the `prose` classes and the `animate-in` utilities are byte-identical
+in the 0.9.0 tarball.
+
+**Context:** Surfaced during the grill for spec 119 (Open Elements dependency updates). Deliberately deferred:
+the defect is pre-existing and independent of the version bump. Under 0.9.0 it was invisible because the
+TipTap schema discarded every block construct before it could reach the DOM; spec 119 opens that schema, so
+from then on a user typing `# ` or `- ` produces real nodes that render unstyled. Shipping that intermediate
+state was an explicit decision.
+
+## Upload over 20 MB returns 500 instead of the documented 400
+
+Two size limits sit at exactly the same value and the outer one has no error handler.
+`backend/src/main/resources/application.yml` caps multipart uploads at 20 MB (`max-file-size`,
+`max-request-size`); `ContactService.uploadPhoto` (`:297`) rejects anything above
+`ImageData.MAX_IMAGE_SIZE`, which `spring-services-core` defines as exactly `20 * 1024 * 1024` and
+documents as having to match that very setting. Since the thresholds are identical, Tomcat's multipart
+parser always fires first in a real deployment, raising `MaxUploadSizeExceededException` — for which no
+`@ExceptionHandler` exists anywhere in the backend, so the client sees a 500.
+
+The application-level branch that produces the documented `400 — Photo exceeds 20 MB` is therefore
+unreachable in production. It is nevertheless green in `ContactPhotoUploadIntegrationTest`
+(`oversizedJpegIsRejected`, `oversizedPngIsRejectedBeforeTranscoding`), because `MockMvc` with a
+`MockMultipartFile` never runs the servlet container's multipart parser. The tests assert the contract
+that `ContactController.java:223` documents; the deployed application does not honour it.
+
+**Context:** Surfaced during the grill for spec 119 while reviewing the `nextjs-app-layer` 0.8.0 proxy change.
+The bump moves *when* the rejection happens — 0.8.0 forwards `Content-Length`, so Tomcat can reject before
+reading the body instead of during the read — but not the status code. The defect is pre-existing and was
+deliberately kept out of the dependency-update spec.
+
+## `.gitattributes` to pin line endings across platforms
+
+The repository has no `.gitattributes`, so the bytes of a checkout depend on each developer's
+`core.autocrlf` (default `true` on Windows). `.editorconfig` sets `end_of_line = lf` but only governs
+editors, not what Git writes to the working tree. `java-parent` 1.3.0 ships a ready-to-copy version:
+`* text=auto eol=lf`, `*.bat` / `*.cmd` as `eol=crlf`, plus explicit `binary` markers for archives,
+images, fonts and keystores.
+
+Note that the parent's `.editorconfig` should **not** be copied along with it: its `[*.java]` block
+specifies 2 spaces and a 100 column limit to match `googleJavaFormat`, while open-crm uses 4 spaces and
+120 columns and never invokes Spotless. Copying it would point the editor against the existing code style.
+
+**Context:** Surfaced during the grill for spec 119. The upgrade guide for `java-parent` 1.3.0 recommends
+the file as protection against Spotless re-introducing CRLF — a rationale that does not apply here, because
+Spotless has no execution bound to a lifecycle phase and neither CI (`clean verify`) nor the Dockerfile
+(`clean package`) invokes it. What remains is the determinism argument, which belongs with the pinning work
+rather than with a dependency bump.
+
+**Prerequisite:** Belongs to spec 118 (version pinning gate), which negotiates pinning and determinism.
