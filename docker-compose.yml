@@ -79,7 +79,7 @@ services:
     # digest for reproducible deployments.
     image: ghcr.io/openelementslabs/db-backup-service:0.1.1@sha256:1c331a1f33f6003e709e7166ad9d2908a370d514a13325972bfc167e10566548
     volumes:
-      - db-backup-data:/backup
+      - db-backup-data:/var/lib/db-backup-service
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -87,7 +87,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       STORAGE_BACKEND: local
-      BACKUP_LOCAL_DIR: /backup/db/
+      BACKUP_LOCAL_DIR: /var/lib/db-backup-service
       # Bearer token shared with the backend (DB_BACKUP_API_TOKEN below).
       API_TOKEN: ${DB_BACKUP_API_TOKEN}
       BACKUP_INTERVAL: ${BACKUP_INTERVAL:-24h}
