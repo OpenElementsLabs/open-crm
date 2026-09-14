@@ -79,7 +79,7 @@ services:
     # digest for reproducible deployments.
     image: ghcr.io/openelementslabs/db-backup-service:0.1.1@sha256:1c331a1f33f6003e709e7166ad9d2908a370d514a13325972bfc167e10566548
     volumes:
-      - db-backup:/backup
+      - db-backup-data:/backup
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -107,4 +107,4 @@ services:
 volumes:
   db-data:
   meili-data:
-  db-backup:
+  db-backup-data:
