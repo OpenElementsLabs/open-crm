@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Activity, Bell, Building2, DatabaseBackup, FileText, Handshake, KeyRound, RefreshCw, Search, Settings, Sparkles, Tag, Users, Webhook } from "lucide-react";
-import { Sidebar, NavItem, CollapsibleGroup, TooltipProvider } from "@open-elements/ui";
+import { Sidebar, SidebarHeader, NavItem, CollapsibleGroup, TooltipProvider } from "@open-elements/ui";
 import { useTranslations } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/api";
 import { hasRole, ROLE_IT_ADMIN } from "@open-elements/nextjs-app-layer";
@@ -30,8 +31,14 @@ function CrmSidebar() {
   return (
       <Sidebar
         appTitle={t.app.title}
-        homeHref="/companies"
-        developedByText={t.app.developedBy}
+        header={
+          <SidebarHeader
+            appTitle={t.app.title}
+            homeHref="/companies"
+            developedByText={t.app.developedBy}
+            logoIcon={<Image src="/open-crm-logo.png" alt="" width={40} height={28} priority />}
+          />
+        }
         menuLabel={t.sidebar.menu}
         user={{
           userName: session?.user?.name ?? "User",
